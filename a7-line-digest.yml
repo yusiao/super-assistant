@@ -1,0 +1,37 @@
+name: A7 LINE Digest
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-digest:
+    runs-on: ubuntu-latest
+    env:
+      TASK_ID: a7-leju-digest-cloud
+      TIME_ZONE: Asia/Taipei
+      REPORT_ROOT: vault/2-actions/scheduled-reports/a7-leju
+      STATE_PATH: vault/2-actions/scheduled-reports/a7-leju/state.json
+      SYNC_LEDGER_PATH: system/skills/local-scheduler/config/sync-ledger.json
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      LINE_MODE: ${{ secrets.LINE_MODE }}
+      LINE_TO: ${{ secrets.LINE_TO }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run A7 digest
+        run: python scripts/a7-line-monitor/a7_leju_digest.py
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a7-leju-digest
+          path: vault/2-actions/scheduled-reports/a7-leju/
