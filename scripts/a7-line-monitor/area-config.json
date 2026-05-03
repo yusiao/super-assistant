@@ -1,0 +1,23 @@
+[
+  {
+    "name": "A7站重劃區-郵政物流",
+    "theme": "郵政特區 / AI走廊",
+    "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11175",
+    "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11175",
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175"
+  },
+  {
+    "name": "A7站重劃區-樂善國小",
+    "theme": "學區",
+    "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11176",
+    "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11176",
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176"
+  },
+  {
+    "name": "A7站重劃區-中心商業區",
+    "theme": "商業核心 / AI走廊",
+    "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11173",
+    "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173",
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173"
+  }
+]
