@@ -98,3 +98,8 @@ def get_default_area_config_path() -> Path:
 def load_area_config(path: Path | None) -> list[dict[str, str]]:
     config_path = path or get_default_area_config_path()
     if config_path.exists():
+        loaded = read_json_file(config_path)
+        if isinstance(loaded, list) and loaded:
+            return loaded
+        raise RuntimeError(f"Area config file is invalid: {config_path}")
+    return DEFAULT_AREA_CONFIG
