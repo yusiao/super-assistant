@@ -93,7 +93,7 @@ def write_json_file(path: Path, value) -> None:
 def fetch_text(url: str) -> str:
     result = subprocess.run(
         [
-            "curl.exe",
+            "curl",
             "-L",
             "-A",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
