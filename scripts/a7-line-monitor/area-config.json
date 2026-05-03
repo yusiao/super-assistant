@@ -4,20 +4,72 @@
     "theme": "郵政特區 / AI走廊",
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11175",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11175",
-    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175"
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175",
+    "manual_latest_listings": [
+      {
+        "name": "富宇上城高樓2房車",
+        "url": "https://www.leju.com.tw/sales/S092103617H"
+      },
+      {
+        "name": "文工一路全新工業廠房",
+        "url": "https://www.leju.com.tw/sales/S02FEB91EH"
+      }
+    ],
+    "manual_presale_projects": [
+      {
+        "name": "富宇上城",
+        "url": "https://www.leju.com.tw/sales/S092103617H"
+      },
+      {
+        "name": "知森堂森木",
+        "url": "https://www.leju.com.tw/sales/S037321321H"
+      }
+    ]
   },
   {
     "name": "A7站重劃區-樂善國小",
     "theme": "學區",
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11176",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11176",
-    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176"
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176",
+    "manual_presale_projects": [
+      {
+        "name": "樂捷綻",
+        "url": "https://www.leju.com.tw/community/La271519763d33a?mode=buy"
+      },
+      {
+        "name": "豐邑GREEN IN",
+        "url": "https://www.leju.com.tw/community/L165114714689b0?mode=buy"
+      },
+      {
+        "name": "豐邑氧森",
+        "url": "https://www.leju.com.tw/community/L76d114715898a9?mode=buy"
+      }
+    ]
   },
   {
     "name": "A7站重劃區-中心商業區",
     "theme": "商業核心 / AI走廊",
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11173",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173",
-    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173"
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173",
+    "manual_latest_listings": [
+      {
+        "name": "新潤翡麗景觀1+1房",
+        "url": "https://www.leju.com.tw/sales/S04DE02405440H"
+      },
+      {
+        "name": "華悅城2房",
+        "url": "https://www.leju.com.tw/sales/S021499GCH"
+      },
+      {
+        "name": "甲子園3房車",
+        "url": "https://www.leju.com.tw/sales/S037331653H"
+      },
+      {
+        "name": "甲子園高樓兩房",
+        "url": "https://www.leju.com.tw/sales/S028292UUH"
+      }
+    ]
   }
 ]
