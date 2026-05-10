@@ -22,6 +22,7 @@ DEFAULT_AREA_CONFIG = [
         "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11175",
         "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11175",
         "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175",
+        "road_focus": ["文桃路南側", "樂善科技園區周邊", "中華郵政物流總部周邊"],
     },
     {
         "name": "A7站重劃區-樂善國小",
@@ -29,6 +30,7 @@ DEFAULT_AREA_CONFIG = [
         "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11176",
         "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11176",
         "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176",
+        "road_focus": ["文德路", "文明路", "文康街與樂善一路周邊"],
     },
     {
         "name": "A7站重劃區-中心商業區",
@@ -36,6 +38,23 @@ DEFAULT_AREA_CONFIG = [
         "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11173",
         "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173",
         "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173",
+        "road_focus": ["文化一路近A7站南段", "樂善一路北段", "華亞科技園區銜接帶"],
+    },
+    {
+        "name": "A7站重劃區-文青國小",
+        "theme": "學區 / 住宅核心",
+        "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11174",
+        "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11174",
+        "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11174",
+        "road_focus": ["文桃路北側", "文化一路西側", "文青路與文青二路周邊"],
+    },
+    {
+        "name": "A7站重劃區-體育大學",
+        "theme": "成熟生活圈",
+        "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11177",
+        "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11177",
+        "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11177",
+        "road_focus": ["文化一路西側", "文青路商業帶", "體育大學站周邊"],
     },
 ]
 
@@ -78,23 +97,3 @@ def write_json_file(path: Path, value: Any) -> None:
 
 def get_default_area_config_path() -> Path:
     return Path(__file__).with_name("area-config.json")
-
-
-def load_area_config(path: Path | None) -> list[dict[str, Any]]:
-    config_path = path or get_default_area_config_path()
-    if config_path.exists():
-        loaded = read_json_file(config_path)
-        if isinstance(loaded, list) and loaded:
-            return loaded
-        raise RuntimeError(f"Area config file is invalid: {config_path}")
-    return DEFAULT_AREA_CONFIG
-
-
-def normalize_url(url: str) -> str:
-    if not url:
-        return ""
-    if url.startswith("http://") or url.startswith("https://"):
-        return url
-    if url.startswith("/"):
-        return f"https://www.leju.com.tw{url}"
-    return f"https://www.leju.com.tw/{url.lstrip('/')}"
