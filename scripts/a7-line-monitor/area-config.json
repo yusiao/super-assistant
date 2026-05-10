@@ -5,25 +5,10 @@
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11175",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11175",
     "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175",
-    "manual_latest_listings": [
-      {
-        "name": "富宇上城高樓2房車",
-        "url": "https://www.leju.com.tw/sales/S092103617H"
-      },
-      {
-        "name": "文工一路全新工業廠房",
-        "url": "https://www.leju.com.tw/sales/S02FEB91EH"
-      }
-    ],
-    "manual_presale_projects": [
-      {
-        "name": "富宇上城",
-        "url": "https://www.leju.com.tw/sales/S092103617H"
-      },
-      {
-        "name": "知森堂森木",
-        "url": "https://www.leju.com.tw/sales/S037321321H"
-      }
+    "road_focus": [
+      "文桃路南側",
+      "樂善科技園區周邊",
+      "中華郵政物流總部周邊"
     ]
   },
   {
@@ -32,19 +17,10 @@
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11176",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11176",
     "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176",
-    "manual_presale_projects": [
-      {
-        "name": "樂捷綻",
-        "url": "https://www.leju.com.tw/community/La271519763d33a?mode=buy"
-      },
-      {
-        "name": "豐邑GREEN IN",
-        "url": "https://www.leju.com.tw/community/L165114714689b0?mode=buy"
-      },
-      {
-        "name": "豐邑氧森",
-        "url": "https://www.leju.com.tw/community/L76d114715898a9?mode=buy"
-      }
+    "road_focus": [
+      "文德路",
+      "文明路",
+      "文康街與樂善一路周邊"
     ]
   },
   {
@@ -53,23 +29,34 @@
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11173",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173",
     "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173",
-    "manual_latest_listings": [
-      {
-        "name": "新潤翡麗景觀1+1房",
-        "url": "https://www.leju.com.tw/sales/S04DE02405440H"
-      },
-      {
-        "name": "華悅城2房",
-        "url": "https://www.leju.com.tw/sales/S021499GCH"
-      },
-      {
-        "name": "甲子園3房車",
-        "url": "https://www.leju.com.tw/sales/S037331653H"
-      },
-      {
-        "name": "甲子園高樓兩房",
-        "url": "https://www.leju.com.tw/sales/S028292UUH"
-      }
+    "road_focus": [
+      "文化一路近 A7 站南段",
+      "樂善一路北段",
+      "華亞科技園區銜接帶"
+    ]
+  },
+  {
+    "name": "A7站重劃區-文青國小",
+    "theme": "學區 / 住宅核心",
+    "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11174",
+    "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11174",
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11174",
+    "road_focus": [
+      "文桃路北側",
+      "文化一路西側",
+      "文青路與文青二路周邊"
+    ]
+  },
+  {
+    "name": "A7站重劃區-體育大學",
+    "theme": "成熟生活圈",
+    "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11177",
+    "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11177",
+    "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11177",
+    "road_focus": [
+      "文化一路西側",
+      "文青路商業帶",
+      "體育大學站周邊"
     ]
   }
 ]
