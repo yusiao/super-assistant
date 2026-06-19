@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>八字與紫微斗數排盤</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">命盤工具</p>
+          <h1>八字・紫微斗數排盤</h1>
+        </div>
+        <div class="engine-badge">中州派設定 / lunar-js 1.7.7 / iztro 2.5.8</div>
+      </header>
+
+      <section class="workspace" aria-label="排盤工作區">
+        <form class="input-panel" id="birth-form">
+          <div class="field-row">
+            <label for="birth-date">出生日期</label>
+            <input id="birth-date" name="birthDate" type="date" min="1900-01-01" max="2100-12-31" required />
+          </div>
+
+          <div class="field-row">
+            <label for="birth-time">出生時間</label>
+            <input id="birth-time" name="birthTime" type="time" step="60" required />
+          </div>
+
+          <fieldset class="segmented-field">
+            <legend>性別</legend>
+            <label>
+              <input type="radio" name="gender" value="女" checked />
+              <span>女</span>
+            </label>
+            <label>
+              <input type="radio" name="gender" value="男" />
+              <span>男</span>
+            </label>
+          </fieldset>
+
+          <div class="field-row">
+            <label for="place-note">出生地時間</label>
+            <input id="place-note" name="placeNote" type="text" value="UTC+08 台北時間" />
+          </div>
+
+          <div class="action-row">
+            <button class="primary-button" type="submit">排盤</button>
+            <button class="secondary-button" type="button" id="sample-button">範例</button>
+          </div>
+        </form>
+
+        <section class="result-panel" aria-live="polite">
+          <div id="error-message" class="error-message" hidden></div>
+
+          <section class="summary-strip" id="summary-strip"></section>
+
+          <section class="bazi-section">
+            <div class="section-heading">
+              <p class="eyebrow">BaZi</p>
+              <h2>八字四柱</h2>
+            </div>
+            <div class="pillar-grid" id="pillar-grid"></div>
+            <div class="analysis-grid">
+              <div class="analysis-panel">
+                <h3>五行分布</h3>
+                <div id="element-bars" class="element-bars"></div>
+              </div>
+              <div class="analysis-panel">
+                <h3>納音</h3>
+                <div id="nayin-list" class="nayin-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="reading-section">
+            <div class="section-heading">
+              <p class="eyebrow">Reading</p>
+              <h2>主題解盤</h2>
+            </div>
+
+            <div class="reading-controls">
+              <label class="select-field">
+                <span>運勢層級</span>
+                <select id="scope-select">
+                  <option value="natal">本命</option>
+                  <option value="decadal">大限</option>
+                  <option value="yearly">流年</option>
+                  <option value="monthly">流月</option>
+                </select>
+              </label>
+
+              <label class="select-field" id="decadal-control">
+                <span>大限區間</span>
+                <select id="decadal-select"></select>
+              </label>
+
+              <label class="select-field" id="year-control">
+                <span>流年年份</span>
+                <input id="target-year" type="number" min="1900" max="2100" />
+              </label>
+
+              <label class="select-field" id="month-control">
+                <span>流月月份</span>
+                <input id="target-month" type="number" min="1" max="12" />
+              </label>
+
+              <label class="select-field">
+                <span>主題</span>
+                <select id="topic-select">
+                  <option value="relationship">感情</option>
+                  <option value="marriage">姻緣</option>
+                  <option value="career">事業</option>
+                  <option value="parents">父母</option>
+                  <option value="property">財產</option>
+                  <option value="health">健康</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="reading-output" class="reading-output"></div>
+          </section>
+
+          <section class="partner-section">
+            <div class="section-heading">
+              <p class="eyebrow">Partner</p>
+              <h2>正緣輪廓</h2>
+            </div>
+            <div id="partner-output" class="partner-output"></div>
+          </section>
+
+          <section class="ziwei-section">
+            <div class="section-heading">
+              <p class="eyebrow">Zi Wei Dou Shu</p>
+              <h2>紫微十二宮</h2>
+            </div>
+            <div class="astrolabe-grid" id="astrolabe-grid"></div>
+          </section>
+        </section>
+      </section>
+
+      <footer class="page-note">
+        排盤採公曆與輸入地本地時間計算；正緣輪廓為紫微斗數象徵式推估，結果屬命理排盤資料，請作參考。
+      </footer>
+    </main>
+
+    <aside class="chat-widget" aria-label="解盤機器人">
+      <header class="chat-header">
+        <div>
+          <p class="eyebrow">Bot</p>
+          <h2>解盤機器人</h2>
+        </div>
+        <span class="chat-status">本地命盤</span>
+      </header>
+      <div id="chat-log" class="chat-log"></div>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" type="text" autocomplete="off" placeholder="問感情、事業、正緣、來因宮..." />
+        <button type="submit">送出</button>
+      </form>
+    </aside>
+
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iztro@2.5.8/dist/iztro.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
