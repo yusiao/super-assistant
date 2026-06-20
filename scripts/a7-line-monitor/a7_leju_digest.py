@@ -15,6 +15,12 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
+
 DEFAULT_AREA_CONFIG = [
     {
         "name": "A7站重劃區-郵政物流",
@@ -97,3 +103,1409 @@ def write_json_file(path: Path, value: Any) -> None:
 
 def get_default_area_config_path() -> Path:
     return Path(__file__).with_name("area-config.json")
+
+
+def get_default_bargain_watch_config_path() -> Path:
+    return Path(__file__).with_name("bargain-watch-config.json")
+
+
+def get_default_market_pulse_config_path() -> Path:
+    return Path(__file__).with_name("market-pulse-config.json")
+
+
+def load_area_config(path: Path | None) -> list[dict[str, Any]]:
+    config_path = path or get_default_area_config_path()
+    if config_path.exists():
+        loaded = read_json_file(config_path)
+        if isinstance(loaded, list) and loaded:
+            return loaded
+        raise RuntimeError(f"Area config file is invalid: {config_path}")
+    return DEFAULT_AREA_CONFIG
+
+
+def load_bargain_watch_config(path: Path | None) -> dict[str, Any]:
+    config_path = path or get_default_bargain_watch_config_path()
+    if not config_path.exists():
+        return {"enabled": False, "threshold_percent": 10, "max_items": 8, "areas": []}
+    loaded = read_json_file(config_path)
+    if isinstance(loaded, dict):
+        loaded.setdefault("enabled", True)
+        loaded.setdefault("threshold_percent", 10)
+        loaded.setdefault("max_items", 8)
+        loaded.setdefault("areas", [])
+        return loaded
+    raise RuntimeError(f"Bargain watch config file is invalid: {config_path}")
+
+
+def load_market_pulse_config(path: Path | None) -> dict[str, Any]:
+    config_path = path or get_default_market_pulse_config_path()
+    if not config_path.exists():
+        return {"enabled": False, "days_back": 7, "source_urls": [], "districts": [], "keywords": []}
+    loaded = read_json_file(config_path)
+    if isinstance(loaded, dict):
+        loaded.setdefault("enabled", True)
+        loaded.setdefault("days_back", 7)
+        loaded.setdefault("max_districts", 8)
+        loaded.setdefault("source_urls", [])
+        loaded.setdefault("districts", [])
+        loaded.setdefault("keywords", [])
+        return loaded
+    raise RuntimeError(f"Market pulse config file is invalid: {config_path}")
+
+
+def normalize_url(url: str) -> str:
+    if not url:
+        return ""
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    if url.startswith("/"):
+        return f"https://www.leju.com.tw{url}"
+    return f"https://www.leju.com.tw/{url.lstrip('/')}"
+
+
+def strip_tags(text: str) -> str:
+    clean = re.sub(r"<[^>]+>", " ", text)
+    clean = (
+        clean.replace("&nbsp;", " ")
+        .replace("&#160;", " ")
+        .replace("&amp;", "&")
+        .replace("&quot;", '"')
+    )
+    return re.sub(r"\s+", " ", clean).strip()
+
+
+def html_to_text(content: str) -> str:
+    return strip_tags(content)
+
+
+def fetch_text(url: str) -> str:
+    curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
+    result = subprocess.run(
+        [
+            curl_bin,
+            "-L",
+            "-A",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+            "-H",
+            "Accept-Language: zh-TW,zh;q=0.9,en;q=0.8",
+            "-H",
+            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            url,
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="ignore",
+        timeout=45,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        raise RuntimeError(f"curl fetch failed for {url}: {result.stderr.strip() or result.returncode}")
+    if "Just a moment..." in result.stdout and "challenges.cloudflare.com" in result.stdout:
+        raise RuntimeError(f"Cloudflare challenge blocked {url}")
+    return result.stdout
+
+
+def get_regex_value(content: str, pattern: str, default: str = "") -> str:
+    match = re.search(pattern, content, re.S)
+    return match.group(1).strip() if match else default
+
+
+def get_regex_int(content: str, pattern: str) -> int | None:
+    value = get_regex_value(content, pattern, "")
+    digits = re.sub(r"[^\d]", "", value)
+    return int(digits) if digits else None
+
+
+def parse_percent_value(text: str) -> float | None:
+    if not text:
+        return None
+    match = re.search(r"([+\-]?\d+(?:\.\d+)?)%", text)
+    if not match:
+        return None
+    try:
+        return float(match.group(1))
+    except ValueError:
+        return None
+
+
+def parse_price_range(text: str) -> tuple[float | None, float | None]:
+    if not text:
+        return None, None
+    numbers = re.findall(r"(\d+(?:\.\d+)?)", text)
+    if not numbers:
+        return None, None
+    values = [float(n) for n in numbers]
+    if len(values) == 1:
+        return values[0], values[0]
+    return values[0], values[1]
+
+
+def get_project_low_price(project: dict[str, str]) -> float | None:
+    low, high = parse_price_range(project.get("status", ""))
+    if low is None:
+        return None
+    if high is not None and high < low:
+        return high
+    return low
+
+
+def get_project_mid_price(project: dict[str, str]) -> float | None:
+    low, high = parse_price_range(project.get("status", ""))
+    if low is None:
+        return None
+    if high is None:
+        return low
+    return (low + high) / 2
+
+
+def get_median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    sorted_values = sorted(values)
+    midpoint = len(sorted_values) // 2
+    if len(sorted_values) % 2:
+        return sorted_values[midpoint]
+    return (sorted_values[midpoint - 1] + sorted_values[midpoint]) / 2
+
+
+def parse_anchor_links(content: str, href_keyword: str) -> list[dict[str, str]]:
+    results: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for href, label in re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', content, re.S | re.I):
+        url = normalize_url(href)
+        if href_keyword not in url:
+            continue
+        name = strip_tags(label)
+        if not name:
+            continue
+        key = f"{name}|{url}"
+        if key in seen:
+            continue
+        seen.add(key)
+        results.append({"name": name, "url": url})
+    return results
+
+
+def extract_html_section(content: str, heading: str) -> str:
+    candidates = [
+        rf"##\s*{re.escape(heading)}(.*?)(?:##\s*[^#<\n]+|$)",
+        rf">\s*{re.escape(heading)}\s*<(.*?)(?:>\s*[^<]+<|$)",
+    ]
+    for pattern in candidates:
+        match = re.search(pattern, content, re.S)
+        if match:
+            return match.group(1)
+    return ""
+
+
+def get_latest_listing_links(content: str) -> list[dict[str, str]]:
+    section = extract_html_section(content, "最新上架")
+    source = section if section else content
+    return parse_anchor_links(source, "/sales/")
+
+
+def parse_project_blocks(content: str) -> list[dict[str, str]]:
+    links = parse_anchor_links(content, "/community/")
+    text = html_to_text(content)
+    projects: list[dict[str, str]] = []
+    for link in links:
+        name = link["name"]
+        if name in {"首頁", "前往看更多", "更多", "建案總表"} or "AlfaSafe" in name:
+            continue
+        tail = text.split(name, 1)[1] if name in text else ""
+        snippet = tail[:900]
+        price_text = get_regex_value(snippet, r"開價\s*([^\s]+)", "")
+        if not price_text:
+            price_text = get_regex_value(snippet, r"(待定|未開賣|請電洽)", "")
+        schedule_text = get_regex_value(
+            snippet,
+            r"(預計\d+年\d+月|預計\d+年|預售屋|施工中|未完工|已完銷|完銷|銷售中|已完工|新成屋|成屋|已交屋|交屋)",
+            "",
+        )
+        status_bits = " ".join(bit for bit in [price_text, schedule_text] if bit).strip()
+        projects.append({"name": name, "url": link["url"], "status": status_bits})
+    deduped: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for item in projects:
+        key = item["url"].split("&is_alfasafe=", 1)[0]
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    return deduped[:40]
+
+
+def get_project_detail_status(project: dict[str, str]) -> str:
+    try:
+        detail_text = html_to_text(fetch_text(project["url"]))
+    except Exception:
+        return project.get("status", "")
+    price_text = get_regex_value(detail_text, r"開價\s*([^\s]+)", "")
+    if not price_text:
+        price_text = get_regex_value(detail_text, r"最新價\s*([\d.]+萬/?坪)", "")
+    if price_text.endswith("萬坪"):
+        price_text = price_text.replace("萬坪", "萬/坪")
+    if not price_text:
+        price_text = get_regex_value(project.get("status", ""), r"(\d+(?:\.\d+)?~\d+(?:\.\d+)?萬|\d+(?:\.\d+)?萬|待定|未開賣|請電洽)", "")
+    schedule_text = get_regex_value(
+        detail_text,
+        r"(預計\d+年\d+月|預計\d+年|預售屋|施工中|未完工|已完銷|完銷|銷售中|已完工|新成屋|成屋|已交屋|交屋)",
+        "",
+    )
+    return " ".join(bit for bit in [price_text, schedule_text] if bit).strip()
+
+
+def enrich_project_statuses(projects: list[dict[str, str]]) -> list[dict[str, str]]:
+    enriched: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for project in projects:
+        item = dict(project)
+        key = f"{item.get('name', '')}|{item.get('url', '')}"
+        if key in seen:
+            continue
+        seen.add(key)
+        detail_status = get_project_detail_status(item)
+        if detail_status:
+            item["status"] = detail_status
+        enriched.append(item)
+    return enriched
+
+
+def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
+    projects: list[dict[str, str]] = []
+    for raw_item in area.get("extra_project_urls", []):
+        if isinstance(raw_item, str):
+            url = normalize_url(raw_item)
+            projects.append({"name": url, "url": url, "status": ""})
+            continue
+        if not isinstance(raw_item, dict):
+            continue
+        name = str(raw_item.get("name", "")).strip()
+        url = normalize_url(str(raw_item.get("url", "")).strip())
+        if not name or not url:
+            continue
+        projects.append({"name": name, "url": url, "status": str(raw_item.get("status", "")).strip()})
+    return projects
+
+
+def get_full_community_list_url(area: dict[str, Any]) -> str:
+    explicit_url = str(area.get("community_list_url", "")).strip()
+    if explicit_url:
+        return explicit_url
+    new_build_url = str(area.get("new_build_list_url", "")).strip()
+    if not new_build_url:
+        return ""
+    url = re.sub(r"([?&])is_new=1&?", r"\1", new_build_url)
+    return url.rstrip("?&")
+
+
+def get_excluded_project_names(area: dict[str, Any]) -> set[str]:
+    return {str(name).strip() for name in area.get("exclude_project_names", []) if str(name).strip()}
+
+
+def filter_excluded_projects(projects: list[dict[str, str]], excluded_names: set[str]) -> list[dict[str, str]]:
+    if not excluded_names:
+        return projects
+    return [project for project in projects if project.get("name") not in excluded_names and project.get("project_name") not in excluded_names]
+
+
+def is_pending_launch(project: dict[str, str]) -> bool:
+    status = project.get("status", "")
+    return any(keyword in status for keyword in ["待定", "未開賣", "潛銷", "即將公開"])
+
+
+def is_completed_project(project: dict[str, str]) -> bool:
+    status = project.get("status", "")
+    return any(keyword in status for keyword in ["新成屋", "成屋", "已交屋", "交屋"])
+
+
+def is_sold_out_presale(project: dict[str, str], active_project_urls: set[str] | None = None) -> bool:
+    status = project.get("status", "")
+    if is_completed_project(project):
+        return False
+    if "預售屋" not in status:
+        return False
+    if any(keyword in status for keyword in ["已完銷", "完銷"]):
+        return True
+    if active_project_urls is not None:
+        return project.get("url", "") not in active_project_urls
+    return False
+
+
+def is_active_presale(project: dict[str, str]) -> bool:
+    status = project.get("status", "")
+    if is_pending_launch(project) or is_completed_project(project):
+        return False
+    if "預售屋" in status or "預計" in status:
+        return True
+    if any(keyword in status for keyword in ["施工中", "未完工"]):
+        return True
+    return False
+
+
+def get_price_snapshot(content: str) -> dict[str, str]:
+    text = html_to_text(content)
+    return {
+        "one_year_price": get_regex_value(text, r"近一年成交價\s*([\d.]+萬/坪)", ""),
+        "yearly_change_text": get_regex_value(text, r"(?:較去年同期|年漲跌)\s*([+\-]?\d+(?:\.\d+)?%)", ""),
+        "new_build_price": get_regex_value(text, r"新案成交價\s*([\d.]+萬/坪)", ""),
+    }
+
+
+def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
+    buy_content = fetch_text(area["buy_url"])
+    price_content = fetch_text(area["price_url"])
+    new_build_list_content = fetch_text(area["new_build_list_url"]) if area.get("new_build_list_url") else ""
+    full_community_url = get_full_community_list_url(area)
+    try:
+        full_community_content = fetch_text(full_community_url) if full_community_url else ""
+        comparison_fetch_error = ""
+    except Exception as exc:
+        full_community_content = ""
+        comparison_fetch_error = str(exc)
+
+    buy_text = html_to_text(buy_content)
+    summary = {
+        "active_projects": get_regex_int(buy_text, r"銷售中新建案共有\s*(\d+)個"),
+        "resale_listings": get_regex_int(buy_text, r"待售有\s*(\d+)戶"),
+        "latest_count": get_regex_int(buy_text, r"最新上架\s*(\d+)戶"),
+        "rezoning_listings": get_regex_int(buy_text, r"重劃區有\s*(\d+)個物件"),
+        "five_year_new_completion": get_regex_int(buy_text, r"(\d+)個五年內新成屋"),
+        "near_school": get_regex_int(buy_text, r"(\d+)個近學校"),
+        "near_mrt": get_regex_int(buy_text, r"(\d+)個近捷運"),
+        "all_listings": get_regex_int(buy_text, r"所有物件(?:共有)?\s*(\d+)戶"),
+    }
+    if summary["active_projects"] is None or summary["latest_count"] is None:
+        raise RuntimeError(f"Cannot parse buy summary for {area['name']}.")
+
+    latest_listing_links = get_latest_listing_links(buy_content)[:8]
+    excluded_names = get_excluded_project_names(area)
+    latest_listing_links = filter_excluded_projects(latest_listing_links, excluded_names)
+    project_candidates = parse_project_blocks(new_build_list_content)
+    all_projects = filter_excluded_projects(enrich_project_statuses(project_candidates), excluded_names)
+    comparison_candidates = parse_project_blocks(full_community_content) + get_extra_project_links(area)
+    comparison_projects = enrich_project_statuses(comparison_candidates)
+    pending_launch_projects = [item for item in all_projects if is_pending_launch(item)]
+    active_presale_projects = [item for item in all_projects if is_active_presale(item)]
+    active_project_urls = {item.get("url", "") for item in all_projects}
+    sold_out_presale_projects = [
+        item for item in comparison_projects if is_sold_out_presale(item, active_project_urls)
+    ]
+    completed_projects = [item for item in comparison_projects if is_completed_project(item)]
+    unclassified_projects = [
+        item
+        for item in all_projects
+        if item not in pending_launch_projects and item not in active_presale_projects and item not in completed_projects
+    ]
+
+    return {
+        "name": area["name"],
+        "theme": area.get("theme", ""),
+        "road_focus": area.get("road_focus", []),
+        "buy_url": area["buy_url"],
+        "price_url": area["price_url"],
+        "new_build_list_url": area.get("new_build_list_url", ""),
+        "community_list_url": full_community_url,
+        "comparison_fetch_error": comparison_fetch_error,
+        "exclude_project_names": sorted(excluded_names),
+        **summary,
+        "latest_listing_links": latest_listing_links,
+        "all_new_build_projects": all_projects,
+        "all_comparison_projects": comparison_projects,
+        "latest_presale_registrations": [],
+        "latest_new_completion_registrations": [],
+        "pending_launch_projects": pending_launch_projects,
+        "active_presale_projects": active_presale_projects,
+        "sold_out_presale_projects": sold_out_presale_projects,
+        "completed_projects": completed_projects,
+        "unclassified_projects": unclassified_projects,
+        "presale_projects": active_presale_projects,
+        "pending_presale_projects": pending_launch_projects,
+        "price": get_price_snapshot(price_content),
+        "stale": False,
+    }
+
+
+def get_state_file(path: Path) -> dict[str, Any]:
+    state = read_json_file(path)
+    if state is None:
+        return {"runs": [], "history": []}
+    state.setdefault("runs", [])
+    state.setdefault("history", [])
+    return state
+
+
+def save_state_file(path: Path, existing_state: dict[str, Any], area_snapshots: list[dict[str, Any]], local_now: datetime) -> None:
+    history = list(existing_state.get("history", []))
+    today = local_now.strftime("%Y-%m-%d")
+    history = [entry for entry in history if entry.get("date") != today]
+    history.append({"date": today, "timestamp": local_now.isoformat(), "runs": area_snapshots})
+    cutoff = local_now - timedelta(days=120)
+    kept_history = []
+    for entry in history:
+        try:
+            if datetime.fromisoformat(entry["timestamp"]) >= cutoff:
+                kept_history.append(entry)
+        except Exception:
+            continue
+    write_json_file(path, {"last_run_at": local_now.isoformat(), "runs": area_snapshots, "history": kept_history})
+
+
+def get_previous_area(state: dict[str, Any], area_name: str) -> dict[str, Any] | None:
+    for item in state.get("runs", []):
+        if item.get("name") == area_name:
+            return item
+    return None
+
+
+def get_new_pending_launch_projects(snapshots: list[dict[str, Any]], state: dict[str, Any]) -> list[dict[str, str]]:
+    new_items: list[dict[str, str]] = []
+    for area in snapshots:
+        previous = get_previous_area(state, area["name"]) or {}
+        previous_keys = {
+            f"{item.get('name', '')}|{item.get('url', '')}"
+            for item in previous.get("pending_launch_projects", [])
+        }
+        for project in area.get("pending_launch_projects", []):
+            key = f"{project.get('name', '')}|{project.get('url', '')}"
+            if key in previous_keys:
+                continue
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            new_items.append(item)
+    return new_items
+
+
+def is_weekly_report_day(local_now: datetime, weekly_day: int) -> bool:
+    return local_now.isoweekday() == weekly_day
+
+
+def format_lifecycle_trend(start_text: str, current_text: str) -> str:
+    if not start_text and not current_text:
+        return "資料累積中"
+    if not start_text:
+        return f"{current_text or '未解析'}（資料累積中）"
+    if not current_text:
+        return f"{start_text} -> 未解析"
+    if start_text == current_text:
+        return f"{current_text}（持平）"
+    return f"{start_text} -> {current_text}"
+
+
+def get_history_runs(state: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = list(state.get("history", []))
+    entries.sort(key=lambda item: item.get("timestamp", ""))
+    return entries
+
+
+def find_first_project_status(state: dict[str, Any], area_name: str, project_name: str, bucket_key: str) -> str:
+    legacy_bucket = "presale_projects" if bucket_key == "active_presale_projects" else bucket_key
+    for entry in get_history_runs(state):
+        for area in entry.get("runs", []):
+            if area.get("name") != area_name:
+                continue
+            projects = area.get(bucket_key) or area.get(legacy_bucket) or []
+            for project in projects:
+                if project.get("name") == project_name:
+                    return project.get("status", "")
+    return ""
+
+
+def build_project_trend_summary(state: dict[str, Any], area_name: str, projects: list[dict[str, str]], bucket_key: str, empty_text: str) -> str:
+    if not projects:
+        return empty_text
+    trend_lines: list[str] = []
+    for project in projects[:3]:
+        start_status = find_first_project_status(state, area_name, project.get("name", ""), bucket_key)
+        trend_lines.append(f"{project.get('name', '未命名')} {format_lifecycle_trend(start_status, project.get('status', ''))}")
+    return "；".join(trend_lines) if trend_lines else "資料累積中"
+
+
+def build_stale_snapshot(area: dict[str, Any], previous: dict[str, Any] | None, error: Exception) -> dict[str, Any]:
+    base = dict(previous) if previous else {}
+    excluded_names = get_excluded_project_names(area)
+    base.update(
+        {
+            "name": area["name"],
+            "theme": area.get("theme", ""),
+            "road_focus": area.get("road_focus", []),
+            "buy_url": area["buy_url"],
+            "price_url": area["price_url"],
+            "new_build_list_url": area.get("new_build_list_url", ""),
+            "community_list_url": get_full_community_list_url(area),
+            "exclude_project_names": sorted(excluded_names),
+            "fetch_error": str(error),
+            "stale": True,
+        }
+    )
+    base.setdefault("active_projects", 0)
+    base.setdefault("resale_listings", 0)
+    base.setdefault("latest_count", 0)
+    base.setdefault("rezoning_listings", 0)
+    base.setdefault("five_year_new_completion", 0)
+    base.setdefault("near_school", None)
+    base.setdefault("near_mrt", None)
+    base.setdefault("all_listings", None)
+    base.setdefault("latest_listing_links", [])
+    base.setdefault("all_new_build_projects", [])
+    base.setdefault("all_comparison_projects", [])
+    base.setdefault("latest_presale_registrations", [])
+    base.setdefault("latest_new_completion_registrations", [])
+    base.setdefault("pending_launch_projects", [])
+    base.setdefault("active_presale_projects", [])
+    base.setdefault("sold_out_presale_projects", [])
+    base.setdefault("completed_projects", [])
+    base.setdefault("unclassified_projects", [])
+    base.setdefault("presale_projects", [])
+    base.setdefault("pending_presale_projects", [])
+    base.setdefault("price", {"one_year_price": "", "yearly_change_text": "", "new_build_price": ""})
+    for key in [
+        "latest_listing_links",
+        "all_new_build_projects",
+        "latest_presale_registrations",
+        "latest_new_completion_registrations",
+        "pending_launch_projects",
+        "active_presale_projects",
+        "unclassified_projects",
+        "presale_projects",
+        "pending_presale_projects",
+    ]:
+        base[key] = filter_excluded_projects(base.get(key, []), excluded_names)
+    return base
+
+
+def get_change_text(current: Any, previous: Any) -> str:
+    if current is None:
+        return ""
+    if previous is None:
+        return str(current)
+    delta = int(current) - int(previous)
+    if delta == 0:
+        return str(current)
+    return f"{current} ({'+' if delta > 0 else ''}{delta})"
+
+
+def get_ledger_file(path: Path) -> dict[str, Any]:
+    file_data = read_json_file(path)
+    if file_data is None:
+        return {
+            "schema_version": "1.0",
+            "description": "Cross-platform scheduler ledger.",
+            "last_updated": datetime.now().isoformat(),
+            "ledger": [],
+        }
+    file_data.setdefault("ledger", [])
+    return file_data
+
+
+def test_ledger_already_ran(ledger_file: dict[str, Any], task_id: str, date_string: str) -> bool:
+    return any(entry.get("task_id") == task_id and entry.get("date") == date_string for entry in ledger_file.get("ledger", []))
+
+
+def update_ledger(path: Path, ledger_file: dict[str, Any], task_id: str, output_path: Path, local_now: datetime) -> None:
+    entry = {
+        "task_id": task_id,
+        "platform": "codex-windows",
+        "timestamp": local_now.isoformat(),
+        "date": local_now.strftime("%Y-%m-%d"),
+        "week": f"{local_now.year}-W{local_now.isocalendar().week:02d}",
+        "output_path": str(output_path),
+    }
+    cutoff = local_now - timedelta(days=60)
+    kept = []
+    for existing in ledger_file.get("ledger", []):
+        try:
+            if datetime.fromisoformat(existing["timestamp"]) >= cutoff:
+                kept.append(existing)
+        except Exception:
+            kept.append(existing)
+    kept.append(entry)
+    ledger_file["ledger"] = kept
+    ledger_file["last_updated"] = local_now.isoformat()
+    write_json_file(path, ledger_file)
+
+
+def format_project_line(item: dict[str, str]) -> list[str]:
+    if item.get("status"):
+        return [f"- {item['name']} | {item['status']}", f"  {item['url']}"]
+    return [f"- {item['name']}", f"  {item['url']}"]
+
+
+def format_registration_line(item: dict[str, str]) -> list[str]:
+    parts = [
+        item.get("project_name", "未命名建案"),
+        item.get("floor", "樓層未解析"),
+        item.get("layout", "戶型未解析"),
+        item.get("total_price", "總價未解析"),
+        item.get("unit_price", "單價未解析"),
+        item.get("parking", "車位未解析"),
+    ]
+    line = " | ".join(parts)
+    if item.get("url"):
+        return [f"- {line}", f"  {item['url']}"]
+    return [f"- {line}"]
+
+
+def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
+    status = item.get("status", "價格未解析")
+    return [f"- [{label}] {item.get('name', '未命名建案')} | {status or '價格未解析'}", f"  {item.get('url', '')}"]
+
+
+def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dict[str, str]]:
+    projects: list[dict[str, str]] = []
+    for item in area.get("sold_out_presale_projects", []):
+        candidate = dict(item)
+        candidate["compare_label"] = "完銷/非銷售中預售"
+        projects.append(candidate)
+    for item in area.get("completed_projects", []):
+        candidate = dict(item)
+        candidate["compare_label"] = "新成屋"
+        projects.append(candidate)
+    return projects[:limit]
+
+
+def is_bargain_candidate_project(project: dict[str, str]) -> bool:
+    if is_completed_project(project):
+        return False
+    if is_pending_launch(project):
+        return True
+    return is_active_presale(project)
+
+
+def get_bargain_benchmark(area: dict[str, Any], price_snapshot: dict[str, str], projects: list[dict[str, str]]) -> tuple[float | None, str]:
+    configured = area.get("benchmark_price_per_ping")
+    if configured is not None:
+        try:
+            return float(configured), "手動基準"
+        except (TypeError, ValueError):
+            pass
+
+    for key, label in [("new_build_price", "樂居新案成交價"), ("one_year_price", "樂居近一年成交價")]:
+        low, high = parse_price_range(price_snapshot.get(key, ""))
+        if low is not None:
+            return low if high is None else (low + high) / 2, label
+
+    mid_prices = [price for price in (get_project_mid_price(project) for project in projects) if price is not None]
+    median_price = get_median(mid_prices)
+    if median_price is not None:
+        return median_price, "同區建案中位數"
+    return None, ""
+
+
+def get_bargain_watch_results(config: dict[str, Any]) -> dict[str, Any]:
+    if not config.get("enabled", True):
+        return {"enabled": False, "items": [], "errors": []}
+
+    threshold_percent = float(config.get("threshold_percent", 10))
+    threshold_ratio = threshold_percent / 100
+    max_items = int(config.get("max_items", 8))
+    items: list[dict[str, Any]] = []
+    errors: list[str] = []
+
+    for area in config.get("areas", []):
+        area_name = str(area.get("name", "未命名區域"))
+        try:
+            if not area.get("price_url") and area.get("benchmark_price_per_ping") is None:
+                errors.append(f"{area_name}：缺少生活圈/行政區 price_url 或手動基準，已略過城市級比較")
+                continue
+            list_content = fetch_text(str(area["new_build_list_url"]))
+            price_content = fetch_text(str(area["price_url"])) if area.get("price_url") else ""
+            max_projects = int(area.get("max_projects", 40))
+            raw_projects = parse_project_blocks(list_content)[:max_projects] + get_extra_project_links(area)
+            projects = enrich_project_statuses(raw_projects)
+            candidates = [project for project in projects if is_bargain_candidate_project(project)]
+            price_snapshot = get_price_snapshot(price_content) if price_content else {}
+            benchmark, benchmark_source = get_bargain_benchmark(area, price_snapshot, projects)
+            if benchmark is None or benchmark <= 0:
+                errors.append(f"{area_name}：無法取得周邊基準價")
+                continue
+
+            for project in candidates:
+                low_price = get_project_low_price(project)
+                if low_price is None:
+                    continue
+                discount_percent = (benchmark - low_price) / benchmark * 100
+                if discount_percent < threshold_percent:
+                    continue
+                items.append(
+                    {
+                        "region_group": area.get("region_group", ""),
+                        "area_name": area_name,
+                        "name": project.get("name", "未命名建案"),
+                        "status": project.get("status", ""),
+                        "url": project.get("url", ""),
+                        "low_price": low_price,
+                        "benchmark": benchmark,
+                        "benchmark_source": benchmark_source,
+                        "discount_percent": discount_percent,
+                    }
+                )
+        except Exception as exc:
+            errors.append(f"{area_name}：{exc}")
+
+    items.sort(key=lambda item: item["discount_percent"], reverse=True)
+    return {
+        "enabled": True,
+        "threshold_percent": threshold_percent,
+        "items": items[:max_items],
+        "errors": errors,
+    }
+
+
+def format_bargain_watch_line(item: dict[str, Any]) -> list[str]:
+    prefix = f"{item.get('region_group')}/{item.get('area_name')}".strip("/")
+    first = (
+        f"- [{prefix}] {item.get('name')} | {item.get('status') or '價格未解析'} | "
+        f"低於基準 {item.get('discount_percent', 0):.1f}%"
+    )
+    second = (
+        f"  基準：{item.get('benchmark', 0):.1f}萬/坪（{item.get('benchmark_source') or '未標示'}）；"
+        f"低價：{item.get('low_price', 0):.1f}萬/坪"
+    )
+    lines = [first, second]
+    if item.get("url"):
+        lines.append(f"  {item['url']}")
+    return lines
+
+
+def split_sentences(text: str) -> list[str]:
+    rough_parts = re.split(r"[。！？!?；;\n\r]+", text)
+    return [part.strip() for part in rough_parts if len(part.strip()) >= 8]
+
+
+def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, Any]:
+    if not config.get("enabled", True):
+        return {"enabled": False, "items": [], "errors": []}
+
+    districts = [str(item).strip() for item in config.get("districts", []) if str(item).strip()]
+    keywords = [str(item).strip() for item in config.get("keywords", []) if str(item).strip()]
+    max_districts = int(config.get("max_districts", 8))
+    source_hits: list[dict[str, str]] = []
+    errors: list[str] = []
+
+    for source in config.get("source_urls", []):
+        source_name = str(source.get("name", "未命名來源"))
+        source_url = str(source.get("url", "")).strip()
+        if not source_url:
+            continue
+        try:
+            content = fetch_text(source_url)
+            if "Just a moment..." in content and "Cloudflare" in content:
+                raise RuntimeError("Cloudflare challenge")
+            text = html_to_text(content)
+            source_hits.append({"name": source_name, "url": source_url, "text": text})
+        except Exception as exc:
+            errors.append(f"{source_name}：{exc}")
+
+    district_items: list[dict[str, Any]] = []
+    for district in districts:
+        mention_count = 0
+        keyword_counts: dict[str, int] = {}
+        examples: list[str] = []
+        sources: set[str] = set()
+        for source in source_hits:
+            text = source["text"]
+            count = text.count(district)
+            if count <= 0:
+                continue
+            mention_count += count
+            sources.add(source["name"])
+            for keyword in keywords:
+                key_count = len(re.findall(rf"{re.escape(district)}[^。！？!?]{{0,80}}{re.escape(keyword)}|{re.escape(keyword)}[^。！？!?]{{0,80}}{re.escape(district)}", text))
+                if key_count:
+                    keyword_counts[keyword] = keyword_counts.get(keyword, 0) + key_count
+            if len(examples) < 2:
+                for sentence in split_sentences(text):
+                    if district in sentence:
+                        examples.append(sentence[:90])
+                        break
+
+        if mention_count:
+            district_items.append(
+                {
+                    "district": district,
+                    "mention_count": mention_count,
+                    "keywords": sorted(keyword_counts, key=keyword_counts.get, reverse=True)[:4],
+                    "examples": examples[:2],
+                    "sources": sorted(sources),
+                }
+            )
+
+    district_items.sort(key=lambda item: item["mention_count"], reverse=True)
+    return {
+        "enabled": True,
+        "days_back": int(config.get("days_back", 7)),
+        "items": district_items[:max_districts],
+        "errors": errors,
+        "source_count": len(source_hits),
+        "generated_at": local_now.isoformat(),
+    }
+
+
+def format_market_pulse_line(item: dict[str, Any]) -> list[str]:
+    keyword_text = f"；關鍵詞：{'、'.join(item.get('keywords', []))}" if item.get("keywords") else ""
+    source_text = f"；來源：{'、'.join(item.get('sources', []))}" if item.get("sources") else ""
+    lines = [f"- {item.get('district')}：近週提及 {item.get('mention_count', 0)} 次{keyword_text}{source_text}"]
+    for example in item.get("examples", [])[:1]:
+        lines.append(f"  例：{example}")
+    return lines
+
+
+def get_rising_price_watch(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    watch: list[dict[str, Any]] = []
+    for area in areas:
+        percent_text = area.get("price", {}).get("yearly_change_text", "")
+        percent_value = parse_percent_value(percent_text)
+        if percent_value is None or percent_value <= 0:
+            continue
+        watch.append(
+            {
+                "name": area["name"],
+                "yearly_change_text": percent_text,
+                "one_year_price": area.get("price", {}).get("one_year_price", ""),
+                "new_build_price": area.get("price", {}).get("new_build_price", ""),
+                "road_focus": area.get("road_focus", []),
+                "price_url": area.get("price_url", ""),
+            }
+        )
+    watch.sort(key=lambda item: parse_percent_value(item["yearly_change_text"]) or 0, reverse=True)
+    return watch
+
+
+def get_falling_price_watch(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    watch: list[dict[str, Any]] = []
+    for area in areas:
+        percent_text = area.get("price", {}).get("yearly_change_text", "")
+        percent_value = parse_percent_value(percent_text)
+        if percent_value is None or percent_value >= 0:
+            continue
+        watch.append(
+            {
+                "name": area["name"],
+                "yearly_change_text": percent_text,
+                "one_year_price": area.get("price", {}).get("one_year_price", ""),
+                "new_build_price": area.get("price", {}).get("new_build_price", ""),
+                "road_focus": area.get("road_focus", []),
+                "price_url": area.get("price_url", ""),
+            }
+        )
+    watch.sort(key=lambda item: parse_percent_value(item["yearly_change_text"]) or 0)
+    return watch
+
+
+def get_project_price_rise_watch(areas: list[dict[str, Any]], state: dict[str, Any]) -> list[dict[str, Any]]:
+    watch: list[dict[str, Any]] = []
+    for area in areas:
+        previous = get_previous_area(state, area["name"])
+        if not previous:
+            continue
+        previous_presales = previous.get("active_presale_projects") or previous.get("presale_projects", [])
+        previous_projects = {item.get("name"): item for item in previous_presales if item.get("name")}
+        rising_projects: list[dict[str, str]] = []
+        for current in area.get("active_presale_projects", []):
+            name = current.get("name", "")
+            if not name or name not in previous_projects:
+                continue
+            prev = previous_projects[name]
+            prev_low, prev_high = parse_price_range(prev.get("status", ""))
+            cur_low, cur_high = parse_price_range(current.get("status", ""))
+            if prev_high is None or cur_high is None:
+                continue
+            if cur_high > prev_high or (cur_low is not None and prev_low is not None and cur_low > prev_low):
+                rising_projects.append(
+                    {
+                        "name": name,
+                        "previous_status": prev.get("status", ""),
+                        "current_status": current.get("status", ""),
+                        "url": current.get("url", ""),
+                    }
+                )
+        if rising_projects:
+            watch.append({"name": area["name"], "road_focus": area.get("road_focus", []), "projects": rising_projects})
+    return watch
+
+
+def format_price_rise_text(previous_status: str, current_status: str) -> str:
+    return f"{previous_status or '未標示'} -> {current_status or '未標示'}"
+
+
+def build_macro_summary(areas: list[dict[str, Any]], rising_watch: list[dict[str, Any]], falling_watch: list[dict[str, Any]]) -> list[str]:
+    lines: list[str] = []
+    valid_areas = [area for area in areas if not area.get("stale")]
+    analysis_areas = valid_areas or areas
+
+    if not analysis_areas:
+        return ["- 目前可用資料不足，今天先不下市場結論。"]
+
+    presale_focus_area = max(analysis_areas, key=lambda area: len(area.get("active_presale_projects", [])))
+    pending_focus_area = max(analysis_areas, key=lambda area: len(area.get("pending_launch_projects", [])))
+
+    presale_count = len(presale_focus_area.get("active_presale_projects", []))
+    pending_count = len(pending_focus_area.get("pending_launch_projects", []))
+    pending_total = sum(len(area.get("pending_launch_projects", [])) for area in analysis_areas)
+    stale_count = sum(1 for area in areas if area.get("stale"))
+
+    strongest = rising_watch[0] if rising_watch else None
+    weakest = falling_watch[0] if falling_watch else None
+
+    if strongest:
+        road_text = f"；路段集中在 {'、'.join(strongest['road_focus'][:3])}" if strongest.get("road_focus") else ""
+        lines.append(
+            f"- 價格結構目前最偏強的是 {strongest['name']}，年變化 {strongest['yearly_change_text']}，"
+            f"近一年成交約 {strongest['one_year_price'] or '未解析'}{road_text}。"
+        )
+
+    if weakest:
+        road_text = f"；路段集中在 {'、'.join(weakest['road_focus'][:3])}" if weakest.get("road_focus") else ""
+        lines.append(
+            f"- 目前相對偏弱的是 {weakest['name']}，年變化 {weakest['yearly_change_text']}，"
+            "如果新增待售物件繼續增加，後續更可能看到價格修正。"
+            f"{road_text}"
+        )
+
+    if presale_count > 0:
+        lines.append(
+            f"- 預售案最密集的區塊是 {presale_focus_area['name']}，目前可觀察到 {presale_count} 個預售案，"
+            "最適合拿來連續盯價格帶是否有集體墊高。"
+        )
+
+    if pending_total > 0 and pending_count > 0:
+        lines.append(
+            f"- 目前全 A7 可看到待預售 / 未開賣新建案共 {pending_total} 案，"
+            f"其中 {pending_focus_area['name']} 最需要先盯，因為這區目前有 {pending_count} 案仍在待定階段，"
+            "後續一旦公開價格，通常最能反映市場對該區的信心。"
+        )
+
+    if presale_count == 0 and pending_total == 0:
+        lines.append("- 今天沒有抓到明確仍屬預售或未開賣預售的新案，先不把新成屋或已交屋案納入判斷。")
+
+    if stale_count > 0:
+        lines.append(
+            f"- 今天有 {stale_count} 個區塊因網站擋爬或資料不穩而沿用前次資料，"
+            "所以本日結論以郵政物流、樂善國小、中心商業區這些成功抓到的區塊為主。"
+        )
+
+    return lines
+
+
+def new_report_content(
+    areas: list[dict[str, Any]],
+    state: dict[str, Any],
+    local_now: datetime,
+    bargain_watch: dict[str, Any] | None = None,
+    market_pulse: dict[str, Any] | None = None,
+    report_kind: str = "週報",
+    urgent_pending_projects: list[dict[str, str]] | None = None,
+) -> str:
+    lines = [
+        f"# A7 Leju {report_kind} | {local_now:%Y-%m-%d}",
+        "",
+        "- Source: leju.com.tw",
+        f"- Generated at: {local_now:%Y-%m-%d %H:%M:%S}",
+        "",
+    ]
+    rising_watch = get_rising_price_watch(areas)
+    falling_watch = get_falling_price_watch(areas)
+    project_rise_watch = get_project_price_rise_watch(areas, state)
+
+    if urgent_pending_projects:
+        lines.append("## 當日未開案預售屋提醒")
+        lines.append("")
+        for item in urgent_pending_projects:
+            lines.extend(format_project_line(item))
+        lines.append("")
+
+    if market_pulse and market_pulse.get("enabled", False):
+        lines.append("## 近一週市場脈動")
+        lines.append("")
+        items = market_pulse.get("items", [])
+        if items:
+            for item in items:
+                lines.extend(format_market_pulse_line(item))
+        else:
+            lines.append("- 近一週來源中未解析到明確的雙北、桃園行政區熱點。")
+        if market_pulse.get("errors"):
+            lines.append("")
+            lines.append("資料限制：")
+            for error in market_pulse["errors"][:5]:
+                lines.append(f"- {error}")
+        lines.append("")
+
+    if bargain_watch and bargain_watch.get("enabled", False):
+        lines.append("## 雙北桃園低價預售觀察")
+        lines.append("")
+        items = bargain_watch.get("items", [])
+        if items:
+            for item in items:
+                lines.extend(format_bargain_watch_line(item))
+        else:
+            threshold = bargain_watch.get("threshold_percent", 10)
+            lines.append(f"- 今天未發現公開價格低於周邊基準 {threshold:g}% 以上的預售 / 待開案。")
+        errors = bargain_watch.get("errors", [])
+        if errors:
+            lines.append("")
+            lines.append("資料限制：")
+            for error in errors[:5]:
+                lines.append(f"- {error}")
+        lines.append("")
+
+    if rising_watch:
+        lines.append("## 價格抬升觀察")
+        lines.append("")
+        for item in rising_watch:
+            lines.append(
+                f"- {item['name']} | 年變化 {item['yearly_change_text']} | 近一年 {item['one_year_price'] or '未解析'} | 新案 {item['new_build_price'] or '未解析'}"
+            )
+            if item["road_focus"]:
+                lines.append(f"  路段：{'、'.join(item['road_focus'])}")
+            if item["price_url"]:
+                lines.append(f"  {item['price_url']}")
+        lines.append("")
+
+    if falling_watch:
+        lines.append("## 價格下降觀察")
+        lines.append("")
+        for item in falling_watch:
+            lines.append(
+                f"- {item['name']} | 年變化 {item['yearly_change_text']} | 近一年 {item['one_year_price'] or '未解析'} | 新案 {item['new_build_price'] or '未解析'}"
+            )
+            if item["road_focus"]:
+                lines.append(f"  路段：{'、'.join(item['road_focus'])}")
+            if item["price_url"]:
+                lines.append(f"  {item['price_url']}")
+        lines.append("")
+
+    if project_rise_watch:
+        lines.append("## 預售案逐步抬價觀察")
+        lines.append("")
+        for item in project_rise_watch:
+            lines.append(f"- {item['name']}")
+            if item["road_focus"]:
+                lines.append(f"  路段：{'、'.join(item['road_focus'])}")
+            for project in item["projects"][:4]:
+                lines.append(f"  - {project['name']} | {format_price_rise_text(project['previous_status'], project['current_status'])}")
+                lines.append(f"    {project['url']}")
+        lines.append("")
+
+    for area in areas:
+        previous = get_previous_area(state, area["name"])
+        lines.extend(
+            [
+                f"## {area['name']}",
+                "",
+                f"- 追蹤中預售屋：{len(area.get('active_presale_projects', []))} 個",
+                f"- 未開賣預售：{len(area.get('pending_launch_projects', []))} 個",
+                f"- 買房頁：{area['buy_url']}",
+                f"- 房價頁：{area['price_url']}",
+                "",
+            ]
+        )
+        if area.get("stale"):
+            lines.append(f"- 注意：本次抓取失敗，以下使用上次成功資料。原因：{area.get('fetch_error', '')}")
+            lines.append("")
+        pending = area.get("pending_launch_projects", [])[:5]
+        if pending:
+            lines.append("### 準備推案 / 待預售")
+            for item in pending:
+                lines.extend(format_project_line(item))
+            lines.append("")
+        latest_presale_regs = area.get("latest_presale_registrations", [])[:5]
+        lines.append("### 最新登錄的預售屋")
+        if latest_presale_regs:
+            for item in latest_presale_regs:
+                lines.extend(format_registration_line(item))
+        else:
+            lines.append("- 目前未解析，資料來源待串接")
+        lines.append("")
+        presale_projects = area.get("active_presale_projects", [])[:8]
+        if presale_projects:
+            lines.append("### 預售屋觀察（未完工）")
+            for item in presale_projects:
+                lines.extend(format_project_line(item))
+            lines.append("")
+        compare_projects = get_price_compare_projects(area)
+        if compare_projects:
+            lines.append("### 新成屋 vs 完銷預售價格比較")
+            for item in compare_projects:
+                lines.extend(format_price_compare_line(item, item.get("compare_label", "比較案")))
+            lines.append("")
+
+    lines.append("## 大數據觀察")
+    lines.append("")
+    lines.extend(build_macro_summary(areas, rising_watch, falling_watch))
+    return "\n".join(lines).strip()
+
+
+def new_line_message(
+    areas: list[dict[str, Any]],
+    state: dict[str, Any],
+    local_now: datetime,
+    bargain_watch: dict[str, Any] | None = None,
+    market_pulse: dict[str, Any] | None = None,
+    report_kind: str = "週報",
+    urgent_pending_projects: list[dict[str, str]] | None = None,
+) -> str:
+    lines = [f"A7 {report_kind}", f"日期：{local_now:%Y-%m-%d}", ""]
+    rising_watch = get_rising_price_watch(areas)
+    falling_watch = get_falling_price_watch(areas)
+    project_rise_watch = get_project_price_rise_watch(areas, state)
+
+    if urgent_pending_projects:
+        lines.append("當日未開案預售屋提醒")
+        for item in urgent_pending_projects[:4]:
+            lines.extend(format_project_line(item))
+        lines.append("")
+
+    if market_pulse and market_pulse.get("enabled", False):
+        lines.append("近一週市場脈動")
+        items = market_pulse.get("items", [])
+        if items:
+            for item in items[:5]:
+                keyword_text = f" | {'、'.join(item.get('keywords', []))}" if item.get("keywords") else ""
+                lines.append(f"- {item.get('district')}：提及 {item.get('mention_count', 0)} 次{keyword_text}")
+        else:
+            lines.append("- 未解析到明確雙北、桃園行政區熱點。")
+        if market_pulse.get("errors"):
+            lines.append(f"- 部分新聞/報告來源抓取失敗：{len(market_pulse['errors'])} 個")
+        lines.append("")
+
+    if bargain_watch and bargain_watch.get("enabled", False):
+        lines.append("雙北桃園低價預售觀察")
+        items = bargain_watch.get("items", [])
+        if items:
+            for item in items[:4]:
+                lines.extend(format_bargain_watch_line(item))
+        else:
+            threshold = bargain_watch.get("threshold_percent", 10)
+            lines.append(f"- 未發現低於周邊基準 {threshold:g}% 以上的預售 / 待開案。")
+        if bargain_watch.get("errors"):
+            lines.append(f"- 部分區域抓取失敗：{len(bargain_watch['errors'])} 區")
+        lines.append("")
+
+    if rising_watch:
+        lines.append("價格抬升觀察")
+        for item in rising_watch[:4]:
+            road_text = f" | {'、'.join(item['road_focus'])}" if item["road_focus"] else ""
+            lines.append(f"- {item['name']} | {item['yearly_change_text']} | {item['one_year_price'] or '未解析'}{road_text}")
+        lines.append("")
+
+    if falling_watch:
+        lines.append("價格下降觀察")
+        for item in falling_watch[:4]:
+            road_text = f" | {'、'.join(item['road_focus'])}" if item["road_focus"] else ""
+            lines.append(f"- {item['name']} | {item['yearly_change_text']} | {item['one_year_price'] or '未解析'}{road_text}")
+        lines.append("")
+
+    if project_rise_watch:
+        lines.append("預售案逐步抬價觀察")
+        for item in project_rise_watch[:3]:
+            road_text = f" | {'、'.join(item['road_focus'])}" if item["road_focus"] else ""
+            lines.append(f"- {item['name']}{road_text}")
+            for project in item["projects"][:2]:
+                lines.append(f"  - {project['name']} | {format_price_rise_text(project['previous_status'], project['current_status'])}")
+        lines.append("")
+
+    for area in areas:
+        previous = get_previous_area(state, area["name"])
+        lines.extend(
+            [
+                area["name"],
+                f"- 追蹤中預售屋：{len(area.get('active_presale_projects', []))} 個",
+                f"- 未開賣預售：{len(area.get('pending_launch_projects', []))} 個",
+                "",
+            ]
+        )
+        if area.get("stale"):
+            lines.append("注意：本次抓取失敗，改用上次成功資料。")
+            lines.append("")
+        pending = area.get("pending_launch_projects", [])[:3]
+        if pending:
+            lines.append("準備推案 / 待預售")
+            for item in pending:
+                lines.extend(format_project_line(item))
+            lines.append("")
+        latest_presale_regs = area.get("latest_presale_registrations", [])[:2]
+        lines.append("最新登錄的預售屋")
+        if latest_presale_regs:
+            for item in latest_presale_regs:
+                lines.extend(format_registration_line(item))
+        else:
+            lines.append("- 目前未解析")
+        lines.append("")
+        presale_projects = area.get("active_presale_projects", [])[:4]
+        if presale_projects:
+            lines.append("預售屋觀察（未完工）")
+            for item in presale_projects:
+                lines.extend(format_project_line(item))
+            lines.append("")
+        compare_projects = get_price_compare_projects(area, limit=5)
+        if compare_projects:
+            lines.append("新成屋 vs 完銷預售價格比較")
+            for item in compare_projects:
+                lines.extend(format_price_compare_line(item, item.get("compare_label", "比較案")))
+            lines.append("")
+
+    lines.append("大數據觀察")
+    lines.extend(build_macro_summary(areas, rising_watch, falling_watch))
+    message = "\n".join(lines).strip()
+    return message[:4897] + "..." if len(message) > 4900 else message
+
+
+def send_line_push(channel_access_token: str, to: str, message: str) -> None:
+    body = json.dumps({"to": to, "messages": [{"type": "text", "text": message}]}, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(
+        "https://api.line.me/v2/bot/message/push",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {channel_access_token}",
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30):
+        return
+
+
+def send_line_broadcast(channel_access_token: str, message: str) -> None:
+    body = json.dumps({"messages": [{"type": "text", "text": message}]}, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(
+        "https://api.line.me/v2/bot/message/broadcast",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {channel_access_token}",
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30):
+        return
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config-path", default=str(Path(__file__).with_name("a7-leju-monitor.env")))
+    parser.add_argument("--area-config-path", default="")
+    parser.add_argument("--bargain-watch-config-path", default="")
+    parser.add_argument("--market-pulse-config-path", default="")
+    parser.add_argument("--force", action="store_true")
+    parser.add_argument("--skip-line", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    file_config = read_env_file(Path(args.config_path))
+    task_id = get_config_value(file_config, "TASK_ID", "a7-leju-digest")
+    report_root = resolve_workspace_path(get_config_value(file_config, "REPORT_ROOT", "vault/2-actions/scheduled-reports/a7-leju"))
+    state_path = resolve_workspace_path(get_config_value(file_config, "STATE_PATH", str(report_root / "state.json")))
+    ledger_path = resolve_workspace_path(get_config_value(file_config, "SYNC_LEDGER_PATH", "system/skills/local-scheduler/config/sync-ledger.json"))
+    timezone_raw = get_config_value(file_config, "TIME_ZONE", "Asia/Taipei")
+    timezone_name = TIME_ZONE_ALIASES.get(timezone_raw, timezone_raw)
+    line_token = get_config_value(file_config, "LINE_CHANNEL_ACCESS_TOKEN", "")
+    line_mode = get_config_value(file_config, "LINE_MODE", "broadcast").strip().lower()
+    line_to = get_config_value(file_config, "LINE_TO", "")
+    area_config_path_text = args.area_config_path or get_config_value(file_config, "AREA_CONFIG_PATH", str(get_default_area_config_path()))
+    area_config_path = resolve_workspace_path(area_config_path_text)
+    bargain_config_path_text = args.bargain_watch_config_path or get_config_value(
+        file_config,
+        "BARGAIN_WATCH_CONFIG_PATH",
+        str(get_default_bargain_watch_config_path()),
+    )
+    bargain_config_path = resolve_workspace_path(bargain_config_path_text)
+    market_pulse_config_path_text = args.market_pulse_config_path or get_config_value(
+        file_config,
+        "MARKET_PULSE_CONFIG_PATH",
+        str(get_default_market_pulse_config_path()),
+    )
+    market_pulse_config_path = resolve_workspace_path(market_pulse_config_path_text)
+    line_schedule = get_config_value(file_config, "LINE_SCHEDULE", "weekly").strip().lower()
+    weekly_report_day = int(get_config_value(file_config, "WEEKLY_REPORT_DAY", "6"))
+    urgent_pending_enabled = get_config_value(file_config, "URGENT_PENDING_PRESALE_ALERT", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+    report_root.mkdir(parents=True, exist_ok=True)
+    local_now = datetime.now(ZoneInfo(timezone_name))
+    date_string = local_now.strftime("%Y-%m-%d")
+    report_path = report_root / f"a7-leju-digest-{date_string}.md"
+
+    ledger_file = get_ledger_file(ledger_path)
+    if not args.force and test_ledger_already_ran(ledger_file, task_id, date_string):
+        print(f"Task '{task_id}' already ran on {date_string}. Use --force to run again.")
+        return 0
+
+    state = get_state_file(state_path)
+    area_config = load_area_config(area_config_path)
+    snapshots: list[dict[str, Any]] = []
+    for area in area_config:
+        previous = get_previous_area(state, area["name"])
+        try:
+            snapshots.append(get_area_snapshot(area))
+        except Exception as exc:
+            snapshots.append(build_stale_snapshot(area, previous, exc))
+
+    urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
+    weekly_due = is_weekly_report_day(local_now, weekly_report_day)
+    should_send_line = args.force or line_schedule == "daily" or weekly_due or bool(urgent_pending_projects)
+    report_kind = "即時提醒" if urgent_pending_projects and not weekly_due else "週報"
+
+    bargain_watch = get_bargain_watch_results(load_bargain_watch_config(bargain_config_path))
+    market_pulse = get_market_pulse(load_market_pulse_config(market_pulse_config_path), local_now)
+    report_content = new_report_content(
+        snapshots,
+        state,
+        local_now,
+        bargain_watch,
+        market_pulse,
+        report_kind,
+        urgent_pending_projects,
+    )
+    report_path.write_text(report_content + "\n", encoding="utf-8")
+    save_state_file(state_path, state, snapshots, local_now)
+    update_ledger(ledger_path, ledger_file, task_id, report_path, local_now)
+
+    line_message = new_line_message(
+        snapshots,
+        state,
+        local_now,
+        bargain_watch,
+        market_pulse,
+        report_kind,
+        urgent_pending_projects,
+    )
+    if args.dry_run:
+        print("Dry run complete.")
+        print(line_message)
+        print(f"Report path: {report_path}")
+        return 0
+
+    if not args.skip_line and should_send_line:
+        if not line_token:
+            print("WARNING: LINE token is missing. Report was generated locally, but no LINE message was sent.")
+        elif line_mode == "push":
+            if not line_to:
+                print("WARNING: LINE_TO is missing for push mode. Report was generated locally, but no LINE message was sent.")
+            else:
+                send_line_push(line_token, line_to, line_message)
+                print("LINE push sent successfully.")
+        else:
+            send_line_broadcast(line_token, line_message)
+            print("LINE broadcast sent successfully.")
+    elif not args.skip_line:
+        print("LINE send skipped: weekly report is not due and no new pending presale project was detected.")
+
+    print(f"Report written to {report_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except urllib.error.URLError as exc:
+        print(f"Network request failed: {exc}", file=sys.stderr)
+        raise
