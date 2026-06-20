@@ -958,6 +958,19 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
+def append_presale_count_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
+    lines.append("## 各區預售數量速覽" if markdown else "各區預售數量速覽")
+    if markdown:
+        lines.append("")
+    for area in areas:
+        active = format_project_count(area, "active_presale_projects")
+        pending = format_project_count(area, "pending_launch_projects")
+        sold_out = format_project_count(area, "sold_out_presale_projects")
+        total = format_observable_presale_count(area)
+        lines.append(f"- {area['name']}：合計 {total}；銷售中 {active}；待開 {pending}；完銷/非銷售中 {sold_out}")
+    lines.append("")
+
+
 def is_bargain_candidate_project(project: dict[str, str]) -> bool:
     if is_completed_project(project):
         return False
@@ -1314,6 +1327,7 @@ def new_report_content(
             lines.extend(format_project_line(item))
         lines.append("")
 
+    append_presale_count_overview(lines, areas, markdown=True)
     append_presale_overview(lines, areas, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1395,7 +1409,7 @@ def new_report_content(
                 f"## {area['name']}",
                 "",
                 f"- 可觀察預售案合計：{format_observable_presale_count(area)}",
-                f"- 追蹤中預售屋：{format_project_count(area, 'active_presale_projects')}",
+                f"- 銷售中預售屋：{format_project_count(area, 'active_presale_projects')}",
                 f"- 未開賣預售：{format_project_count(area, 'pending_launch_projects')}",
                 f"- 完銷 / 非銷售中預售：{format_project_count(area, 'sold_out_presale_projects')}",
                 f"- 買房頁：{area['buy_url']}",
@@ -1459,6 +1473,7 @@ def new_line_message(
             lines.extend(format_project_line(item))
         lines.append("")
 
+    append_presale_count_overview(lines, areas)
     append_presale_overview(lines, areas)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1518,7 +1533,7 @@ def new_line_message(
             [
                 area["name"],
                 f"- 可觀察預售案合計：{format_observable_presale_count(area)}",
-                f"- 追蹤中預售屋：{format_project_count(area, 'active_presale_projects')}",
+                f"- 銷售中預售屋：{format_project_count(area, 'active_presale_projects')}",
                 f"- 未開賣預售：{format_project_count(area, 'pending_launch_projects')}",
                 f"- 完銷 / 非銷售中預售：{format_project_count(area, 'sold_out_presale_projects')}",
                 "",
