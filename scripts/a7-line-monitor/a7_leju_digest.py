@@ -446,6 +446,99 @@ def is_active_presale(project: dict[str, str]) -> bool:
     return False
 
 
+def get_project_price_url(project: dict[str, str]) -> str:
+    url = project.get("url", "")
+    if not url:
+        return ""
+    if "mode=" in url:
+        return re.sub(r"mode=[^&]+", "mode=price", url)
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}mode=price"
+
+
+def normalize_price_text(value: str) -> str:
+    value = value.strip().replace(",", "")
+    if not value:
+        return ""
+    if "萬" in value:
+        return value
+    return f"{value}萬"
+
+
+def parse_latest_registration_rows(project: dict[str, str], content: str, limit: int = 3) -> list[dict[str, str]]:
+    text = html_to_text(content)
+    if "Just a moment..." in text and "Cloudflare" in text:
+        return []
+
+    chunks = split_sentences(text)
+    if not chunks:
+        chunks = [line.strip() for line in text.splitlines() if line.strip()]
+
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for chunk in chunks:
+        if "成交" not in chunk and "實價" not in chunk:
+            continue
+        if "萬" not in chunk and "坪" not in chunk:
+            continue
+
+        unit = get_regex_value(
+            chunk,
+            r"([A-ZＡ-Ｚ]\s*棟?\s*[A-ZＡ-Ｚ]?\d{1,3}\s*[-－]\s*\d+\s*(?:F|樓)?)",
+            "",
+        )
+        if not unit:
+            unit = get_regex_value(chunk, r"([A-ZＡ-Ｚ]?\d{1,3}\s*[-－]\s*\d+\s*(?:F|樓))", "")
+        floor = get_regex_value(chunk, r"(\d{1,2}\s*(?:F|樓))", "")
+        area = get_regex_value(chunk, r"(?:房屋|建物|權狀|坪數|面積)\s*([\d.]+\s*坪)", "")
+        if not area:
+            area = get_regex_value(chunk, r"([\d.]+\s*坪)", "")
+        parking_price = get_regex_value(chunk, r"車位(?:價|總價|價格)?\s*([\d,.]+\s*萬)", "")
+        total_price = get_regex_value(chunk, r"(?:總價|成交總價)\s*([\d,.]+\s*萬)", "")
+        if not total_price:
+            total_price = get_regex_value(chunk, r"([\d,.]+\s*萬)(?:\s*成交|\s*總價)", "")
+        unit_price = get_regex_value(chunk, r"(?:單價|每坪|成交單價)\s*([\d.]+\s*萬/?坪)", "")
+        if not unit_price:
+            unit_price = get_regex_value(chunk, r"([\d.]+\s*萬/坪)", "")
+        if not any([unit, total_price, unit_price]):
+            continue
+
+        key = "|".join([project.get("name", ""), unit, floor, area, total_price, unit_price])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "project_name": project.get("name", "未命名建案"),
+                "unit": re.sub(r"\s+", "", unit) if unit else "戶別未解析",
+                "floor": re.sub(r"\s+", "", floor) if floor else "樓層未解析",
+                "area": re.sub(r"\s+", "", area) if area else "坪數未解析",
+                "parking_price": normalize_price_text(parking_price) if parking_price else "車位價未解析",
+                "total_price": normalize_price_text(total_price) if total_price else "總價未解析",
+                "unit_price": unit_price.replace(" ", "") if unit_price else "單價未解析",
+                "url": get_project_price_url(project) or project.get("url", ""),
+            }
+        )
+        if len(rows) >= limit:
+            break
+    return rows
+
+
+def get_latest_presale_registrations(projects: list[dict[str, str]], limit: int = 5) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for project in projects:
+        price_url = get_project_price_url(project)
+        if not price_url:
+            continue
+        try:
+            rows.extend(parse_latest_registration_rows(project, fetch_text(price_url), limit=2))
+        except Exception:
+            continue
+        if len(rows) >= limit:
+            break
+    return rows[:limit]
+
+
 def get_price_snapshot(content: str) -> dict[str, str]:
     text = html_to_text(content)
     return {
@@ -495,6 +588,9 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         item for item in comparison_projects if is_sold_out_presale(item, active_project_urls)
     ]
     completed_projects = [item for item in comparison_projects if is_completed_project(item)]
+    latest_presale_registrations = get_latest_presale_registrations(
+        active_presale_projects + pending_launch_projects + sold_out_presale_projects
+    )
     unclassified_projects = [
         item
         for item in all_projects
@@ -515,7 +611,7 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "latest_listing_links": latest_listing_links,
         "all_new_build_projects": all_projects,
         "all_comparison_projects": comparison_projects,
-        "latest_presale_registrations": [],
+        "latest_presale_registrations": latest_presale_registrations,
         "latest_new_completion_registrations": [],
         "pending_launch_projects": pending_launch_projects,
         "active_presale_projects": active_presale_projects,
@@ -736,15 +832,26 @@ def format_project_line(item: dict[str, str]) -> list[str]:
 
 
 def format_registration_line(item: dict[str, str]) -> list[str]:
-    parts = [
-        item.get("project_name", "未命名建案"),
-        item.get("floor", "樓層未解析"),
-        item.get("layout", "戶型未解析"),
-        item.get("total_price", "總價未解析"),
-        item.get("unit_price", "單價未解析"),
-        item.get("parking", "車位未解析"),
-    ]
-    line = " | ".join(parts)
+    if item.get("unit") or item.get("area") or item.get("parking_price"):
+        line = (
+            f"{item.get('project_name', '未命名建案')} "
+            f"{item.get('unit', '戶別未解析')}；"
+            f"樓層：{item.get('floor', '樓層未解析')}；"
+            f"房屋坪數：{item.get('area', '坪數未解析')}；"
+            f"車位價：{item.get('parking_price', '車位價未解析')}；"
+            f"總價：{item.get('total_price', '總價未解析')}；"
+            f"成交單價：{item.get('unit_price', '單價未解析')}"
+        )
+    else:
+        parts = [
+            item.get("project_name", "未命名建案"),
+            item.get("floor", "樓層未解析"),
+            item.get("layout", "戶型未解析"),
+            item.get("total_price", "總價未解析"),
+            item.get("unit_price", "單價未解析"),
+            item.get("parking", "車位未解析"),
+        ]
+        line = " | ".join(parts)
     if item.get("url"):
         return [f"- {line}", f"  {item['url']}"]
     return [f"- {line}"]
@@ -758,7 +865,10 @@ def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
 def format_project_count(area: dict[str, Any], key: str) -> str:
     if area.get("stale") and not area.get("has_previous_data", True):
         return "資料不足"
-    return f"{len(area.get(key, []))} 個"
+    count_text = f"{len(area.get(key, []))} 個"
+    if area.get("stale"):
+        return f"{count_text}（沿用前次）"
+    return count_text
 
 
 def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dict[str, str]]:
@@ -777,6 +887,7 @@ def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dic
 def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int = 10) -> dict[str, list[dict[str, str]]]:
     pending: list[dict[str, str]] = []
     active: list[dict[str, str]] = []
+    sold_out: list[dict[str, str]] = []
     insufficient: list[dict[str, str]] = []
     for area in areas:
         if area.get("stale") and not area.get("has_previous_data", True):
@@ -790,9 +901,14 @@ def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int
             item = dict(project)
             item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
             active.append(item)
+        for project in area.get("sold_out_presale_projects", []):
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            sold_out.append(item)
     return {
         "pending": pending[:limit_per_group],
         "active": active[:limit_per_group],
+        "sold_out": sold_out[:limit_per_group],
         "insufficient": insufficient[:limit_per_group],
     }
 
@@ -815,6 +931,12 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
             lines.extend(format_project_line(item))
     else:
         lines.append("- 銷售中預售屋：目前未抓到")
+    if overview["sold_out"]:
+        lines.append("完銷 / 非銷售中預售")
+        for item in overview["sold_out"]:
+            lines.extend(format_project_line(item))
+    else:
+        lines.append("- 完銷 / 非銷售中預售：目前未抓到")
     if overview["insufficient"]:
         lines.append("資料不足區域")
         for item in overview["insufficient"]:
