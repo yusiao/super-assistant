@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "0 12 * * *"
   workflow_dispatch:
+    inputs:
+      force_send:
+        description: "Force rerun and send LINE even if today's digest already ran"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   run-digest:
@@ -43,7 +49,12 @@ jobs:
             a7-leju-state-
 
       - name: Run A7 digest
-        run: python scripts/a7-line-monitor/a7_leju_digest.py
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force_send }}" = "true" ]; then
+            python scripts/a7-line-monitor/a7_leju_digest.py --force
+          else
+            python scripts/a7-line-monitor/a7_leju_digest.py
+          fi
 
       - name: Upload report artifact
         if: always()
