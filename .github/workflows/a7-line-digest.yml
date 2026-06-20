@@ -14,6 +14,12 @@ jobs:
       REPORT_ROOT: vault/2-actions/scheduled-reports/a7-leju
       STATE_PATH: vault/2-actions/scheduled-reports/a7-leju/state.json
       SYNC_LEDGER_PATH: system/skills/local-scheduler/config/sync-ledger.json
+      AREA_CONFIG_PATH: scripts/a7-line-monitor/area-config.json
+      BARGAIN_WATCH_CONFIG_PATH: scripts/a7-line-monitor/bargain-watch-config.json
+      MARKET_PULSE_CONFIG_PATH: scripts/a7-line-monitor/market-pulse-config.json
+      LINE_SCHEDULE: weekly
+      WEEKLY_REPORT_DAY: "6"
+      URGENT_PENDING_PRESALE_ALERT: "true"
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
       LINE_TO: ${{ secrets.LINE_TO }}
@@ -25,6 +31,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Restore digest state
+        uses: actions/cache@v4
+        with:
+          path: |
+            vault/2-actions/scheduled-reports/a7-leju/state.json
+            system/skills/local-scheduler/config/sync-ledger.json
+          key: a7-leju-state-${{ github.run_id }}
+          restore-keys: |
+            a7-leju-state-
 
       - name: Run A7 digest
         run: python scripts/a7-line-monitor/a7_leju_digest.py
