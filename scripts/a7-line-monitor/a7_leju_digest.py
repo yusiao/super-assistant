@@ -1421,11 +1421,21 @@ def new_report_content(
             lines.append(f"- 注意：本次抓取失敗，以下使用上次成功資料。原因：{area.get('fetch_error', '')}")
             lines.append("")
         pending = area.get("pending_launch_projects", [])[:5]
+        lines.append("### 待預售建案")
         if pending:
-            lines.append("### 準備推案 / 待預售")
             for item in pending:
                 lines.extend(format_project_line(item))
-            lines.append("")
+        else:
+            lines.append("- 目前未抓到")
+        lines.append("")
+        presale_projects = area.get("active_presale_projects", [])[:8]
+        lines.append("### 銷售中預售建案")
+        if presale_projects:
+            for item in presale_projects:
+                lines.extend(format_project_line(item))
+        else:
+            lines.append("- 目前未抓到")
+        lines.append("")
         latest_presale_regs = area.get("latest_presale_registrations", [])[:5]
         lines.append("### 最新登錄的預售屋")
         if latest_presale_regs:
@@ -1434,12 +1444,6 @@ def new_report_content(
         else:
             lines.append("- 目前未解析，資料來源待串接")
         lines.append("")
-        presale_projects = area.get("active_presale_projects", [])[:8]
-        if presale_projects:
-            lines.append("### 預售屋觀察（未完工）")
-            for item in presale_projects:
-                lines.extend(format_project_line(item))
-            lines.append("")
         compare_projects = get_price_compare_projects(area)
         if compare_projects:
             lines.append("### 新成屋 vs 完銷預售價格比較")
@@ -1543,11 +1547,21 @@ def new_line_message(
             lines.append("注意：本次抓取失敗，改用上次成功資料。")
             lines.append("")
         pending = area.get("pending_launch_projects", [])[:3]
+        lines.append("待預售建案")
         if pending:
-            lines.append("準備推案 / 待預售")
             for item in pending:
                 lines.extend(format_project_line(item))
-            lines.append("")
+        else:
+            lines.append("- 目前未抓到")
+        lines.append("")
+        presale_projects = area.get("active_presale_projects", [])[:4]
+        lines.append("銷售中預售建案")
+        if presale_projects:
+            for item in presale_projects:
+                lines.extend(format_project_line(item))
+        else:
+            lines.append("- 目前未抓到")
+        lines.append("")
         latest_presale_regs = area.get("latest_presale_registrations", [])[:2]
         lines.append("最新登錄的預售屋")
         if latest_presale_regs:
@@ -1556,12 +1570,6 @@ def new_line_message(
         else:
             lines.append("- 目前未解析")
         lines.append("")
-        presale_projects = area.get("active_presale_projects", [])[:4]
-        if presale_projects:
-            lines.append("預售屋觀察（未完工）")
-            for item in presale_projects:
-                lines.extend(format_project_line(item))
-            lines.append("")
         compare_projects = get_price_compare_projects(area, limit=5)
         if compare_projects:
             lines.append("新成屋 vs 完銷預售價格比較")
