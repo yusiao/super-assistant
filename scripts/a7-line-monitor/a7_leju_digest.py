@@ -971,6 +971,40 @@ def append_presale_count_overview(lines: list[str], areas: list[dict[str, Any]],
     lines.append("")
 
 
+def append_active_pending_project_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
+    pending_items: list[dict[str, str]] = []
+    active_items: list[dict[str, str]] = []
+    for area in areas:
+        for project in area.get("pending_launch_projects", []):
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            pending_items.append(item)
+        for project in area.get("active_presale_projects", []):
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            active_items.append(item)
+
+    lines.append("## 待預售建案" if markdown else "待預售建案")
+    if markdown:
+        lines.append("")
+    if pending_items:
+        for item in pending_items[:10]:
+            lines.extend(format_project_line(item))
+    else:
+        lines.append("- 目前未抓到")
+    lines.append("")
+
+    lines.append("## 銷售中預售建案" if markdown else "銷售中預售建案")
+    if markdown:
+        lines.append("")
+    if active_items:
+        for item in active_items[:10]:
+            lines.extend(format_project_line(item))
+    else:
+        lines.append("- 目前未抓到")
+    lines.append("")
+
+
 def is_bargain_candidate_project(project: dict[str, str]) -> bool:
     if is_completed_project(project):
         return False
@@ -1328,6 +1362,7 @@ def new_report_content(
         lines.append("")
 
     append_presale_count_overview(lines, areas, markdown=True)
+    append_active_pending_project_overview(lines, areas, markdown=True)
     append_presale_overview(lines, areas, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1478,6 +1513,7 @@ def new_line_message(
         lines.append("")
 
     append_presale_count_overview(lines, areas)
+    append_active_pending_project_overview(lines, areas)
     append_presale_overview(lines, areas)
 
     if market_pulse and market_pulse.get("enabled", False):
