@@ -5,11 +5,121 @@
   "source_urls": [
     {
       "name": "好房網News",
-      "url": "https://news.housefun.com.tw/"
+      "url": "https://news.housefun.com.tw/",
+      "report_errors": false
     },
     {
       "name": "樂居",
-      "url": "https://www.leju.com.tw/"
+      "url": "https://www.leju.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "永慶房屋",
+      "url": "https://www.yungching.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "591房屋交易網",
+      "url": "https://www.591.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "樂屋網",
+      "url": "https://www.rakuya.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "信義房屋",
+      "url": "https://www.sinyi.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "住展房屋網",
+      "url": "https://www.myhousing.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "MyGoNews買購不動產新聞",
+      "url": "https://www.mygonews.com/",
+      "report_errors": false
+    },
+    {
+      "name": "自由地產天下",
+      "url": "https://estate.ltn.com.tw/",
+      "report_errors": false
+    },
+    {
+      "name": "ETtoday房產雲",
+      "url": "https://house.ettoday.net/",
+      "report_errors": false
+    },
+    {
+      "name": "Google News RSS-好房網房市",
+      "url": "https://news.google.com/rss/search?q=好房網+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-樂居房市",
+      "url": "https://news.google.com/rss/search?q=樂居+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-東森房屋",
+      "url": "https://news.google.com/rss/search?q=東森房屋+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-ETtoday房產雲",
+      "url": "https://news.google.com/rss/search?q=ETtoday房產雲+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-永慶房屋",
+      "url": "https://news.google.com/rss/search?q=永慶房屋+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-信義房屋",
+      "url": "https://news.google.com/rss/search?q=信義房屋+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-591新建案",
+      "url": "https://news.google.com/rss/search?q=591+新建案+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-樂屋網",
+      "url": "https://news.google.com/rss/search?q=樂屋網+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-住展房屋網",
+      "url": "https://news.google.com/rss/search?q=住展房屋網+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-MyGoNews",
+      "url": "https://news.google.com/rss/search?q=MyGoNews+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-自由地產天下",
+      "url": "https://news.google.com/rss/search?q=自由地產天下+雙北+桃園+預售屋+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-工商房市",
+      "url": "https://news.google.com/rss/search?q=工商時報+房市+雙北+桃園+預售屋&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-經濟日報房市",
+      "url": "https://news.google.com/rss/search?q=經濟日報+房市+雙北+桃園+預售屋&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-聯合房市",
+      "url": "https://news.google.com/rss/search?q=聯合新聞網+房市+雙北+桃園+預售屋&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-中央社房市",
+      "url": "https://news.google.com/rss/search?q=中央社+房市+雙北+桃園+預售屋&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-待開案預售",
+      "url": "https://news.google.com/rss/search?q=雙北+桃園+預售屋+待開案+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News RSS-預售價格異常",
+      "url": "https://news.google.com/rss/search?q=雙北+桃園+預售屋+價格+低於周邊+房市&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     }
   ],
   "districts": [
@@ -26,28 +136,28 @@
     "南港區",
     "文山區",
     "板橋區",
-    "新莊區",
+    "三重區",
     "中和區",
     "永和區",
+    "新莊區",
+    "新店區",
     "土城區",
-    "樹林區",
-    "三峽區",
-    "鶯歌區",
-    "三重區",
     "蘆洲區",
+    "汐止區",
+    "樹林區",
+    "淡水區",
+    "三峽區",
+    "林口區",
     "五股區",
     "泰山區",
-    "林口區",
-    "淡水區",
-    "汐止區",
-    "新店區",
+    "八里區",
     "桃園區",
     "中壢區",
     "平鎮區",
     "八德區",
     "楊梅區",
     "蘆竹區",
-    "大園區",
+    "大溪區",
     "龜山區",
     "龍潭區",
     "青埔",
@@ -68,6 +178,12 @@
     "低價",
     "讓利",
     "去化",
-    "餘屋"
+    "餘屋",
+    "房貸",
+    "限貸",
+    "交屋",
+    "完銷",
+    "建商",
+    "代銷"
   ]
 }
