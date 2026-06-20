@@ -40,7 +40,30 @@ Commit message:
 Add BaZi Zi Wei web app
 ```
 
-## 2. Upload GitHub Pages Workflow
+## 2. Upload Netlify AI Function Files
+
+If you want real AI image generation, upload these files too:
+
+```text
+C:\Users\Power\Desktop\super-assistant\netlify.toml
+C:\Users\Power\Desktop\super-assistant\netlify\functions\generate-partner-image.js
+```
+
+Then deploy the repository on Netlify and set one environment variable:
+
+```text
+OPENAI_API_KEY=...
+```
+
+or:
+
+```text
+GEMINI_API_KEY=...
+```
+
+GitHub Pages can show the chart page, but AI image generation needs Netlify/Vercel/Cloudflare style backend functions.
+
+## 3. Upload GitHub Pages Workflow
 
 Open this GitHub URL:
 
@@ -60,7 +83,7 @@ Commit message:
 Add BaZi Zi Wei Pages deploy workflow
 ```
 
-## 3. Enable GitHub Pages
+## 4. Enable GitHub Pages
 
 Go to:
 
@@ -74,7 +97,7 @@ Set:
 Source: GitHub Actions
 ```
 
-## 4. Run The Workflow
+## 5. Run The Workflow
 
 Go to:
 

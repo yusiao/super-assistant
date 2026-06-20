@@ -80,11 +80,20 @@
               <h2>主題解盤</h2>
             </div>
 
+            <div id="palace-overview-output"></div>
+
             <div class="reading-controls">
               <label class="select-field">
-                <span>運勢層級</span>
+                <span class="field-label-with-help">
+                  運勢層級
+                  <span
+                    class="info-tooltip"
+                    tabindex="0"
+                    aria-label="大限：十年一階段的長期運勢；流年：單一年份的年度焦點；流月：單一月份的短期事件節奏。"
+                    data-tooltip="大限：十年一階段的長期運勢。流年：單一年份的年度焦點。流月：單一月份的短期事件節奏。"
+                  >?</span>
+                </span>
                 <select id="scope-select">
-                  <option value="natal">本命</option>
                   <option value="decadal">大限</option>
                   <option value="yearly">流年</option>
                   <option value="monthly">流月</option>
@@ -109,12 +118,10 @@
               <label class="select-field">
                 <span>主題</span>
                 <select id="topic-select">
-                  <option value="relationship">感情</option>
-                  <option value="marriage">姻緣</option>
+                  <option value="property">財富</option>
                   <option value="career">事業</option>
-                  <option value="parents">父母</option>
-                  <option value="property">財產</option>
-                  <option value="health">健康</option>
+                  <option value="marriage">姻緣</option>
+                  <option value="children">子女</option>
                 </select>
               </label>
             </div>
@@ -135,6 +142,7 @@
               <p class="eyebrow">Zi Wei Dou Shu</p>
               <h2>紫微十二宮</h2>
             </div>
+            <div id="ziwei-image-output" class="ziwei-image-output"></div>
             <div class="astrolabe-grid" id="astrolabe-grid"></div>
           </section>
         </section>
@@ -155,7 +163,7 @@
       </header>
       <div id="chat-log" class="chat-log"></div>
       <form id="chat-form" class="chat-form">
-        <input id="chat-input" type="text" autocomplete="off" placeholder="問感情、事業、正緣、來因宮..." />
+        <input id="chat-input" type="text" autocomplete="off" placeholder="問財富、事業、姻緣、子女、房產緣..." />
         <button type="submit">送出</button>
       </form>
     </aside>
