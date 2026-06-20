@@ -2146,10 +2146,17 @@ async function generatePartnerAiImage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(buildPartnerImagePayload(currentChart, profile)),
     });
-    const result = await response.json().catch(() => ({}));
+    const responseText = await response.text();
+    let result = {};
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch (error) {
+      result = {};
+    }
 
     if (!response.ok) {
-      throw new Error(result.error || "AI 圖片生成失敗，請稍後再試。");
+      const detail = result.error || responseText.trim().slice(0, 240);
+      throw new Error(detail || `AI 圖片生成失敗，Netlify 回傳 HTTP ${response.status}。`);
     }
     if (!result.imageUrl) {
       throw new Error("AI 圖片服務沒有回傳圖片。");
