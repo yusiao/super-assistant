@@ -164,6 +164,8 @@ def normalize_url(url: str) -> str:
 
 
 def strip_tags(text: str) -> str:
+    text = re.sub(r"<script\b[^>]*>.*?</script>", " ", text, flags=re.S | re.I)
+    text = re.sub(r"<style\b[^>]*>.*?</style>", " ", text, flags=re.S | re.I)
     clean = re.sub(r"<[^>]+>", " ", text)
     clean = (
         clean.replace("&nbsp;", " ")
@@ -772,6 +774,54 @@ def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dic
     return projects[:limit]
 
 
+def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int = 10) -> dict[str, list[dict[str, str]]]:
+    pending: list[dict[str, str]] = []
+    active: list[dict[str, str]] = []
+    insufficient: list[dict[str, str]] = []
+    for area in areas:
+        if area.get("stale") and not area.get("has_previous_data", True):
+            insufficient.append({"name": area["name"], "url": area.get("buy_url", ""), "status": "資料不足"})
+            continue
+        for project in area.get("pending_launch_projects", []):
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            pending.append(item)
+        for project in area.get("active_presale_projects", []):
+            item = dict(project)
+            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
+            active.append(item)
+    return {
+        "pending": pending[:limit_per_group],
+        "active": active[:limit_per_group],
+        "insufficient": insufficient[:limit_per_group],
+    }
+
+
+def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
+    overview = get_presale_overview_items(areas)
+    heading = "## 預售屋 / 待開案總覽" if markdown else "預售屋 / 待開案總覽"
+    lines.append(heading)
+    if markdown:
+        lines.append("")
+    if overview["pending"]:
+        lines.append("待開案 / 未開賣預售")
+        for item in overview["pending"]:
+            lines.extend(format_project_line(item))
+    else:
+        lines.append("- 待開案 / 未開賣預售：目前未抓到")
+    if overview["active"]:
+        lines.append("銷售中預售屋")
+        for item in overview["active"]:
+            lines.extend(format_project_line(item))
+    else:
+        lines.append("- 銷售中預售屋：目前未抓到")
+    if overview["insufficient"]:
+        lines.append("資料不足區域")
+        for item in overview["insufficient"]:
+            lines.extend(format_project_line(item))
+    lines.append("")
+
+
 def is_bargain_candidate_project(project: dict[str, str]) -> bool:
     if is_completed_project(project):
         return False
@@ -903,7 +953,12 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
             text = html_to_text(content)
             source_hits.append({"name": source_name, "url": source_url, "text": text})
         except Exception as exc:
+            if not source.get("report_errors", True):
+                continue
             errors.append(f"{source_name}：{exc}")
+
+    if not source_hits and not errors:
+        errors.append("所有房市新聞/報告來源都抓取失敗或沒有可解析內容")
 
     district_items: list[dict[str, Any]] = []
     for district in districts:
@@ -1123,6 +1178,8 @@ def new_report_content(
             lines.extend(format_project_line(item))
         lines.append("")
 
+    append_presale_overview(lines, areas, markdown=True)
+
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("## 近一週市場脈動")
         lines.append("")
@@ -1264,6 +1321,8 @@ def new_line_message(
             lines.extend(format_project_line(item))
         lines.append("")
 
+    append_presale_overview(lines, areas)
+
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("近一週市場脈動")
         items = market_pulse.get("items", [])
@@ -1274,7 +1333,9 @@ def new_line_message(
         else:
             lines.append("- 未解析到明確雙北、桃園行政區熱點。")
         if market_pulse.get("errors"):
-            lines.append(f"- 部分新聞/報告來源抓取失敗：{len(market_pulse['errors'])} 個")
+            lines.append("- 部分新聞/報告來源抓取失敗：")
+            for error in market_pulse["errors"][:3]:
+                lines.append(f"  - {error}")
         lines.append("")
 
     if bargain_watch and bargain_watch.get("enabled", False):
