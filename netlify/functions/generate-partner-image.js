@@ -17,6 +17,12 @@ function compact(value, fallback = "", maxLength = 220) {
   return text.slice(0, maxLength);
 }
 
+function safeErrorMessage(message) {
+  return compact(message, "unknown error", 260)
+    .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted-google-api-key]")
+    .replace(/sk-[0-9A-Za-z_-]+/g, "[redacted-openai-api-key]");
+}
+
 function list(values, fallback, maxItems = 6) {
   const items = Array.isArray(values)
     ? values.map((item) => compact(item, "", 120)).filter(Boolean)
@@ -60,8 +66,8 @@ function unique(values) {
 
 function openAIModels() {
   return unique([
-    compact(process.env.OPENAI_IMAGE_MODEL, "gpt-image-1.5", 80),
-    compact(process.env.OPENAI_FALLBACK_IMAGE_MODEL, "gpt-image-1", 80),
+    compact(process.env.OPENAI_IMAGE_MODEL, "gpt-image-2", 80),
+    compact(process.env.OPENAI_FALLBACK_IMAGE_MODEL, "gpt-image-1.5", 80),
   ]);
 }
 
@@ -138,6 +144,9 @@ async function generateWithGemini(prompt, model) {
           parts: [{ text: prompt }],
         },
       ],
+      generationConfig: {
+        responseModalities: ["Image"],
+      },
     }),
   });
   const data = await response.json().catch(() => ({}));
@@ -199,18 +208,23 @@ async function generateWithProvider(prompt, provider, model) {
 
 async function generateWithFallback(prompt) {
   const attempts = [];
+  const failures = [];
   for (const provider of providerOrder()) {
     for (const model of providerModels(provider)) {
       attempts.push(`${provider}:${model}`);
       try {
         return await generateWithProvider(prompt, provider, model);
       } catch (error) {
-        console.warn(`Image generation failed for ${provider}:${model}`, error.message);
+        const message = safeErrorMessage(error.message);
+        failures.push(`${provider}:${model} => ${message}`);
+        console.warn(`Image generation failed for ${provider}:${model}`, message);
       }
     }
   }
 
-  throw new Error(`所有 AI 圖片模型都生成失敗。已嘗試：${attempts.join("、") || "無可用模型"}`);
+  throw new Error(
+    `所有 AI 圖片模型都生成失敗。已嘗試：${attempts.join("、") || "無可用模型"}。錯誤摘要：${failures.join("；") || "無"}`,
+  );
 }
 
 exports.handler = async (event) => {
