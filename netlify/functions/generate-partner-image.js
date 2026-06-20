@@ -97,3 +97,161 @@ async function generateWithOpenAI(prompt, model) {
   } else {
     body.response_format = "b64_json";
   }
+
+  const response = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || "OpenAI image generation failed.");
+  }
+
+  const image = data.data?.[0];
+  if (image?.b64_json) {
+    const mime = model.startsWith("gpt-image") ? `image/${body.output_format}` : "image/png";
+    return {
+      imageUrl: `data:${mime};base64,${image.b64_json}`,
+      provider: `OpenAI ${model}`,
+    };
+  }
+  if (image?.url) {
+    return {
+      imageUrl: image.url,
+      provider: `OpenAI ${model}`,
+    };
+  }
+
+  throw new Error("OpenAI did not return an image.");
+}
+
+async function generateWithGemini(prompt, model) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not set.");
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = data.error?.message || "Gemini image generation failed.";
+    throw new Error(message);
+  }
+
+  const parts = data.candidates?.flatMap((candidate) => candidate.content?.parts || []) || [];
+  const imagePart = parts.find((part) => part.inlineData?.data || part.inline_data?.data);
+  const inlineData = imagePart?.inlineData || imagePart?.inline_data;
+
+  if (!inlineData?.data) {
+    throw new Error("Gemini did not return an image.");
+  }
+
+  return {
+    imageUrl: `data:${inlineData.mimeType || inlineData.mime_type || "image/png"};base64,${inlineData.data}`,
+    provider: `Gemini ${model}`,
+  };
+}
+
+function shuffle(values) {
+  return [...values].sort(() => Math.random() - 0.5);
+}
+
+function availableProviders() {
+  return [
+    process.env.OPENAI_API_KEY ? "openai" : "",
+    process.env.GEMINI_API_KEY ? "gemini" : "",
+  ].filter(Boolean);
+}
+
+function providerOrder() {
+  const provider = compact(process.env.IMAGE_PROVIDER, "", 20).toLowerCase();
+  const available = availableProviders();
+
+  if (provider === "openai" || provider === "gemini") {
+    return unique([provider, ...available.filter((item) => item !== provider)]);
+  }
+  if (provider === "random" && available.length) {
+    return shuffle(available);
+  }
+  return available.length > 1 ? shuffle(available) : available;
+}
+
+function providerModels(provider) {
+  if (provider === "openai") return openAIModels();
+  if (provider === "gemini") return geminiModels();
+  return [];
+}
+
+async function generateWithProvider(prompt, provider, model) {
+  if (provider === "gemini") return generateWithGemini(prompt, model);
+  if (provider === "openai") return generateWithOpenAI(prompt, model);
+  throw new Error(`Unsupported provider: ${provider}`);
+}
+
+async function generateWithFallback(prompt) {
+  const attempts = [];
+  const failures = [];
+  for (const provider of providerOrder()) {
+    for (const model of providerModels(provider)) {
+      attempts.push(`${provider}:${model}`);
+      try {
+        return await generateWithProvider(prompt, provider, model);
+      } catch (error) {
+        const message = safeErrorMessage(error.message);
+        failures.push(`${provider}:${model} => ${message}`);
+        console.warn(`Image generation failed for ${provider}:${model}`, message);
+      }
+    }
+  }
+
+  throw new Error(
+    `所有 AI 圖片模型都生成失敗。已嘗試：${attempts.join("、") || "無可用模型"}。錯誤摘要：${failures.join("；") || "無"}`,
+  );
+}
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return json(405, { error: "Method not allowed." });
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(event.body || "{}");
+  } catch (error) {
+    return json(400, { error: "Invalid JSON body." });
+  }
+
+  if (!availableProviders().length) {
+    return json(500, {
+      error: "尚未設定 AI 圖片 API key。請在 Netlify 環境變數加入 OPENAI_API_KEY 或 GEMINI_API_KEY。",
+    });
+  }
+
+  try {
+    const prompt = buildPrompt(payload);
+    const result = await generateWithFallback(prompt);
+
+    return json(200, result);
+  } catch (error) {
+    return json(502, {
+      error: error.message || "AI 圖片生成失敗。",
+    });
+  }
+};
