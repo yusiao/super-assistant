@@ -637,6 +637,7 @@ def build_stale_snapshot(area: dict[str, Any], previous: dict[str, Any] | None, 
             "exclude_project_names": sorted(excluded_names),
             "fetch_error": str(error),
             "stale": True,
+            "has_previous_data": bool(previous),
         }
     )
     base.setdefault("active_projects", 0)
@@ -750,6 +751,12 @@ def format_registration_line(item: dict[str, str]) -> list[str]:
 def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
     status = item.get("status", "價格未解析")
     return [f"- [{label}] {item.get('name', '未命名建案')} | {status or '價格未解析'}", f"  {item.get('url', '')}"]
+
+
+def format_project_count(area: dict[str, Any], key: str) -> str:
+    if area.get("stale") and not area.get("has_previous_data", True):
+        return "資料不足"
+    return f"{len(area.get(key, []))} 個"
 
 
 def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dict[str, str]]:
@@ -1194,8 +1201,8 @@ def new_report_content(
             [
                 f"## {area['name']}",
                 "",
-                f"- 追蹤中預售屋：{len(area.get('active_presale_projects', []))} 個",
-                f"- 未開賣預售：{len(area.get('pending_launch_projects', []))} 個",
+                f"- 追蹤中預售屋：{format_project_count(area, 'active_presale_projects')}",
+                f"- 未開賣預售：{format_project_count(area, 'pending_launch_projects')}",
                 f"- 買房頁：{area['buy_url']}",
                 f"- 房價頁：{area['price_url']}",
                 "",
@@ -1311,8 +1318,8 @@ def new_line_message(
         lines.extend(
             [
                 area["name"],
-                f"- 追蹤中預售屋：{len(area.get('active_presale_projects', []))} 個",
-                f"- 未開賣預售：{len(area.get('pending_launch_projects', []))} 個",
+                f"- 追蹤中預售屋：{format_project_count(area, 'active_presale_projects')}",
+                f"- 未開賣預售：{format_project_count(area, 'pending_launch_projects')}",
                 "",
             ]
         )
