@@ -374,9 +374,9 @@ def enrich_project_statuses(projects: list[dict[str, str]]) -> list[dict[str, st
     return enriched
 
 
-def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
+def get_configured_project_links(area: dict[str, Any], key: str) -> list[dict[str, str]]:
     projects: list[dict[str, str]] = []
-    for raw_item in area.get("extra_project_urls", []):
+    for raw_item in area.get(key, []):
         if isinstance(raw_item, str):
             url = normalize_url(raw_item)
             projects.append({"name": url, "url": url, "status": ""})
@@ -389,6 +389,23 @@ def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
             continue
         projects.append({"name": name, "url": url, "status": str(raw_item.get("status", "")).strip()})
     return projects
+
+
+def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
+    return get_configured_project_links(area, "extra_project_urls")
+
+
+def merge_project_lists(*groups: list[dict[str, str]]) -> list[dict[str, str]]:
+    merged: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for group in groups:
+        for item in group:
+            key = item.get("url", "") or f"{item.get('name', '')}|{item.get('status', '')}"
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(item)
+    return merged
 
 
 def get_full_community_list_url(area: dict[str, Any]) -> str:
@@ -578,7 +595,12 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
     excluded_names = get_excluded_project_names(area)
     latest_listing_links = filter_excluded_projects(latest_listing_links, excluded_names)
     project_candidates = parse_project_blocks(new_build_list_content)
-    all_projects = filter_excluded_projects(enrich_project_statuses(project_candidates), excluded_names)
+    manual_pending_projects = get_configured_project_links(area, "manual_pending_projects")
+    manual_active_projects = get_configured_project_links(area, "manual_active_presale_projects")
+    all_projects = filter_excluded_projects(
+        merge_project_lists(enrich_project_statuses(project_candidates), manual_pending_projects, manual_active_projects),
+        excluded_names,
+    )
     comparison_candidates = parse_project_blocks(full_community_content) + get_extra_project_links(area)
     comparison_projects = enrich_project_statuses(comparison_candidates)
     pending_launch_projects = [item for item in all_projects if is_pending_launch(item)]

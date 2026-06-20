@@ -9,6 +9,11 @@
       "文桃路南側",
       "樂善科技園區周邊",
       "中華郵政物流總部周邊"
+    ],
+    "exclude_project_names": [
+      "富宇富御",
+      "富宇上城",
+      "大頂森木"
     ]
   },
   {
@@ -21,6 +26,13 @@
       "文德路",
       "文明路",
       "文康街與樂善一路周邊"
+    ],
+    "manual_pending_projects": [
+      {
+        "name": "樂捷綻",
+        "url": "https://www.leju.com.tw/community/La271519763d33a?mode=buy",
+        "status": "待定 預售屋"
+      }
     ]
   },
   {
@@ -29,6 +41,12 @@
     "buy_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=buy&sid=11173",
     "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173",
     "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173",
+    "extra_project_urls": [
+      {
+        "name": "富堡菁英滙",
+        "url": "https://www.leju.com.tw/community/L41613824717c31?mode=buy"
+      }
+    ],
     "road_focus": [
       "文化一路近 A7 站南段",
       "樂善一路北段",
