@@ -1411,6 +1411,33 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
+def append_area_presale_projects(
+    lines: list[str],
+    area: dict[str, Any],
+    markdown: bool = False,
+    limit_per_group: int | None = None,
+) -> None:
+    groups = [
+        ("待開案 / 未開賣預售", area.get("pending_launch_projects", [])),
+        ("銷售中預售屋", area.get("active_presale_projects", [])),
+        ("完銷 / 非銷售中預售", area.get("sold_out_presale_projects", [])),
+    ]
+    wrote_any = False
+    for title, projects in groups:
+        if not projects:
+            continue
+        wrote_any = True
+        lines.append(f"### {title}" if markdown else title)
+        display_projects = projects[:limit_per_group] if limit_per_group else projects
+        for item in display_projects:
+            lines.extend(format_project_line(item))
+        if limit_per_group and len(projects) > limit_per_group:
+            lines.append(f"- 其餘 {len(projects) - limit_per_group} 個略，完整名單請看 GitHub artifact。")
+        lines.append("")
+    if wrote_any and lines and lines[-1] != "":
+        lines.append("")
+
+
 def print_extraction_diagnostics(areas: list[dict[str, Any]]) -> None:
     print("A7 extraction diagnostics:")
     print(f"proxy_configured={'yes' if os.environ.get('LEJU_FETCH_PROXY_URL', '').strip() else 'no'}")
@@ -1635,6 +1662,44 @@ def format_market_pulse_line(item: dict[str, Any]) -> list[str]:
     return lines
 
 
+def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = False) -> list[str]:
+    items = market_pulse.get("items", []) if market_pulse else []
+    if not items:
+        return ["- 近一週來源未形成明確行政區熱點；本週不宜只依新聞熱度判斷區域強弱。"]
+
+    top_items = items[:3]
+    top_names = [str(item.get("district", "")).strip() for item in top_items if item.get("district")]
+    all_keywords: list[str] = []
+    for item in top_items:
+        all_keywords.extend([str(keyword) for keyword in item.get("keywords", []) if str(keyword).strip()])
+    keyword_counts: dict[str, int] = {}
+    for keyword in all_keywords:
+        keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
+    key_topics = sorted(keyword_counts, key=keyword_counts.get, reverse=True)[:4]
+    source_count = market_pulse.get("source_count", 0)
+
+    lines: list[str] = []
+    if top_names:
+        lines.append(f"- 本週新聞/報告討論熱點集中在：{'、'.join(top_names)}。")
+    if key_topics:
+        lines.append(f"- 反覆出現的題材是：{'、'.join(key_topics)}；可優先對照預售開價、待開案量與成交速度。")
+
+    districts = set(top_names)
+    if {"A7", "青埔", "龜山", "林口", "桃園"} & districts:
+        lines.append("- 桃園/A7相關題材仍有曝光，重點不是新聞次數，而是後續待開案是否用更高單價試水溫。")
+    elif {"中和", "板橋", "新莊", "三重", "土城", "新店", "淡水"} & districts:
+        lines.append("- 雙北外圍區被提及較多，代表市場仍在比較捷運、重劃區與相對低總價產品。")
+    elif {"大安", "信義", "松山", "中山", "內湖"} & districts:
+        lines.append("- 台北核心區熱度偏向價格指標與資金風向，不能直接套用到 A7，但可作為買氣溫度參考。")
+
+    examples = [example for item in top_items for example in item.get("examples", [])[:1]]
+    if examples and not line_mode:
+        lines.append(f"- 代表性內容：{examples[0][:120]}")
+    if source_count:
+        lines.append(f"- 本段依 {source_count} 個可讀來源彙整；若來源被擋，結論會偏保守。")
+    return lines
+
+
 def get_rising_price_watch(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
     watch: list[dict[str, Any]] = []
     for area in areas:
@@ -1793,14 +1858,15 @@ def new_report_content(
     falling_watch = get_falling_price_watch(areas)
     project_rise_watch = get_project_price_rise_watch(areas, state)
 
-    append_presale_overview(lines, areas, markdown=True)
-
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("## 近一週市場脈動")
         lines.append("")
         items = market_pulse.get("items", [])
         if items:
-            for item in items:
+            lines.extend(build_market_pulse_insights(market_pulse))
+            lines.append("")
+            lines.append("### 資料依據")
+            for item in items[:5]:
                 lines.extend(format_market_pulse_line(item))
         else:
             lines.append("- 近一週來源中未解析到明確的雙北、桃園行政區熱點。")
@@ -1892,6 +1958,7 @@ def new_report_content(
                 "",
             ]
         )
+        append_area_presale_projects(lines, area, markdown=True)
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
@@ -1929,15 +1996,11 @@ def new_line_message(
     falling_watch = get_falling_price_watch(areas)
     project_rise_watch = get_project_price_rise_watch(areas, state)
 
-    append_presale_overview(lines, areas)
-
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("近一週市場脈動")
         items = market_pulse.get("items", [])
         if items:
-            for item in items[:5]:
-                keyword_text = f" | {'、'.join(item.get('keywords', []))}" if item.get("keywords") else ""
-                lines.append(f"- {item.get('district')}：提及 {item.get('mention_count', 0)} 次{keyword_text}")
+            lines.extend(build_market_pulse_insights(market_pulse, line_mode=True))
         else:
             lines.append("- 未解析到明確雙北、桃園行政區熱點。")
         if market_pulse.get("errors"):
@@ -2003,6 +2066,7 @@ def new_line_message(
                 "",
             ]
         )
+        append_area_presale_projects(lines, area, limit_per_group=4)
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
