@@ -285,9 +285,58 @@ def fetch_text_with_curl(url: str) -> str:
     raise RuntimeError(f"curl fetch failed for {url}: {'; '.join(errors[-2:])}")
 
 
+def fetch_text_with_playwright(url: str) -> str:
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception as exc:
+        raise RuntimeError(f"playwright unavailable: {exc}") from exc
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+            ],
+        )
+        try:
+            context = browser.new_context(
+                locale="zh-TW",
+                timezone_id="Asia/Taipei",
+                viewport={"width": 1366, "height": 900},
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/136.0.0.0 Safari/537.36"
+                ),
+                extra_http_headers={
+                    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "Referer": "https://www.leju.com.tw/",
+                },
+            )
+            page = context.new_page()
+            response = page.goto(url, wait_until="domcontentloaded", timeout=90000)
+            page.wait_for_timeout(8000)
+            content = page.content()
+            status = response.status if response else 0
+            if status >= 400 and not content.strip():
+                raise RuntimeError(f"HTTP {status} for {url}")
+            if not content.strip():
+                raise RuntimeError(f"empty browser response for {url}")
+            if is_cloudflare_challenge(content):
+                page.wait_for_timeout(12000)
+                content = page.content()
+                if is_cloudflare_challenge(content):
+                    raise RuntimeError(f"Cloudflare challenge blocked browser fetch for {url}")
+            return content
+        finally:
+            browser.close()
+
+
 def fetch_text(url: str) -> str:
     errors: list[str] = []
-    for fetcher in (fetch_text_with_curl_cffi, fetch_text_with_curl):
+    for fetcher in (fetch_text_with_curl_cffi, fetch_text_with_curl, fetch_text_with_playwright):
         try:
             return fetcher(url)
         except Exception as exc:
