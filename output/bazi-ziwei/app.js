@@ -2204,7 +2204,7 @@ function renderPartnerVisual(chart, profile) {
     ? `由${partnerImageState.provider || "AI 圖像模型"}生成，依夫妻宮三方四正、命宮、遷移、福德、官祿、財帛與來因宮摘要製作。`
     : partnerImageEndpointAvailable()
       ? "按下生成後會由後端呼叫 AI 圖像模型，頁面不會顯示提示詞。"
-      : "目前是本機 file 預覽，先顯示概念圖；部署到 Netlify 並設定 Cloudflare Workers AI 後即可生成 AI 圖片。";
+      : "目前是本機 file 預覽，先顯示概念圖；部署到 Cloudflare 並啟用 Workers AI 後即可生成 AI 圖片。";
   const generateLabel = isLoading
     ? "生成中..."
     : hasAiImage
@@ -2331,7 +2331,7 @@ function chatPartnerAnswer() {
     `可能職業方向：${careers}。`,
     `身材長相模擬：${appearance}。`,
     profile.causePalace ? `來因宮是${palaceLabel(profile.causePalace)}，關係事件常會從${palaceKey(profile.causePalace.name)}議題切入。` : "",
-    "正緣輪廓區可按「生成 AI 圖片」，部署到 Netlify 並設定 API key 後會直接回傳圖片；本機預覽會先保留概念圖。",
+    "正緣輪廓區可按「生成 AI 圖片」，部署到 Cloudflare 並啟用 Workers AI 後會直接回傳圖片；本機預覽會先保留概念圖。",
     notes,
   ].filter(Boolean).join(" ");
 }
@@ -2406,10 +2406,10 @@ async function generatePartnerAiImage() {
       status: "error",
       imageUrl: "",
       provider: "",
-      message: "本機 file 預覽無法呼叫 AI 後端；部署到 Netlify 並設定 Cloudflare、OpenAI 或 Gemini API key 後即可生成。",
+      message: "本機 file 預覽無法呼叫 AI 後端；部署到 Cloudflare 並啟用 Workers AI 後即可生成。",
     };
     renderPartnerProfile(currentChart);
-    addChatMessage("目前是本機檔案預覽，所以不能直接呼叫 AI 生圖。部署到 Netlify 並設定 Cloudflare Workers AI API key 後，這顆按鈕就會直接產生圖片。");
+    addChatMessage("目前是本機檔案預覽，所以不能直接呼叫 AI 生圖。部署到 Cloudflare 並啟用 Workers AI 後，這顆按鈕就會直接產生圖片。");
     return;
   }
 
@@ -2437,7 +2437,7 @@ async function generatePartnerAiImage() {
 
     if (!response.ok) {
       const detail = result.error || responseText.trim().slice(0, 240);
-      throw new Error(detail || `AI 圖片生成失敗，Netlify 回傳 HTTP ${response.status}。`);
+      throw new Error(detail || `AI 圖片生成失敗，Cloudflare 回傳 HTTP ${response.status}。`);
     }
     if (!result.imageUrl) {
       throw new Error("AI 圖片服務沒有回傳圖片。");
