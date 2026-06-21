@@ -56,7 +56,7 @@ exports.handler = async function handler(event) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000);
+  const timeout = setTimeout(() => controller.abort(), 12000);
 
   try {
     const response = await fetch(targetUrl.toString(), {
