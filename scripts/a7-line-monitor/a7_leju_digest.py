@@ -211,7 +211,7 @@ def fetch_text_with_curl_cffi(url: str) -> str:
         url,
         headers=headers,
         impersonate="chrome",
-        timeout=45,
+        timeout=10,
     )
     text = response.text or ""
     if response.status_code >= 400:
@@ -258,14 +258,10 @@ def fetch_text_with_curl(url: str) -> str:
                 "-sS",
                 "--compressed",
                 "--http1.1",
-                "--retry",
-                "2",
-                "--retry-delay",
-                "2",
                 "--connect-timeout",
-                "20",
+                "5",
                 "--max-time",
-                "75",
+                "12",
                 *extra_args,
                 url,
             ],
@@ -273,7 +269,7 @@ def fetch_text_with_curl(url: str) -> str:
             text=True,
             encoding="utf-8",
             errors="ignore",
-            timeout=90,
+            timeout=15,
             check=False,
         )
         if result.returncode != 0 or not result.stdout.strip():
@@ -312,7 +308,7 @@ def fetch_text_with_proxy(url: str) -> str:
         headers["Authorization"] = f"Bearer {token}"
 
     request = urllib.request.Request(request_url, headers=headers)
-    with urllib.request.urlopen(request, timeout=90) as response:
+    with urllib.request.urlopen(request, timeout=12) as response:
         raw = response.read()
         content_type = response.headers.get("Content-Type", "")
     text = raw.decode("utf-8", errors="ignore")
@@ -357,8 +353,8 @@ def fetch_text_with_playwright(url: str) -> str:
                 },
             )
             page = context.new_page()
-            response = page.goto(url, wait_until="domcontentloaded", timeout=90000)
-            page.wait_for_timeout(8000)
+            response = page.goto(url, wait_until="domcontentloaded", timeout=15000)
+            page.wait_for_timeout(1500)
             content = page.content()
             status = response.status if response else 0
             if status >= 400 and not content.strip():
@@ -366,7 +362,7 @@ def fetch_text_with_playwright(url: str) -> str:
             if not content.strip():
                 raise RuntimeError(f"empty browser response for {url}")
             if is_cloudflare_challenge(content):
-                page.wait_for_timeout(12000)
+                page.wait_for_timeout(3000)
                 content = page.content()
                 if is_cloudflare_challenge(content):
                     raise RuntimeError(f"Cloudflare challenge blocked browser fetch for {url}")
@@ -393,9 +389,9 @@ def fetch_bytes(url: str) -> bytes:
             "-L",
             "-sS",
             "--connect-timeout",
-            "20",
+            "10",
             "--max-time",
-            "60",
+            "25",
             "-A",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
             "-H",
@@ -403,7 +399,7 @@ def fetch_bytes(url: str) -> bytes:
             url,
         ],
         capture_output=True,
-        timeout=90,
+        timeout=30,
         check=False,
     )
     if result.returncode != 0 or not result.stdout:
