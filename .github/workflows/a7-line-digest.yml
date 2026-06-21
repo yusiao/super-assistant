@@ -29,6 +29,8 @@ jobs:
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
       LINE_TO: ${{ secrets.LINE_TO }}
+      LEJU_FETCH_PROXY_URL: ${{ secrets.LEJU_FETCH_PROXY_URL }}
+      LEJU_FETCH_PROXY_TOKEN: ${{ secrets.LEJU_FETCH_PROXY_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
