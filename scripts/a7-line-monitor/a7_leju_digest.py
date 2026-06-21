@@ -759,8 +759,9 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "near_mrt": get_regex_int(buy_text, r"(\d+)個近捷運"),
         "all_listings": get_regex_int(buy_text, r"所有物件(?:共有)?\s*(\d+)戶"),
     }
+    summary_parse_warning = ""
     if summary["active_projects"] is None or summary["latest_count"] is None:
-        raise RuntimeError(f"Cannot parse buy summary for {area['name']}.")
+        summary_parse_warning = "樂居買房摘要格式不同，已略過摘要數字並繼續解析建案卡片。"
 
     latest_listing_links = get_latest_listing_links(buy_content)[:8]
     excluded_names = get_excluded_project_names(area)
@@ -794,6 +795,7 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "new_build_list_url": area.get("new_build_list_url", ""),
         "community_list_url": full_community_url,
         "comparison_fetch_error": comparison_fetch_error,
+        "summary_parse_warning": summary_parse_warning,
         "exclude_project_names": sorted(excluded_names),
         **summary,
         "latest_listing_links": latest_listing_links,
@@ -1194,6 +1196,7 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
     stale_areas = [area for area in areas if area.get("stale")]
     no_previous_stale = [area for area in stale_areas if not area.get("has_previous_data", True)]
     official_errors = [area.get("official_presale_fetch_error", "") for area in areas if area.get("official_presale_fetch_error")]
+    summary_warning_areas = [area["name"] for area in areas if area.get("summary_parse_warning")]
 
     lines: list[str] = []
     if total_projects == 0:
@@ -1208,6 +1211,9 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
         lines.append("- 新增預售屋成交：本次沒有比上次新增的成交登錄。")
     if official_errors:
         lines.append(f"- 官方實價登錄資料抓取失敗：{official_errors[0]}")
+    if summary_warning_areas:
+        names = "、".join(summary_warning_areas[:5])
+        lines.append(f"- 樂居摘要格式不同：{names}；已略過摘要數字，仍繼續解析建案卡片。")
     if stale_areas:
         names = "、".join(area["name"] for area in stale_areas[:5])
         lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗，本次不列舊資料：{names}")
