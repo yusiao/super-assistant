@@ -222,6 +222,11 @@ def fetch_bytes(url: str) -> bytes:
         [
             curl_bin,
             "-L",
+            "-sS",
+            "--connect-timeout",
+            "20",
+            "--max-time",
+            "60",
             "-A",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
             "-H",
@@ -235,7 +240,9 @@ def fetch_bytes(url: str) -> bytes:
     if result.returncode != 0 or not result.stdout:
         stderr = result.stderr.decode("utf-8", errors="ignore") if result.stderr else ""
         error_text = re.sub(r"\s+", " ", stderr).strip()
-        raise RuntimeError(f"curl binary fetch failed for {url}: {error_text or result.returncode}")
+        if "Failed to connect" in error_text or result.returncode == 28:
+            error_text = "連線逾時或無法連到官方資料站"
+        raise RuntimeError(error_text or f"下載失敗，代碼 {result.returncode}")
     return result.stdout
 
 
@@ -1178,6 +1185,20 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
+def append_project_mapping_index(lines: list[str], area_config: list[dict[str, Any]], markdown: bool = False) -> None:
+    mappings = get_project_url_mappings(area_config)
+    if not mappings:
+        return
+    lines.append("## 追蹤建案網址索引" if markdown else "追蹤建案網址索引")
+    if markdown:
+        lines.append("")
+    lines.append("- 以下是設定檔追蹤名單，不代表本次即時銷售狀態。")
+    for item in mappings[:10]:
+        lines.append(f"- {item.get('area_name', '')} / {item['name']}")
+        lines.append(f"  {item['url']}")
+    lines.append("")
+
+
 def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) -> list[str]:
     total_projects = sum(
         len(area.get("pending_launch_projects", []))
@@ -1560,6 +1581,7 @@ def new_report_content(
     market_pulse: dict[str, Any] | None = None,
     report_kind: str = "週報",
     urgent_pending_projects: list[dict[str, str]] | None = None,
+    area_config: list[dict[str, Any]] | None = None,
 ) -> str:
     lines = [
         f"# A7 Leju {report_kind} | {local_now:%Y-%m-%d}",
@@ -1580,6 +1602,11 @@ def new_report_content(
         lines.append("")
 
     append_presale_overview(lines, areas, markdown=True)
+    if not any(
+        area.get("pending_launch_projects") or area.get("active_presale_projects") or area.get("sold_out_presale_projects")
+        for area in areas
+    ):
+        append_project_mapping_index(lines, area_config or [], markdown=True)
     append_presale_data_status(lines, areas, state, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1702,6 +1729,7 @@ def new_line_message(
     market_pulse: dict[str, Any] | None = None,
     report_kind: str = "週報",
     urgent_pending_projects: list[dict[str, str]] | None = None,
+    area_config: list[dict[str, Any]] | None = None,
 ) -> str:
     lines = [f"A7 {report_kind}", f"日期：{local_now:%Y-%m-%d}", ""]
     rising_watch = get_rising_price_watch(areas)
@@ -1715,6 +1743,11 @@ def new_line_message(
         lines.append("")
 
     append_presale_overview(lines, areas)
+    if not any(
+        area.get("pending_launch_projects") or area.get("active_presale_projects") or area.get("sold_out_presale_projects")
+        for area in areas
+    ):
+        append_project_mapping_index(lines, area_config or [])
     append_presale_data_status(lines, areas, state)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1937,6 +1970,7 @@ def main() -> int:
         market_pulse,
         report_kind,
         urgent_pending_projects,
+        area_config,
     )
     line_message = new_line_message(
         snapshots,
@@ -1946,6 +1980,7 @@ def main() -> int:
         market_pulse,
         report_kind,
         urgent_pending_projects,
+        area_config,
     )
     report_path.write_text(report_content + "\n", encoding="utf-8")
     save_state_file(state_path, state, snapshots, local_now)
