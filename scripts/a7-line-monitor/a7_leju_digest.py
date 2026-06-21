@@ -1000,6 +1000,48 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
+def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) -> list[str]:
+    total_projects = sum(
+        len(area.get("pending_launch_projects", []))
+        + len(area.get("active_presale_projects", []))
+        + len(area.get("sold_out_presale_projects", []))
+        for area in areas
+    )
+    new_regs = sum(
+        len(get_new_registration_rows(area.get("latest_presale_registrations", []), get_previous_area(state, area["name"])))
+        for area in areas
+    )
+    stale_areas = [area for area in areas if area.get("stale")]
+    no_previous_stale = [area for area in stale_areas if not area.get("has_previous_data", True)]
+
+    lines: list[str] = []
+    if total_projects == 0:
+        lines.append("- 預售/待預售清單：本次沒有可用建案資料。")
+        if no_previous_stale:
+            lines.append("- 原因：樂居抓取失敗，且 GitHub cache/state 沒有前次成功資料可沿用。")
+        elif stale_areas:
+            lines.append("- 原因：樂居部分區域抓取失敗，目前只能沿用前次資料，但前次也沒有可用預售案。")
+        else:
+            lines.append("- 原因：樂居頁面可解析，但未解析到預售、待預售或完銷預售案。")
+    if new_regs == 0:
+        lines.append("- 新增預售屋成交：本次沒有比上次新增的成交登錄。")
+    if stale_areas:
+        names = "、".join(area["name"] for area in stale_areas[:5])
+        lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗或沿用前次資料：{names}")
+    return lines
+
+
+def append_presale_data_status(lines: list[str], areas: list[dict[str, Any]], state: dict[str, Any], markdown: bool = False) -> None:
+    status_lines = get_presale_data_status(areas, state)
+    if not status_lines:
+        return
+    lines.append("## 資料抓取狀態" if markdown else "資料抓取狀態")
+    if markdown:
+        lines.append("")
+    lines.extend(status_lines)
+    lines.append("")
+
+
 def is_bargain_candidate_project(project: dict[str, str]) -> bool:
     if is_completed_project(project):
         return False
@@ -1357,6 +1399,7 @@ def new_report_content(
         lines.append("")
 
     append_presale_overview(lines, areas, markdown=True)
+    append_presale_data_status(lines, areas, state, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("## 近一週市場脈動")
@@ -1491,6 +1534,7 @@ def new_line_message(
         lines.append("")
 
     append_presale_overview(lines, areas)
+    append_presale_data_status(lines, areas, state)
 
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("近一週市場脈動")
@@ -1693,10 +1737,6 @@ def main() -> int:
         report_kind,
         urgent_pending_projects,
     )
-    report_path.write_text(report_content + "\n", encoding="utf-8")
-    save_state_file(state_path, state, snapshots, local_now)
-    update_ledger(ledger_path, ledger_file, task_id, report_path, local_now)
-
     line_message = new_line_message(
         snapshots,
         state,
@@ -1706,6 +1746,10 @@ def main() -> int:
         report_kind,
         urgent_pending_projects,
     )
+    report_path.write_text(report_content + "\n", encoding="utf-8")
+    save_state_file(state_path, state, snapshots, local_now)
+    update_ledger(ledger_path, ledger_file, task_id, report_path, local_now)
+
     if args.dry_run:
         print("Dry run complete.")
         print(line_message)
