@@ -11,6 +11,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -285,6 +286,46 @@ def fetch_text_with_curl(url: str) -> str:
     raise RuntimeError(f"curl fetch failed for {url}: {'; '.join(errors[-2:])}")
 
 
+def fetch_text_with_proxy(url: str) -> str:
+    proxy_url = os.environ.get("LEJU_FETCH_PROXY_URL", "").strip()
+    if not proxy_url or "leju.com.tw" not in url:
+        raise RuntimeError("Leju fetch proxy not configured")
+
+    encoded_target = urllib.parse.quote(url, safe="")
+    if "{url}" in proxy_url:
+        request_url = proxy_url.replace("{url}", encoded_target)
+    else:
+        separator = "&" if "?" in proxy_url else "?"
+        request_url = f"{proxy_url}{separator}url={encoded_target}"
+
+    headers = {
+        "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
+        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/136.0.0.0 Safari/537.36"
+        ),
+    }
+    token = os.environ.get("LEJU_FETCH_PROXY_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    request = urllib.request.Request(request_url, headers=headers)
+    with urllib.request.urlopen(request, timeout=90) as response:
+        raw = response.read()
+        content_type = response.headers.get("Content-Type", "")
+    text = raw.decode("utf-8", errors="ignore")
+    if "application/json" in content_type:
+        data = json.loads(text)
+        text = str(data.get("html") or data.get("content") or data.get("body") or "")
+    if not text.strip():
+        raise RuntimeError(f"empty proxy response for {url}")
+    if is_cloudflare_challenge(text):
+        raise RuntimeError(f"Cloudflare challenge returned by proxy for {url}")
+    return text
+
+
 def fetch_text_with_playwright(url: str) -> str:
     try:
         from playwright.sync_api import sync_playwright
@@ -336,7 +377,7 @@ def fetch_text_with_playwright(url: str) -> str:
 
 def fetch_text(url: str) -> str:
     errors: list[str] = []
-    for fetcher in (fetch_text_with_curl_cffi, fetch_text_with_curl, fetch_text_with_playwright):
+    for fetcher in (fetch_text_with_proxy, fetch_text_with_curl_cffi, fetch_text_with_curl, fetch_text_with_playwright):
         try:
             return fetcher(url)
         except Exception as exc:
@@ -2016,6 +2057,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     file_config = read_env_file(Path(args.config_path))
+    for env_key in ("LEJU_FETCH_PROXY_URL", "LEJU_FETCH_PROXY_TOKEN"):
+        if env_key not in os.environ and file_config.get(env_key):
+            os.environ[env_key] = file_config[env_key]
     task_id = get_config_value(file_config, "TASK_ID", "a7-leju-digest")
     report_root = resolve_workspace_path(get_config_value(file_config, "REPORT_ROOT", "vault/2-actions/scheduled-reports/a7-leju"))
     state_path = resolve_workspace_path(get_config_value(file_config, "STATE_PATH", str(report_root / "state.json")))
