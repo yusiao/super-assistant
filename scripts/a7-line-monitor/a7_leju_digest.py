@@ -815,22 +815,29 @@ def get_price_snapshot(content: str) -> dict[str, str]:
     }
 
 
+def try_fetch_text(url: str) -> tuple[str, str]:
+    if not url:
+        return "", ""
+    try:
+        return fetch_text(url), ""
+    except Exception as exc:
+        return "", str(exc)
+
+
 def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
-    buy_content = fetch_text(area["buy_url"])
-    price_content = fetch_text(area["price_url"])
-    try:
-        new_build_list_content = fetch_text(area["new_build_list_url"]) if area.get("new_build_list_url") else ""
-        new_build_list_fetch_error = ""
-    except Exception as exc:
-        new_build_list_content = ""
-        new_build_list_fetch_error = str(exc)
     full_community_url = get_full_community_list_url(area)
-    try:
-        full_community_content = fetch_text(full_community_url) if full_community_url else ""
-        comparison_fetch_error = ""
-    except Exception as exc:
-        full_community_content = ""
-        comparison_fetch_error = str(exc)
+    buy_content, buy_fetch_error = try_fetch_text(area["buy_url"])
+    price_content, price_fetch_error = try_fetch_text(area["price_url"])
+    new_build_list_content, new_build_list_fetch_error = try_fetch_text(area.get("new_build_list_url", ""))
+    full_community_content, comparison_fetch_error = try_fetch_text(full_community_url)
+
+    if not any([buy_content, new_build_list_content, full_community_content]):
+        errors = [
+            f"buy={buy_fetch_error}" if buy_fetch_error else "",
+            f"new={new_build_list_fetch_error}" if new_build_list_fetch_error else "",
+            f"community={comparison_fetch_error}" if comparison_fetch_error else "",
+        ]
+        raise RuntimeError("; ".join(error for error in errors if error) or "all Leju project pages returned empty content")
 
     buy_text = html_to_text(buy_content)
     summary = {
@@ -880,6 +887,8 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "price_url": area["price_url"],
         "new_build_list_url": area.get("new_build_list_url", ""),
         "community_list_url": full_community_url,
+        "buy_fetch_error": buy_fetch_error,
+        "price_fetch_error": price_fetch_error,
         "new_build_list_fetch_error": new_build_list_fetch_error,
         "comparison_fetch_error": comparison_fetch_error,
         "summary_parse_warning": summary_parse_warning,
@@ -1280,6 +1289,16 @@ def print_extraction_diagnostics(areas: list[dict[str, Any]]) -> None:
             f"- {area.get('name')}: "
             f"stale={stale}, pending={len(pending)}, active={len(active)}, sold_out={len(sold_out)}"
         )
+        for key in (
+            "fetch_error",
+            "buy_fetch_error",
+            "new_build_list_fetch_error",
+            "comparison_fetch_error",
+            "price_fetch_error",
+        ):
+            error = str(area.get(key, "")).strip()
+            if error:
+                print(f"  {key}: {error[:220]}")
         for label, projects in (
             ("pending", pending),
             ("active", active),
