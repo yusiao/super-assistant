@@ -739,7 +739,12 @@ def get_price_snapshot(content: str) -> dict[str, str]:
 def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
     buy_content = fetch_text(area["buy_url"])
     price_content = fetch_text(area["price_url"])
-    new_build_list_content = fetch_text(area["new_build_list_url"]) if area.get("new_build_list_url") else ""
+    try:
+        new_build_list_content = fetch_text(area["new_build_list_url"]) if area.get("new_build_list_url") else ""
+        new_build_list_fetch_error = ""
+    except Exception as exc:
+        new_build_list_content = ""
+        new_build_list_fetch_error = str(exc)
     full_community_url = get_full_community_list_url(area)
     try:
         full_community_content = fetch_text(full_community_url) if full_community_url else ""
@@ -767,6 +772,8 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
     excluded_names = get_excluded_project_names(area)
     latest_listing_links = filter_excluded_projects(latest_listing_links, excluded_names)
     project_candidates = parse_project_blocks(new_build_list_content)
+    if not project_candidates and full_community_content:
+        project_candidates = parse_project_blocks(full_community_content)
     all_projects = filter_excluded_projects(
         enrich_project_statuses(project_candidates),
         excluded_names,
@@ -794,6 +801,7 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "price_url": area["price_url"],
         "new_build_list_url": area.get("new_build_list_url", ""),
         "community_list_url": full_community_url,
+        "new_build_list_fetch_error": new_build_list_fetch_error,
         "comparison_fetch_error": comparison_fetch_error,
         "summary_parse_warning": summary_parse_warning,
         "exclude_project_names": sorted(excluded_names),
@@ -1182,53 +1190,25 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
-def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) -> list[str]:
-    total_projects = sum(
-        len(area.get("pending_launch_projects", []))
-        + len(area.get("active_presale_projects", []))
-        + len(area.get("sold_out_presale_projects", []))
-        for area in areas
-    )
-    new_regs = sum(
-        len(get_new_registration_rows(area.get("latest_presale_registrations", []), get_previous_area(state, area["name"])))
-        for area in areas
-    )
-    stale_areas = [area for area in areas if area.get("stale")]
-    no_previous_stale = [area for area in stale_areas if not area.get("has_previous_data", True)]
-    official_errors = [area.get("official_presale_fetch_error", "") for area in areas if area.get("official_presale_fetch_error")]
-    summary_warning_areas = [area["name"] for area in areas if area.get("summary_parse_warning")]
-
-    lines: list[str] = []
-    if total_projects == 0:
-        lines.append("- 預售/待預售清單：本次沒有可用建案資料。")
-        if no_previous_stale:
-            lines.append("- 原因：樂居抓取失敗，本次不顯示舊資料或設定清單。")
-        elif stale_areas:
-            lines.append("- 原因：樂居部分區域抓取失敗，本次不顯示舊資料或設定清單。")
-        else:
-            lines.append("- 原因：樂居頁面可解析，但未解析到預售、待預售或完銷預售案。")
-    if new_regs == 0:
-        lines.append("- 新增預售屋成交：本次沒有比上次新增的成交登錄。")
-    if official_errors:
-        lines.append(f"- 官方實價登錄資料抓取失敗：{official_errors[0]}")
-    if summary_warning_areas:
-        names = "、".join(summary_warning_areas[:5])
-        lines.append(f"- 樂居摘要格式不同：{names}；已略過摘要數字，仍繼續解析建案卡片。")
-    if stale_areas:
-        names = "、".join(area["name"] for area in stale_areas[:5])
-        lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗，本次不列舊資料：{names}")
-    return lines
-
-
-def append_presale_data_status(lines: list[str], areas: list[dict[str, Any]], state: dict[str, Any], markdown: bool = False) -> None:
-    status_lines = get_presale_data_status(areas, state)
-    if not status_lines:
-        return
-    lines.append("## 資料抓取狀態" if markdown else "資料抓取狀態")
-    if markdown:
-        lines.append("")
-    lines.extend(status_lines)
-    lines.append("")
+def print_extraction_diagnostics(areas: list[dict[str, Any]]) -> None:
+    print("A7 extraction diagnostics:")
+    for area in areas:
+        pending = area.get("pending_launch_projects", [])
+        active = area.get("active_presale_projects", [])
+        sold_out = area.get("sold_out_presale_projects", [])
+        stale = "yes" if area.get("stale") else "no"
+        print(
+            f"- {area.get('name')}: "
+            f"stale={stale}, pending={len(pending)}, active={len(active)}, sold_out={len(sold_out)}"
+        )
+        for label, projects in (
+            ("pending", pending),
+            ("active", active),
+            ("sold_out", sold_out),
+        ):
+            names = [str(item.get("name", "")).strip() for item in projects if item.get("name")]
+            if names:
+                print(f"  {label}: {', '.join(names[:8])}")
 
 
 def is_bargain_candidate_project(project: dict[str, str]) -> bool:
@@ -1589,7 +1569,6 @@ def new_report_content(
         lines.append("")
 
     append_presale_overview(lines, areas, markdown=True)
-    append_presale_data_status(lines, areas, state, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("## 近一週市場脈動")
@@ -1732,7 +1711,6 @@ def new_line_message(
         lines.append("")
 
     append_presale_overview(lines, areas)
-    append_presale_data_status(lines, areas, state)
 
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("近一週市場脈動")
@@ -1944,6 +1922,8 @@ def main() -> int:
         except Exception as exc:
             if snapshots:
                 snapshots[0]["official_presale_fetch_error"] = str(exc)
+
+    print_extraction_diagnostics(snapshots)
 
     urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
     weekly_due = is_weekly_report_day(local_now, weekly_report_day)
