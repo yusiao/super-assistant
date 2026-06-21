@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import os
 import re
@@ -12,6 +14,7 @@ import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+from zipfile import ZipFile
 from zoneinfo import ZoneInfo
 
 
@@ -186,6 +189,11 @@ def fetch_text(url: str) -> str:
         [
             curl_bin,
             "-L",
+            "-sS",
+            "--connect-timeout",
+            "20",
+            "--max-time",
+            "60",
             "-A",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
             "-H",
@@ -205,6 +213,29 @@ def fetch_text(url: str) -> str:
         raise RuntimeError(f"curl fetch failed for {url}: {result.stderr.strip() or result.returncode}")
     if "Just a moment..." in result.stdout and "challenges.cloudflare.com" in result.stdout:
         raise RuntimeError(f"Cloudflare challenge blocked {url}")
+    return result.stdout
+
+
+def fetch_bytes(url: str) -> bytes:
+    curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
+    result = subprocess.run(
+        [
+            curl_bin,
+            "-L",
+            "-A",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+            "-H",
+            "Accept-Language: zh-TW,zh;q=0.9,en;q=0.8",
+            url,
+        ],
+        capture_output=True,
+        timeout=90,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout:
+        stderr = result.stderr.decode("utf-8", errors="ignore") if result.stderr else ""
+        error_text = re.sub(r"\s+", " ", stderr).strip()
+        raise RuntimeError(f"curl binary fetch failed for {url}: {error_text or result.returncode}")
     return result.stdout
 
 
@@ -389,6 +420,139 @@ def get_configured_project_links(area: dict[str, Any], key: str) -> list[dict[st
             continue
         projects.append({"name": name, "url": url, "status": str(raw_item.get("status", "")).strip()})
     return projects
+
+
+def get_project_url_mappings(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    mappings: list[dict[str, Any]] = []
+    for area in areas:
+        for item in area.get("project_url_mappings", []):
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name", "")).strip()
+            url = normalize_url(str(item.get("url", "")).strip())
+            if not name or not url:
+                continue
+            aliases = [str(alias).strip() for alias in item.get("aliases", []) if str(alias).strip()]
+            mappings.append({"name": name, "url": url, "aliases": aliases, "area_name": area.get("name", "")})
+    return mappings
+
+
+def decode_csv_bytes(data: bytes) -> str:
+    for encoding in ["utf-8-sig", "utf-8", "cp950", "big5"]:
+        try:
+            return data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return data.decode("utf-8", errors="ignore")
+
+
+def iter_csv_rows_from_archive(data: bytes) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    if data[:2] == b"PK":
+        with ZipFile(io.BytesIO(data)) as archive:
+            for name in archive.namelist():
+                if not name.lower().endswith(".csv"):
+                    continue
+                content = decode_csv_bytes(archive.read(name))
+                rows.extend(csv.DictReader(io.StringIO(content)))
+        return rows
+    content = decode_csv_bytes(data)
+    return list(csv.DictReader(io.StringIO(content)))
+
+
+def get_first_field(row: dict[str, str], names: list[str]) -> str:
+    normalized = {re.sub(r"\s+", "", key): value for key, value in row.items() if key is not None}
+    for name in names:
+        value = normalized.get(re.sub(r"\s+", "", name), "")
+        if value:
+            return str(value).strip()
+    return ""
+
+
+def get_int_field(row: dict[str, str], names: list[str]) -> int | None:
+    value = get_first_field(row, names)
+    digits = re.sub(r"[^\d]", "", value)
+    return int(digits) if digits else None
+
+
+def square_meter_to_ping(value: str) -> str:
+    try:
+        number = float(str(value).replace(",", "").strip())
+    except ValueError:
+        return ""
+    if number <= 0:
+        return ""
+    return f"{number * 0.3025:.2f}坪"
+
+
+def money_to_wan(value: int | None) -> str:
+    if value is None:
+        return ""
+    return f"{value / 10000:.0f}萬"
+
+
+def unit_price_to_wan_per_ping(value: int | None) -> str:
+    if value is None:
+        return ""
+    return f"{value / 10000 / 0.3025:.2f}萬/坪"
+
+
+def row_text_for_match(row: dict[str, str]) -> str:
+    return " ".join(str(value) for value in row.values() if value)
+
+
+def match_project_mapping(row: dict[str, str], mappings: list[dict[str, Any]]) -> dict[str, Any] | None:
+    text = row_text_for_match(row)
+    for mapping in mappings:
+        candidates = [mapping["name"], *mapping.get("aliases", [])]
+        if any(candidate and candidate in text for candidate in candidates):
+            return mapping
+    return None
+
+
+def parse_official_presale_row(row: dict[str, str], mapping: dict[str, Any]) -> dict[str, str]:
+    unit = get_first_field(row, ["棟及號", "棟戶", "交易標的", "土地位置建物門牌", "建物門牌"])
+    floor = get_first_field(row, ["移轉層次", "樓層"])
+    building_area = square_meter_to_ping(get_first_field(row, ["建物移轉總面積平方公尺", "建物移轉面積平方公尺", "房屋移轉總面積平方公尺"]))
+    parking_price = money_to_wan(get_int_field(row, ["車位總價元", "車位總價"]))
+    total_price = money_to_wan(get_int_field(row, ["總價元", "交易總價元", "總價"]))
+    unit_price = unit_price_to_wan_per_ping(get_int_field(row, ["單價元平方公尺", "單價元/平方公尺"]))
+    if not unit_price:
+        unit_price = get_first_field(row, ["單價", "每坪單價"])
+    deal_date = get_first_field(row, ["交易年月日", "交易日期"])
+    return {
+        "project_name": mapping["name"],
+        "unit": unit or "戶別未解析",
+        "floor": floor or "樓層未解析",
+        "area": building_area or "坪數未解析",
+        "parking_price": parking_price or "車位價未解析",
+        "total_price": total_price or "總價未解析",
+        "unit_price": unit_price or "單價未解析",
+        "deal_date": deal_date,
+        "url": mapping["url"],
+        "source": "內政部實價登錄",
+    }
+
+
+def get_official_presale_registrations(source_url: str, mappings: list[dict[str, Any]], limit: int = 50) -> list[dict[str, str]]:
+    if not source_url or not mappings:
+        return []
+    rows = iter_csv_rows_from_archive(fetch_bytes(source_url))
+    registrations: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in rows:
+        mapping = match_project_mapping(row, mappings)
+        if not mapping:
+            continue
+        item = parse_official_presale_row(row, mapping)
+        key = get_registration_key(item)
+        if key in seen:
+            continue
+        seen.add(key)
+        registrations.append(item)
+        if len(registrations) >= limit:
+            break
+    return registrations
 
 
 def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
@@ -608,9 +772,6 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         item for item in comparison_projects if is_sold_out_presale(item, active_project_urls)
     ]
     completed_projects = [item for item in comparison_projects if is_completed_project(item)]
-    latest_presale_registrations = get_latest_presale_registrations(
-        active_presale_projects + pending_launch_projects + sold_out_presale_projects
-    )
     unclassified_projects = [
         item
         for item in all_projects
@@ -631,7 +792,7 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
         "latest_listing_links": latest_listing_links,
         "all_new_build_projects": all_projects,
         "all_comparison_projects": comparison_projects,
-        "latest_presale_registrations": latest_presale_registrations,
+        "latest_presale_registrations": [],
         "latest_new_completion_registrations": [],
         "pending_launch_projects": pending_launch_projects,
         "active_presale_projects": active_presale_projects,
@@ -903,6 +1064,23 @@ def get_new_registration_rows(current: list[dict[str, str]], previous: dict[str,
     return [item for item in current if get_registration_key(item) not in previous_keys]
 
 
+def attach_official_presale_registrations(
+    snapshots: list[dict[str, Any]],
+    registrations: list[dict[str, str]],
+    mappings: list[dict[str, Any]],
+) -> None:
+    area_by_name = {area.get("name", ""): area for area in snapshots}
+    mapping_area_by_project = {mapping["name"]: mapping.get("area_name", "") for mapping in mappings}
+    for item in registrations:
+        area_name = mapping_area_by_project.get(item.get("project_name", ""))
+        if not area_name or area_name not in area_by_name:
+            continue
+        area = area_by_name[area_name]
+        existing = area.setdefault("latest_presale_registrations", [])
+        if get_registration_key(item) not in {get_registration_key(row) for row in existing if isinstance(row, dict)}:
+            existing.append(item)
+
+
 def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
     status = item.get("status", "價格未解析")
     return [f"- [{label}] {item.get('name', '未命名建案')} | {status or '價格未解析'}", f"  {item.get('url', '')}"]
@@ -1013,6 +1191,7 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
     )
     stale_areas = [area for area in areas if area.get("stale")]
     no_previous_stale = [area for area in stale_areas if not area.get("has_previous_data", True)]
+    official_errors = [area.get("official_presale_fetch_error", "") for area in areas if area.get("official_presale_fetch_error")]
 
     lines: list[str] = []
     if total_projects == 0:
@@ -1025,6 +1204,8 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
             lines.append("- 原因：樂居頁面可解析，但未解析到預售、待預售或完銷預售案。")
     if new_regs == 0:
         lines.append("- 新增預售屋成交：本次沒有比上次新增的成交登錄。")
+    if official_errors:
+        lines.append(f"- 官方實價登錄資料抓取失敗：{official_errors[0]}")
     if stale_areas:
         names = "、".join(area["name"] for area in stale_areas[:5])
         lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗或沿用前次資料：{names}")
@@ -1694,6 +1875,17 @@ def main() -> int:
     market_pulse_config_path = resolve_workspace_path(market_pulse_config_path_text)
     line_schedule = get_config_value(file_config, "LINE_SCHEDULE", "weekly").strip().lower()
     weekly_report_day = int(get_config_value(file_config, "WEEKLY_REPORT_DAY", "6"))
+    official_presale_url = get_config_value(
+        file_config,
+        "OFFICIAL_PRESALE_URL",
+        "https://data.moi.gov.tw/MoiOD/System/DownloadFile.aspx?DATA=402BE9A1-6B0B-470B-806A-F9BFB15A8749",
+    )
+    official_presale_enabled = get_config_value(file_config, "OFFICIAL_PRESALE_ENABLED", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
     urgent_pending_enabled = get_config_value(file_config, "URGENT_PENDING_PRESALE_ALERT", "true").strip().lower() in {
         "1",
         "true",
@@ -1720,6 +1912,15 @@ def main() -> int:
             snapshots.append(get_area_snapshot(area))
         except Exception as exc:
             snapshots.append(build_stale_snapshot(area, previous, exc))
+
+    if official_presale_enabled:
+        try:
+            project_mappings = get_project_url_mappings(area_config)
+            official_regs = get_official_presale_registrations(official_presale_url, project_mappings)
+            attach_official_presale_registrations(snapshots, official_regs, project_mappings)
+        except Exception as exc:
+            if snapshots:
+                snapshots[0]["official_presale_fetch_error"] = str(exc)
 
     urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
     weekly_due = is_weekly_report_day(local_now, weekly_report_day)

@@ -14,6 +14,15 @@
       "富宇富御",
       "富宇上城",
       "大頂森木"
+    ],
+    "project_url_mappings": [
+      {
+        "name": "英倫花都",
+        "url": "https://www.leju.com.tw/community/L47315223426b05?mode=buy",
+        "aliases": [
+          "英倫花都"
+        ]
+      }
     ]
   },
   {
@@ -26,6 +35,31 @@
       "文德路",
       "文明路",
       "文康街與樂善一路周邊"
+    ],
+    "project_url_mappings": [
+      {
+        "name": "豐邑GREEN IN",
+        "url": "https://www.leju.com.tw/community/L165114714689b0?mode=buy",
+        "aliases": [
+          "豐邑GREEN IN",
+          "豐邑 Green In",
+          "GREEN IN"
+        ]
+      },
+      {
+        "name": "鴻築玥",
+        "url": "https://www.leju.com.tw/community/Le67139767b0a33?mode=buy",
+        "aliases": [
+          "鴻築玥"
+        ]
+      },
+      {
+        "name": "樂捷綻",
+        "url": "https://www.leju.com.tw/community/La271519763d33a?mode=buy",
+        "aliases": [
+          "樂捷綻"
+        ]
+      }
     ]
   },
   {
@@ -44,6 +78,37 @@
       "文化一路近 A7 站南段",
       "樂善一路北段",
       "華亞科技園區銜接帶"
+    ],
+    "project_url_mappings": [
+      {
+        "name": "大亮泊",
+        "url": "https://www.leju.com.tw/community/Lc751255287537e?mode=buy",
+        "aliases": [
+          "大亮泊"
+        ]
+      },
+      {
+        "name": "大亮波波",
+        "url": "https://www.leju.com.tw/community/La6513888006f2e?mode=buy",
+        "aliases": [
+          "大亮波波"
+        ]
+      },
+      {
+        "name": "富堡菁英滙",
+        "url": "https://www.leju.com.tw/community/L41613824717c31?mode=buy",
+        "aliases": [
+          "富堡菁英滙",
+          "富堡菁英匯"
+        ]
+      },
+      {
+        "name": "允將大作",
+        "url": "https://www.leju.com.tw/community/L4fb1109071d5b7?mode=buy",
+        "aliases": [
+          "允將大作"
+        ]
+      }
     ]
   },
   {
