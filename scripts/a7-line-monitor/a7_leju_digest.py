@@ -595,10 +595,8 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
     excluded_names = get_excluded_project_names(area)
     latest_listing_links = filter_excluded_projects(latest_listing_links, excluded_names)
     project_candidates = parse_project_blocks(new_build_list_content)
-    manual_pending_projects = get_configured_project_links(area, "manual_pending_projects")
-    manual_active_projects = get_configured_project_links(area, "manual_active_presale_projects")
     all_projects = filter_excluded_projects(
-        merge_project_lists(enrich_project_statuses(project_candidates), manual_pending_projects, manual_active_projects),
+        enrich_project_statuses(project_candidates),
         excluded_names,
     )
     comparison_candidates = parse_project_blocks(full_community_content) + get_extra_project_links(area)
@@ -879,6 +877,32 @@ def format_registration_line(item: dict[str, str]) -> list[str]:
     return [f"- {line}"]
 
 
+def get_registration_key(item: dict[str, str]) -> str:
+    return "|".join(
+        [
+            item.get("project_name", ""),
+            item.get("unit", ""),
+            item.get("floor", ""),
+            item.get("area", ""),
+            item.get("parking_price", ""),
+            item.get("total_price", ""),
+            item.get("unit_price", ""),
+            item.get("url", ""),
+        ]
+    )
+
+
+def get_new_registration_rows(current: list[dict[str, str]], previous: dict[str, Any] | None) -> list[dict[str, str]]:
+    if not previous:
+        return current
+    previous_keys = {
+        get_registration_key(item)
+        for item in previous.get("latest_presale_registrations", [])
+        if isinstance(item, dict)
+    }
+    return [item for item in current if get_registration_key(item) not in previous_keys]
+
+
 def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
     status = item.get("status", "價格未解析")
     return [f"- [{label}] {item.get('name', '未命名建案')} | {status or '價格未解析'}", f"  {item.get('url', '')}"]
@@ -951,6 +975,8 @@ def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int
 
 def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
     overview = get_presale_overview_items(areas)
+    if not (overview["pending"] or overview["active"] or overview["sold_out"] or overview["insufficient"]):
+        return
     heading = "## 預售屋 / 待開案總覽" if markdown else "預售屋 / 待開案總覽"
     lines.append(heading)
     if markdown:
@@ -959,58 +985,18 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
         lines.append("待開案 / 未開賣預售")
         for item in overview["pending"]:
             lines.extend(format_project_line(item))
-    else:
-        lines.append("- 待開案 / 未開賣預售：目前未抓到")
     if overview["active"]:
         lines.append("銷售中預售屋")
         for item in overview["active"]:
             lines.extend(format_project_line(item))
-    else:
-        lines.append("- 銷售中預售屋：目前未抓到")
     if overview["sold_out"]:
         lines.append("完銷 / 非銷售中預售")
         for item in overview["sold_out"]:
             lines.extend(format_project_line(item))
-    else:
-        lines.append("- 完銷 / 非銷售中預售：目前未抓到")
     if overview["insufficient"]:
         lines.append("資料不足區域")
         for item in overview["insufficient"]:
             lines.extend(format_project_line(item))
-    lines.append("")
-
-
-def append_active_pending_project_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
-    pending_items: list[dict[str, str]] = []
-    active_items: list[dict[str, str]] = []
-    for area in areas:
-        for project in area.get("pending_launch_projects", []):
-            item = dict(project)
-            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
-            pending_items.append(item)
-        for project in area.get("active_presale_projects", []):
-            item = dict(project)
-            item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
-            active_items.append(item)
-
-    lines.append("## 待預售建案" if markdown else "待預售建案")
-    if markdown:
-        lines.append("")
-    if pending_items:
-        for item in pending_items[:10]:
-            lines.extend(format_project_line(item))
-    else:
-        lines.append("- 目前未抓到")
-    lines.append("")
-
-    lines.append("## 銷售中預售建案" if markdown else "銷售中預售建案")
-    if markdown:
-        lines.append("")
-    if active_items:
-        for item in active_items[:10]:
-            lines.extend(format_project_line(item))
-    else:
-        lines.append("- 目前未抓到")
     lines.append("")
 
 
@@ -1370,7 +1356,6 @@ def new_report_content(
             lines.extend(format_project_line(item))
         lines.append("")
 
-    append_active_pending_project_overview(lines, areas, markdown=True)
     append_presale_overview(lines, areas, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1463,30 +1448,15 @@ def new_report_content(
         if area.get("stale"):
             lines.append(f"- 注意：本次抓取失敗，以下使用上次成功資料。原因：{area.get('fetch_error', '')}")
             lines.append("")
-        pending = area.get("pending_launch_projects", [])[:5]
-        lines.append("### 待預售建案")
-        if pending:
-            for item in pending:
-                lines.extend(format_project_line(item))
-        else:
-            lines.append("- 目前未抓到")
-        lines.append("")
-        presale_projects = area.get("active_presale_projects", [])[:8]
-        lines.append("### 銷售中預售建案")
-        if presale_projects:
-            for item in presale_projects:
-                lines.extend(format_project_line(item))
-        else:
-            lines.append("- 目前未抓到")
-        lines.append("")
-        latest_presale_regs = area.get("latest_presale_registrations", [])[:5]
-        lines.append("### 最新登錄的預售屋")
+        latest_presale_regs = get_new_registration_rows(
+            area.get("latest_presale_registrations", []),
+            previous,
+        )[:5]
         if latest_presale_regs:
+            lines.append("### 新增登錄的預售屋成交")
             for item in latest_presale_regs:
                 lines.extend(format_registration_line(item))
-        else:
-            lines.append("- 目前未解析，資料來源待串接")
-        lines.append("")
+            lines.append("")
         compare_projects = get_price_compare_projects(area)
         if compare_projects:
             lines.append("### 新成屋 vs 完銷預售價格比較")
@@ -1520,7 +1490,6 @@ def new_line_message(
             lines.extend(format_project_line(item))
         lines.append("")
 
-    append_active_pending_project_overview(lines, areas)
     append_presale_overview(lines, areas)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1589,30 +1558,15 @@ def new_line_message(
         if area.get("stale"):
             lines.append("注意：本次抓取失敗，改用上次成功資料。")
             lines.append("")
-        pending = area.get("pending_launch_projects", [])[:3]
-        lines.append("待預售建案")
-        if pending:
-            for item in pending:
-                lines.extend(format_project_line(item))
-        else:
-            lines.append("- 目前未抓到")
-        lines.append("")
-        presale_projects = area.get("active_presale_projects", [])[:4]
-        lines.append("銷售中預售建案")
-        if presale_projects:
-            for item in presale_projects:
-                lines.extend(format_project_line(item))
-        else:
-            lines.append("- 目前未抓到")
-        lines.append("")
-        latest_presale_regs = area.get("latest_presale_registrations", [])[:2]
-        lines.append("最新登錄的預售屋")
+        latest_presale_regs = get_new_registration_rows(
+            area.get("latest_presale_registrations", []),
+            previous,
+        )[:2]
         if latest_presale_regs:
+            lines.append("新增登錄的預售屋成交")
             for item in latest_presale_regs:
                 lines.extend(format_registration_line(item))
-        else:
-            lines.append("- 目前未解析")
-        lines.append("")
+            lines.append("")
         compare_projects = get_price_compare_projects(area, limit=5)
         if compare_projects:
             lines.append("新成屋 vs 完銷預售價格比較")
