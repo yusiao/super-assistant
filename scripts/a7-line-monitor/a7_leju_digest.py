@@ -980,19 +980,6 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
     lines.append("")
 
 
-def append_presale_count_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
-    lines.append("## 各區預售數量速覽" if markdown else "各區預售數量速覽")
-    if markdown:
-        lines.append("")
-    for area in areas:
-        active = format_project_count(area, "active_presale_projects")
-        pending = format_project_count(area, "pending_launch_projects")
-        sold_out = format_project_count(area, "sold_out_presale_projects")
-        total = format_observable_presale_count(area)
-        lines.append(f"- {area['name']}：合計 {total}；銷售中 {active}；待開 {pending}；完銷/非銷售中 {sold_out}")
-    lines.append("")
-
-
 def append_active_pending_project_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
     pending_items: list[dict[str, str]] = []
     active_items: list[dict[str, str]] = []
@@ -1383,7 +1370,6 @@ def new_report_content(
             lines.extend(format_project_line(item))
         lines.append("")
 
-    append_presale_count_overview(lines, areas, markdown=True)
     append_active_pending_project_overview(lines, areas, markdown=True)
     append_presale_overview(lines, areas, markdown=True)
 
@@ -1534,7 +1520,6 @@ def new_line_message(
             lines.extend(format_project_line(item))
         lines.append("")
 
-    append_presale_count_overview(lines, areas)
     append_active_pending_project_overview(lines, areas)
     append_presale_overview(lines, areas)
 
