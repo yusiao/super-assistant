@@ -183,37 +183,116 @@ def html_to_text(content: str) -> str:
     return strip_tags(content)
 
 
-def fetch_text(url: str) -> str:
-    curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
-    result = subprocess.run(
+def is_cloudflare_challenge(content: str) -> bool:
+    lower = content.lower()
+    return (
+        ("just a moment" in lower and "challenges.cloudflare.com" in lower)
+        or "cf-chl" in lower
+        or "cf_clearance" in lower
+    )
+
+
+def fetch_text_with_curl_cffi(url: str) -> str:
+    try:
+        from curl_cffi import requests as curl_requests
+    except Exception as exc:
+        raise RuntimeError(f"curl_cffi unavailable: {exc}") from exc
+
+    headers = {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Referer": "https://www.leju.com.tw/",
+        "Upgrade-Insecure-Requests": "1",
+    }
+    response = curl_requests.get(
+        url,
+        headers=headers,
+        impersonate="chrome",
+        timeout=45,
+    )
+    text = response.text or ""
+    if response.status_code >= 400:
+        raise RuntimeError(f"HTTP {response.status_code} for {url}")
+    if not text.strip():
+        raise RuntimeError(f"empty response for {url}")
+    if is_cloudflare_challenge(text):
+        raise RuntimeError(f"Cloudflare challenge blocked {url}")
+    return text
+
+
+def fetch_text_with_curl(url: str) -> str:
+    attempts = [
         [
-            curl_bin,
-            "-L",
-            "-sS",
-            "--connect-timeout",
-            "20",
-            "--max-time",
-            "60",
             "-A",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
             "-H",
-            "Accept-Language: zh-TW,zh;q=0.9,en;q=0.8",
+            "Accept-Language: zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
             "-H",
             "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-            url,
+            "-H",
+            "Referer: https://www.leju.com.tw/",
+            "-H",
+            "Cache-Control: no-cache",
         ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="ignore",
-        timeout=45,
-        check=False,
-    )
-    if result.returncode != 0 or not result.stdout.strip():
-        raise RuntimeError(f"curl fetch failed for {url}: {result.stderr.strip() or result.returncode}")
-    if "Just a moment..." in result.stdout and "challenges.cloudflare.com" in result.stdout:
-        raise RuntimeError(f"Cloudflare challenge blocked {url}")
-    return result.stdout
+        [
+            "-A",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
+            "-H",
+            "Accept-Language: zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+            "-H",
+            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "-H",
+            "Referer: https://www.leju.com.tw/",
+        ],
+    ]
+    errors: list[str] = []
+    curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
+    for extra_args in attempts:
+        result = subprocess.run(
+            [
+                curl_bin,
+                "-L",
+                "-sS",
+                "--compressed",
+                "--http1.1",
+                "--retry",
+                "2",
+                "--retry-delay",
+                "2",
+                "--connect-timeout",
+                "20",
+                "--max-time",
+                "75",
+                *extra_args,
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="ignore",
+            timeout=90,
+            check=False,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            errors.append(result.stderr.strip() or str(result.returncode))
+            continue
+        if is_cloudflare_challenge(result.stdout):
+            errors.append("Cloudflare challenge")
+            continue
+        return result.stdout
+    raise RuntimeError(f"curl fetch failed for {url}: {'; '.join(errors[-2:])}")
+
+
+def fetch_text(url: str) -> str:
+    errors: list[str] = []
+    for fetcher in (fetch_text_with_curl_cffi, fetch_text_with_curl):
+        try:
+            return fetcher(url)
+        except Exception as exc:
+            errors.append(str(exc))
+    raise RuntimeError(f"fetch failed for {url}: {'; '.join(errors[-2:])}")
 
 
 def fetch_bytes(url: str) -> bytes:
