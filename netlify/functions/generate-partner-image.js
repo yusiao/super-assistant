@@ -37,6 +37,8 @@ function imageOutputFormat() {
 
 function buildPrompt(payload) {
   const targetGender = compact(payload.targetGender, "adult person", 40);
+  const imageGender = compact(payload.imageGender, targetGender, 90);
+  const genderReason = compact(payload.genderReason, "", 180);
   const careers = list(payload.careers, "professional, composed, reliable");
   const stars = list(payload.stars, "balanced and refined symbolic traits", 10);
   const reasons = list(payload.reasons, "warm but composed relationship energy", 4);
@@ -56,7 +58,8 @@ function buildPrompt(payload) {
   const notes = list(appearance.notes, "natural confidence, approachable expression", 6);
 
   return [
-    `Create a high-quality photorealistic portrait of a fictional adult ${targetGender}.`,
+    `Create a high-quality photorealistic portrait of a fictional ${imageGender}.`,
+    `Chinese astrology gender-expression note: ${targetGender}${genderReason ? `, ${genderReason}` : ""}.`,
     "The person must be original and not a celebrity, influencer, public figure, or identifiable private person.",
     "Use a tasteful editorial portrait style, natural lighting, realistic skin texture, modern clothing, calm confident expression, half-body framing, neutral background, no text, no watermark, no horoscope symbols.",
     `Appearance direction: ${face}; body direction: ${build}; five-element mood: ${element}.`,
