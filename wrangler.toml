@@ -1,0 +1,17 @@
+name = "super-assistant"
+main = "workers/bazi-ziwei.js"
+compatibility_date = "2026-06-21"
+
+[assets]
+directory = "./output/bazi-ziwei"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/.netlify/functions/*", "/api/*"]
+
+[ai]
+binding = "AI"
+
+[vars]
+IMAGE_PROVIDER = "cloudflare"
+CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell"
+CLOUDFLARE_IMAGE_STEPS = "4"
