@@ -909,7 +909,9 @@ def build_project_trend_summary(state: dict[str, Any], area_name: str, projects:
 
 
 def build_stale_snapshot(area: dict[str, Any], previous: dict[str, Any] | None, error: Exception) -> dict[str, Any]:
-    base = dict(previous) if previous else {}
+    # Do not copy previous project data into the current report. Stale cached
+    # listings look like fallback data and can be mistaken for live observations.
+    base: dict[str, Any] = {}
     excluded_names = get_excluded_project_names(area)
     base.update(
         {
@@ -923,7 +925,7 @@ def build_stale_snapshot(area: dict[str, Any], previous: dict[str, Any] | None, 
             "exclude_project_names": sorted(excluded_names),
             "fetch_error": str(error),
             "stale": True,
-            "has_previous_data": bool(previous),
+            "has_previous_data": False,
         }
     )
     base.setdefault("active_projects", 0)
@@ -1098,7 +1100,7 @@ def format_project_count(area: dict[str, Any], key: str) -> str:
         return "資料不足"
     count_text = f"{len(area.get(key, []))} 個"
     if area.get("stale"):
-        return f"{count_text}（沿用前次）"
+        return "資料不足"
     return count_text
 
 
@@ -1112,7 +1114,7 @@ def format_observable_presale_count(area: dict[str, Any]) -> str:
     )
     count_text = f"{count} 個"
     if area.get("stale"):
-        return f"{count_text}（沿用前次）"
+        return "資料不足"
     return count_text
 
 
@@ -1133,10 +1135,8 @@ def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int
     pending: list[dict[str, str]] = []
     active: list[dict[str, str]] = []
     sold_out: list[dict[str, str]] = []
-    insufficient: list[dict[str, str]] = []
     for area in areas:
         if area.get("stale") and not area.get("has_previous_data", True):
-            insufficient.append({"name": area["name"], "url": area.get("buy_url", ""), "status": "資料不足"})
             continue
         for project in area.get("pending_launch_projects", []):
             item = dict(project)
@@ -1154,13 +1154,12 @@ def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int
         "pending": pending[:limit_per_group],
         "active": active[:limit_per_group],
         "sold_out": sold_out[:limit_per_group],
-        "insufficient": insufficient[:limit_per_group],
     }
 
 
 def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markdown: bool = False) -> None:
     overview = get_presale_overview_items(areas)
-    if not (overview["pending"] or overview["active"] or overview["sold_out"] or overview["insufficient"]):
+    if not (overview["pending"] or overview["active"] or overview["sold_out"]):
         return
     heading = "## 預售屋 / 待開案總覽" if markdown else "預售屋 / 待開案總覽"
     lines.append(heading)
@@ -1178,24 +1177,6 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
         lines.append("完銷 / 非銷售中預售")
         for item in overview["sold_out"]:
             lines.extend(format_project_line(item))
-    if overview["insufficient"]:
-        lines.append("資料不足區域")
-        for item in overview["insufficient"]:
-            lines.extend(format_project_line(item))
-    lines.append("")
-
-
-def append_project_mapping_index(lines: list[str], area_config: list[dict[str, Any]], markdown: bool = False) -> None:
-    mappings = get_project_url_mappings(area_config)
-    if not mappings:
-        return
-    lines.append("## 追蹤建案網址索引" if markdown else "追蹤建案網址索引")
-    if markdown:
-        lines.append("")
-    lines.append("- 以下是設定檔追蹤名單，不代表本次即時銷售狀態。")
-    for item in mappings[:10]:
-        lines.append(f"- {item.get('area_name', '')} / {item['name']}")
-        lines.append(f"  {item['url']}")
     lines.append("")
 
 
@@ -1218,9 +1199,9 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
     if total_projects == 0:
         lines.append("- 預售/待預售清單：本次沒有可用建案資料。")
         if no_previous_stale:
-            lines.append("- 原因：樂居抓取失敗，且 GitHub cache/state 沒有前次成功資料可沿用。")
+            lines.append("- 原因：樂居抓取失敗，本次不顯示舊資料或設定清單。")
         elif stale_areas:
-            lines.append("- 原因：樂居部分區域抓取失敗，目前只能沿用前次資料，但前次也沒有可用預售案。")
+            lines.append("- 原因：樂居部分區域抓取失敗，本次不顯示舊資料或設定清單。")
         else:
             lines.append("- 原因：樂居頁面可解析，但未解析到預售、待預售或完銷預售案。")
     if new_regs == 0:
@@ -1229,7 +1210,7 @@ def get_presale_data_status(areas: list[dict[str, Any]], state: dict[str, Any]) 
         lines.append(f"- 官方實價登錄資料抓取失敗：{official_errors[0]}")
     if stale_areas:
         names = "、".join(area["name"] for area in stale_areas[:5])
-        lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗或沿用前次資料：{names}")
+        lines.append(f"- 抓取限制：{len(stale_areas)} 個區域抓取失敗，本次不列舊資料：{names}")
     return lines
 
 
@@ -1566,8 +1547,8 @@ def build_macro_summary(areas: list[dict[str, Any]], rising_watch: list[dict[str
 
     if stale_count > 0:
         lines.append(
-            f"- 今天有 {stale_count} 個區塊因網站擋爬或資料不穩而沿用前次資料，"
-            "所以本日結論以郵政物流、樂善國小、中心商業區這些成功抓到的區塊為主。"
+            f"- 今天有 {stale_count} 個區塊因網站擋爬或資料不穩而抓取失敗，"
+            "本日結論只採用成功抓到的即時資料，不使用舊資料或設定清單補足。"
         )
 
     return lines
@@ -1602,11 +1583,6 @@ def new_report_content(
         lines.append("")
 
     append_presale_overview(lines, areas, markdown=True)
-    if not any(
-        area.get("pending_launch_projects") or area.get("active_presale_projects") or area.get("sold_out_presale_projects")
-        for area in areas
-    ):
-        append_project_mapping_index(lines, area_config or [], markdown=True)
     append_presale_data_status(lines, areas, state, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1683,6 +1659,16 @@ def new_report_content(
 
     for area in areas:
         previous = get_previous_area(state, area["name"])
+        if area.get("stale"):
+            lines.extend(
+                [
+                    f"## {area['name']}",
+                    "",
+                    f"- 本次抓取失敗，不顯示舊資料。原因：{area.get('fetch_error', '')}",
+                    "",
+                ]
+            )
+            continue
         lines.extend(
             [
                 f"## {area['name']}",
@@ -1696,9 +1682,6 @@ def new_report_content(
                 "",
             ]
         )
-        if area.get("stale"):
-            lines.append(f"- 注意：本次抓取失敗，以下使用上次成功資料。原因：{area.get('fetch_error', '')}")
-            lines.append("")
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
@@ -1743,11 +1726,6 @@ def new_line_message(
         lines.append("")
 
     append_presale_overview(lines, areas)
-    if not any(
-        area.get("pending_launch_projects") or area.get("active_presale_projects") or area.get("sold_out_presale_projects")
-        for area in areas
-    ):
-        append_project_mapping_index(lines, area_config or [])
     append_presale_data_status(lines, areas, state)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1803,6 +1781,15 @@ def new_line_message(
 
     for area in areas:
         previous = get_previous_area(state, area["name"])
+        if area.get("stale"):
+            lines.extend(
+                [
+                    area["name"],
+                    "本次抓取失敗，不顯示舊資料。",
+                    "",
+                ]
+            )
+            continue
         lines.extend(
             [
                 area["name"],
@@ -1813,9 +1800,6 @@ def new_line_message(
                 "",
             ]
         )
-        if area.get("stale"):
-            lines.append("注意：本次抓取失敗，改用上次成功資料。")
-            lines.append("")
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
