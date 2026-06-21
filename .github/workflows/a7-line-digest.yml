@@ -52,7 +52,7 @@ jobs:
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           python --version
-          python -m pip install --disable-pip-version-check --quiet curl-cffi
+          python -m pip install --disable-pip-version-check --quiet curl-cffi tzdata
 
       - name: Run A7 digest
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
