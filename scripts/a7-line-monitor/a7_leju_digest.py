@@ -378,7 +378,7 @@ def fetch_text(url: str) -> str:
             return fetcher(url)
         except Exception as exc:
             errors.append(str(exc))
-    raise RuntimeError(f"fetch failed for {url}: {'; '.join(errors[-2:])}")
+    raise RuntimeError(f"fetch failed for {url}: {'; '.join(errors)}")
 
 
 def fetch_bytes(url: str) -> bytes:
@@ -1333,6 +1333,35 @@ def get_price_compare_projects(area: dict[str, Any], limit: int = 8) -> list[dic
     return projects[:limit]
 
 
+def get_discounted_completed_projects(area: dict[str, Any], limit: int = 5) -> list[dict[str, Any]]:
+    benchmark = get_project_mid_price({"status": area.get("price", {}).get("one_year_price", "")})
+    if benchmark is None:
+        return []
+    discounted: list[dict[str, Any]] = []
+    for item in area.get("completed_projects", []):
+        low_price = get_project_low_price(item)
+        if low_price is None or low_price >= benchmark:
+            continue
+        candidate = dict(item)
+        candidate["benchmark_price"] = benchmark
+        candidate["low_price"] = low_price
+        candidate["discount_percent"] = (benchmark - low_price) / benchmark * 100
+        discounted.append(candidate)
+    discounted.sort(key=lambda row: row.get("discount_percent", 0), reverse=True)
+    return discounted[:limit]
+
+
+def format_discounted_completed_line(item: dict[str, Any]) -> list[str]:
+    return [
+        (
+            f"- {item.get('name', '未命名建案')} | 開價低點 {item.get('low_price', 0):.1f}萬/坪 "
+            f"< 近一年均價 {item.get('benchmark_price', 0):.1f}萬/坪 "
+            f"({item.get('discount_percent', 0):.1f}% below)"
+        ),
+        f"  {item.get('url', '')}",
+    ]
+
+
 def get_presale_overview_items(areas: list[dict[str, Any]], limit_per_group: int = 10) -> dict[str, list[dict[str, str]]]:
     pending: list[dict[str, str]] = []
     active: list[dict[str, str]] = []
@@ -1384,6 +1413,7 @@ def append_presale_overview(lines: list[str], areas: list[dict[str, Any]], markd
 
 def print_extraction_diagnostics(areas: list[dict[str, Any]]) -> None:
     print("A7 extraction diagnostics:")
+    print(f"proxy_configured={'yes' if os.environ.get('LEJU_FETCH_PROXY_URL', '').strip() else 'no'}")
     for area in areas:
         pending = area.get("pending_launch_projects", [])
         active = area.get("active_presale_projects", [])
@@ -1763,13 +1793,6 @@ def new_report_content(
     falling_watch = get_falling_price_watch(areas)
     project_rise_watch = get_project_price_rise_watch(areas, state)
 
-    if urgent_pending_projects:
-        lines.append("## 當日未開案預售屋提醒")
-        lines.append("")
-        for item in urgent_pending_projects:
-            lines.extend(format_project_line(item))
-        lines.append("")
-
     append_presale_overview(lines, areas, markdown=True)
 
     if market_pulse and market_pulse.get("enabled", False):
@@ -1878,11 +1901,11 @@ def new_report_content(
             for item in latest_presale_regs:
                 lines.extend(format_registration_line(item))
             lines.append("")
-        compare_projects = get_price_compare_projects(area)
-        if compare_projects:
-            lines.append("### 新成屋 vs 完銷預售價格比較")
-            for item in compare_projects:
-                lines.extend(format_price_compare_line(item, item.get("compare_label", "比較案")))
+        discounted_completed = get_discounted_completed_projects(area)
+        if discounted_completed:
+            lines.append("### 新成屋低於近一年均價觀察")
+            for item in discounted_completed:
+                lines.extend(format_discounted_completed_line(item))
             lines.append("")
 
     lines.append("## 大數據觀察")
@@ -1905,12 +1928,6 @@ def new_line_message(
     rising_watch = get_rising_price_watch(areas)
     falling_watch = get_falling_price_watch(areas)
     project_rise_watch = get_project_price_rise_watch(areas, state)
-
-    if urgent_pending_projects:
-        lines.append("當日未開案預售屋提醒")
-        for item in urgent_pending_projects[:4]:
-            lines.extend(format_project_line(item))
-        lines.append("")
 
     append_presale_overview(lines, areas)
 
@@ -1995,11 +2012,11 @@ def new_line_message(
             for item in latest_presale_regs:
                 lines.extend(format_registration_line(item))
             lines.append("")
-        compare_projects = get_price_compare_projects(area, limit=5)
-        if compare_projects:
-            lines.append("新成屋 vs 完銷預售價格比較")
-            for item in compare_projects:
-                lines.extend(format_price_compare_line(item, item.get("compare_label", "比較案")))
+        discounted_completed = get_discounted_completed_projects(area, limit=3)
+        if discounted_completed:
+            lines.append("新成屋低於近一年均價觀察")
+            for item in discounted_completed:
+                lines.extend(format_discounted_completed_line(item))
             lines.append("")
 
     lines.append("大數據觀察")
