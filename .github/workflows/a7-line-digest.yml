@@ -50,7 +50,7 @@ jobs:
 
       - name: Run A7 digest
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force_send }}" = "true" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python scripts/a7-line-monitor/a7_leju_digest.py --force
           else
             python scripts/a7-line-monitor/a7_leju_digest.py
