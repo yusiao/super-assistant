@@ -504,6 +504,18 @@ def parse_project_blocks(content: str) -> list[dict[str, str]]:
     return deduped[:40]
 
 
+def dedupe_projects(projects: list[dict[str, str]]) -> list[dict[str, str]]:
+    deduped: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for item in projects:
+        key = item.get("url", "").split("&is_alfasafe=", 1)[0] or item.get("name", "")
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    return deduped
+
+
 def get_project_detail_status(project: dict[str, str]) -> str:
     try:
         detail_text = html_to_text(fetch_text(project["url"]))
@@ -906,14 +918,20 @@ def get_area_snapshot(area: dict[str, Any]) -> dict[str, Any]:
     latest_listing_links = get_latest_listing_links(buy_content)[:8]
     excluded_names = get_excluded_project_names(area)
     latest_listing_links = filter_excluded_projects(latest_listing_links, excluded_names)
-    project_candidates = parse_project_blocks(new_build_list_content)
-    if not project_candidates and full_community_content:
-        project_candidates = parse_project_blocks(full_community_content)
+    project_candidates = dedupe_projects(
+        parse_project_blocks(new_build_list_content)
+        + parse_project_blocks(buy_content)
+        + parse_project_blocks(full_community_content)
+    )
     all_projects = filter_excluded_projects(
         enrich_project_statuses(project_candidates),
         excluded_names,
     )
-    comparison_candidates = parse_project_blocks(full_community_content) + get_extra_project_links(area)
+    comparison_candidates = dedupe_projects(
+        parse_project_blocks(full_community_content)
+        + parse_project_blocks(buy_content)
+        + get_extra_project_links(area)
+    )
     comparison_projects = enrich_project_statuses(comparison_candidates)
     pending_launch_projects = [item for item in all_projects if is_pending_launch(item)]
     active_presale_projects = [item for item in all_projects if is_active_presale(item)]
@@ -1347,7 +1365,7 @@ def print_extraction_diagnostics(areas: list[dict[str, Any]]) -> None:
         ):
             error = str(area.get(key, "")).strip()
             if error:
-                print(f"  {key}: {error[:220]}")
+                print(f"  {key}: {error[:600]}")
         for label, projects in (
             ("pending", pending),
             ("active", active),
