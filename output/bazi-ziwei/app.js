@@ -131,6 +131,12 @@ const TOPIC_CONFIG = {
     elements: ["木", "水"],
     prompt: "看子女緣、親子互動、生養照顧、晚輩關係與家庭延續。",
   },
+  health: {
+    label: "健康",
+    palaces: ["疾厄宮", "命宮", "福德宮"],
+    elements: ["水", "木", "土"],
+    prompt: "看身體弱點、壓力反應、修復能力、作息與長期保養方向。",
+  },
 };
 const SCOPE_LABELS = {
   decadal: "大限",
@@ -1124,6 +1130,7 @@ function topicAdvice(topicKey) {
     career: "事業分析會看官祿宮的職涯主軸，再用命宮看個人能力，用遷移宮看外部舞台、曝光與跨城市機會。",
     property: "財富分析會特別看田宅宮；若田宅有助力星且財帛/官祿能接上，房產緣較容易落地。仍建議保守估現金流、貸款壓力與維修成本。",
     children: "子女分析會以子女宮為主，輔看田宅宮的家庭承載與福德宮的相處舒適度；若煞忌較重，重點會落在照顧壓力、溝通節奏或緣分來得較晚。",
+    health: "健康分析以疾厄宮看身體弱點，命宮看體質基調，福德宮看睡眠、精神與壓力修復；命理結果只能作保養提醒，不取代醫師診斷。",
   }[topicKey] || "";
 }
 
@@ -1180,6 +1187,7 @@ function relatedPalaceNames(topicKey) {
     career: ["官祿宮", "命宮", "遷移宮", "財帛宮", "父母宮", "福德宮"],
     marriage: ["夫妻宮", "福德宮", "遷移宮", "命宮", "官祿宮", "子女宮"],
     children: ["子女宮", "田宅宮", "福德宮", "夫妻宮", "命宮", "父母宮"],
+    health: ["疾厄宮", "命宮", "福德宮", "父母宮", "田宅宮", "遷移宮"],
   }[topicKey] || TOPIC_CONFIG[topicKey]?.palaces || [];
 }
 
@@ -1275,6 +1283,7 @@ function baziTopicAnalysis(topicKey, chart, topic) {
     career: `八字事業看官殺的責任壓力、印星的學習證照、食傷的輸出表達與財星的資源變現；本盤${godCountText(counts, ["正官", "七殺", "正印", "偏印", "食神", "傷官"])}。${element.text}`,
     marriage: `八字姻緣看伴侶星與日主互動；女命重看正官、七殺，男命重看正財、偏財，再輔看食傷的相處表達與印星的安全感。本盤${godCountText(counts, ["正官", "七殺", "正財", "偏財", "食神", "傷官"])}。${element.text}`,
     children: `八字子女看食神、傷官，也看印星是否過重而壓住表達。本盤${godCountText(counts, ["食神", "傷官", "正印", "偏印"])}；食傷越能流通，越利於子女、作品、晚輩緣與創造力。${element.text}`,
+    health: `八字健康看五行偏盛偏枯、印星修復力、食傷消耗與官殺壓力；本盤${godCountText(counts, ["正印", "偏印", "食神", "傷官", "正官", "七殺"])}。印星較能看恢復、休養與照護資源，食傷過旺時要留意過度輸出與作息消耗，官殺重時壓力與緊繃感要優先管理。${element.text}`,
   };
 
   return {
@@ -1304,6 +1313,7 @@ function ziweiTopicAnalysis(topicKey, chart, context, network) {
     : "目前未取得流運宮位，先以原局網絡判斷。";
   const property = topicKey === "property" ? propertyAffinityText(chart, context) : "";
   const career = topicKey === "career" ? careerFitText(chart, context) : "";
+  const health = topicKey === "health" ? healthCareText(chart, context) : "";
 
   return [
     `紫微斗數以${topic.label}主宮為起點，但不單看一宮；本次同時納入${palaceListText(network.networkPalaces)}，並以${primary ? normalizePalaceName(primary.palace.name) : "主宮"}的三方四正${palaceListText(squarePalaces)}確認成局。`,
@@ -1314,6 +1324,7 @@ function ziweiTopicAnalysis(topicKey, chart, context, network) {
     flower,
     property,
     career,
+    health,
     period,
   ].filter(Boolean).join(" ");
 }
@@ -1553,6 +1564,24 @@ function buildTopicTimeline(topicKey, chart) {
       timelineEntry("升遷與能見度", promote, "官祿與制度資源較能接上，適合爭取職位、負責大型專案或建立專業名聲。"),
       timelineEntry("事業機會最好", best, "貴人、祿科與外部舞台較有支撐，是比較適合主動投履歷、談合作或擴大版圖的窗口。"),
     );
+  } else if (topicKey === "health") {
+    const checkup = pick((record) => record.score
+      + (periodHits(record, ["疾厄宮", "命宮", "父母宮"]) ? 2.4 : 0)
+      + starHits(record, ["天梁", "天魁", "天鉞", "化科", "左輔", "右弼"]) * 0.75);
+    const repair = pick((record) => record.score
+      + (periodHits(record, ["福德宮", "田宅宮", "命宮"]) ? 2 : 0)
+      + starHits(record, ["太陰", "天同", "天府", "祿存", "化祿"]) * 0.65
+      - record.network.pressureStars.length * 0.2);
+    const pressure = pick((record) => -record.score
+      + record.network.pressureStars.length * 1.25
+      + (periodHits(record, ["疾厄宮", "官祿宮", "遷移宮"]) ? 1.8 : 0)
+      + starHits(record, ["擎羊", "陀羅", "火星", "鈴星", "化忌", "病符", "白虎"]) * 0.75);
+    items.push(
+      timelineEntry("適合健檢與調理", checkup, "疾厄、命宮或父母宮被啟動，適合做健康檢查、追蹤舊問題與建立保養計畫。"),
+      timelineEntry("修復作息窗口", repair, "福德、田宅與命宮承接較好，適合調整睡眠、飲食、運動與居家生活節奏。"),
+      timelineEntry("壓力需保守", pressure, "疾厄、官祿或遷移壓力較明顯，工作奔波、睡眠不足或身體警訊要提早處理。"),
+    );
+    note = "健康時間軸為命理保養提醒，不是疾病診斷；若有症狀、疼痛或檢查異常，請以醫師與正式檢查為準。";
   } else {
     const windfall = pick((record) => record.score
       + (record.bazi.counts["偏財"] || 0) * 0.55
@@ -1676,6 +1705,39 @@ function careerFitText(chart, context) {
   return `職業適配：命主較適合${uniqueItems(suitable).slice(0, 5).join("、")}。`;
 }
 
+function healthCareText(chart, context) {
+  const illnessPalace = findPalaceByName(chart.astrolabe, "疾厄宮");
+  const lifePalace = getLifePalace(chart.astrolabe);
+  const fortunePalace = findPalaceByName(chart.astrolabe, "福德宮");
+  if (!illnessPalace) return "健康提醒：目前未取得疾厄宮資料，健康主題只能用八字五行作概略提醒。";
+
+  const illnessEvaluation = evaluatePalace(illnessPalace, periodStarsAt(context, illnessPalace.index));
+  const lifeEvaluation = lifePalace ? evaluatePalace(lifePalace, periodStarsAt(context, lifePalace.index)) : null;
+  const fortuneEvaluation = fortunePalace ? evaluatePalace(fortunePalace, periodStarsAt(context, fortunePalace.index)) : null;
+  const branchElement = ZHI_ELEMENT[illnessPalace.earthlyBranch] || "";
+  const elementFocus = {
+    "木": "木象偏筋骨、肝膽、眼睛、神經緊繃與伸展循環，重點是規律運動、放鬆與不要長期憋壓。",
+    "火": "火象偏心火、血壓、發炎、睡眠品質與急躁耗能，重點是降火、早睡與避免長期高刺激。",
+    "土": "土象偏脾胃、消化、代謝、肌肉承載與濕氣，重點是飲食節制、穩定作息與少冰甜油膩。",
+    "金": "金象偏呼吸道、皮膚、過敏、肩頸與規律性，重點是空氣品質、伸展與不要過度緊繃。",
+    "水": "水象偏腎氣、泌尿、內分泌、循環與寒濕，重點是保暖、補水、睡眠與避免透支。",
+  }[branchElement] || "五行象意不集中，重點放在作息、飲食、壓力與年度健檢。";
+  const pressureStars = cleanReadingStarNames(illnessEvaluation.challenges, 5);
+  const supportStars = cleanReadingStarNames([
+    ...illnessEvaluation.helpful,
+    ...(lifeEvaluation?.helpful || []),
+    ...(fortuneEvaluation?.helpful || []),
+  ], 5);
+  const pressure = pressureStars.length
+    ? `疾厄宮壓力星見${pressureStars.join("、")}，壓力容易從身體警訊、睡眠、發炎或慢性不適表現出來。`
+    : "疾厄宮煞忌壓力不重，較適合用穩定作息與運動保養維持。";
+  const support = supportStars.length
+    ? `修復助力見${supportStars.join("、")}，代表照護資源、恢復意識或遇到好醫師/好方法的機會較容易接上。`
+    : "修復助力星不算集中，更需要靠固定習慣與紀律保養。";
+
+  return `健康提醒：疾厄宮為${palaceLabel(illnessPalace)}，${elementFocus}${pressure}${support}命理只能提示保養方向，任何症狀仍應以醫師檢查為準。`;
+}
+
 function palaceStarNames(palace) {
   return uniqueItems([
     ...(palace?.majorStars || []).map(starDisplayName),
@@ -1716,7 +1778,58 @@ function pickBySeed(items, seed) {
   return items[Math.abs(seed) % items.length];
 }
 
+function partnerPresentationKind(targetGender) {
+  if (/女性|陰柔/.test(targetGender)) return "feminine";
+  if (/中性|雌雄|莫辨/.test(targetGender)) return "androgynous";
+  return "masculine";
+}
+
+function inferPartnerGenderProfile(starNames, spousePalace) {
+  const branch = toTraditional(spousePalace?.earthlyBranch || "");
+  const branchElement = ZHI_ELEMENT[branch] || "";
+  let masculine = BRANCH_YINYANG[branch] === "陽" ? 1.2 : 0;
+  let feminine = BRANCH_YINYANG[branch] === "陰" ? 1.2 : 0;
+  let neutral = 0;
+
+  masculine += namesIncludeAny(starNames, ["太陽", "武曲", "七殺", "破軍", "天梁", "紫微", "化權"]) ? 1.6 : 0;
+  masculine += namesIncludeAny(starNames, ["擎羊", "火星", "鈴星"]) ? 0.8 : 0;
+  feminine += namesIncludeAny(starNames, ["太陰", "天同", "天姚", "紅鸞", "天喜", "咸池", "文曲"]) ? 1.6 : 0;
+  feminine += namesIncludeAny(starNames, ["天鉞", "右弼"]) ? 0.6 : 0;
+  neutral += namesIncludeAny(starNames, ["天機", "巨門", "文昌", "文曲", "天相", "天馬"]) ? 1.1 : 0;
+  neutral += Math.abs(masculine - feminine) < 1.2 ? 1.4 : 0;
+
+  if (branchElement === "火" || branchElement === "金") masculine += 0.35;
+  if (branchElement === "水" || branchElement === "木") feminine += 0.35;
+  if (branchElement === "土") neutral += 0.3;
+
+  if (neutral >= masculine && neutral >= feminine) {
+    return {
+      label: "中性氣質",
+      imageGender: "androgynous adult person with refined gender-neutral presentation",
+      kind: "androgynous",
+      reason: "夫妻宮與三方四正的陰陽訊號接近，且帶有機敏、溝通或協調星，對象呈現不宜硬分男相或女相。",
+    };
+  }
+
+  if (feminine > masculine) {
+    return {
+      label: "女性氣質",
+      imageGender: "feminine-presenting adult woman",
+      kind: "feminine",
+      reason: "夫妻宮與三方四正陰柔、桃花、審美或照護星較明顯，對象外在呈現偏女性氣質。",
+    };
+  }
+
+  return {
+    label: "男性氣質",
+    imageGender: "masculine-presenting adult man",
+    kind: "masculine",
+    reason: "夫妻宮與三方四正陽剛、執行、承擔或開創星較明顯，對象外在呈現偏男性氣質。",
+  };
+}
+
 function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
+  const kind = partnerPresentationKind(targetGender);
   const femaleRanges = {
     "木": [164, 171, 48, 56],
     "火": [160, 168, 45, 54],
@@ -1731,13 +1844,21 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
     "金": [174, 182, 65, 78],
     "水": [170, 178, 60, 72],
   };
-  const [minHeight, maxHeight, minWeight, maxWeight] = (targetGender === "女性" ? femaleRanges : maleRanges)[branchElement] || [162, 172, 50, 64];
+  const androgynousRanges = {
+    "木": [168, 176, 54, 65],
+    "火": [166, 174, 52, 64],
+    "土": [164, 172, 58, 70],
+    "金": [167, 176, 54, 66],
+    "水": [164, 173, 52, 64],
+  };
+  const rangeMap = kind === "feminine" ? femaleRanges : kind === "androgynous" ? androgynousRanges : maleRanges;
+  const [minHeight, maxHeight, minWeight, maxWeight] = rangeMap[branchElement] || [162, 172, 50, 64];
   const height = numberFromSeed(seed, minHeight, maxHeight);
   const weight = numberFromSeed(seed * 7, minWeight, maxWeight);
   const isSoft = namesIncludeAny(starNames, ["太陰", "天同", "紅鸞", "天喜", "天姚", "咸池"]);
   const isSharp = namesIncludeAny(starNames, ["武曲", "七殺", "破軍", "擎羊", "陀羅"]);
 
-  if (targetGender === "女性") {
+  if (kind === "feminine") {
     const cupOptions = branchElement === "土" || branchElement === "水"
       ? ["C-D", "D", "C", "D-E"]
       : branchElement === "火"
@@ -1755,6 +1876,18 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
     };
   }
 
+  if (kind === "androgynous") {
+    return {
+      height: `${height} cm`,
+      weight: `${weight} kg`,
+      bodyRatio: isSharp
+        ? "肩頸與腰線乾淨，整體偏中性冷感、比例俐落"
+        : isSoft
+          ? "線條柔和但不過度女性化，帶雌雄莫辨的親近感"
+          : "身形修長均衡，男女特徵都不過度突出，辨識度在氣質與穿搭",
+    };
+  }
+
   return {
     height: `${height} cm`,
     weight: `${weight} kg`,
@@ -1767,6 +1900,7 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
 }
 
 function partnerHairAndStyle(targetGender, branchElement, starNames, seed) {
+  const kind = partnerPresentationKind(targetGender);
   const hairColors = {
     "木": ["深棕色", "自然黑帶棕光", "栗棕色"],
     "火": ["暖棕色", "焦糖棕", "深咖啡色"],
@@ -1788,12 +1922,19 @@ function partnerHairAndStyle(targetGender, branchElement, starNames, seed) {
     "金": ["線條感短髮", "乾淨旁分", "俐落油頭感短髮"],
     "水": ["柔順短中髮", "自然瀏海短髮", "鬆弛感旁分"],
   }[branchElement] || ["自然短髮"];
+  const neutralHair = {
+    "木": ["鎖骨層次髮或清爽中短髮", "自然蓬鬆中短髮", "帶空氣感的中性髮型"],
+    "火": ["俐落短中髮", "高層次中短髮", "有造型感的中性髮型"],
+    "土": ["低調中短髮", "自然內彎短中髮", "穩重乾淨的中性髮型"],
+    "金": ["線條感短中髮", "耳下短髮", "俐落直順的中性髮型"],
+    "水": ["柔順短中髮", "微捲中短髮", "低調帶瀏海的中性髮型"],
+  }[branchElement] || ["自然中性髮型"];
   const outfitBase = {
-    "木": targetGender === "女性" ? "喜歡襯衫、針織、長裙或有垂墜感的單品" : "偏好襯衫、薄外套、乾淨休閒與有層次的穿法",
-    "火": targetGender === "女性" ? "喜歡亮色點綴、合身上衣、短版外套或有存在感的配件" : "偏好合身剪裁、運動休閒、皮革或亮色細節",
-    "土": targetGender === "女性" ? "喜歡大地色、柔軟材質、長版外套與穩重質感" : "偏好大地色、工裝、針織與穩重耐看的單品",
-    "金": targetGender === "女性" ? "喜歡西裝外套、單色洋裝、金屬飾品與乾淨線條" : "偏好襯衫、西裝外套、單色系與俐落剪裁",
-    "水": targetGender === "女性" ? "喜歡柔霧色、絲質或雪紡、寬鬆但修飾身形的穿搭" : "偏好深色、柔軟材質、簡潔但有細節的穿法",
+    "木": kind === "feminine" ? "喜歡襯衫、針織、長裙或有垂墜感的單品" : kind === "androgynous" ? "偏好襯衫、寬版外套、層次感背心與乾淨中性穿法" : "偏好襯衫、薄外套、乾淨休閒與有層次的穿法",
+    "火": kind === "feminine" ? "喜歡亮色點綴、合身上衣、短版外套或有存在感的配件" : kind === "androgynous" ? "偏好短版外套、俐落剪裁、亮色小配件與帶速度感的中性穿搭" : "偏好合身剪裁、運動休閒、皮革或亮色細節",
+    "土": kind === "feminine" ? "喜歡大地色、柔軟材質、長版外套與穩重質感" : kind === "androgynous" ? "偏好大地色、工裝、寬褲、針織與低調質感" : "偏好大地色、工裝、針織與穩重耐看的單品",
+    "金": kind === "feminine" ? "喜歡西裝外套、單色洋裝、金屬飾品與乾淨線條" : kind === "androgynous" ? "偏好西裝外套、單色系、直線剪裁與金屬配件" : "偏好襯衫、西裝外套、單色系與俐落剪裁",
+    "水": kind === "feminine" ? "喜歡柔霧色、絲質或雪紡、寬鬆但修飾身形的穿搭" : kind === "androgynous" ? "偏好深色、柔軟材質、寬鬆輪廓與低調細節" : "偏好深色、柔軟材質、簡潔但有細節的穿法",
   }[branchElement] || "穿搭偏乾淨耐看";
   const stylingNotes = [];
 
@@ -1803,7 +1944,7 @@ function partnerHairAndStyle(targetGender, branchElement, starNames, seed) {
 
   return {
     hairColor: pickBySeed(hairColors, seed + 3),
-    hairStyle: pickBySeed(targetGender === "女性" ? femaleHair : maleHair, seed + 5),
+    hairStyle: pickBySeed(kind === "feminine" ? femaleHair : kind === "androgynous" ? neutralHair : maleHair, seed + 5),
     outfit: outfitBase,
     stylingNotes,
   };
@@ -1870,7 +2011,7 @@ function inferPartnerAppearance(starNames, spousePalace, targetGender = "成人"
 }
 
 function partnerTargetGender(chart) {
-  return chart.formValues.gender === "女" ? "男性" : "女性";
+  return chart.partnerProfile?.genderProfile?.label || "命盤所示對象氣質";
 }
 
 function compactQuery(value) {
@@ -1912,7 +2053,8 @@ function buildPartnerProfile(chart) {
     ...palaceStarNames(causePalace).slice(0, 3),
   ]);
   const careers = inferPartnerCareers(supportStars, careerPalace || spousePalace);
-  const appearance = inferPartnerAppearance(supportStars, spousePalace, partnerTargetGender(chart));
+  const genderProfile = inferPartnerGenderProfile(supportStars, spousePalace);
+  const appearance = inferPartnerAppearance(supportStars, spousePalace, genderProfile.label);
   const spouseEvaluation = spousePalace ? evaluatePalace(spousePalace) : null;
   const spouseMain = summarizeStarNames(spousePalace?.majorStars || [], "夫妻宮主星不明顯");
   const meeting = [];
@@ -1937,6 +2079,7 @@ function buildPartnerProfile(chart) {
     spouseStars,
     supportStars,
     careers,
+    genderProfile,
     appearance,
     spouseEvaluation,
     spouseMain,
@@ -1962,15 +2105,18 @@ function partnerPalette(profile) {
 function buildPartnerPortraitSvg(chart, profile) {
   const palette = partnerPalette(profile);
   const targetGender = partnerTargetGender(chart);
+  const presentationKind = partnerPresentationKind(targetGender);
   const avatar = profile.appearance.avatarClass;
   const faceWidth = avatar === "tall" ? 88 : avatar === "sharp" ? 94 : avatar === "solid" ? 118 : 106;
   const shoulderWidth = avatar === "solid" ? 224 : avatar === "athletic" ? 210 : avatar === "tall" ? 168 : 190;
   const faceShape = avatar === "sharp" ? "M153 109 C158 66 202 60 217 109 C229 153 207 187 185 191 C162 187 140 153 153 109Z" : "M150 110 C150 72 220 72 220 110 C220 160 204 190 185 190 C166 190 150 160 150 110Z";
   const mouth = namesIncludeAny(profile.supportStars, ["太陽", "紅鸞", "天喜", "天姚"]) ? "M174 161 Q185 169 196 161" : "M176 163 Q185 166 194 163";
   const eyeY = namesIncludeAny(profile.supportStars, ["天機", "巨門"]) ? 126 : 130;
-  const hairPath = targetGender === "男性"
+  const hairPath = presentationKind === "masculine"
     ? `M139 112 C136 72 162 52 188 54 C220 56 236 81 226 119 C211 101 181 94 139 112Z`
-    : `M132 121 C128 72 160 46 190 48 C226 50 244 83 235 136 C223 112 203 94 160 102 C146 108 138 115 132 121Z`;
+    : presentationKind === "androgynous"
+      ? `M136 116 C133 75 160 50 190 52 C222 54 239 80 230 124 C212 105 185 96 150 105 C144 108 139 112 136 116Z`
+      : `M132 121 C128 72 160 46 190 48 C226 50 244 83 235 136 C223 112 203 94 160 102 C146 108 138 115 132 121Z`;
   const career = profile.careers[0] || "專業人士";
   const title = `${targetGender}・${career}`;
   const subtitle = `${profile.appearance.face}｜${profile.appearance.build}`;
@@ -2013,7 +2159,9 @@ function partnerImageEndpointAvailable() {
 
 function buildPartnerImagePayload(chart, profile) {
   return {
-    targetGender: partnerTargetGender(chart),
+    targetGender: profile.genderProfile?.label || partnerTargetGender(chart),
+    imageGender: profile.genderProfile?.imageGender || "androgynous adult person",
+    genderReason: profile.genderProfile?.reason || "",
     school: ASTRO_SCHOOL_LABEL,
     careers: profile.careers.slice(0, 4),
     appearance: {
@@ -2087,6 +2235,7 @@ function renderPartnerProfile(chart) {
   const reasons = [
     `以夫妻宮為主，夫妻宮為${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}，但不單看夫妻宮。`,
     `正緣輪廓同時參考${focusText}；本盤參考星曜包含${starText}。`,
+    `正緣呈現不以命主性別硬切，而是依夫妻宮與三方四正推估為${profile.genderProfile?.label || "命盤所示對象氣質"}；${profile.genderProfile?.reason || ""}`,
     `職業推估以夫妻宮看對象本質，官祿宮看社會角色，遷移宮看出現場域，財帛宮看資源與工作型態。`,
     `外貌身形以夫妻宮地支五行${profile.appearance.element}作底，再用夫妻宮三方四正、主星、桃花與煞曜修正。`,
     ...profile.meeting,
@@ -2104,6 +2253,7 @@ function renderPartnerProfile(chart) {
         </div>
         <div class="partner-grid">
           <div class="partner-cell"><span>可能職業</span><strong>${escapeHtml(careerText)}</strong></div>
+          <div class="partner-cell"><span>性別氣質</span><strong>${escapeHtml(profile.genderProfile?.label || "依命盤呈現")}</strong></div>
           <div class="partner-cell"><span>身高體重</span><strong>${escapeHtml(`${detail.height || "待推估"} / ${detail.weight || "待推估"}`)}</strong></div>
           <div class="partner-cell"><span>身材輪廓</span><strong>${escapeHtml(profile.appearance.build)}</strong></div>
           <div class="partner-cell"><span>體態比例</span><strong>${escapeHtml(detail.bodyRatio || "比例訊號待校正")}</strong></div>
@@ -2136,6 +2286,7 @@ function topicFromQuestion(question) {
   const q = question.replace(/\s+/g, "");
   if (/正緣|姻緣|婚|伴侶|另一半|對象/.test(q)) return "marriage";
   if (/子女|小孩|孩子|生育|懷孕|親子|晚輩/.test(q)) return "children";
+  if (/健康|身體|疾病|疾厄|病|睡眠|壓力|作息|體質|保養|醫/.test(q)) return "health";
   if (/事業|工作|職涯|升遷|公司|官祿/.test(q)) return "career";
   if (/財富|財|錢|收入|資產|房|田宅|投資|房地產|不動產/.test(q)) return "property";
   return null;
@@ -2176,6 +2327,7 @@ function chatPartnerAnswer() {
 
   return [
     `正緣以夫妻宮為主，但會合看夫妻宮三方四正與相關宮位：${palaceListText(profile.focusPalaces, 10)}。夫妻宮為${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}。`,
+    `性別氣質：${profile.genderProfile?.label || "依命盤呈現"}，${profile.genderProfile?.reason || "不以命主性別硬性限制對象外在呈現。"}`,
     `可能職業方向：${careers}。`,
     `身材長相模擬：${appearance}。`,
     profile.causePalace ? `來因宮是${palaceLabel(profile.causePalace)}，關係事件常會從${palaceKey(profile.causePalace.name)}議題切入。` : "",
@@ -2237,7 +2389,7 @@ function addChatMessage(text, role = "bot") {
 
 function seedChat() {
   if (chatLog.children.length > 0) return;
-  addChatMessage("命盤已載入。你可以問財富、房地產、事業、姻緣、子女、正緣、來因宮、身宮、大限或流年。");
+  addChatMessage("命盤已載入。你可以問財富、房地產、事業、姻緣、子女、健康、正緣、來因宮、身宮、大限或流年。");
 }
 
 function regeneratePartnerPortrait() {
