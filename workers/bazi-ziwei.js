@@ -1,12 +1,27 @@
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Price-Watch-Token",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
+  ...CORS_HEADERS,
 };
+const PRICE_WATCH_KV_KEY = "price-watch:watches";
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
     status,
     headers: JSON_HEADERS,
   });
+}
+
+function methodNotAllowed() {
+  return json(405, { error: "Method not allowed." });
+}
+
+function corsPreflight() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
 function envValue(env, key, fallback = "") {
@@ -27,6 +42,317 @@ function safeErrorMessage(message) {
     .replace(/sk-[0-9A-Za-z_-]+/g, "[redacted-openai-api-key]");
 }
 
+function safeId(text, fallback = "watch") {
+  const slug = compact(text, "", 120)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || `${fallback}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function hasPriceWatchAccess(request, env, allowPublicSearch = false) {
+  if (allowPublicSearch && envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true") {
+    return true;
+  }
+  const expected = envValue(env, "PRICE_WATCH_ACCESS_TOKEN");
+  if (!expected) return false;
+  const authorization = request.headers.get("Authorization") || "";
+  const bearer = authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
+  const headerToken = request.headers.get("X-Price-Watch-Token") || "";
+  return bearer === expected || headerToken === expected;
+}
+
+function priceWatchAuthError(env) {
+  if (!envValue(env, "PRICE_WATCH_ACCESS_TOKEN")) {
+    return json(503, { error: "PRICE_WATCH_ACCESS_TOKEN is not set." });
+  }
+  return json(401, { error: "Invalid or missing price watch access token." });
+}
+
+function normalizeMoney(value) {
+  if (value === undefined || value === null) return null;
+  const number = Number(String(value).replace(/[^\d.]/g, ""));
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function currencyLabel(currency) {
+  const value = compact(currency, "TWD", 10).toUpperCase();
+  return value || "TWD";
+}
+
+function formatPrice(price, currency = "TWD") {
+  if (!Number.isFinite(Number(price))) return "";
+  const rounded = Math.round(Number(price));
+  if (currencyLabel(currency) === "TWD") return `NT$${rounded.toLocaleString("zh-TW")}`;
+  return `${currencyLabel(currency)} ${rounded.toLocaleString("en-US")}`;
+}
+
+async function serpApiSearch(params, env) {
+  const apiKey = envValue(env, "SERPAPI_API_KEY");
+  if (!apiKey) throw new Error("SERPAPI_API_KEY is not set.");
+  const url = new URL("https://serpapi.com/search.json");
+  Object.entries({ ...params, api_key: apiKey }).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || `SerpApi request failed with HTTP ${response.status}.`);
+  }
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+function normalizeShoppingResults(data, currency) {
+  return (data.shopping_results || [])
+    .map((item) => {
+      const price = normalizeMoney(item.extracted_price || item.price);
+      if (!price) return null;
+      return {
+        id: safeId(`${item.source || item.seller || "shop"}-${item.title || ""}-${item.link || ""}`, "product"),
+        type: "product",
+        title: compact(item.title, "商品", 180),
+        source: compact(item.source || item.seller || "Google Shopping", "Google Shopping", 80),
+        price,
+        priceText: item.price || formatPrice(price, currency),
+        currency: currencyLabel(currency),
+        link: item.link || item.product_link || "",
+        thumbnail: item.thumbnail || "",
+        rating: item.rating || "",
+        reviews: item.reviews || "",
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.price - right.price)
+    .slice(0, 20);
+}
+
+function normalizeFlightResults(data, payload, currency) {
+  const flights = [...(data.best_flights || []), ...(data.other_flights || [])];
+  const route = `${payload.departureId || ""}-${payload.arrivalId || ""}`;
+  const items = flights
+    .map((item, index) => {
+      const price = normalizeMoney(item.price);
+      if (!price) return null;
+      const firstFlight = Array.isArray(item.flights) ? item.flights[0] || {} : {};
+      const lastFlight = Array.isArray(item.flights) ? item.flights[item.flights.length - 1] || {} : {};
+      const airline = compact(firstFlight.airline || item.airline || "Flight", "Flight", 80);
+      return {
+        id: safeId(`${route}-${airline}-${item.price}-${index}`, "flight"),
+        type: "flight",
+        title: `${route} ${compact(airline, "航班", 60)}`,
+        source: "Google Flights",
+        price,
+        priceText: formatPrice(price, currency),
+        currency: currencyLabel(currency),
+        link: `https://www.google.com/travel/flights?q=${encodeURIComponent(
+          `${payload.departureId || ""} ${payload.arrivalId || ""} ${payload.outboundDate || ""} ${payload.returnDate || ""}`,
+        )}`,
+        airline,
+        duration: item.total_duration || "",
+        stops: item.stops ?? "",
+        departure: firstFlight.departure_airport?.time || "",
+        arrival: lastFlight.arrival_airport?.time || "",
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.price - right.price)
+    .slice(0, 20);
+
+  const insights = data.price_insights || {};
+  return {
+    results: items,
+    insights: {
+      lowestPrice: normalizeMoney(insights.lowest_price),
+      priceLevel: insights.price_level || "",
+      typicalPriceRange: insights.typical_price_range || [],
+    },
+  };
+}
+
+function productWatchFromPayload(payload) {
+  const name = compact(payload.name || payload.query || payload.title, "商品追蹤", 120);
+  const query = compact(payload.query || name, name, 160);
+  const currency = currencyLabel(payload.currency);
+  return {
+    enabled: true,
+    id: safeId(payload.id || name, "product"),
+    type: "product",
+    name,
+    currency,
+    target_price: normalizeMoney(payload.targetPrice),
+    alert_on_new_low: true,
+    alert_cooldown_days: 7,
+    sources: [
+      {
+        type: "serpapi_google_shopping",
+        id: "google-shopping",
+        name: "Google Shopping",
+        query,
+        gl: compact(payload.gl, "tw", 8),
+        hl: compact(payload.hl, "zh-tw", 12),
+        currency,
+        limit: 8,
+      },
+    ],
+  };
+}
+
+function flightWatchFromPayload(payload) {
+  const departureId = compact(payload.departureId, "", 8).toUpperCase();
+  const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+  const outboundDate = compact(payload.outboundDate, "", 16);
+  const returnDate = compact(payload.returnDate, "", 16);
+  const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${outboundDate}`, 140);
+  const currency = currencyLabel(payload.currency);
+  const source = {
+    type: "serpapi_google_flights",
+    id: "google-flights",
+    name: "Google Flights",
+    departure_id: departureId,
+    arrival_id: arrivalId,
+    outbound_date: outboundDate,
+    currency,
+    hl: compact(payload.hl, "zh-tw", 12),
+    gl: compact(payload.gl, "tw", 8),
+    adults: compact(payload.adults, "1", 4),
+    travel_class: compact(payload.travelClass, "1", 4),
+  };
+  if (returnDate) source.return_date = returnDate;
+  return {
+    enabled: true,
+    id: safeId(payload.id || `${departureId}-${arrivalId}-${outboundDate}-${returnDate}`, "flight"),
+    type: "flight",
+    name,
+    currency,
+    target_price: normalizeMoney(payload.targetPrice),
+    alert_on_new_low: true,
+    alert_cooldown_days: 3,
+    sources: [source],
+  };
+}
+
+function validateWatch(watch) {
+  if (!watch || typeof watch !== "object") throw new Error("watch is required.");
+  if (!watch.id || !watch.name || !watch.type) throw new Error("watch id, name and type are required.");
+  if (!Array.isArray(watch.sources) || !watch.sources.length) throw new Error("watch sources are required.");
+  return watch;
+}
+
+async function readPriceWatches(env) {
+  if (!env.PRICE_WATCH_KV || typeof env.PRICE_WATCH_KV.get !== "function") return [];
+  const data = await env.PRICE_WATCH_KV.get(PRICE_WATCH_KV_KEY, { type: "json" });
+  return Array.isArray(data?.watches) ? data.watches : [];
+}
+
+async function writePriceWatches(env, watches) {
+  if (!env.PRICE_WATCH_KV || typeof env.PRICE_WATCH_KV.put !== "function") {
+    throw new Error("PRICE_WATCH_KV binding is not set.");
+  }
+  await env.PRICE_WATCH_KV.put(PRICE_WATCH_KV_KEY, JSON.stringify({ watches }, null, 2));
+}
+
+async function handlePriceWatchConfig(request, env) {
+  if (request.method !== "GET") return methodNotAllowed();
+  return json(200, {
+    hasSerpApi: Boolean(envValue(env, "SERPAPI_API_KEY")),
+    hasKv: Boolean(env.PRICE_WATCH_KV),
+    requiresToken: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() !== "true",
+    publicSearch: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true",
+  });
+}
+
+async function handlePriceWatchSearch(request, env) {
+  if (request.method === "OPTIONS") return corsPreflight();
+  if (request.method !== "POST") return methodNotAllowed();
+  if (!hasPriceWatchAccess(request, env, true)) return priceWatchAuthError(env);
+
+  const payload = await request.json().catch(() => ({}));
+  const type = compact(payload.type, "product", 20).toLowerCase();
+  const currency = currencyLabel(payload.currency);
+
+  if (type === "product") {
+    const query = compact(payload.query, "", 160);
+    if (!query) return json(400, { error: "query is required." });
+    const data = await serpApiSearch(
+      {
+        engine: "google_shopping",
+        q: query,
+        gl: compact(payload.gl, "tw", 8),
+        hl: compact(payload.hl, "zh-tw", 12),
+        currency,
+      },
+      env,
+    );
+    return json(200, {
+      type: "product",
+      query,
+      currency,
+      results: normalizeShoppingResults(data, currency),
+    });
+  }
+
+  if (type === "flight") {
+    const departureId = compact(payload.departureId, "", 8).toUpperCase();
+    const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+    const outboundDate = compact(payload.outboundDate, "", 16);
+    if (!departureId || !arrivalId || !outboundDate) {
+      return json(400, { error: "departureId, arrivalId and outboundDate are required." });
+    }
+    const data = await serpApiSearch(
+      {
+        engine: "google_flights",
+        departure_id: departureId,
+        arrival_id: arrivalId,
+        outbound_date: outboundDate,
+        return_date: compact(payload.returnDate, "", 16),
+        currency,
+        hl: compact(payload.hl, "zh-tw", 12),
+        gl: compact(payload.gl, "tw", 8),
+        adults: compact(payload.adults, "1", 4),
+        travel_class: compact(payload.travelClass, "1", 4),
+      },
+      env,
+    );
+    return json(200, {
+      type: "flight",
+      currency,
+      ...normalizeFlightResults(data, { ...payload, departureId, arrivalId, outboundDate }, currency),
+    });
+  }
+
+  return json(400, { error: "Unsupported search type." });
+}
+
+async function handlePriceWatchWatches(request, env) {
+  if (request.method === "OPTIONS") return corsPreflight();
+  if (!hasPriceWatchAccess(request, env, false)) return priceWatchAuthError(env);
+
+  if (request.method === "GET") {
+    return json(200, { watches: await readPriceWatches(env) });
+  }
+
+  if (request.method !== "POST") return methodNotAllowed();
+  const payload = await request.json().catch(() => ({}));
+  let watch = payload.watch;
+  if (!watch && payload.type === "product") watch = productWatchFromPayload(payload);
+  if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload);
+  watch = validateWatch(watch);
+
+  const watches = await readPriceWatches(env);
+  const withoutExisting = watches.filter((item) => item.id !== watch.id);
+  withoutExisting.push(watch);
+  await writePriceWatches(env, withoutExisting);
+  return json(200, { ok: true, watch, watches: withoutExisting });
+}
+
 function list(values, fallback, maxItems = 6) {
   const items = Array.isArray(values)
     ? values.map((item) => compact(item, "", 120)).filter(Boolean)
@@ -40,6 +366,7 @@ function imageOutputFormat(env) {
 }
 
 function buildPrompt(payload) {
+  const method = compact(payload.method, "Chinese astrology", 80);
   const targetGender = compact(payload.targetGender, "adult person", 40);
   const imageGender = compact(payload.imageGender, targetGender, 90);
   const genderReason = compact(payload.genderReason, "", 180);
@@ -63,7 +390,7 @@ function buildPrompt(payload) {
 
   return [
     `Create a high-quality photorealistic portrait of a fictional ${imageGender}.`,
-    `Chinese astrology gender-expression note: ${targetGender}${genderReason ? `, ${genderReason}` : ""}.`,
+    `Astrology method: ${method}. Relationship-presentation note: ${targetGender}${genderReason ? `, ${genderReason}` : ""}.`,
     "The person must be original and not a celebrity, influencer, public figure, or identifiable private person.",
     "Use a tasteful editorial portrait style, natural lighting, realistic skin texture, modern clothing, calm confident expression, half-body framing, neutral background, no text, no watermark, no horoscope symbols.",
     `Appearance direction: ${face}; body direction: ${build}; five-element mood: ${element}.`,
@@ -71,7 +398,7 @@ function buildPrompt(payload) {
     story ? `Character silhouette story: ${story}.` : "",
     `Personality and styling cues: ${notes}.`,
     `Possible career aura: ${careers}.`,
-    `Zi Wei symbolic references, used only as abstract styling guidance: spouse palace ${compact(palaces.spouse)}, spouse three-directions/four-correct ${compact(palaces.spouseSquare)}, life palace ${compact(palaces.life)}, travel palace ${compact(palaces.travel)}, fortune palace ${compact(palaces.fortune)}, career palace ${compact(palaces.career)}, wealth palace ${compact(palaces.wealth)}, cause palace ${compact(palaces.cause)}, stars ${stars}.`,
+    `Symbolic references from ${method}, used only as abstract styling guidance: relationship context ${compact(palaces.spouse)}, supporting structure ${compact(palaces.spouseSquare)}, self context ${compact(palaces.life)}, external context ${compact(palaces.travel)}, inner context ${compact(palaces.fortune)}, career context ${compact(palaces.career)}, wealth context ${compact(palaces.wealth)}, origin context ${compact(palaces.cause)}, stars ${stars}.`,
     `Relationship context cues: ${reasons}.`,
     "Do not include explicit content. Do not include more than one person. Do not add labels or captions.",
   ].filter(Boolean).join(" ");
@@ -267,7 +594,7 @@ async function generateWithFallback(prompt, env) {
 
 async function handleGeneratePartnerImage(request, env) {
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204 });
+    return corsPreflight();
   }
   if (request.method !== "POST") {
     return json(405, { error: "Method not allowed." });
@@ -304,6 +631,15 @@ export default {
       url.pathname === "/api/generate-partner-image"
     ) {
       return handleGeneratePartnerImage(request, env);
+    }
+    if (url.pathname === "/api/price-watch/config") {
+      return handlePriceWatchConfig(request, env);
+    }
+    if (url.pathname === "/api/price-watch/search") {
+      return handlePriceWatchSearch(request, env);
+    }
+    if (url.pathname === "/api/price-watch/watches") {
+      return handlePriceWatchWatches(request, env);
     }
     return env.ASSETS.fetch(request);
   },
