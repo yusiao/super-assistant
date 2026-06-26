@@ -56,95 +56,157 @@
 
           <section class="summary-strip" id="summary-strip"></section>
 
-          <section class="bazi-section">
-            <div class="section-heading">
-              <p class="eyebrow">BaZi</p>
-              <h2>八字四柱</h2>
-            </div>
-            <div class="pillar-grid" id="pillar-grid"></div>
-            <div class="analysis-grid">
-              <div class="analysis-panel">
-                <h3>五行分布</h3>
-                <div id="element-bars" class="element-bars"></div>
+          <nav class="method-switch" aria-label="選擇論盤方法" role="tablist">
+            <button class="method-tab is-active" type="button" role="tab" aria-selected="true" data-reading-method="bazi">八字論盤</button>
+            <button class="method-tab" type="button" role="tab" aria-selected="false" data-reading-method="ziwei">紫微斗數論盤</button>
+          </nav>
+
+          <section class="method-view" data-method-view="bazi">
+            <section class="bazi-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">BaZi</p>
+                  <h2>八字四柱</h2>
+                </div>
+                <span class="section-note">以日主、月令、十神與五行結構為核心</span>
               </div>
-              <div class="analysis-panel">
-                <h3>納音</h3>
-                <div id="nayin-list" class="nayin-list"></div>
+              <div class="pillar-grid" id="pillar-grid"></div>
+              <div class="analysis-grid">
+                <div class="analysis-panel">
+                  <h3>五行分布</h3>
+                  <div id="element-bars" class="element-bars"></div>
+                </div>
+                <div class="analysis-panel">
+                  <h3>納音</h3>
+                  <div id="nayin-list" class="nayin-list"></div>
+                </div>
               </div>
-            </div>
+              <div id="bazi-insight-output" class="bazi-insight-output"></div>
+            </section>
+
+            <section class="bazi-reading-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">BaZi Reading</p>
+                  <h2>八字主題論盤</h2>
+                </div>
+                <span class="section-note">五行、十神、干支關係與當期運勢分開判讀</span>
+              </div>
+              <div class="reading-controls bazi-reading-controls">
+                <label class="select-field">
+                  <span class="field-label-with-help">
+                    判讀層級
+                    <span class="info-tooltip" tabindex="0" aria-label="原局：四柱先天結構；大運：十年左右的人生階段；流年：單一年份的干支作用。" data-tooltip="原局：四柱先天結構。大運：十年左右的人生階段。流年：單一年份的干支作用。">?</span>
+                  </span>
+                  <select id="bazi-scope-select">
+                    <option value="natal">原局</option>
+                    <option value="decadal">大運</option>
+                    <option value="yearly">流年</option>
+                  </select>
+                </label>
+                <label class="select-field" id="bazi-decadal-control" hidden>
+                  <span>大運階段</span>
+                  <select id="bazi-decadal-select"></select>
+                </label>
+                <label class="select-field" id="bazi-year-control" hidden>
+                  <span>流年年份</span>
+                  <input id="bazi-target-year" type="number" min="1900" max="2100" />
+                </label>
+                <label class="select-field">
+                  <span>主題</span>
+                  <select id="bazi-topic-select">
+                    <option value="property">財富</option>
+                    <option value="career">事業</option>
+                    <option value="marriage">姻緣</option>
+                    <option value="children">子女</option>
+                    <option value="health">健康</option>
+                  </select>
+                </label>
+              </div>
+              <div id="bazi-reading-output" class="reading-output"></div>
+            </section>
           </section>
 
-          <section class="reading-section">
-            <div class="section-heading">
-              <p class="eyebrow">Reading</p>
-              <h2>主題解盤</h2>
-            </div>
+          <section class="method-view" data-method-view="ziwei" hidden>
+            <section class="reading-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Zi Wei Dou Shu</p>
+                  <h2>紫微斗數主題解盤</h2>
+                </div>
+                <span class="section-note">以十二宮、三方四正與流運宮位為核心</span>
+              </div>
 
-            <div id="palace-overview-output"></div>
+              <div id="palace-overview-output"></div>
 
-            <div class="reading-controls">
-              <label class="select-field">
-                <span class="field-label-with-help">
-                  運勢層級
-                  <span
-                    class="info-tooltip"
-                    tabindex="0"
-                    aria-label="大限：十年一階段的長期運勢；流年：單一年份的年度焦點；流月：單一月份的短期事件節奏。"
-                    data-tooltip="大限：十年一階段的長期運勢。流年：單一年份的年度焦點。流月：單一月份的短期事件節奏。"
-                  >?</span>
-                </span>
-                <select id="scope-select">
-                  <option value="decadal">大限</option>
-                  <option value="yearly">流年</option>
-                  <option value="monthly">流月</option>
-                </select>
-              </label>
+              <div class="reading-controls">
+                <label class="select-field">
+                  <span class="field-label-with-help">
+                    運勢層級
+                    <span
+                      class="info-tooltip"
+                      tabindex="0"
+                      aria-label="大限：十年一階段的長期運勢；流年：單一年份的年度焦點；流月：單一月份的短期事件節奏。"
+                      data-tooltip="大限：十年一階段的長期運勢。流年：單一年份的年度焦點。流月：單一月份的短期事件節奏。"
+                    >?</span>
+                  </span>
+                  <select id="scope-select">
+                    <option value="decadal">大限</option>
+                    <option value="yearly">流年</option>
+                    <option value="monthly">流月</option>
+                  </select>
+                </label>
 
-              <label class="select-field" id="decadal-control">
-                <span>大限區間</span>
-                <select id="decadal-select"></select>
-              </label>
+                <label class="select-field" id="decadal-control">
+                  <span>大限區間</span>
+                  <select id="decadal-select"></select>
+                </label>
 
-              <label class="select-field" id="year-control">
-                <span>流年年份</span>
-                <input id="target-year" type="number" min="1900" max="2100" />
-              </label>
+                <label class="select-field" id="year-control">
+                  <span>流年年份</span>
+                  <input id="target-year" type="number" min="1900" max="2100" />
+                </label>
 
-              <label class="select-field" id="month-control">
-                <span>流月月份</span>
-                <input id="target-month" type="number" min="1" max="12" />
-              </label>
+                <label class="select-field" id="month-control">
+                  <span>流月月份</span>
+                  <input id="target-month" type="number" min="1" max="12" />
+                </label>
 
-              <label class="select-field">
-                <span>主題</span>
-                <select id="topic-select">
-                  <option value="property">財富</option>
-                  <option value="career">事業</option>
-                  <option value="marriage">姻緣</option>
-                  <option value="children">子女</option>
-                  <option value="health">健康</option>
-                </select>
-              </label>
-            </div>
+                <label class="select-field">
+                  <span>主題</span>
+                  <select id="topic-select">
+                    <option value="property">財富</option>
+                    <option value="career">事業</option>
+                    <option value="marriage">姻緣</option>
+                    <option value="children">子女</option>
+                    <option value="health">健康</option>
+                  </select>
+                </label>
+              </div>
 
-            <div id="reading-output" class="reading-output"></div>
-          </section>
+              <div id="reading-output" class="reading-output"></div>
+            </section>
 
-          <section class="partner-section">
-            <div class="section-heading">
-              <p class="eyebrow">Partner</p>
-              <h2>正緣輪廓</h2>
-            </div>
-            <div id="partner-output" class="partner-output"></div>
-          </section>
+            <section class="partner-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Partner</p>
+                  <h2>正緣輪廓</h2>
+                </div>
+              </div>
+              <div id="partner-output" class="partner-output"></div>
+            </section>
 
-          <section class="ziwei-section">
-            <div class="section-heading">
-              <p class="eyebrow">Zi Wei Dou Shu</p>
-              <h2>紫微十二宮</h2>
-            </div>
-            <div id="ziwei-image-output" class="ziwei-image-output"></div>
-            <div class="astrolabe-grid" id="astrolabe-grid"></div>
+            <section class="ziwei-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Zi Wei Dou Shu</p>
+                  <h2>紫微十二宮</h2>
+                </div>
+              </div>
+              <div id="ziwei-image-output" class="ziwei-image-output"></div>
+              <div class="astrolabe-grid" id="astrolabe-grid"></div>
+            </section>
           </section>
         </section>
       </section>

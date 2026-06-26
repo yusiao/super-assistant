@@ -143,6 +143,45 @@ const SCOPE_LABELS = {
   yearly: "流年",
   monthly: "流月",
 };
+const BAZI_SCOPE_LABELS = {
+  natal: "原局",
+  decadal: "大運",
+  yearly: "流年",
+};
+const HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+const EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+const STEM_COMBINATION_RULES = [
+  ["甲", "己", "土"],
+  ["乙", "庚", "金"],
+  ["丙", "辛", "水"],
+  ["丁", "壬", "木"],
+  ["戊", "癸", "火"],
+];
+const STEM_CLASH_RULES = [["甲", "庚"], ["乙", "辛"], ["丙", "壬"], ["丁", "癸"]];
+const BRANCH_COMBINATION_RULES = [
+  ["子", "丑", "土"],
+  ["寅", "亥", "木"],
+  ["卯", "戌", "火"],
+  ["辰", "酉", "金"],
+  ["巳", "申", "水"],
+  ["午", "未", "土"],
+];
+const BRANCH_CLASH_RULES = [["子", "午"], ["丑", "未"], ["寅", "申"], ["卯", "酉"], ["辰", "戌"], ["巳", "亥"]];
+const BRANCH_HARM_RULES = [["子", "未"], ["丑", "午"], ["寅", "巳"], ["卯", "辰"], ["申", "亥"], ["酉", "戌"]];
+const BRANCH_PUNISHMENT_RULES = [["寅", "巳", "申"], ["丑", "戌", "未"], ["子", "卯"], ["辰", "辰"], ["午", "午"], ["酉", "酉"], ["亥", "亥"]];
+const BRANCH_TRIAD_RULES = [
+  ["申", "子", "辰", "水"],
+  ["亥", "卯", "未", "木"],
+  ["寅", "午", "戌", "火"],
+  ["巳", "酉", "丑", "金"],
+];
+const BAZI_TEN_GOD_GROUPS = [
+  { label: "比劫", gods: ["比肩", "劫財"], note: "看自我、同輩、人脈、競爭與資源分配" },
+  { label: "食傷", gods: ["食神", "傷官"], note: "看才華、輸出、創意、表達與作品" },
+  { label: "財星", gods: ["正財", "偏財"], note: "看收入、資源、商業感與資產承接" },
+  { label: "官殺", gods: ["正官", "七殺"], note: "看責任、規範、壓力、位置與行動要求" },
+  { label: "印星", gods: ["正印", "偏印"], note: "看學習、證照、保護、恢復與支持系統" },
+];
 const PALACE_OVERVIEWS = [
   ["命宮", "先天個性、人生主軸、外在呈現與做事基調。"],
   ["兄弟宮", "手足、同輩、合作默契、競爭關係與資源分攤。"],
@@ -440,6 +479,14 @@ const summaryStrip = document.querySelector("#summary-strip");
 const pillarGrid = document.querySelector("#pillar-grid");
 const elementBars = document.querySelector("#element-bars");
 const nayinList = document.querySelector("#nayin-list");
+const baziInsightOutput = document.querySelector("#bazi-insight-output");
+const baziScopeSelect = document.querySelector("#bazi-scope-select");
+const baziDecadalSelect = document.querySelector("#bazi-decadal-select");
+const baziTargetYearInput = document.querySelector("#bazi-target-year");
+const baziDecadalControl = document.querySelector("#bazi-decadal-control");
+const baziYearControl = document.querySelector("#bazi-year-control");
+const baziTopicSelect = document.querySelector("#bazi-topic-select");
+const baziReadingOutput = document.querySelector("#bazi-reading-output");
 const astrolabeGrid = document.querySelector("#astrolabe-grid");
 const ziweiImageOutput = document.querySelector("#ziwei-image-output");
 const scopeSelect = document.querySelector("#scope-select");
@@ -456,10 +503,13 @@ const partnerOutput = document.querySelector("#partner-output");
 const chatLog = document.querySelector("#chat-log");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
+const methodTabs = [...document.querySelectorAll("[data-reading-method]")];
+const methodViews = [...document.querySelectorAll("[data-method-view]")];
 
 let currentChart = null;
 let partnerRenderSalt = 0;
 let ziweiImageType = "sanhe";
+let activeReadingMethod = "bazi";
 let partnerImageState = {
   status: "idle",
   imageUrl: "",
@@ -567,6 +617,240 @@ function getHiddenStemGods(dayStem, branch) {
       god: getTenGod(dayStem, hiddenStem),
     }))
     .filter((item) => item.god);
+}
+
+function elementThatGenerates(element) {
+  return Object.entries(ELEMENT_GENERATES).find(([, target]) => target === element)?.[0] || "";
+}
+
+function elementControlledBy(element) {
+  return Object.entries(ELEMENT_CONTROLS).find(([, target]) => target === element)?.[0] || "";
+}
+
+function seasonForBranch(branch) {
+  if (["寅", "卯", "辰"].includes(branch)) return "春";
+  if (["巳", "午", "未"].includes(branch)) return "夏";
+  if (["申", "酉", "戌"].includes(branch)) return "秋";
+  return "冬";
+}
+
+function baziDayMasterProfile(chart) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const monthBranch = splitPillar(chart.pillars?.[1]).branch;
+  const dayElement = GAN_ELEMENT[dayStem] || "";
+  const monthElement = ZHI_ELEMENT[monthBranch] || "";
+  const resourceElement = elementThatGenerates(dayElement);
+  const outputElement = ELEMENT_GENERATES[dayElement] || "";
+  const wealthElement = ELEMENT_CONTROLS[dayElement] || "";
+  const officerElement = elementControlledBy(dayElement);
+  const counts = chart.elementCounts || countElements(chart.pillars || []);
+  const supportScore = (counts[dayElement] || 0) + (counts[resourceElement] || 0);
+  const drainScore = (counts[outputElement] || 0) + (counts[wealthElement] || 0) + (counts[officerElement] || 0);
+  const monthAdjustment = [dayElement, resourceElement].includes(monthElement)
+    ? 2
+    : [outputElement, wealthElement, officerElement].includes(monthElement)
+      ? -2
+      : 0;
+  const score = supportScore - drainScore + monthAdjustment;
+  const strength = score >= 3 ? "偏旺" : score <= -3 ? "偏弱" : "中和";
+  const favorable = strength === "偏弱"
+    ? [resourceElement, dayElement]
+    : strength === "偏旺"
+      ? [outputElement, wealthElement, officerElement]
+      : [outputElement, wealthElement];
+  const caution = strength === "偏弱"
+    ? [outputElement, wealthElement, officerElement]
+    : strength === "偏旺"
+      ? [resourceElement, dayElement]
+      : [];
+  const monthMainStem = (BRANCH_HIDDEN_STEMS[monthBranch] || [])[0] || "";
+  const monthGod = monthMainStem ? getTenGod(dayStem, monthMainStem) : "";
+
+  return {
+    dayStem,
+    dayElement,
+    monthBranch,
+    monthElement,
+    season: seasonForBranch(monthBranch),
+    resourceElement,
+    outputElement,
+    wealthElement,
+    officerElement,
+    strength,
+    score,
+    favorable: uniqueItems(favorable.filter(Boolean)),
+    caution: uniqueItems(caution.filter(Boolean)),
+    monthMainStem,
+    monthGod,
+    text: `日主為${dayStem}${dayElement}，生於${monthBranch}月（${seasonForBranch(monthBranch)}季${monthElement}氣）。以月令、同類與生扶對比洩耗剋制，日主呈${strength}；五行運用宜先讓${uniqueItems(favorable.filter(Boolean)).join("、")}形成流通${caution.filter(Boolean).length ? `，避免${uniqueItems(caution.filter(Boolean)).join("、")}過度堆疊` : ""}。`,
+  };
+}
+
+function baziTenGodGroupSummary(chart) {
+  const counts = tenGodCounts(chart);
+  return BAZI_TEN_GOD_GROUPS.map((group) => ({
+    ...group,
+    count: group.gods.reduce((sum, god) => sum + (counts[god] || 0), 0),
+    detail: group.gods.map((god) => `${god}${counts[god] || 0}`).join("、"),
+  }));
+}
+
+function relationLabel(values) {
+  return values.join("、");
+}
+
+function baziRelationAnalysis(pillars) {
+  const stems = pillars.map((pillar) => splitPillar(pillar).stem).filter(Boolean);
+  const branches = pillars.map((pillar) => splitPillar(pillar).branch).filter(Boolean);
+  const hasBoth = (values, first, second) => values.includes(first) && values.includes(second);
+  const stemCombines = STEM_COMBINATION_RULES
+    .filter(([first, second]) => hasBoth(stems, first, second))
+    .map(([first, second, element]) => `${first}${second}合${element}`);
+  const stemClashes = STEM_CLASH_RULES
+    .filter(([first, second]) => hasBoth(stems, first, second))
+    .map(([first, second]) => `${first}${second}沖`);
+  const branchCombines = BRANCH_COMBINATION_RULES
+    .filter(([first, second]) => hasBoth(branches, first, second))
+    .map(([first, second, element]) => `${first}${second}合${element}`);
+  const branchClashes = BRANCH_CLASH_RULES
+    .filter(([first, second]) => hasBoth(branches, first, second))
+    .map(([first, second]) => `${first}${second}沖`);
+  const branchHarms = BRANCH_HARM_RULES
+    .filter(([first, second]) => hasBoth(branches, first, second))
+    .map(([first, second]) => `${first}${second}害`);
+  const branchPunishments = BRANCH_PUNISHMENT_RULES
+    .filter((rule) => {
+      if (rule.length === 2 && rule[0] === rule[1]) {
+        return branches.filter((branch) => branch === rule[0]).length >= 2;
+      }
+      return rule.length === 2
+        ? hasBoth(branches, rule[0], rule[1])
+        : rule.every((branch) => branches.includes(branch));
+    })
+    .map((rule) => `${relationLabel(rule)}刑`);
+  const triads = BRANCH_TRIAD_RULES
+    .map(([first, second, third, element]) => {
+      const hits = [first, second, third].filter((branch) => branches.includes(branch));
+      if (hits.length < 2) return "";
+      return hits.length === 3 ? `${first}${second}${third}三合${element}局` : `${hits.join("")}半合${element}勢`;
+    })
+    .filter(Boolean);
+  const supports = uniqueItems([...stemCombines, ...branchCombines, ...triads]);
+  const tensions = uniqueItems([...stemClashes, ...branchClashes, ...branchHarms, ...branchPunishments]);
+
+  return {
+    supports,
+    tensions,
+    text: `${supports.length ? `合局與流通訊號：${supports.join("、")}。` : "合局訊號不集中，需靠十神與行運引動。"}${tensions.length ? `結構張力：${tensions.join("、")}，代表人生主題容易出現拉扯、移動、意見衝突或關係調整，須看落在哪一柱與行運何時觸發。` : "四柱未見明顯沖害刑，原局節奏相對可用穩定規劃承接。"}`,
+  };
+}
+
+function stepStemBranch(pillar, direction, steps) {
+  const { stem, branch } = splitPillar(pillar);
+  const stemIndex = HEAVENLY_STEMS.indexOf(stem);
+  const branchIndex = EARTHLY_BRANCHES.indexOf(branch);
+  if (stemIndex < 0 || branchIndex < 0) return "";
+  const wrap = (index, length) => ((index % length) + length) % length;
+  return `${HEAVENLY_STEMS[wrap(stemIndex + direction * steps, HEAVENLY_STEMS.length)]}${EARTHLY_BRANCHES[wrap(branchIndex + direction * steps, EARTHLY_BRANCHES.length)]}`;
+}
+
+function getBaziLuckCycles(chart) {
+  try {
+    const gender = chart.formValues.gender === "男" ? 1 : 0;
+    const yun = chart.lunar?.getEightChar?.().getYun?.(gender);
+    const cycles = yun?.getDaYun?.(10) || [];
+    const records = cycles
+      .map((cycle, index) => {
+        const pillar = String(cycle?.getGanZhi?.() || "");
+        const startAge = Number(cycle?.getStartAge?.());
+        const endAge = Number(cycle?.getEndAge?.());
+        return {
+          index,
+          pillar,
+          startAge: Number.isFinite(startAge) ? startAge : null,
+          endAge: Number.isFinite(endAge) ? endAge : null,
+          source: "lunar",
+        };
+      })
+      .filter((item) => splitPillar(item.pillar).stem && splitPillar(item.pillar).branch);
+    if (records.length) return records;
+  } catch (error) {
+    // Fallback below keeps the interface usable if a library version omits Da Yun helpers.
+  }
+
+  const yearStem = splitPillar(chart.pillars?.[0]).stem;
+  const yearIsYang = STEM_YINYANG[yearStem] === "陽";
+  const forward = (chart.formValues.gender === "男" && yearIsYang)
+    || (chart.formValues.gender === "女" && !yearIsYang);
+  const direction = forward ? 1 : -1;
+  const monthPillar = chart.pillars?.[1] || "";
+  return Array.from({ length: 8 }, (_, index) => ({
+    index,
+    pillar: stepStemBranch(monthPillar, direction, index + 1),
+    startAge: null,
+    endAge: null,
+    source: "fallback",
+  }));
+}
+
+function renderBaziDecadalOptions(chart) {
+  if (!baziDecadalSelect) return;
+  const previous = baziDecadalSelect.value;
+  const cycles = getBaziLuckCycles(chart);
+  baziDecadalSelect.innerHTML = cycles
+    .map((cycle, index) => {
+      const ageText = Number.isFinite(cycle.startAge) && Number.isFinite(cycle.endAge)
+        ? `${cycle.startAge}-${cycle.endAge}歲`
+        : `第${index + 1}運`;
+      return `<option value="${index}">${escapeHtml(`${ageText} ${cycle.pillar}`)}</option>`;
+    })
+    .join("");
+  if ([...baziDecadalSelect.options].some((option) => option.value === previous)) {
+    baziDecadalSelect.value = previous;
+  }
+}
+
+function getBaziYearPillar(year) {
+  try {
+    return Solar.fromYmdHms(year, 7, 1, 12, 0, 0).getLunar().getBaZi()?.[0] || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function buildBaziPeriodContext(chart) {
+  const scope = BAZI_SCOPE_LABELS[baziScopeSelect?.value] ? baziScopeSelect.value : "natal";
+  const targetYear = getSafeNumber(baziTargetYearInput, new Date().getFullYear(), 1900, 2100);
+  if (scope === "natal") {
+    return { scope, periodName: BAZI_SCOPE_LABELS.natal, pillar: "", targetYear };
+  }
+  if (scope === "yearly") {
+    const pillar = getBaziYearPillar(targetYear);
+    return { scope, periodName: `${targetYear} 流年`, pillar, targetYear };
+  }
+  const cycles = getBaziLuckCycles(chart);
+  const index = getSafeNumber(baziDecadalSelect, 0, 0, Math.max(0, cycles.length - 1));
+  const cycle = cycles[index] || {};
+  const ageText = Number.isFinite(cycle.startAge) && Number.isFinite(cycle.endAge)
+    ? `${cycle.startAge}-${cycle.endAge}歲`
+    : `第${index + 1}運`;
+  return {
+    scope,
+    periodName: `${ageText} 大運`,
+    pillar: cycle.pillar || "",
+    targetYear,
+    cycle,
+  };
+}
+
+function baziPeriodReading(chart, period) {
+  if (!period.pillar) return "原局先看日主、月令、十神與四柱干支關係；行運尚未疊加。";
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const { stem, branch } = splitPillar(period.pillar);
+  const stemGod = getTenGod(dayStem, stem);
+  const hiddenGods = getHiddenStemGods(dayStem, branch).map((item) => `${item.stem}${item.god}`);
+  const relations = baziRelationAnalysis([...(chart.pillars || []), period.pillar]);
+  return `${period.periodName}為${period.pillar}：天干${stem}對日主是${stemGod || "五行作用"}，地支${branch}藏${hiddenGods.join("、") || "干"}。${relations.text}`;
 }
 
 function getNaYinElement(name) {
@@ -1271,7 +1555,42 @@ function godCountText(counts, gods) {
   return gods.map((god) => `${god}${counts[god] || 0}`).join("、");
 }
 
-function baziTopicAnalysis(topicKey, chart, topic) {
+function baziPeriodTopicAdvice(topicKey, chart, period) {
+  if (!period?.pillar) return "原局重點在先把日主、月令與十神是否流通看清楚，再決定行動節奏。";
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const { stem, branch } = splitPillar(period.pillar);
+  const stemGod = getTenGod(dayStem, stem);
+  const hiddenGods = getHiddenStemGods(dayStem, branch).map((item) => item.god);
+  const periodGods = [stemGod, ...hiddenGods].filter(Boolean);
+  const hasAny = (gods) => periodGods.some((god) => gods.includes(god));
+  const focus = {
+    property: hasAny(["正財", "偏財"])
+      ? "財星被行運帶動，適合把收入、現金流、投資研究與資產規劃拆成可執行的紀律。"
+      : hasAny(["食神", "傷官"])
+        ? "食傷被帶動，較適合靠技能輸出、內容、業務或副業探索創造現金流。"
+        : "財星未被直接帶動，宜先整理預算、信用、風險與長期累積，不宜急著放大槓桿。",
+    career: hasAny(["正官", "七殺"])
+      ? "官殺被帶動，責任、考核、職位競爭或轉換壓力會變明顯，適合以專業與規則承接。"
+      : hasAny(["正印", "偏印"])
+        ? "印星被帶動，適合進修、考證照、尋找師長或把專業底盤打穩。"
+        : "此期更適合讓食傷與財星轉為成果，主動呈現作品、談合作或整理履歷。",
+    marriage: hasAny(["正官", "七殺", "正財", "偏財"])
+      ? "伴侶星被行運帶動，容易出現較具現實感的認識、確認關係或討論責任分工的機會。"
+      : "伴侶星不屬於直接引動，關係更仰賴社交場域、溝通品質與生活節奏是否願意騰出空間。",
+    children: hasAny(["食神", "傷官"])
+      ? "食傷被帶動，子女、作品、創造力與照顧議題較容易浮現，適合把時間與資源安排得更具彈性。"
+      : "食傷不直接突出，宜先把身心與生活節奏調整好，讓創造與照顧能有穩定承接。",
+    health: hasAny(["七殺", "傷官"])
+      ? "壓力與耗能訊號較明顯，工作節奏、睡眠與情緒反應要優先管理；這是保養提醒，不是疾病診斷。"
+      : hasAny(["正印", "偏印"])
+        ? "印星被帶動，較適合建立修復節奏、健檢、休養與規律保養。"
+        : "五行平衡與作息仍是本期健康重點；不適應以醫師與正式檢查為準。",
+  }[topicKey] || "行運需配合原局與實際選擇判讀。";
+
+  return `${period.periodName}${period.pillar ? ` ${period.pillar}` : ""}的十神重點為${periodGods.join("、") || "未取得"}。${focus}`;
+}
+
+function baziTopicAnalysis(topicKey, chart, topic, period = null) {
   const counts = tenGodCounts(chart);
   const element = elementInsight(chart.elementCounts, topic);
   const wealthText = `正財看穩定收入與可控資產，偏財看投資、業務、外部機會與非固定收入；本盤${godCountText(counts, ["正財", "偏財"])}，食傷生財訊號為${godCountText(counts, ["食神", "傷官"])}。`;
@@ -1287,7 +1606,7 @@ function baziTopicAnalysis(topicKey, chart, topic) {
   };
 
   return {
-    text: map[topicKey] || element.text,
+    text: `${map[topicKey] || element.text}${period ? baziPeriodTopicAdvice(topicKey, chart, period) : ""}`,
     element,
     counts,
     tags: uniqueItems([
@@ -1377,7 +1696,8 @@ function palacePeachSignals(palace) {
   return names.filter((name) => peachKeywords.some((keyword) => name.includes(keyword)));
 }
 
-function nativePeachBlossomAnalysis(chart, network) {
+function nativePeachBlossomAnalysis(chart, network, options = {}) {
+  const includeBazi = options.includeBazi !== false;
   const astrolabe = chart.astrolabe;
   const focusPalaces = uniquePalaces([
     getLifePalace(astrolabe),
@@ -1388,7 +1708,7 @@ function nativePeachBlossomAnalysis(chart, network) {
     findPalaceByName(astrolabe, "官祿宮"),
   ]);
   const palaceSignals = uniqueItems(focusPalaces.flatMap(palacePeachSignals));
-  const baziSignals = baziPeachBlossomSignals(chart);
+  const baziSignals = includeBazi ? baziPeachBlossomSignals(chart) : [];
   const pressureSignals = uniqueItems(focusPalaces.flatMap((palace) => palaceStarNames(palace)).filter((name) => (
     ["孤辰", "寡宿", "地空", "地劫", "天空", "旬空", "截空", "化忌"].some((keyword) => name.includes(keyword))
   )));
@@ -1402,9 +1722,11 @@ function nativePeachBlossomAnalysis(chart, network) {
   const palaceText = palaceSignals.length
     ? `紫微斗數在${palaceListText(focusPalaces, 6)}見${palaceSignals.slice(0, 8).join("、")}，代表命主有被注意、被邀約或因社交場景啟動感情的條件。`
     : `紫微斗數在${palaceListText(focusPalaces, 6)}未見桃花星特別集中，命主的桃花較需要靠環境、形象經營與主動互動催動。`;
-  const baziText = baziSignals.length
-    ? `八字桃花訊號為${baziSignals.join("；")}。`
-    : "八字年支、日支桃花未明顯入四柱，桃花較不屬於自動被追求型。";
+  const baziText = includeBazi
+    ? (baziSignals.length
+      ? `八字桃花訊號為${baziSignals.join("；")}。`
+      : "八字年支、日支桃花未明顯入四柱，桃花較不屬於自動被追求型。")
+    : "";
   const pressureText = pressureSignals.length
     ? `但${pressureSignals.slice(0, 5).join("、")}也會帶來距離感、落空感或關係反覆，需要避免只停在曖昧與想像。`
     : "阻隔桃花的孤空訊號不算集中，重點在是否願意進入人群與建立互動。";
@@ -1434,13 +1756,11 @@ function buildYearContext(chart, year) {
 }
 
 function timelineRecords(topicKey, chart, span = 12) {
-  const topic = TOPIC_CONFIG[topicKey];
   const startYear = new Date().getFullYear();
   return Array.from({ length: span }, (_, offset) => {
     const year = startYear + offset;
     const context = buildYearContext(chart, year);
     const network = evaluateTopicNetwork(topicKey, chart, context);
-    const bazi = baziTopicAnalysis(topicKey, chart, topic);
     const starNames = uniqueItems(network.evaluations.flatMap((item) => item.stars.flatMap((star) => [
       starPlainName(star),
       starReadingDisplayName(star),
@@ -1450,9 +1770,8 @@ function timelineRecords(topicKey, chart, span = 12) {
       age: year - chart.formValues.year + 1,
       context,
       network,
-      bazi,
       starNames,
-      score: network.score + bazi.element.score,
+      score: network.score,
     };
   });
 }
@@ -1511,7 +1830,7 @@ function buildTopicTimeline(topicKey, chart) {
     return record;
   };
   const items = [];
-  let note = "時間軸以未來十二年流年宮位、主題宮位三方四正、來因宮與八字十神共同推估。";
+  let note = "時間軸以未來十二年流年宮位、主題宮位三方四正、來因宮與星曜結構推估。";
 
   if (topicKey === "marriage") {
     const meet = pick((record) => record.score
@@ -1584,8 +1903,6 @@ function buildTopicTimeline(topicKey, chart) {
     note = "健康時間軸為命理保養提醒，不是疾病診斷；若有症狀、疼痛或檢查異常，請以醫師與正式檢查為準。";
   } else {
     const windfall = pick((record) => record.score
-      + (record.bazi.counts["偏財"] || 0) * 0.55
-      + ((record.bazi.counts["食神"] || 0) + (record.bazi.counts["傷官"] || 0)) * 0.35
       + (periodHits(record, ["財帛宮", "遷移宮", "官祿宮"]) ? 2.1 : 0)
       + starHits(record, ["化祿", "祿存", "天馬", "貪狼", "武曲"]) * 0.7);
     const property = pick((record) => record.score
@@ -1596,7 +1913,7 @@ function buildTopicTimeline(topicKey, chart) {
       + record.network.pressureStars.length * 1.2
       + starHits(record, ["地空", "地劫", "大耗", "化忌", "擎羊", "陀羅"]) * 0.8);
     items.push(
-      timelineEntry("偏財/副業窗口", windfall, "偏財、食傷生財與財帛/遷移/官祿牽動較明顯，適合嘗試副業、業務、投資研究或外部機會。"),
+      timelineEntry("外部財機會", windfall, "財帛、遷移、官祿與祿馬財星牽動較明顯，適合嘗試副業、業務、投資研究或外部機會。"),
       timelineEntry("資產/房產窗口", property, "田宅、財帛與官祿承接較好，適合規劃買房、換屋、長期資產配置或現金流整理。"),
       timelineEntry("保守控風險", cautious, "耗損、空劫或忌煞訊號較高，投資與借貸要降低槓桿，先守住現金流。"),
     );
@@ -2219,7 +2536,6 @@ function renderPartnerVisual(chart, profile) {
       ${renderPartnerImageStatus()}
       <div class="portrait-actions">
         <button type="button" data-generate-ai-partner ${isLoading ? "disabled" : ""}>${escapeHtml(generateLabel)}</button>
-        <button type="button" data-download-partner>下載圖片</button>
       </div>
     </div>
   `;
@@ -2236,6 +2552,7 @@ function renderPartnerProfile(chart) {
     `以夫妻宮為主，夫妻宮為${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}，但不單看夫妻宮。`,
     `正緣輪廓同時參考${focusText}；本盤參考星曜包含${starText}。`,
     `正緣呈現不以命主性別硬切，而是依夫妻宮與三方四正推估為${profile.genderProfile?.label || "命盤所示對象氣質"}；${profile.genderProfile?.reason || ""}`,
+    "提醒：此輪廓只推估伴侶的外在氣質與互動傾向，不能判定命主或正緣的性傾向、性別認同或生理性別；感情偏好應以當事人的感受與選擇為準。",
     `職業推估以夫妻宮看對象本質，官祿宮看社會角色，遷移宮看出現場域，財帛宮看資源與工作型態。`,
     `外貌身形以夫妻宮地支五行${profile.appearance.element}作底，再用夫妻宮三方四正、主星、桃花與煞曜修正。`,
     ...profile.meeting,
@@ -2294,20 +2611,27 @@ function topicFromQuestion(question) {
 
 function chatTopicAnswer(topicKey) {
   const topic = TOPIC_CONFIG[topicKey];
+  if (activeReadingMethod === "bazi") {
+    const period = buildBaziPeriodContext(currentChart);
+    const profile = baziDayMasterProfile(currentChart);
+    const analysis = baziTopicAnalysis(topicKey, currentChart, topic, period);
+    return [
+      `八字：${analysis.text}`,
+      `原局：${profile.text}`,
+      `當期：${baziPeriodReading(currentChart, period)}`,
+    ].join(" ");
+  }
+
   const context = buildPeriodContext(currentChart);
   const network = evaluateTopicNetwork(topicKey, currentChart, context);
-  const bazi = baziTopicAnalysis(topicKey, currentChart, topic);
   const ziweiText = ziweiTopicAnalysis(topicKey, currentChart, context, network);
-  const integratedText = integratedTopicSummary(topicKey, currentChart, context, network, bazi);
   const peachText = topicKey === "marriage"
-    ? nativePeachBlossomAnalysis(currentChart, network).text
+    ? nativePeachBlossomAnalysis(currentChart, network, { includeBazi: false }).text
     : "";
 
   return [
     `紫微斗數：${ziweiText}`,
-    `八字：${bazi.text}`,
     peachText,
-    `綜合統整：${integratedText}`,
     `時間軸：${timelinePlainText(topicKey, currentChart)}`,
   ].filter(Boolean).join(" ");
 }
@@ -2328,6 +2652,7 @@ function chatPartnerAnswer() {
   return [
     `正緣以夫妻宮為主，但會合看夫妻宮三方四正與相關宮位：${palaceListText(profile.focusPalaces, 10)}。夫妻宮為${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}。`,
     `性別氣質：${profile.genderProfile?.label || "依命盤呈現"}，${profile.genderProfile?.reason || "不以命主性別硬性限制對象外在呈現。"}`,
+    "提醒：這是伴侶外在氣質與互動傾向的推估，不能判定命主或正緣的性傾向、性別認同或生理性別；感情偏好應以當事人的感受與選擇為準。",
     `可能職業方向：${careers}。`,
     `身材長相模擬：${appearance}。`,
     profile.causePalace ? `來因宮是${palaceLabel(profile.causePalace)}，關係事件常會從${palaceKey(profile.causePalace.name)}議題切入。` : "",
@@ -2367,6 +2692,10 @@ function buildBotAnswer(question) {
   }
 
   if (/大限|流年|流月|今年|本月/.test(q)) {
+    if (activeReadingMethod === "bazi") {
+      const baziPeriod = buildBaziPeriodContext(currentChart);
+      return `目前八字選的是${baziPeriod.periodName}。${baziPeriodReading(currentChart, baziPeriod)}`;
+    }
     return `${context.periodName}目前${context.periodPalace ? `落在${palaceLabel(context.periodPalace)}，` : ""}我會把這個宮位視為當期事件焦點，再疊加你問的主題宮位。`;
   }
 
@@ -2376,7 +2705,9 @@ function buildBotAnswer(question) {
   const topicKey = topicFromQuestion(q);
   if (topicKey) return chatTopicAnswer(topicKey);
 
-  return `我會用目前命盤回答：中州派設定、八字五行、命宮/身宮/來因宮、夫妻宮、財帛宮與田宅宮都會納入。這題若要精準一點，可以問「我的正緣長相」、「有沒有房產緣」、「身宮怎麼看」或「來因宮怎麼看」。`;
+  return activeReadingMethod === "bazi"
+    ? "目前是八字論盤模式，可以問日主強弱、十神、喜用方向、合沖刑害、大運、流年、財富、事業、姻緣、子女或健康。"
+    : "目前是紫微斗數論盤模式，可以問十二宮、三方四正、正緣長相、房產緣、身宮、來因宮、大限或流年。";
 }
 
 function addChatMessage(text, role = "bot") {
@@ -2389,7 +2720,7 @@ function addChatMessage(text, role = "bot") {
 
 function seedChat() {
   if (chatLog.children.length > 0) return;
-  addChatMessage("命盤已載入。你可以問財富、房地產、事業、姻緣、子女、健康、正緣、來因宮、身宮、大限或流年。");
+  addChatMessage("命盤已載入。切換到八字可問日主、十神、喜用與大運；切換到紫微可問十二宮、正緣、來因宮與流年。");
 }
 
 function regeneratePartnerPortrait() {
@@ -2447,7 +2778,7 @@ async function generatePartnerAiImage() {
       status: "ready",
       imageUrl: result.imageUrl,
       provider: result.provider || "AI 圖像模型",
-      message: "AI 圖片已生成，可以直接下載或重新生成。",
+      message: "AI 圖片已生成，可以重新生成。",
     };
     renderPartnerProfile(currentChart);
     addChatMessage("AI 正緣圖片已生成。這張圖是依夫妻宮、遷移宮、福德宮與來因宮摘要生成，不會顯示提示詞。");
@@ -2460,40 +2791,6 @@ async function generatePartnerAiImage() {
     renderPartnerProfile(currentChart);
     addChatMessage(`AI 圖片暫時沒有生成成功：${partnerImageState.message}`);
   }
-}
-
-function aiImageExtension(src) {
-  if (src.startsWith("data:image/jpeg")) return "jpg";
-  if (src.startsWith("data:image/webp")) return "webp";
-  return "png";
-}
-
-function downloadPartnerPortrait() {
-  const aiImage = document.querySelector(".partner-ai-image");
-  if (aiImage?.src) {
-    const anchor = document.createElement("a");
-    anchor.href = aiImage.src;
-    anchor.download = `partner-ai-portrait.${aiImageExtension(aiImage.src)}`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    addChatMessage("AI 正緣圖片已下載。");
-    return;
-  }
-
-  const svg = document.querySelector(".partner-generated-svg");
-  if (!svg) return;
-  const source = `<?xml version="1.0" encoding="UTF-8"?>\n${svg.outerHTML}`;
-  const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "partner-portrait.svg";
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
-  addChatMessage("正緣概念肖像已下載為 SVG 圖片。");
 }
 
 function renderPalaceOverview(astrolabe) {
@@ -2534,6 +2831,132 @@ function renderPalaceOverview(astrolabe) {
   `;
 }
 
+function renderBaziInsights(chart) {
+  if (!baziInsightOutput) return;
+  const profile = baziDayMasterProfile(chart);
+  const groups = baziTenGodGroupSummary(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const monthText = profile.monthMainStem
+    ? `月令${profile.monthBranch}的主氣藏干為${profile.monthMainStem}，對日主形成${profile.monthGod || "五行作用"}。`
+    : `月令為${profile.monthBranch}，以${profile.monthElement}氣為主要季節背景。`;
+
+  baziInsightOutput.innerHTML = `
+    <div class="bazi-insight-grid">
+      <article class="bazi-insight-card">
+        <span>日主與月令</span>
+        <strong>${escapeHtml(`${profile.dayStem}${profile.dayElement}日主 · ${profile.strength}`)}</strong>
+        <p>${escapeHtml(monthText)} ${escapeHtml(profile.text)}</p>
+      </article>
+      <article class="bazi-insight-card">
+        <span>喜用方向</span>
+        <strong>${escapeHtml(profile.favorable.join("、") || "以流通為先")}</strong>
+        <p>${escapeHtml(profile.strength === "偏弱"
+          ? "日主偏弱時，優先需要生扶與同類資源，重點是先穩住體力、專業與支持系統。"
+          : profile.strength === "偏旺"
+            ? "日主偏旺時，宜用輸出、財星與規範讓能量落地，避免只累積想法或固執。"
+            : "日主中和時，重點不是偏補某一行，而是讓才華、財務與責任形成順暢循環。")}</p>
+      </article>
+      <article class="bazi-insight-card bazi-ten-god-card">
+        <span>十神配置</span>
+        <div class="bazi-ten-god-grid">
+          ${groups.map((group) => `
+            <div>
+              <b>${escapeHtml(group.label)} ${escapeHtml(String(group.count))}</b>
+              <small>${escapeHtml(group.detail)}</small>
+            </div>
+          `).join("")}
+        </div>
+      </article>
+      <article class="bazi-insight-card">
+        <span>干支結構</span>
+        <strong>${escapeHtml(relations.supports.length ? "有流通訊號" : "以原局平衡為先")}</strong>
+        <p>${escapeHtml(relations.text)}</p>
+      </article>
+    </div>
+  `;
+}
+
+function buildBaziReading(chart) {
+  const topicKey = baziTopicSelect?.value || "property";
+  const topic = TOPIC_CONFIG[topicKey];
+  const profile = baziDayMasterProfile(chart);
+  const counts = tenGodCounts(chart);
+  const groups = baziTenGodGroupSummary(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const period = buildBaziPeriodContext(chart);
+  const analysis = baziTopicAnalysis(topicKey, chart, topic, period);
+  const tone = scoreTone(analysis.element.score + profile.score * 0.45);
+  const periodText = baziPeriodReading(chart, period);
+  const why = [
+    `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；日主判為${profile.strength}。`,
+    `十神結構：${godCountText(counts, ["比肩", "劫財", "食神", "傷官", "正財", "偏財", "正官", "七殺", "正印", "偏印"])}。`,
+    `喜用方向：${profile.favorable.join("、") || "以五行流通為先"}${profile.caution.length ? `；需避免${profile.caution.join("、")}過度集中` : ""}。`,
+    relations.text,
+    periodText,
+  ];
+  const tags = [
+    `${profile.dayStem}${profile.dayElement}日主`,
+    `身強弱：${profile.strength}`,
+    `月令：${profile.monthBranch}${profile.monthGod || ""}`,
+    ...groups.filter((group) => group.count).map((group) => `${group.label}${group.count}`),
+    period.periodName,
+  ];
+
+  return `
+    <div class="reading-main bazi-reading-main">
+      <div class="reading-copy">
+        <div class="reading-status">${escapeHtml(period.periodName)} · ${escapeHtml(topic.label)}</div>
+        <h3>${escapeHtml(topic.label)}：${escapeHtml(tone)}</h3>
+        <section class="reading-block">
+          <h4>原局骨架</h4>
+          <p>${escapeHtml(profile.text)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>${escapeHtml(topic.label)}八字解讀</h4>
+          <p>${escapeHtml(analysis.text)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>${escapeHtml(period.periodName)}重點</h4>
+          <p>${escapeHtml(periodText)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>十神怎麼用在行動上</h4>
+          <p>${escapeHtml(groups.filter((group) => group.count).map((group) => `${group.label}${group.count}：${group.note}`).join("；") || "十神訊號不集中，宜以五行平衡、實際環境與選擇為主。")}</p>
+        </section>
+        <div class="reading-tags">
+          ${tags.map((tag) => `<span class="reading-tag">${escapeHtml(tag)}</span>`).join("")}
+        </div>
+      </div>
+      <aside class="reading-side">
+        <h4>八字為何這樣判</h4>
+        <ul class="why-list">
+          ${why.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </aside>
+    </div>
+  `;
+}
+
+function updateBaziReading() {
+  if (!currentChart) return;
+  if (baziDecadalControl) baziDecadalControl.hidden = baziScopeSelect?.value !== "decadal";
+  if (baziYearControl) baziYearControl.hidden = baziScopeSelect?.value !== "yearly";
+  if (baziReadingOutput) baziReadingOutput.innerHTML = buildBaziReading(currentChart);
+}
+
+function setActiveReadingMethod(method) {
+  const nextMethod = method === "ziwei" ? "ziwei" : "bazi";
+  activeReadingMethod = nextMethod;
+  methodTabs.forEach((tab) => {
+    const active = tab.dataset.readingMethod === nextMethod;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  methodViews.forEach((view) => {
+    view.hidden = view.dataset.methodView !== nextMethod;
+  });
+}
+
 function buildReading(chart) {
   const topicKey = topicSelect.value;
   const topic = TOPIC_CONFIG[topicKey];
@@ -2542,24 +2965,20 @@ function buildReading(chart) {
   const yearStem = chart.astrolabe.rawDates?.chineseDate?.yearly?.[0] || "";
   const network = evaluateTopicNetwork(topicKey, chart, context);
   const primary = network.baseEvaluations[0] || network.evaluations[0];
-  const bazi = baziTopicAnalysis(topicKey, chart, topic);
-  const finalScore = network.score + bazi.element.score;
+  const finalScore = network.score;
   const tone = scoreTone(finalScore);
   const causeText = causePalace
     ? `來因宮以生年天干${yearStem}對照宮干定位，本盤落在${palaceLabel(causePalace)}；解盤會把它視為原局動機與事件入口。`
     : "來因宮未能從生年天干與宮干定位取得。";
   const topicPalacesText = topicPalaceLabels(topicKey, chart).join("、") || topic.palaces.join("、");
   const ziweiText = ziweiTopicAnalysis(topicKey, chart, context, network);
-  const integratedText = integratedTopicSummary(topicKey, chart, context, network, bazi);
-  const peach = topicKey === "marriage" ? nativePeachBlossomAnalysis(chart, network) : null;
+  const peach = topicKey === "marriage" ? nativePeachBlossomAnalysis(chart, network, { includeBazi: false }) : null;
   const why = [
     `${ASTRO_SCHOOL_LABEL}：星曜安置與神煞顯示使用 iztro 的 zhongzhou 演算法設定。`,
     `${topic.label}主題先取${topicPalacesText}，再加入三方四正、對宮、來因宮、身宮與當期流運宮位，避免單宮斷事。`,
-    primary ? describePalaceEvaluation(primary) : "找不到主宮資料，因此以輔助宮位與八字五行補看。",
+    primary ? describePalaceEvaluation(primary) : "找不到主宮資料，因此以輔助宮位與當期流運補看。",
     peach ? peach.text : "",
     causeText,
-    `八字以日主十神輔判：${godCountText(bazi.counts, ["正財", "偏財", "正官", "七殺", "食神", "傷官", "正印", "偏印"])}。`,
-    bazi.element.text,
   ].filter(Boolean);
   const tags = [
     context.periodName,
@@ -2569,7 +2988,6 @@ function buildReading(chart) {
     network.pressureStars.length ? `壓力：${network.pressureStars.slice(0, 3).join("、")}` : "",
     network.flowerStars.length ? `桃花：${network.flowerStars.join("、")}` : "",
     ...(peach?.tags || []),
-    ...bazi.tags,
   ].filter(Boolean);
 
   return `
@@ -2581,20 +2999,12 @@ function buildReading(chart) {
           <h4>紫微斗數</h4>
           <p>${escapeHtml(ziweiText)}</p>
         </section>
-        <section class="reading-block">
-          <h4>八字</h4>
-          <p>${escapeHtml(bazi.text)}</p>
-        </section>
         ${peach ? `
           <section class="reading-block">
             <h4>命主桃花分析</h4>
             <p>${escapeHtml(peach.text)}</p>
           </section>
         ` : ""}
-        <section class="reading-block">
-          <h4>綜合統整</h4>
-          <p>${escapeHtml(integratedText)}</p>
-        </section>
         ${renderTopicTimeline(topicKey, chart)}
         <div class="reading-tags">
           ${tags.map((tag) => `<span class="reading-tag">${escapeHtml(tag)}</span>`).join("")}
@@ -2621,6 +3031,7 @@ function updateReading() {
   renderPartnerProfile(currentChart);
   renderAstrolabe(currentChart.astrolabe, context.periodIndex);
   renderZiweiImage(currentChart.astrolabe, context.periodIndex);
+  updateBaziReading();
 }
 
 function renderSummary(astrolabe, lunar, formValues, timeIndex) {
@@ -3074,60 +3485,10 @@ function renderZiweiImage(astrolabe, periodIndex = null) {
             <button type="button" class="${key === ziweiImageType ? "is-active" : ""}" data-ziwei-image-type="${escapeHtml(key)}">${escapeHtml(item.label)}</button>
           `).join("")}
         </div>
-        <p>目前顯示「${escapeHtml(imageMeta.label)}」圖片，可切換飛星、三合與四化後下載。</p>
-        <button type="button" data-download-ziwei-image>下載${escapeHtml(imageMeta.label)}圖片</button>
+        <p>目前顯示「${escapeHtml(imageMeta.label)}」命盤圖，可切換飛星、三合與四化查看不同的判讀結構。</p>
       </div>
     </div>
   `;
-}
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
-}
-
-async function downloadZiweiChartImage() {
-  const svg = document.querySelector(".ziwei-generated-svg");
-  if (!svg) return;
-  const imageType = svg.dataset.imageType || ziweiImageType || "sanhe";
-  const imageMeta = ZIWEI_IMAGE_TYPES[imageType] || ZIWEI_IMAGE_TYPES.sanhe;
-
-  const source = `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(svg)}`;
-  const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-
-  try {
-    const image = new Image();
-    const loaded = new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = reject;
-    });
-    image.src = url;
-    await loaded;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 1400;
-    canvas.height = 1400;
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#f4f0e6";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0);
-    const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-    if (!pngBlob) throw new Error("PNG 轉換失敗");
-    downloadBlob(pngBlob, `${imageMeta.filename}.png`);
-    addChatMessage(`${imageMeta.label}圖片已下載為 PNG。`);
-  } catch (error) {
-    downloadBlob(svgBlob, `${imageMeta.filename}.svg`);
-    addChatMessage(`此瀏覽器無法轉成 PNG，已改下載 SVG ${imageMeta.label}圖片。`);
-  } finally {
-    URL.revokeObjectURL(url);
-  }
 }
 
 function renderPalace(palace, periodIndex = null, causeIndex = null) {
@@ -3246,12 +3607,18 @@ function calculate() {
 
   if (!targetYearInput.value) targetYearInput.value = String(new Date().getFullYear());
   if (!targetMonthInput.value) targetMonthInput.value = String(new Date().getMonth() + 1);
+  if (baziTargetYearInput && !baziTargetYearInput.value) {
+    baziTargetYearInput.value = String(new Date().getFullYear());
+  }
 
   renderSummary(astrolabe, lunar, formValues, timeIndex);
   renderPillars(pillars);
   renderElementBars(elementCounts);
   renderNaYin(lunar.getBaZiNaYin());
+  renderBaziInsights(currentChart);
+  renderBaziDecadalOptions(currentChart);
   renderDecadalOptions(astrolabe, formValues);
+  setActiveReadingMethod(activeReadingMethod);
   updateReading();
 }
 
@@ -3283,6 +3650,20 @@ sampleButton.addEventListener("click", setSample);
   control.addEventListener("input", updateReading);
 });
 
+[
+  baziScopeSelect,
+  baziDecadalSelect,
+  baziTargetYearInput,
+  baziTopicSelect,
+].filter(Boolean).forEach((control) => {
+  control.addEventListener("change", updateBaziReading);
+  control.addEventListener("input", updateBaziReading);
+});
+
+methodTabs.forEach((tab) => {
+  tab.addEventListener("click", () => setActiveReadingMethod(tab.dataset.readingMethod));
+});
+
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const question = chatInput.value.trim();
@@ -3306,12 +3687,6 @@ document.addEventListener("click", (event) => {
   }
   if (event.target.matches("[data-generate-ai-partner]")) {
     generatePartnerAiImage();
-  }
-  if (event.target.matches("[data-download-partner]")) {
-    downloadPartnerPortrait();
-  }
-  if (event.target.matches("[data-download-ziwei-image]")) {
-    downloadZiweiChartImage();
   }
 });
 
