@@ -36,6 +36,7 @@ function imageOutputFormat() {
 }
 
 function buildPrompt(payload) {
+  const method = compact(payload.method, "Chinese astrology", 80);
   const targetGender = compact(payload.targetGender, "adult person", 40);
   const imageGender = compact(payload.imageGender, targetGender, 90);
   const genderReason = compact(payload.genderReason, "", 180);
@@ -59,7 +60,7 @@ function buildPrompt(payload) {
 
   return [
     `Create a high-quality photorealistic portrait of a fictional ${imageGender}.`,
-    `Chinese astrology gender-expression note: ${targetGender}${genderReason ? `, ${genderReason}` : ""}.`,
+    `Astrology method: ${method}. Relationship-presentation note: ${targetGender}${genderReason ? `, ${genderReason}` : ""}.`,
     "The person must be original and not a celebrity, influencer, public figure, or identifiable private person.",
     "Use a tasteful editorial portrait style, natural lighting, realistic skin texture, modern clothing, calm confident expression, half-body framing, neutral background, no text, no watermark, no horoscope symbols.",
     `Appearance direction: ${face}; body direction: ${build}; five-element mood: ${element}.`,
@@ -67,7 +68,7 @@ function buildPrompt(payload) {
     story ? `Character silhouette story: ${story}.` : "",
     `Personality and styling cues: ${notes}.`,
     `Possible career aura: ${careers}.`,
-    `Zi Wei symbolic references, used only as abstract styling guidance: spouse palace ${compact(palaces.spouse)}, spouse three-directions/four-correct ${compact(palaces.spouseSquare)}, life palace ${compact(palaces.life)}, travel palace ${compact(palaces.travel)}, fortune palace ${compact(palaces.fortune)}, career palace ${compact(palaces.career)}, wealth palace ${compact(palaces.wealth)}, cause palace ${compact(palaces.cause)}, stars ${stars}.`,
+    `Symbolic references from ${method}, used only as abstract styling guidance: relationship context ${compact(palaces.spouse)}, supporting structure ${compact(palaces.spouseSquare)}, self context ${compact(palaces.life)}, external context ${compact(palaces.travel)}, inner context ${compact(palaces.fortune)}, career context ${compact(palaces.career)}, wealth context ${compact(palaces.wealth)}, origin context ${compact(palaces.cause)}, stars ${stars}.`,
     `Relationship context cues: ${reasons}.`,
     "Do not include explicit content. Do not include more than one person. Do not add labels or captions.",
   ].filter(Boolean).join(" ");
