@@ -473,7 +473,6 @@ const TW_MAP = {
 const form = document.querySelector("#birth-form");
 const dateInput = document.querySelector("#birth-date");
 const timeInput = document.querySelector("#birth-time");
-const sampleButton = document.querySelector("#sample-button");
 const errorMessage = document.querySelector("#error-message");
 const summaryStrip = document.querySelector("#summary-strip");
 const pillarGrid = document.querySelector("#pillar-grid");
@@ -4031,13 +4030,6 @@ function calculate() {
   updateReading();
 }
 
-function setSample() {
-  dateInput.value = "2000-08-16";
-  timeInput.value = "04:00";
-  form.querySelector('input[name="gender"][value="女"]').checked = true;
-  calculate();
-}
-
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
@@ -4047,7 +4039,6 @@ form.addEventListener("submit", (event) => {
   }
 });
 
-sampleButton.addEventListener("click", setSample);
 form.querySelectorAll('input[name="gender"]').forEach((input) => {
   input.addEventListener("change", () => {
     if (!currentChart || !dateInput.value || !timeInput.value) return;
@@ -4112,5 +4103,4 @@ document.addEventListener("click", (event) => {
   }
 });
 
-setSample();
 seedChat();
