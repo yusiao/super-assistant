@@ -3980,11 +3980,13 @@ function calculate() {
   );
   const lunar = solar.getLunar();
   const timeIndex = getTimeIndex(formValues.hour);
+  // iztro accepts English gender identifiers; the form keeps Chinese labels for the UI.
+  const iztroGender = formValues.gender === "男" ? "male" : "female";
   iztro.astro.config(ASTRO_CONFIG);
   const astrolabe = iztro.astro.bySolar(
     `${formValues.year}-${formValues.month}-${formValues.day}`,
     timeIndex,
-    formValues.gender,
+    iztroGender,
     true,
     "zh-TW",
   );
