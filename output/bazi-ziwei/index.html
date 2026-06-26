@@ -57,8 +57,14 @@
           <section class="summary-strip" id="summary-strip"></section>
 
           <nav class="method-switch" aria-label="選擇論盤方法" role="tablist">
-            <button class="method-tab is-active" type="button" role="tab" aria-selected="true" data-reading-method="bazi">八字論盤</button>
-            <button class="method-tab" type="button" role="tab" aria-selected="false" data-reading-method="ziwei">紫微斗數論盤</button>
+            <button class="method-tab is-active" type="button" role="tab" aria-selected="true" data-reading-method="bazi">
+              <strong>八字論盤</strong>
+              <small>看日主、十神、五行、大運與流年，適合抓人生能量與行動節奏。</small>
+            </button>
+            <button class="method-tab" type="button" role="tab" aria-selected="false" data-reading-method="ziwei">
+              <strong>紫微斗數論盤</strong>
+              <small>看十二宮、三方四正與流運，適合看事件落點與人際場景。</small>
+            </button>
           </nav>
 
           <section class="method-view" data-method-view="bazi">
@@ -124,6 +130,17 @@
                 </label>
               </div>
               <div id="bazi-reading-output" class="reading-output"></div>
+            </section>
+
+            <section class="partner-section bazi-partner-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">BaZi Partner</p>
+                  <h2>八字正緣輪廓</h2>
+                </div>
+                <span class="section-note">以日支、關係星、十神與干支合沖推估對象特質</span>
+              </div>
+              <div id="bazi-partner-output" class="partner-output"></div>
             </section>
           </section>
 
@@ -212,7 +229,7 @@
       </section>
 
       <footer class="page-note">
-        排盤採公曆與輸入地本地時間計算；正緣輪廓為紫微斗數象徵式推估，結果屬命理排盤資料，請作參考。
+        排盤採公曆與輸入地本地時間計算；正緣輪廓依所選論盤方法作象徵式推估，不能判定性傾向、性別認同或生理性別，請作參考。
       </footer>
     </main>
 

@@ -336,10 +336,26 @@ button {
 }
 
 .method-tab {
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  justify-items: start;
   min-height: 46px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted);
+  text-align: left;
+}
+
+.method-tab strong {
+  font-size: 0.98rem;
+}
+
+.method-tab small {
+  color: inherit;
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .method-tab.is-active {
@@ -617,6 +633,12 @@ button {
   line-height: 1.45;
 }
 
+.bazi-ten-god-reading {
+  margin-top: 12px !important;
+  border-top: 1px solid #e7dfd1;
+  padding-top: 12px;
+}
+
 .analysis-panel {
   padding: 14px;
 }
@@ -626,6 +648,10 @@ button {
 }
 
 .bazi-reading-section {
+  margin-top: 20px;
+}
+
+.bazi-partner-section {
   margin-top: 20px;
 }
 

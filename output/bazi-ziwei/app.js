@@ -393,17 +393,17 @@ const ZIWEI_IMAGE_TYPES = {
   sihua: { label: "四化", title: "生年四化圖", filename: "ziwei-sihua" },
 };
 const PARTNER_CAREER_RULES = [
-  [["天機", "文昌", "文曲"], ["科技產品、資料分析、顧問、教育研究"]],
-  [["巨門"], ["法律、公關、媒體、業務談判、語言溝通"]],
-  [["太陽"], ["管理職、公共服務、品牌行銷、外勤型工作"]],
-  [["太陰"], ["金融會計、設計美感、不動產、照護服務"]],
-  [["武曲", "祿存"], ["金融投資、工程技術、營運管理、制度型職務"]],
-  [["天府", "紫微", "天相"], ["行政管理、政府機構、大型組織、資源整合"]],
-  [["廉貞"], ["法務稽核、制度管理、審美設計、策略職"]],
-  [["貪狼", "紅鸞", "天喜", "天姚", "咸池"], ["業務開發、娛樂美學、餐旅社交、內容行銷"]],
-  [["七殺", "破軍"], ["新創、工程現場、軍警消防、專案開拓"]],
-  [["天梁", "天魁", "天鉞"], ["醫療照護、教育顧問、專業證照、公益服務"]],
-  [["天馬"], ["國際貿易、旅運物流、跨城市移動型工作"]],
+  [["天機", "文昌", "文曲"], ["產品經理", "資料分析師", "管理顧問", "教育研究員"]],
+  [["巨門"], ["律師", "公關顧問", "媒體企劃", "業務談判代表"]],
+  [["太陽"], ["品牌經理", "公共事務專員", "業務主管", "外勤管理職"]],
+  [["太陰"], ["金融分析師", "會計師", "室內設計師", "不動產顧問"]],
+  [["武曲", "祿存"], ["投資分析師", "工程師", "營運經理", "風險管理師"]],
+  [["天府", "紫微", "天相"], ["專案總監", "行政管理師", "公部門專員", "資源整合經理"]],
+  [["廉貞"], ["法遵專員", "稽核師", "策略顧問", "品牌設計師"]],
+  [["貪狼", "紅鸞", "天喜", "天姚", "咸池"], ["商務開發", "內容行銷師", "活動企劃", "餐旅經理"]],
+  [["七殺", "破軍"], ["新創創辦人", "專案開發經理", "工程現場主管", "危機管理師"]],
+  [["天梁", "天魁", "天鉞"], ["醫療照護專員", "教育顧問", "職涯顧問", "社福專員"]],
+  [["天馬"], ["國際貿易專員", "旅運規劃師", "物流經理", "海外業務"]],
 ];
 const ELEMENT_WORDS = {
   "木": "成長、規劃與開展",
@@ -487,6 +487,7 @@ const baziDecadalControl = document.querySelector("#bazi-decadal-control");
 const baziYearControl = document.querySelector("#bazi-year-control");
 const baziTopicSelect = document.querySelector("#bazi-topic-select");
 const baziReadingOutput = document.querySelector("#bazi-reading-output");
+const baziPartnerOutput = document.querySelector("#bazi-partner-output");
 const astrolabeGrid = document.querySelector("#astrolabe-grid");
 const ziweiImageOutput = document.querySelector("#ziwei-image-output");
 const scopeSelect = document.querySelector("#scope-select");
@@ -511,6 +512,12 @@ let partnerRenderSalt = 0;
 let ziweiImageType = "sanhe";
 let activeReadingMethod = "bazi";
 let partnerImageState = {
+  status: "idle",
+  imageUrl: "",
+  provider: "",
+  message: "",
+};
+let baziPartnerImageState = {
   status: "idle",
   imageUrl: "",
   provider: "",
@@ -693,6 +700,143 @@ function baziTenGodGroupSummary(chart) {
     count: group.gods.reduce((sum, god) => sum + (counts[god] || 0), 0),
     detail: group.gods.map((god) => `${god}${counts[god] || 0}`).join("、"),
   }));
+}
+
+function baziTenGodInterpretation(chart) {
+  const profiles = {
+    "比劫": {
+      active: "比劫有根，自主性、同輩競爭與人脈互動會比較強，適合自己掌握節奏，但合作與金錢分配要先講清楚。",
+      concentrated: "比劫偏集中，行動力與主見很夠，卻容易硬撐、把事情都攬在自己身上；團隊合作宜設定權責與邊界。",
+      quiet: "比劫不集中，不代表沒有能力，而是較需要先找到支持環境、同儕夥伴或明確定位，才容易放大行動力。",
+    },
+    "食傷": {
+      active: "食傷有作用，才華、表達、作品與解題能力是重要出口，適合把想法做成看得見的成果。",
+      concentrated: "食傷偏集中，創意與輸出動能強，適合內容、產品、技術與商務表達；也要留意太直接、過勞或不耐受規則。",
+      quiet: "食傷不集中，輸出風格更需要靠訓練與作品累積建立，不宜只等靈感或一次到位。",
+    },
+    "財星": {
+      active: "財星有根，對資源、現金流與務實成果較敏感，適合把技能、時間與人脈做成可衡量的收入。",
+      concentrated: "財星偏集中，對金錢與責任感很強，適合經營現金流與資產；也要避免把安全感全部綁在收入或過度承諾上。",
+      quiet: "財星不集中，財務更適合走制度化累積、專業定價與長期規劃，不宜只靠短線機會。",
+    },
+    "官殺": {
+      active: "官殺有作用，容易遇到責任、規範、競爭或被賦予角色，適合把壓力轉成專業、位置與信任。",
+      concentrated: "官殺偏集中，責任感與危機感都強，能扛事但也容易長期緊繃；要練習拆分目標、授權與休息。",
+      quiet: "官殺不集中，職涯不必硬走權責很重的路線，反而可先靠專長、作品與人脈累積影響力。",
+    },
+    "印星": {
+      active: "印星有作用，學習、證照、貴人、修復與支持系統是命盤的重要底盤。",
+      concentrated: "印星偏集中，吸收力與思考深度佳，適合研究與專業累積；也要避免準備太久、只想不做或過度依賴安全感。",
+      quiet: "印星不集中，更需要主動建立學習方法、休息制度與可信任的支持網，別把恢復當成理所當然。",
+    },
+  };
+  return baziTenGodGroupSummary(chart)
+    .map((group) => {
+      const profile = profiles[group.label];
+      if (!profile) return "";
+      if (group.count >= 3) return `${group.label}${group.count}：${profile.concentrated}`;
+      if (group.count >= 1) return `${group.label}${group.count}：${profile.active}`;
+      return `${group.label}0：${profile.quiet}`;
+    })
+    .join(" ");
+}
+
+function baziCareerRecommendations(chart, limit = 5) {
+  const profile = baziDayMasterProfile(chart);
+  const counts = tenGodCounts(chart);
+  const scores = new Map();
+  const add = (roles, score) => roles.forEach((role, index) => {
+    scores.set(role, (scores.get(role) || 0) + score - index * 0.07);
+  });
+
+  if ((counts["食神"] || 0) + (counts["傷官"] || 0)) add(["產品經理", "內容策略師", "設計師", "商務企劃"], 1.3);
+  if ((counts["正財"] || 0) + (counts["偏財"] || 0)) add(["金融分析師", "商務開發", "不動產顧問", "營運經理"], 1.25);
+  if ((counts["正官"] || 0) + (counts["七殺"] || 0)) add(["專案經理", "法遵專員", "風險管理師", "組織管理職"], 1.18);
+  if ((counts["正印"] || 0) + (counts["偏印"] || 0)) add(["研究員", "教育顧問", "資料分析師", "醫療照護專員"], 1.05);
+  if ((counts["比肩"] || 0) + (counts["劫財"] || 0)) add(["創業者", "顧問", "業務主管", "社群經營者"], 0.88);
+
+  const elementRoles = {
+    "木": ["產品經理", "教育培訓師", "策略顧問"],
+    "火": ["品牌行銷師", "公關企劃", "內容創作者"],
+    "土": ["不動產顧問", "營運經理", "資產管理師"],
+    "金": ["金融分析師", "工程師", "法遵專員"],
+    "水": ["資料分析師", "國際貿易專員", "研究員"],
+  };
+  add(elementRoles[profile.dayElement] || [], 0.72);
+  add((profile.favorable || []).flatMap((element) => elementRoles[element] || []), 0.46);
+
+  return [...scores.entries()]
+    .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0], "zh-Hant"))
+    .slice(0, limit)
+    .map(([role]) => role);
+}
+
+function baziRelationshipSignal(chart) {
+  const relationshipGods = ["正官", "七殺", "正財", "偏財"];
+  const records = getBaziTenGodRecords(chart).filter((record) => relationshipGods.includes(record.god));
+  const counts = Object.fromEntries(relationshipGods.map((god) => [god, 0]));
+  records.forEach((record) => { counts[record.god] += 1; });
+  const leadingGods = relationshipGods
+    .filter((god) => counts[god])
+    .sort((first, second) => counts[second] - counts[first] || first.localeCompare(second, "zh-Hant"));
+  const elementCounts = {};
+  records.forEach((record) => {
+    const element = GAN_ELEMENT[record.stem];
+    if (element) elementCounts[element] = (elementCounts[element] || 0) + 1;
+  });
+  const dayBranch = splitPillar(chart.pillars?.[2]).branch;
+  const partnerElement = Object.entries(elementCounts)
+    .sort((first, second) => second[1] - first[1])[0]?.[0]
+    || ZHI_ELEMENT[dayBranch]
+    || "木";
+  const relationshipText = leadingGods.length
+    ? `關係星見${leadingGods.map((god) => `${god}${counts[god]}`).join("、")}，代表命盤在關係中較容易被${leadingGods.includes("正官") || leadingGods.includes("七殺") ? "有責任感、行動力或專業位置" : "務實、資源感與經營能力"}的對象觸動。`
+    : "四柱的關係星不集中，正緣輪廓更要看日支、桃花、干支合沖與行運是否帶動。";
+  return { records, counts, leadingGods, partnerElement, dayBranch, relationshipText };
+}
+
+function baziPeachBlossomAnalysis(chart) {
+  const signals = baziPeachBlossomSignals(chart);
+  const dayBranch = splitPillar(chart.pillars?.[2]).branch;
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const level = signals.length >= 2 ? "桃花較旺" : signals.length === 1 ? "桃花有入口" : "桃花偏慢熱";
+  const relationText = relations.supports.length
+    ? `日支${dayBranch}所在四柱有${relations.supports.join("、")}等流通訊號，關係比較容易透過合作、社交或生活互動被推進。`
+    : `日支${dayBranch}沒有明顯合局時，感情更需要靠主動認識、穩定相處與生活場景累積。`;
+  const lifestyleWarning = level === "桃花較旺"
+    ? "不過桃花旺只表示被注意與相遇的入口較多；若生活長期兩點一線、沒有社交或新場景，實際感受仍可能不明顯。"
+    : "桃花慢熱不等於沒有姻緣，比較像需要用穩定曝光、朋友介紹或共同興趣慢慢打開入口。";
+  return `${level}。${signals.length ? `四柱訊號：${signals.join("；")}。` : "四柱未見明顯桃花入柱。"}${relationText}${lifestyleWarning}`;
+}
+
+function baziTopicSupplement(topicKey, chart) {
+  const profile = baziDayMasterProfile(chart);
+  const counts = tenGodCounts(chart);
+  const missing = ELEMENTS.filter((element) => !(chart.elementCounts?.[element] || 0));
+  if (topicKey === "property") {
+    const wealth = (counts["正財"] || 0) + (counts["偏財"] || 0);
+    const earth = chart.elementCounts?.["土"] || 0;
+    const propertyTone = wealth + earth >= 4
+      ? "財星與土氣承接較明顯，較適合把收入、現金流與長期資產配置連成一套。"
+      : wealth + earth >= 2
+        ? "有資產累積條件，但買房或投資前更需要先看現金流、負債比與持有成本。"
+        : "房產與資產節奏偏慢熱，宜先累積信用、頭期與穩定收入，避免因焦慮或人情而過早承擔。";
+    return `房產與資產：${propertyTone} 正財${counts["正財"] || 0}、偏財${counts["偏財"] || 0}、土${earth}，可用來看穩定收入、外部機會與不動產承接的平衡。`;
+  }
+  if (topicKey === "career") {
+    const careers = baziCareerRecommendations(chart);
+    return `最有機會的五種職業：${careers.join("、")}。這是依日主${profile.dayElement}、喜用${profile.favorable.join("、")}與十神配置推估；實際仍要以技能、經驗與市場條件校正。`;
+  }
+  if (topicKey === "marriage") {
+    return `八字桃花：${baziPeachBlossomAnalysis(chart)} ${baziRelationshipSignal(chart).relationshipText}`;
+  }
+  if (topicKey === "children") {
+    const output = (counts["食神"] || 0) + (counts["傷官"] || 0);
+    const print = (counts["正印"] || 0) + (counts["偏印"] || 0);
+    return `子女與作品：食傷${output}、印星${print}。食傷偏看子女緣、作品與創造力；印星偏看照顧、教育與修復資源。兩者能流通時，較能把照顧與自我發展兼顧。`;
+  }
+  const weakText = missing.length ? `偏弱或未見的五行為${missing.join("、")}，` : "五行沒有明顯缺行，";
+  return `健康保養：${weakText}日主${profile.strength}。木偏筋骨與壓力伸展、火偏睡眠與發炎、土偏脾胃代謝、金偏呼吸皮膚與肩頸、水偏內分泌與循環；這是保養提醒，不是疾病診斷。`;
 }
 
 function relationLabel(values) {
@@ -2069,21 +2213,31 @@ function namesIncludeAny(names, keywords) {
 }
 
 function inferPartnerCareers(starNames, spousePalace) {
-  const careers = [];
+  const scored = new Map();
+  const addCareers = (careers, score) => {
+    careers.forEach((career, index) => {
+      scored.set(career, (scored.get(career) || 0) + score - index * 0.06);
+    });
+  };
   PARTNER_CAREER_RULES.forEach(([keywords, options]) => {
-    if (namesIncludeAny(starNames, keywords)) {
-      careers.push(...options);
-    }
+    const hits = keywords.filter((keyword) => starNames.some((name) => name.includes(keyword))).length;
+    if (hits) addCareers(options, 1.35 + hits * 0.35);
   });
 
   const branchElement = ZHI_ELEMENT[spousePalace?.earthlyBranch] || "";
-  if (branchElement === "木") careers.push("企劃、教育、顧問、產品成長相關");
-  if (branchElement === "火") careers.push("行銷、公眾表達、內容、表演或曝光型工作");
-  if (branchElement === "土") careers.push("不動產、營運、專案管理、資產管理");
-  if (branchElement === "金") careers.push("金融、法務、工程、制度與品質管理");
-  if (branchElement === "水") careers.push("研究、跨域協調、心理諮詢、旅運貿易");
+  const fallback = {
+    "木": ["產品企劃", "教育培訓師", "成長顧問"],
+    "火": ["品牌行銷師", "內容創作者", "活動企劃"],
+    "土": ["不動產顧問", "營運經理", "專案經理"],
+    "金": ["金融分析師", "法遵專員", "工程師"],
+    "水": ["研究員", "心理諮詢師", "國際貿易專員"],
+  }[branchElement] || ["專案經理", "顧問", "專業技術人員"];
+  addCareers(fallback, 0.55);
 
-  return uniqueItems(careers).slice(0, 5);
+  return [...scored.entries()]
+    .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0], "zh-Hant"))
+    .slice(0, 5)
+    .map(([career]) => career);
 }
 
 function numberFromSeed(seed, min, max) {
@@ -2404,6 +2558,105 @@ function buildPartnerProfile(chart) {
   };
 }
 
+function inferBaziPartnerGenderProfile(chart, relationship) {
+  const dayBranchYinYang = BRANCH_YINYANG[relationship.dayBranch] || "";
+  const hasOfficer = relationship.leadingGods.some((god) => ["正官", "七殺"].includes(god));
+  const hasWealth = relationship.leadingGods.some((god) => ["正財", "偏財"].includes(god));
+  if ((hasOfficer && hasWealth) || relationship.leadingGods.length === 0) {
+    return {
+      label: "中性氣質",
+      imageGender: "androgynous adult person with refined gender-neutral presentation",
+      kind: "androgynous",
+      reason: "八字關係星訊號並列或不集中，外在輪廓以中性、氣質感與相處方式為主，不宜硬分性別呈現。",
+    };
+  }
+  if (dayBranchYinYang === "陰") {
+    return {
+      label: "女性氣質",
+      imageGender: "feminine-presenting adult woman",
+      kind: "feminine",
+      reason: "日支陰性與關係星的細膩、承接特質較明顯，對象外在呈現偏女性氣質。",
+    };
+  }
+  return {
+    label: "男性氣質",
+    imageGender: "masculine-presenting adult man",
+    kind: "masculine",
+    reason: "日支陽性與關係星的行動、承擔特質較明顯，對象外在呈現偏男性氣質。",
+  };
+}
+
+function baziPartnerCareers(chart, relationship) {
+  const scores = new Map();
+  const add = (roles, score) => roles.forEach((role, index) => {
+    scores.set(role, (scores.get(role) || 0) + score - index * 0.07);
+  });
+  const elementRoles = {
+    "木": ["教育顧問", "產品經理", "策略企劃", "心理諮詢師"],
+    "火": ["品牌行銷師", "公關顧問", "內容創作者", "活動企劃"],
+    "土": ["不動產顧問", "營運經理", "專案經理", "資產管理師"],
+    "金": ["金融分析師", "工程師", "法遵專員", "品質管理師"],
+    "水": ["研究員", "資料分析師", "國際貿易專員", "旅運規劃師"],
+  };
+  add(elementRoles[relationship.partnerElement] || [], 1.2);
+  if (relationship.leadingGods.some((god) => ["正官", "七殺"].includes(god))) {
+    add(["專案經理", "法遵專員", "風險管理師", "組織管理職"], 0.95);
+  }
+  if (relationship.leadingGods.some((god) => ["正財", "偏財"].includes(god))) {
+    add(["金融分析師", "商務開發", "不動產顧問", "營運經理"], 0.95);
+  }
+  add(baziCareerRecommendations(chart, 5), 0.3);
+  return [...scores.entries()]
+    .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0], "zh-Hant"))
+    .slice(0, 5)
+    .map(([role]) => role);
+}
+
+function buildBaziPartnerProfile(chart) {
+  const relationship = baziRelationshipSignal(chart);
+  const genderProfile = inferBaziPartnerGenderProfile(chart, relationship);
+  const pseudoPalace = { name: "日支", earthlyBranch: relationship.dayBranch };
+  const supportStars = uniqueItems([
+    ...relationship.leadingGods,
+    `日支${relationship.dayBranch}`,
+    `關係五行${relationship.partnerElement}`,
+  ]);
+  const appearance = inferPartnerAppearance(supportStars, pseudoPalace, genderProfile.label);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const careers = baziPartnerCareers(chart, relationship);
+  const peach = baziPeachBlossomAnalysis(chart);
+  const dayMaster = baziDayMasterProfile(chart);
+  const meeting = [
+    `日支${relationship.dayBranch}是八字關係與相處模式的重要位置；以${relationship.partnerElement}五行作為對象氣質、外型與職業調性的底色。`,
+    relationship.relationshipText,
+    relations.text,
+    `桃花訊號：${peach}`,
+    `日主${dayMaster.dayStem}${dayMaster.dayElement}呈${dayMaster.strength}，會影響命主在關係裡需要安全感、互動空間或承諾節奏的方式。`,
+  ];
+
+  return {
+    source: "bazi",
+    sourceLabel: "八字四柱",
+    relationship,
+    genderProfile,
+    appearance,
+    careers,
+    supportStars,
+    meeting,
+    focusText: `日主${dayMaster.dayStem}${dayMaster.dayElement}、日支${relationship.dayBranch}、關係星${relationship.leadingGods.join("、") || "不集中"}、四柱合沖`,
+    imageContext: {
+      spouse: `日支${relationship.dayBranch}／關係五行${relationship.partnerElement}`,
+      spouseSquare: relations.supports.join("、") || "四柱合局不集中",
+      life: `日主${dayMaster.dayStem}${dayMaster.dayElement} ${dayMaster.strength}`,
+      travel: "以流年與外部社交場景引動",
+      fortune: `喜用方向${dayMaster.favorable.join("、")}`,
+      career: `關係星${relationship.leadingGods.join("、") || "不集中"}`,
+      wealth: `正財${relationship.counts["正財"] || 0}／偏財${relationship.counts["偏財"] || 0}`,
+      cause: "八字不設來因宮，以日支與關係星為關係入口",
+    },
+  };
+}
+
 function hashText(value) {
   return [...String(value)].reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
@@ -2421,7 +2674,7 @@ function partnerPalette(profile) {
 
 function buildPartnerPortraitSvg(chart, profile) {
   const palette = partnerPalette(profile);
-  const targetGender = partnerTargetGender(chart);
+  const targetGender = profile.genderProfile?.label || partnerTargetGender(chart);
   const presentationKind = partnerPresentationKind(targetGender);
   const avatar = profile.appearance.avatarClass;
   const faceWidth = avatar === "tall" ? 88 : avatar === "sharp" ? 94 : avatar === "solid" ? 118 : 106;
@@ -2475,12 +2728,23 @@ function partnerImageEndpointAvailable() {
 }
 
 function buildPartnerImagePayload(chart, profile) {
+  const context = profile.imageContext || {
+    spouse: palaceLabel(profile.spousePalace),
+    spouseSquare: palaceListText(profile.spouseSquarePalaces),
+    travel: palaceLabel(profile.travelPalace),
+    fortune: palaceLabel(profile.fortunePalace),
+    life: palaceLabel(profile.lifePalace),
+    career: palaceLabel(profile.careerPalace),
+    wealth: palaceLabel(profile.wealthPalace),
+    cause: palaceLabel(profile.causePalace),
+  };
   return {
+    method: profile.source === "bazi" ? "BaZi / Four Pillars" : "Zi Wei Dou Shu",
     targetGender: profile.genderProfile?.label || partnerTargetGender(chart),
     imageGender: profile.genderProfile?.imageGender || "androgynous adult person",
     genderReason: profile.genderProfile?.reason || "",
-    school: ASTRO_SCHOOL_LABEL,
-    careers: profile.careers.slice(0, 4),
+    school: profile.sourceLabel || ASTRO_SCHOOL_LABEL,
+    careers: profile.careers.slice(0, 5),
     appearance: {
       face: profile.appearance.face,
       build: profile.appearance.build,
@@ -2488,37 +2752,33 @@ function buildPartnerImagePayload(chart, profile) {
       details: profile.appearance.details,
       notes: profile.appearance.notes.slice(0, 6),
     },
-    palaces: {
-      spouse: palaceLabel(profile.spousePalace),
-      spouseSquare: palaceListText(profile.spouseSquarePalaces),
-      travel: palaceLabel(profile.travelPalace),
-      fortune: palaceLabel(profile.fortunePalace),
-      life: palaceLabel(profile.lifePalace),
-      career: palaceLabel(profile.careerPalace),
-      wealth: palaceLabel(profile.wealthPalace),
-      cause: palaceLabel(profile.causePalace),
-    },
+    palaces: context,
     stars: profile.supportStars.slice(0, 16),
     reasons: profile.meeting.slice(0, 7),
   };
 }
 
-function renderPartnerImageStatus() {
-  if (!partnerImageState.message) return "";
-  const statusClass = ["loading", "ready", "error"].includes(partnerImageState.status)
-    ? partnerImageState.status
-    : "idle";
-  return `<p class="ai-image-status ${statusClass}">${escapeHtml(partnerImageState.message)}</p>`;
+function partnerImageStateFor(source = "ziwei") {
+  return source === "bazi" ? baziPartnerImageState : partnerImageState;
 }
 
-function renderPartnerVisual(chart, profile) {
-  const hasAiImage = Boolean(partnerImageState.imageUrl);
-  const isLoading = partnerImageState.status === "loading";
+function renderPartnerImageStatus(state) {
+  if (!state.message) return "";
+  const statusClass = ["loading", "ready", "error"].includes(state.status)
+    ? state.status
+    : "idle";
+  return `<p class="ai-image-status ${statusClass}">${escapeHtml(state.message)}</p>`;
+}
+
+function renderPartnerVisual(chart, profile, source = "ziwei") {
+  const state = partnerImageStateFor(source);
+  const hasAiImage = Boolean(state.imageUrl);
+  const isLoading = state.status === "loading";
   const visual = hasAiImage
-    ? `<img class="partner-ai-image" src="${escapeHtml(partnerImageState.imageUrl)}" alt="AI 生成的正緣輪廓圖片" loading="lazy" />`
+    ? `<img class="partner-ai-image" src="${escapeHtml(state.imageUrl)}" alt="AI 生成的正緣輪廓圖片" loading="lazy" />`
     : buildPartnerPortraitSvg(chart, profile);
   const caption = hasAiImage
-    ? `由${partnerImageState.provider || "AI 圖像模型"}生成，依夫妻宮三方四正、命宮、遷移、福德、官祿、財帛與來因宮摘要製作。`
+    ? `由${state.provider || "AI 圖像模型"}生成，${source === "bazi" ? "依日主、日支、關係星、十神與干支合沖摘要製作。" : "依夫妻宮三方四正、命宮、遷移、福德、官祿、財帛與來因宮摘要製作。"}`
     : partnerImageEndpointAvailable()
       ? "按下生成後會由後端呼叫 AI 圖像模型，頁面不會顯示提示詞。"
       : "目前是本機 file 預覽，先顯示概念圖；部署到 Cloudflare 並啟用 Workers AI 後即可生成 AI 圖片。";
@@ -2533,9 +2793,9 @@ function renderPartnerVisual(chart, profile) {
       <p class="eyebrow">${hasAiImage ? "AI Portrait" : "Preview Portrait"}</p>
       ${visual}
       <p class="partner-caption">${escapeHtml(caption)}</p>
-      ${renderPartnerImageStatus()}
+      ${renderPartnerImageStatus(state)}
       <div class="portrait-actions">
-        <button type="button" data-generate-ai-partner ${isLoading ? "disabled" : ""}>${escapeHtml(generateLabel)}</button>
+        <button type="button" ${source === "bazi" ? "data-generate-bazi-partner" : "data-generate-ai-partner"} ${isLoading ? "disabled" : ""}>${escapeHtml(generateLabel)}</button>
       </div>
     </div>
   `;
@@ -2588,6 +2848,53 @@ function renderPartnerProfile(chart) {
   `;
 }
 
+function renderBaziPartnerProfile(chart) {
+  if (!baziPartnerOutput) return;
+  const profile = buildBaziPartnerProfile(chart);
+  chart.baziPartnerProfile = profile;
+  const detail = profile.appearance.details || {};
+  const careerText = profile.careers.length ? profile.careers.join("、") : "職業訊號不集中，需以實際互動與工作背景校正";
+  const relationshipStars = profile.relationship.leadingGods.length
+    ? profile.relationship.leadingGods.map((god) => `${god}${profile.relationship.counts[god]}`).join("、")
+    : "關係星不集中";
+  const reasons = [
+    `八字正緣以日支${profile.relationship.dayBranch}、關係星與四柱干支結構為主；本盤關係星為${relationshipStars}。`,
+    `關係五行以${profile.relationship.partnerElement}為主，作為外型、職業調性與相處節奏的底色。`,
+    `正緣呈現不以命主性別硬切，而是依日支陰陽與關係星推估為${profile.genderProfile.label}；${profile.genderProfile.reason}`,
+    "提醒：此輪廓只推估伴侶的外在氣質與互動傾向，不能判定命主或正緣的性傾向、性別認同或生理性別；感情偏好應以當事人的感受與選擇為準。",
+    ...profile.meeting,
+  ];
+
+  baziPartnerOutput.innerHTML = `
+    <div class="partner-main">
+      <div class="partner-visual">
+        ${renderPartnerVisual(chart, profile, "bazi")}
+      </div>
+      <div class="partner-copy">
+        <div>
+          <p class="eyebrow">八字正緣模擬</p>
+          <h3>${escapeHtml(profile.appearance.face)}</h3>
+        </div>
+        <div class="partner-grid">
+          <div class="partner-cell"><span>最有機會職業</span><strong>${escapeHtml(careerText)}</strong></div>
+          <div class="partner-cell"><span>性別氣質</span><strong>${escapeHtml(profile.genderProfile.label)}</strong></div>
+          <div class="partner-cell"><span>身高體重</span><strong>${escapeHtml(`${detail.height || "待推估"} / ${detail.weight || "待推估"}`)}</strong></div>
+          <div class="partner-cell"><span>身材輪廓</span><strong>${escapeHtml(profile.appearance.build)}</strong></div>
+          <div class="partner-cell"><span>體態比例</span><strong>${escapeHtml(detail.bodyRatio || "比例訊號待校正")}</strong></div>
+          <div class="partner-cell"><span>髮色髮型</span><strong>${escapeHtml(`${detail.hairColor || "自然髮色"}，${detail.hairStyle || "乾淨髮型"}`)}</strong></div>
+          <div class="partner-cell"><span>喜歡穿著</span><strong>${escapeHtml(detail.outfit || "穿搭偏乾淨耐看")}</strong></div>
+          <div class="partner-cell"><span>判讀依據</span><strong>${escapeHtml(profile.focusText)}</strong></div>
+        </div>
+        <ul class="partner-list">
+          ${detail.story ? `<li>${escapeHtml(detail.story)}</li>` : ""}
+          ${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}
+          ${profile.appearance.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
 function palaceChatSummary(palace) {
   if (!palace) return "目前找不到這個宮位。";
   const stars = [
@@ -2615,10 +2922,12 @@ function chatTopicAnswer(topicKey) {
     const period = buildBaziPeriodContext(currentChart);
     const profile = baziDayMasterProfile(currentChart);
     const analysis = baziTopicAnalysis(topicKey, currentChart, topic, period);
+    const supplement = baziTopicSupplement(topicKey, currentChart);
     return [
-      `八字：${analysis.text}`,
-      `原局：${profile.text}`,
-      `當期：${baziPeriodReading(currentChart, period)}`,
+      `我先從八字幫你抓${topic.label}的重點：${analysis.text}`,
+      `原局來看，${profile.text}`,
+      `再補一層生活面向：${supplement}`,
+      `目前選的是${period.periodName}，${baziPeriodReading(currentChart, period)}`,
     ].join(" ");
   }
 
@@ -2630,9 +2939,9 @@ function chatTopicAnswer(topicKey) {
     : "";
 
   return [
-    `紫微斗數：${ziweiText}`,
+    `我先從紫微的${topic.label}主宮與三方四正開始看：${ziweiText}`,
     peachText,
-    `時間軸：${timelinePlainText(topicKey, currentChart)}`,
+    `時間節奏方面：${timelinePlainText(topicKey, currentChart)}`,
   ].filter(Boolean).join(" ");
 }
 
@@ -2650,14 +2959,37 @@ function chatPartnerAnswer() {
   const notes = profile.appearance.notes.length ? `外貌修正：${profile.appearance.notes.join(" ")}` : "";
 
   return [
-    `正緣以夫妻宮為主，但會合看夫妻宮三方四正與相關宮位：${palaceListText(profile.focusPalaces, 10)}。夫妻宮為${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}。`,
-    `性別氣質：${profile.genderProfile?.label || "依命盤呈現"}，${profile.genderProfile?.reason || "不以命主性別硬性限制對象外在呈現。"}`,
+    `我先把紫微盤裡的關係線索整理成一個具體輪廓。夫妻宮是${palaceLabel(profile.spousePalace)}，主星為${profile.spouseMain}，並合看${palaceListText(profile.focusPalaces, 10)}。`,
+    `對象呈現偏${profile.genderProfile?.label || "命盤所示氣質"}，${profile.genderProfile?.reason || "不以命主性別硬性限制對象外在呈現。"}`,
     "提醒：這是伴侶外在氣質與互動傾向的推估，不能判定命主或正緣的性傾向、性別認同或生理性別；感情偏好應以當事人的感受與選擇為準。",
-    `可能職業方向：${careers}。`,
-    `身材長相模擬：${appearance}。`,
-    profile.causePalace ? `來因宮是${palaceLabel(profile.causePalace)}，關係事件常會從${palaceKey(profile.causePalace.name)}議題切入。` : "",
-    "正緣輪廓區可按「生成 AI 圖片」，部署到 Cloudflare 並啟用 Workers AI 後會直接回傳圖片；本機預覽會先保留概念圖。",
+    `最有機會的五種職業是：${careers}。`,
+    `外型與身形輪廓則是：${appearance}。`,
+    profile.causePalace ? `來因宮落在${palaceLabel(profile.causePalace)}，所以關係事件常會先從${palaceKey(profile.causePalace.name)}議題切進來。` : "",
+    "把這些當成你容易遇到、容易被吸引的對象特質，比把它當成某一個人的精準預告更合適。",
     notes,
+  ].filter(Boolean).join(" ");
+}
+
+function chatBaziPartnerAnswer() {
+  const profile = currentChart.baziPartnerProfile || buildBaziPartnerProfile(currentChart);
+  const detail = profile.appearance.details || {};
+  const appearance = [
+    `${profile.appearance.build}，${profile.appearance.face}`,
+    detail.height && detail.weight ? `身高體重約${detail.height} / ${detail.weight}` : "",
+    detail.bodyRatio ? `體態比例：${detail.bodyRatio}` : "",
+    detail.hairColor || detail.hairStyle ? `髮色髮型：${detail.hairColor || "自然髮色"}，${detail.hairStyle || "乾淨髮型"}` : "",
+  ].filter(Boolean).join("。 ");
+  const stars = profile.relationship.leadingGods.length
+    ? profile.relationship.leadingGods.map((god) => `${god}${profile.relationship.counts[god]}`).join("、")
+    : "關係星不集中";
+  return [
+    `我先用八字把關係線索整理給你：日支是${profile.relationship.dayBranch}，關係星為${stars}，關係五行偏${profile.relationship.partnerElement}。`,
+    profile.relationship.relationshipText,
+    `對象氣質偏${profile.genderProfile.label}，${profile.genderProfile.reason}`,
+    "提醒：這是伴侶外在氣質與互動傾向的推估，不能判定命主或正緣的性傾向、性別認同或生理性別。",
+    `最有機會的五種職業是：${profile.careers.join("、")}。`,
+    `外型與身形輪廓則是：${appearance}。`,
+    "這張八字比較適合用來理解你在關係裡容易被哪種特質吸引，以及什麼互動節奏比較走得久。",
   ].filter(Boolean).join(" ");
 }
 
@@ -2676,7 +3008,7 @@ function buildBotAnswer(question) {
   const context = buildPeriodContext(currentChart);
 
   if (/正緣|另一半|伴侶|對象|長相|身材|職業/.test(q)) {
-    return chatPartnerAnswer();
+    return activeReadingMethod === "bazi" ? chatBaziPartnerAnswer() : chatPartnerAnswer();
   }
 
   if (/來因/.test(q)) {
@@ -2793,6 +3125,67 @@ async function generatePartnerAiImage() {
   }
 }
 
+async function generateBaziPartnerAiImage() {
+  if (!currentChart) return;
+
+  if (!partnerImageEndpointAvailable()) {
+    baziPartnerImageState = {
+      status: "error",
+      imageUrl: "",
+      provider: "",
+      message: "本機 file 預覽無法呼叫 AI 後端；部署到 Cloudflare 並啟用 Workers AI 後即可生成。",
+    };
+    renderBaziPartnerProfile(currentChart);
+    addChatMessage("八字正緣輪廓已先顯示概念圖；部署版本啟用圖片服務後，才可以生成 AI 圖片。", "bot");
+    return;
+  }
+
+  const profile = currentChart.baziPartnerProfile || buildBaziPartnerProfile(currentChart);
+  baziPartnerImageState = {
+    ...baziPartnerImageState,
+    status: "loading",
+    message: "八字正緣圖片生成中，通常需要 10 到 30 秒。",
+  };
+  renderBaziPartnerProfile(currentChart);
+
+  try {
+    const response = await fetch(AI_IMAGE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPartnerImagePayload(currentChart, profile)),
+    });
+    const responseText = await response.text();
+    let result = {};
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch (error) {
+      result = {};
+    }
+    if (!response.ok) {
+      const detail = result.error || responseText.trim().slice(0, 240);
+      throw new Error(detail || `AI 圖片生成失敗，Cloudflare 回傳 HTTP ${response.status}。`);
+    }
+    if (!result.imageUrl) throw new Error("AI 圖片服務沒有回傳圖片。");
+
+    baziPartnerImageState = {
+      status: "ready",
+      imageUrl: result.imageUrl,
+      provider: result.provider || "AI 圖像模型",
+      message: "八字正緣圖片已生成，可以重新生成。",
+    };
+    renderBaziPartnerProfile(currentChart);
+    addChatMessage("我已依日主、日支、關係星與干支結構生成八字正緣圖片。這是象徵式輪廓，不是對真實對象的保證。", "bot");
+  } catch (error) {
+    baziPartnerImageState = {
+      ...baziPartnerImageState,
+      status: "error",
+      message: error.message || "AI 圖片生成失敗。",
+    };
+    renderBaziPartnerProfile(currentChart);
+    addChatMessage(`八字正緣圖片暫時沒有生成成功：${baziPartnerImageState.message}`, "bot");
+  }
+}
+
 function renderPalaceOverview(astrolabe) {
   const squareTooltip = "三方四正：三方是本宮的三合宮位，四正是在三方之外再加對宮；用來判斷該宮事件的外部支援、牽動來源與真正成局條件。";
   return `
@@ -2866,6 +3259,7 @@ function renderBaziInsights(chart) {
             </div>
           `).join("")}
         </div>
+        <p class="bazi-ten-god-reading">${escapeHtml(baziTenGodInterpretation(chart))}</p>
       </article>
       <article class="bazi-insight-card">
         <span>干支結構</span>
@@ -2885,6 +3279,7 @@ function buildBaziReading(chart) {
   const relations = baziRelationAnalysis(chart.pillars || []);
   const period = buildBaziPeriodContext(chart);
   const analysis = baziTopicAnalysis(topicKey, chart, topic, period);
+  const supplement = baziTopicSupplement(topicKey, chart);
   const tone = scoreTone(analysis.element.score + profile.score * 0.45);
   const periodText = baziPeriodReading(chart, period);
   const why = [
@@ -2916,12 +3311,16 @@ function buildBaziReading(chart) {
           <p>${escapeHtml(analysis.text)}</p>
         </section>
         <section class="reading-block">
+          <h4>${escapeHtml(topic.label)}延伸重點</h4>
+          <p>${escapeHtml(supplement)}</p>
+        </section>
+        <section class="reading-block">
           <h4>${escapeHtml(period.periodName)}重點</h4>
           <p>${escapeHtml(periodText)}</p>
         </section>
         <section class="reading-block">
           <h4>十神怎麼用在行動上</h4>
-          <p>${escapeHtml(groups.filter((group) => group.count).map((group) => `${group.label}${group.count}：${group.note}`).join("；") || "十神訊號不集中，宜以五行平衡、實際環境與選擇為主。")}</p>
+          <p>${escapeHtml(baziTenGodInterpretation(chart))}</p>
         </section>
         <div class="reading-tags">
           ${tags.map((tag) => `<span class="reading-tag">${escapeHtml(tag)}</span>`).join("")}
@@ -2942,6 +3341,7 @@ function updateBaziReading() {
   if (baziDecadalControl) baziDecadalControl.hidden = baziScopeSelect?.value !== "decadal";
   if (baziYearControl) baziYearControl.hidden = baziScopeSelect?.value !== "yearly";
   if (baziReadingOutput) baziReadingOutput.innerHTML = buildBaziReading(currentChart);
+  renderBaziPartnerProfile(currentChart);
 }
 
 function setActiveReadingMethod(method) {
@@ -3604,6 +4004,12 @@ function calculate() {
     provider: "",
     message: "",
   };
+  baziPartnerImageState = {
+    status: "idle",
+    imageUrl: "",
+    provider: "",
+    message: "",
+  };
 
   if (!targetYearInput.value) targetYearInput.value = String(new Date().getFullYear());
   if (!targetMonthInput.value) targetMonthInput.value = String(new Date().getMonth() + 1);
@@ -3687,6 +4093,9 @@ document.addEventListener("click", (event) => {
   }
   if (event.target.matches("[data-generate-ai-partner]")) {
     generatePartnerAiImage();
+  }
+  if (event.target.matches("[data-generate-bazi-partner]")) {
+    generateBaziPartnerAiImage();
   }
 });
 
