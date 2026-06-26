@@ -19,8 +19,12 @@
       <section class="workspace" aria-label="排盤工作區">
         <form class="input-panel" id="birth-form">
           <div class="field-row">
-            <label for="birth-date">出生日期</label>
-            <input id="birth-date" name="birthDate" type="date" min="1900-01-01" max="2100-12-31" required />
+            <label for="birth-year">出生日期</label>
+            <div class="birth-date-selects" role="group" aria-label="出生日期">
+              <select id="birth-year" name="birthYear" aria-label="出生年份" required></select>
+              <select id="birth-month" name="birthMonth" aria-label="出生月份" required></select>
+              <select id="birth-day" name="birthDay" aria-label="出生日期" required></select>
+            </div>
           </div>
 
           <div class="field-row">

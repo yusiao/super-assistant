@@ -471,7 +471,9 @@ const TW_MAP = {
 };
 
 const form = document.querySelector("#birth-form");
-const dateInput = document.querySelector("#birth-date");
+const birthYearSelect = document.querySelector("#birth-year");
+const birthMonthSelect = document.querySelector("#birth-month");
+const birthDaySelect = document.querySelector("#birth-day");
 const timeInput = document.querySelector("#birth-time");
 const errorMessage = document.querySelector("#error-message");
 const summaryStrip = document.querySelector("#summary-strip");
@@ -543,18 +545,72 @@ function stripStarBrightnessText(value) {
 }
 
 function getFormValues() {
-  const birthDate = dateInput.value;
+  const year = Number(birthYearSelect.value);
+  const month = Number(birthMonthSelect.value);
+  const day = Number(birthDaySelect.value);
   const birthTime = timeInput.value;
   const gender = form.querySelector('input[name="gender"]:checked')?.value || "女";
 
-  if (!birthDate || !birthTime) {
+  if (!year || !month || !day || !birthTime) {
     throw new Error("請填入完整出生日期與時間。");
   }
 
-  const [year, month, day] = birthDate.split("-").map(Number);
   const [hour, minute] = birthTime.split(":").map(Number);
+  const birthDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   return { birthDate, birthTime, gender, year, month, day, hour, minute };
+}
+
+function setSelectOptions(select, values, selectedValue, formatLabel) {
+  select.replaceChildren(...values.map((value) => {
+    const option = document.createElement("option");
+    option.value = String(value);
+    option.textContent = formatLabel(value);
+    option.selected = String(value) === String(selectedValue);
+    return option;
+  }));
+}
+
+function updateBirthDayOptions() {
+  const year = Number(birthYearSelect.value);
+  const month = Number(birthMonthSelect.value);
+  if (!year || !month) return;
+
+  const lastDay = new Date(year, month, 0).getDate();
+  const selectedDay = Math.min(Number(birthDaySelect.value) || 1, lastDay);
+  setSelectOptions(
+    birthDaySelect,
+    Array.from({ length: lastDay }, (_, index) => index + 1),
+    selectedDay,
+    (day) => `${day} 日`,
+  );
+}
+
+function initializeBirthDateTime() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+
+  setSelectOptions(
+    birthYearSelect,
+    Array.from({ length: 201 }, (_, index) => 1900 + index),
+    year,
+    (value) => `${value} 年`,
+  );
+  setSelectOptions(
+    birthMonthSelect,
+    Array.from({ length: 12 }, (_, index) => index + 1),
+    month,
+    (value) => `${value} 月`,
+  );
+  setSelectOptions(
+    birthDaySelect,
+    Array.from({ length: new Date(year, month, 0).getDate() }, (_, index) => index + 1),
+    day,
+    (value) => `${value} 日`,
+  );
+  timeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 }
 
 function getTimeIndex(hour) {
@@ -2250,7 +2306,6 @@ function pickBySeed(items, seed) {
 
 function partnerPresentationKind(targetGender) {
   if (/女性|陰柔/.test(targetGender)) return "feminine";
-  if (/中性|雌雄|莫辨/.test(targetGender)) return "androgynous";
   return "masculine";
 }
 
@@ -2259,27 +2314,14 @@ function inferPartnerGenderProfile(starNames, spousePalace) {
   const branchElement = ZHI_ELEMENT[branch] || "";
   let masculine = BRANCH_YINYANG[branch] === "陽" ? 1.2 : 0;
   let feminine = BRANCH_YINYANG[branch] === "陰" ? 1.2 : 0;
-  let neutral = 0;
 
   masculine += namesIncludeAny(starNames, ["太陽", "武曲", "七殺", "破軍", "天梁", "紫微", "化權"]) ? 1.6 : 0;
   masculine += namesIncludeAny(starNames, ["擎羊", "火星", "鈴星"]) ? 0.8 : 0;
   feminine += namesIncludeAny(starNames, ["太陰", "天同", "天姚", "紅鸞", "天喜", "咸池", "文曲"]) ? 1.6 : 0;
   feminine += namesIncludeAny(starNames, ["天鉞", "右弼"]) ? 0.6 : 0;
-  neutral += namesIncludeAny(starNames, ["天機", "巨門", "文昌", "文曲", "天相", "天馬"]) ? 1.1 : 0;
-  neutral += Math.abs(masculine - feminine) < 1.2 ? 1.4 : 0;
 
   if (branchElement === "火" || branchElement === "金") masculine += 0.35;
   if (branchElement === "水" || branchElement === "木") feminine += 0.35;
-  if (branchElement === "土") neutral += 0.3;
-
-  if (neutral >= masculine && neutral >= feminine) {
-    return {
-      label: "中性氣質",
-      imageGender: "androgynous adult person with refined gender-neutral presentation",
-      kind: "androgynous",
-      reason: "夫妻宮與三方四正的陰陽訊號接近，且帶有機敏、溝通或協調星，對象呈現不宜硬分男相或女相。",
-    };
-  }
 
   if (feminine > masculine) {
     return {
@@ -2314,14 +2356,7 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
     "金": [174, 182, 65, 78],
     "水": [170, 178, 60, 72],
   };
-  const androgynousRanges = {
-    "木": [168, 176, 54, 65],
-    "火": [166, 174, 52, 64],
-    "土": [164, 172, 58, 70],
-    "金": [167, 176, 54, 66],
-    "水": [164, 173, 52, 64],
-  };
-  const rangeMap = kind === "feminine" ? femaleRanges : kind === "androgynous" ? androgynousRanges : maleRanges;
+  const rangeMap = kind === "feminine" ? femaleRanges : maleRanges;
   const [minHeight, maxHeight, minWeight, maxWeight] = rangeMap[branchElement] || [162, 172, 50, 64];
   const height = numberFromSeed(seed, minHeight, maxHeight);
   const weight = numberFromSeed(seed * 7, minWeight, maxWeight);
@@ -2343,18 +2378,6 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
       height: `${height} cm`,
       weight: `${weight} kg`,
       bodyRatio: `上圍約${cup}罩杯，腰臀比例偏${isSoft ? "柔和有曲線" : isSharp ? "俐落緊實" : "協調耐看"}`,
-    };
-  }
-
-  if (kind === "androgynous") {
-    return {
-      height: `${height} cm`,
-      weight: `${weight} kg`,
-      bodyRatio: isSharp
-        ? "肩頸與腰線乾淨，整體偏中性冷感、比例俐落"
-        : isSoft
-          ? "線條柔和但不過度女性化，帶雌雄莫辨的親近感"
-          : "身形修長均衡，男女特徵都不過度突出，辨識度在氣質與穿搭",
     };
   }
 
@@ -2392,19 +2415,12 @@ function partnerHairAndStyle(targetGender, branchElement, starNames, seed) {
     "金": ["線條感短髮", "乾淨旁分", "俐落油頭感短髮"],
     "水": ["柔順短中髮", "自然瀏海短髮", "鬆弛感旁分"],
   }[branchElement] || ["自然短髮"];
-  const neutralHair = {
-    "木": ["鎖骨層次髮或清爽中短髮", "自然蓬鬆中短髮", "帶空氣感的中性髮型"],
-    "火": ["俐落短中髮", "高層次中短髮", "有造型感的中性髮型"],
-    "土": ["低調中短髮", "自然內彎短中髮", "穩重乾淨的中性髮型"],
-    "金": ["線條感短中髮", "耳下短髮", "俐落直順的中性髮型"],
-    "水": ["柔順短中髮", "微捲中短髮", "低調帶瀏海的中性髮型"],
-  }[branchElement] || ["自然中性髮型"];
   const outfitBase = {
-    "木": kind === "feminine" ? "喜歡襯衫、針織、長裙或有垂墜感的單品" : kind === "androgynous" ? "偏好襯衫、寬版外套、層次感背心與乾淨中性穿法" : "偏好襯衫、薄外套、乾淨休閒與有層次的穿法",
-    "火": kind === "feminine" ? "喜歡亮色點綴、合身上衣、短版外套或有存在感的配件" : kind === "androgynous" ? "偏好短版外套、俐落剪裁、亮色小配件與帶速度感的中性穿搭" : "偏好合身剪裁、運動休閒、皮革或亮色細節",
-    "土": kind === "feminine" ? "喜歡大地色、柔軟材質、長版外套與穩重質感" : kind === "androgynous" ? "偏好大地色、工裝、寬褲、針織與低調質感" : "偏好大地色、工裝、針織與穩重耐看的單品",
-    "金": kind === "feminine" ? "喜歡西裝外套、單色洋裝、金屬飾品與乾淨線條" : kind === "androgynous" ? "偏好西裝外套、單色系、直線剪裁與金屬配件" : "偏好襯衫、西裝外套、單色系與俐落剪裁",
-    "水": kind === "feminine" ? "喜歡柔霧色、絲質或雪紡、寬鬆但修飾身形的穿搭" : kind === "androgynous" ? "偏好深色、柔軟材質、寬鬆輪廓與低調細節" : "偏好深色、柔軟材質、簡潔但有細節的穿法",
+    "木": kind === "feminine" ? "喜歡襯衫、針織、長裙或有垂墜感的單品" : "偏好襯衫、薄外套、乾淨休閒與有層次的穿法",
+    "火": kind === "feminine" ? "喜歡亮色點綴、合身上衣、短版外套或有存在感的配件" : "偏好合身剪裁、運動休閒、皮革或亮色細節",
+    "土": kind === "feminine" ? "喜歡大地色、柔軟材質、長版外套與穩重質感" : "偏好大地色、工裝、針織與穩重耐看的單品",
+    "金": kind === "feminine" ? "喜歡西裝外套、單色洋裝、金屬飾品與乾淨線條" : "偏好襯衫、西裝外套、單色系與俐落剪裁",
+    "水": kind === "feminine" ? "喜歡柔霧色、絲質或雪紡、寬鬆但修飾身形的穿搭" : "偏好深色、柔軟材質、簡潔但有細節的穿法",
   }[branchElement] || "穿搭偏乾淨耐看";
   const stylingNotes = [];
 
@@ -2414,7 +2430,7 @@ function partnerHairAndStyle(targetGender, branchElement, starNames, seed) {
 
   return {
     hairColor: pickBySeed(hairColors, seed + 3),
-    hairStyle: pickBySeed(kind === "feminine" ? femaleHair : kind === "androgynous" ? neutralHair : maleHair, seed + 5),
+    hairStyle: pickBySeed(kind === "feminine" ? femaleHair : maleHair, seed + 5),
     outfit: outfitBase,
     stylingNotes,
   };
@@ -2559,16 +2575,6 @@ function buildPartnerProfile(chart) {
 
 function inferBaziPartnerGenderProfile(chart, relationship) {
   const dayBranchYinYang = BRANCH_YINYANG[relationship.dayBranch] || "";
-  const hasOfficer = relationship.leadingGods.some((god) => ["正官", "七殺"].includes(god));
-  const hasWealth = relationship.leadingGods.some((god) => ["正財", "偏財"].includes(god));
-  if ((hasOfficer && hasWealth) || relationship.leadingGods.length === 0) {
-    return {
-      label: "中性氣質",
-      imageGender: "androgynous adult person with refined gender-neutral presentation",
-      kind: "androgynous",
-      reason: "八字關係星訊號並列或不集中，外在輪廓以中性、氣質感與相處方式為主，不宜硬分性別呈現。",
-    };
-  }
   if (dayBranchYinYang === "陰") {
     return {
       label: "女性氣質",
@@ -2683,9 +2689,7 @@ function buildPartnerPortraitSvg(chart, profile) {
   const eyeY = namesIncludeAny(profile.supportStars, ["天機", "巨門"]) ? 126 : 130;
   const hairPath = presentationKind === "masculine"
     ? `M139 112 C136 72 162 52 188 54 C220 56 236 81 226 119 C211 101 181 94 139 112Z`
-    : presentationKind === "androgynous"
-      ? `M136 116 C133 75 160 50 190 52 C222 54 239 80 230 124 C212 105 185 96 150 105 C144 108 139 112 136 116Z`
-      : `M132 121 C128 72 160 46 190 48 C226 50 244 83 235 136 C223 112 203 94 160 102 C146 108 138 115 132 121Z`;
+    : `M132 121 C128 72 160 46 190 48 C226 50 244 83 235 136 C223 112 203 94 160 102 C146 108 138 115 132 121Z`;
   const career = profile.careers[0] || "專業人士";
   const title = `${targetGender}・${career}`;
   const subtitle = `${profile.appearance.face}｜${profile.appearance.build}`;
@@ -2740,7 +2744,7 @@ function buildPartnerImagePayload(chart, profile) {
   return {
     method: profile.source === "bazi" ? "BaZi / Four Pillars" : "Zi Wei Dou Shu",
     targetGender: profile.genderProfile?.label || partnerTargetGender(chart),
-    imageGender: profile.genderProfile?.imageGender || "androgynous adult person",
+    imageGender: profile.genderProfile?.imageGender || "adult person with refined presentation",
     genderReason: profile.genderProfile?.reason || "",
     school: profile.sourceLabel || ASTRO_SCHOOL_LABEL,
     careers: profile.careers.slice(0, 5),
@@ -4041,13 +4045,17 @@ form.addEventListener("submit", (event) => {
 
 form.querySelectorAll('input[name="gender"]').forEach((input) => {
   input.addEventListener("change", () => {
-    if (!currentChart || !dateInput.value || !timeInput.value) return;
+    if (!currentChart || !birthYearSelect.value || !birthMonthSelect.value || !birthDaySelect.value || !timeInput.value) return;
     try {
       calculate();
     } catch (error) {
       showError(error);
     }
   });
+});
+
+[birthYearSelect, birthMonthSelect].forEach((select) => {
+  select.addEventListener("change", updateBirthDayOptions);
 });
 [
   scopeSelect,
@@ -4103,4 +4111,5 @@ document.addEventListener("click", (event) => {
   }
 });
 
+initializeBirthDateTime();
 seedChat();
