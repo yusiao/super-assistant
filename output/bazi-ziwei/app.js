@@ -546,7 +546,7 @@ function stripStarBrightnessText(value) {
 function getFormValues() {
   const birthDate = dateInput.value;
   const birthTime = timeInput.value;
-  const gender = new FormData(form).get("gender") || "女";
+  const gender = form.querySelector('input[name="gender"]:checked')?.value || "女";
 
   if (!birthDate || !birthTime) {
     throw new Error("請填入完整出生日期與時間。");
@@ -3447,6 +3447,7 @@ function renderSummary(astrolabe, lunar, formValues, timeIndex) {
     { label: "公曆", value: `${formValues.birthDate} ${formValues.birthTime}` },
     { label: "農曆", value: toTraditional(lunarDate) },
     { label: "時辰", value: `${HOUR_BRANCHES[timeIndex]}時 ${getTimeRange(timeIndex)}` },
+    { label: "性別", value: formValues.gender },
     {
       label: "命宮 / 身宮",
       value: `${lifePalaceLabel} / ${bodyPalaceLabel}`,
@@ -4045,6 +4046,16 @@ form.addEventListener("submit", (event) => {
 });
 
 sampleButton.addEventListener("click", setSample);
+form.querySelectorAll('input[name="gender"]').forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!currentChart || !dateInput.value || !timeInput.value) return;
+    try {
+      calculate();
+    } catch (error) {
+      showError(error);
+    }
+  });
+});
 [
   scopeSelect,
   decadalSelect,
