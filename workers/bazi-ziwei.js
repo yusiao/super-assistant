@@ -8,6 +8,7 @@ const JSON_HEADERS = {
   ...CORS_HEADERS,
 };
 const PRICE_WATCH_KV_KEY = "price-watch:watches";
+const FLIGHT_YEAR_HISTORY_PREFIX = "price-watch:flight-year-history";
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
@@ -110,6 +111,371 @@ async function serpApiSearch(params, env) {
   return data;
 }
 
+function isoDate(value, fallback = "") {
+  const text = compact(value, fallback, 16);
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : fallback;
+}
+
+function addDays(value, days) {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
+}
+
+function dateParts(value, includeDay = false) {
+  const [year, month, day] = value.split("-").map(Number);
+  const parts = { year, month };
+  if (includeDay) parts.day = day;
+  return parts;
+}
+
+function dateFromParts(parts) {
+  if (!parts?.year || !parts?.month || !parts?.day) return "";
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+function daysBetween(start, end) {
+  return Math.round((new Date(`${end}T00:00:00Z`) - new Date(`${start}T00:00:00Z`)) / 86400000);
+}
+
+function quoteValues(data) {
+  const quotes = data?.content?.results?.quotes || data?.results?.quotes || data?.quotes || {};
+  return Array.isArray(quotes) ? quotes : Object.values(quotes);
+}
+
+function quoteLegDate(leg) {
+  return dateFromParts(leg?.departureDate || leg?.departure_date || leg?.date);
+}
+
+function average(values) {
+  const numbers = values.map(Number).filter(Number.isFinite);
+  if (!numbers.length) return null;
+  return numbers.reduce((total, value) => total + value, 0) / numbers.length;
+}
+
+function flightYearStats(results) {
+  const grouped = new Map();
+  results.forEach((result) => {
+    const year = Number(String(result.departureDate || "").slice(0, 4));
+    if (!Number.isInteger(year)) return;
+    if (!grouped.has(year)) grouped.set(year, []);
+    grouped.get(year).push(result.price);
+  });
+  return Object.fromEntries(
+    [...grouped.entries()].map(([year, prices]) => [
+      String(year),
+      { average: average(prices), sampleCount: prices.length },
+    ]),
+  );
+}
+
+function flightYearHistoryKey(departureId, arrivalId, tripDays, currency) {
+  return `${FLIGHT_YEAR_HISTORY_PREFIX}:${departureId}:${arrivalId}:${tripDays}:${currency}`;
+}
+
+function evenlySpacedDates(startDate, endDate, limit = 4) {
+  const totalDays = Math.max(0, daysBetween(startDate, endDate));
+  const count = Math.min(limit, totalDays + 1);
+  if (count <= 1) return [startDate];
+  return [...new Set(Array.from({ length: count }, (_, index) => addDays(startDate, Math.round((totalDays * index) / (count - 1)))))];
+}
+
+async function serpApiSampledFlightSearch(payload, env) {
+  const departureId = compact(payload.departureId, "", 80).toUpperCase();
+  const arrivalId = compact(payload.arrivalId, "", 80).toUpperCase();
+  const mode = compact(payload.flightMode, "annual_low", 24);
+  const today = new Date().toISOString().slice(0, 10);
+  const startDate = mode === "annual_low" ? addDays(today, 14) : isoDate(payload.startDate, today);
+  const horizonDays = mode === "annual_low" ? 351 : Math.max(0, Math.min(Number(payload.lookaheadDays || 30), 365));
+  const endDate = addDays(startDate, horizonDays);
+  const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
+  const currency = currencyLabel(payload.currency);
+  const sampleDates = evenlySpacedDates(startDate, endDate, 4);
+  const searches = await Promise.allSettled(
+    sampleDates.map(async (outboundDate) => {
+      const returnDate = tripDays > 0 ? addDays(outboundDate, tripDays) : "";
+      const data = await serpApiSearch(
+        {
+          engine: "google_flights",
+          departure_id: departureId,
+          arrival_id: arrivalId,
+          outbound_date: outboundDate,
+          return_date: returnDate,
+          type: tripDays > 0 ? "1" : "2",
+          currency,
+          gl: compact(payload.market, "TW", 8).toLowerCase(),
+          hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
+          sort_by: "2",
+        },
+        env,
+      );
+      const normalized = normalizeFlightResults(
+        data,
+        { ...payload, departureId, arrivalId, outboundDate, returnDate },
+        currency,
+      );
+      const best = normalized.results[0];
+      return best ? { ...best, source: "Google Flights 抽樣", sampled: true } : null;
+    }),
+  );
+  const results = searches
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value)
+    .sort((left, right) => left.price - right.price);
+  if (!results.length) throw new Error("Google Flights returned no sampled prices.");
+  const lowestPrice = results[0].price;
+  const yearlyQuotes = flightYearStats(results);
+  const comparisonYear = Number(startDate.slice(0, 4));
+  const previousYear = comparisonYear - 1;
+  const historyKey = flightYearHistoryKey(departureId, arrivalId, tripDays, currency);
+  const history = await readFlightYearHistory(env, historyKey);
+  const currentStats = yearlyQuotes[String(comparisonYear)] || null;
+  const previousRecords = history.filter((record) => Number(record.travelYear) === previousYear);
+  const yearStats = {
+    year: comparisonYear,
+    average: currentStats?.average ?? null,
+    sampleCount: currentStats?.sampleCount ?? 0,
+    previousYear,
+    previousAverage: average(previousRecords.map((record) => record.average)),
+    previousSampleCount: previousRecords.length,
+    basis: "sampled_departure_quotes",
+  };
+  await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
+  return {
+    mode,
+    startDate,
+    endDate,
+    tripDays,
+    results: results.map((item) => ({ ...item, isRangeLow: item.price === lowestPrice })),
+    insights: {
+      lowestPrice,
+      rangeStart: startDate,
+      rangeEnd: endDate,
+      cached: false,
+      sampleDates,
+      samplingNotice: `為控制免費額度，本次抽查 ${sampleDates.length} 個代表出發日。`,
+      yearStats,
+    },
+  };
+}
+
+async function readFlightYearHistory(env, key) {
+  if (!env.PRICE_WATCH_KV || typeof env.PRICE_WATCH_KV.get !== "function") return [];
+  try {
+    const data = await env.PRICE_WATCH_KV.get(key, { type: "json" });
+    return Array.isArray(data?.records) ? data.records : [];
+  } catch {
+    return [];
+  }
+}
+
+async function recordFlightYearHistory(env, key, records, stats, observedDate) {
+  if (!env.PRICE_WATCH_KV || typeof env.PRICE_WATCH_KV.put !== "function") return;
+  const years = Object.keys(stats);
+  const alreadyRecorded = years.every((year) =>
+    records.some((record) => record.observedDate === observedDate && String(record.travelYear) === year),
+  );
+  if (!years.length || alreadyRecorded) return;
+  const additions = years
+    .filter((year) => !records.some((record) => record.observedDate === observedDate && String(record.travelYear) === year))
+    .map((year) => ({
+      observedDate,
+      travelYear: Number(year),
+      average: stats[year].average,
+      sampleCount: stats[year].sampleCount,
+    }));
+  const nextRecords = [...records, ...additions].slice(-800);
+  try {
+    await env.PRICE_WATCH_KV.put(key, JSON.stringify({ records: nextRecords }));
+  } catch {
+    // Price search should still succeed if optional history storage is unavailable.
+  }
+}
+
+async function skyscannerIndicativeSearch(payload, env) {
+  const apiKey = envValue(env, "SKYSCANNER_API_KEY");
+  if (!apiKey) throw new Error("SKYSCANNER_API_KEY is not set.");
+  const departureId = compact(payload.departureId, "", 8).toUpperCase();
+  const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+  const mode = compact(payload.flightMode, "annual_low", 24);
+  const today = new Date().toISOString().slice(0, 10);
+  const startDate = mode === "annual_low" ? today : isoDate(payload.startDate, today);
+  const horizonDays = mode === "annual_low" ? 365 : Math.max(0, Math.min(Number(payload.lookaheadDays || 30), 365));
+  const endDate = addDays(startDate, horizonDays);
+  const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
+  const currency = currencyLabel(payload.currency);
+  const queryLegs = [
+    {
+      originPlace: { queryPlace: { iata: departureId } },
+      destinationPlace: { queryPlace: { iata: arrivalId } },
+      dateRange: {
+        startDate: dateParts(startDate),
+        endDate: dateParts(endDate),
+      },
+    },
+  ];
+  if (tripDays > 0) {
+    queryLegs.push({
+      originPlace: { queryPlace: { iata: arrivalId } },
+      destinationPlace: { queryPlace: { iata: departureId } },
+      dateRange: {
+        startDate: dateParts(addDays(startDate, tripDays)),
+        endDate: dateParts(addDays(endDate, tripDays)),
+      },
+    });
+  }
+
+  const response = await fetch("https://partners.api.skyscanner.net/apiservices/v3/flights/indicative/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+    body: JSON.stringify({
+      query: {
+        market: compact(payload.market, "TW", 8),
+        locale: compact(payload.locale, "zh-TW", 12),
+        currency,
+        queryLegs,
+        dateTimeGroupingType: "DATE_TIME_GROUPING_TYPE_BY_DATE",
+      },
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || `Skyscanner request failed with HTTP ${response.status}.`);
+  }
+
+  const results = quoteValues(data)
+    .map((quote, index) => {
+      const price = normalizeMoney(quote.minPrice?.amount || quote.price?.amount || quote.price);
+      const departureDate = quoteLegDate(quote.outboundLeg || quote.outbound_leg);
+      const returnDate = quoteLegDate(quote.inboundLeg || quote.inbound_leg);
+      if (!price || !departureDate || departureDate < startDate || departureDate > endDate) return null;
+      if (tripDays > 0 && (!returnDate || daysBetween(departureDate, returnDate) !== tripDays)) return null;
+      const dateText = returnDate ? `${departureDate} - ${returnDate}` : departureDate;
+      const path = returnDate
+        ? `${departureDate.replaceAll("-", "").slice(2)}/${returnDate.replaceAll("-", "").slice(2)}`
+        : departureDate.replaceAll("-", "").slice(2);
+      return {
+        id: safeId(`${departureId}-${arrivalId}-${dateText}-${price}-${index}`, "flight"),
+        type: "flight",
+        title: `${departureId}-${arrivalId} ${dateText}`,
+        source: "Skyscanner Indicative",
+        price,
+        priceText: formatPrice(price, currency),
+        currency,
+        link: `https://www.skyscanner.com.tw/transport/flights/${departureId.toLowerCase()}/${arrivalId.toLowerCase()}/${path}/`,
+        departureDate,
+        returnDate,
+        tripDays,
+        cached: true,
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.price - right.price);
+  const lowestPrice = results.length ? results[0].price : null;
+  const yearlyQuotes = flightYearStats(results);
+  const comparisonYear = Number(startDate.slice(0, 4));
+  const previousYear = comparisonYear - 1;
+  const historyKey = flightYearHistoryKey(departureId, arrivalId, tripDays, currency);
+  const history = await readFlightYearHistory(env, historyKey);
+  const previousRecords = history.filter((record) => Number(record.travelYear) === previousYear);
+  const currentQuoteStats = yearlyQuotes[String(comparisonYear)] || null;
+  const currentHistoryRecords = history.filter((record) => Number(record.travelYear) === comparisonYear);
+  const yearStats = {
+    year: comparisonYear,
+    average: currentQuoteStats?.average ?? average(currentHistoryRecords.map((record) => record.average)),
+    sampleCount: currentQuoteStats?.sampleCount ?? currentHistoryRecords.length,
+    previousYear,
+    previousAverage: average(previousRecords.map((record) => record.average)),
+    previousSampleCount: previousRecords.length,
+    basis: currentQuoteStats ? "departure_quotes" : "observed_daily_quotes",
+  };
+  await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
+  return {
+    mode,
+    startDate,
+    endDate,
+    tripDays,
+    results: results.slice(0, 30).map((item) => ({ ...item, isRangeLow: item.price === lowestPrice })),
+    insights: {
+      lowestPrice,
+      rangeStart: startDate,
+      rangeEnd: endDate,
+      cached: true,
+      cacheNotice: "Indicative prices may be up to 4 days old. Confirm live price before booking.",
+      yearStats,
+    },
+  };
+}
+
+async function skyscannerPlaceSearch(payload, env) {
+  const apiKey = envValue(env, "SKYSCANNER_API_KEY");
+  if (!apiKey) throw new Error("SKYSCANNER_API_KEY is not set.");
+  const searchTerm = compact(payload.query, "", 80);
+  if (!searchTerm) return [];
+  const response = await fetch("https://partners.api.skyscanner.net/apiservices/v3/autosuggest/flights", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+    },
+    body: JSON.stringify({
+      query: {
+        market: compact(payload.market, "TW", 8),
+        locale: compact(payload.locale, "zh-TW", 12),
+        searchTerm,
+        includedEntityTypes: ["PLACE_TYPE_CITY", "PLACE_TYPE_AIRPORT"],
+      },
+      limit: 8,
+      isDestination: Boolean(payload.isDestination),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || `Skyscanner autosuggest failed with HTTP ${response.status}.`);
+  }
+  const values = data.places || data?.content?.results?.places || [];
+  const places = Array.isArray(values) ? values : Object.values(values || {});
+  return places
+    .map((place) => ({
+      name: compact(place.name || place.presentation?.title, "", 100),
+      subtitle: compact(place.presentation?.subtitle || place.countryName, "", 120),
+      iataCode: compact(place.iataCode || place.iata_code, "", 8).toUpperCase(),
+      entityId: compact(place.entityId || place.entity_id, "", 80),
+      type: compact(place.type, "", 40),
+    }))
+    .filter((place) => place.name && place.iataCode)
+    .slice(0, 8);
+}
+
+async function serpApiPlaceSearch(payload, env) {
+  const query = compact(payload.query, "", 80);
+  if (!query) return [];
+  const data = await serpApiSearch(
+    {
+      engine: "google_flights_autocomplete",
+      q: query,
+      gl: compact(payload.market, "TW", 8).toLowerCase(),
+      hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
+    },
+    env,
+  );
+  return (data.suggestions || [])
+    .flatMap((place) =>
+      (place.airports || []).map((airport) => ({
+        name: compact(airport.name, place.name, 100),
+        subtitle: compact([airport.city, airport.distance].filter(Boolean).join(" · "), "", 120),
+        iataCode: compact(airport.id, "", 8).toUpperCase(),
+        entityId: compact(place.id, "", 80),
+        type: "airport",
+      })),
+    )
+    .filter((place) => place.name && /^[A-Z]{3}$/.test(place.iataCode))
+    .slice(0, 8);
+}
+
 function normalizeShoppingResults(data, currency) {
   return (data.shopping_results || [])
     .map((item) => {
@@ -160,6 +526,9 @@ function normalizeFlightResults(data, payload, currency) {
         stops: item.stops ?? "",
         departure: firstFlight.departure_airport?.time || "",
         arrival: lastFlight.arrival_airport?.time || "",
+        departureDate: payload.outboundDate || "",
+        returnDate: payload.returnDate || "",
+        tripDays: payload.returnDate ? daysBetween(payload.outboundDate, payload.returnDate) : 0,
       };
     })
     .filter(Boolean)
@@ -205,35 +574,43 @@ function productWatchFromPayload(payload) {
   };
 }
 
-function flightWatchFromPayload(payload) {
+function flightWatchFromPayload(payload, env) {
   const departureId = compact(payload.departureId, "", 8).toUpperCase();
   const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
-  const outboundDate = compact(payload.outboundDate, "", 16);
-  const returnDate = compact(payload.returnDate, "", 16);
-  const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${outboundDate}`, 140);
+  const mode = compact(payload.flightMode, "annual_low", 24);
+  const startDate = isoDate(payload.startDate, "");
+  const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
+  const lookaheadDays = Math.max(1, Math.min(Number(payload.lookaheadDays || 30), 365));
+  const modeLabel = mode === "annual_low" ? "未來一年最低" : `${startDate} 起 ${lookaheadDays} 天`;
+  const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${modeLabel}`, 140);
   const currency = currencyLabel(payload.currency);
+  const useSkyscanner = Boolean(envValue(env, "SKYSCANNER_API_KEY"));
   const source = {
-    type: "serpapi_google_flights",
-    id: "google-flights",
-    name: "Google Flights",
+    type: useSkyscanner ? "skyscanner_indicative_flights" : "serpapi_google_flights_sampled",
+    id: useSkyscanner ? "skyscanner-indicative" : "google-flights-sampled",
+    name: useSkyscanner ? "Skyscanner Indicative" : "Google Flights 抽樣",
+    mode,
     departure_id: departureId,
     arrival_id: arrivalId,
-    outbound_date: outboundDate,
+    start_date: startDate,
+    horizon_days: mode === "annual_low" ? 365 : lookaheadDays,
+    lookahead_days: lookaheadDays,
+    trip_days: tripDays,
     currency,
-    hl: compact(payload.hl, "zh-tw", 12),
-    gl: compact(payload.gl, "tw", 8),
-    adults: compact(payload.adults, "1", 4),
-    travel_class: compact(payload.travelClass, "1", 4),
+    market: compact(payload.market, "TW", 8),
+    locale: compact(payload.locale, "zh-TW", 12),
+    check_interval_hours: useSkyscanner ? 12 : 24,
   };
-  if (returnDate) source.return_date = returnDate;
   return {
     enabled: true,
-    id: safeId(payload.id || `${departureId}-${arrivalId}-${outboundDate}-${returnDate}`, "flight"),
+    id: safeId(payload.id || `${departureId}-${arrivalId}-${mode}-${startDate}-${tripDays}`, "flight"),
     type: "flight",
     name,
     currency,
     target_price: normalizeMoney(payload.targetPrice),
     alert_on_new_low: true,
+    alert_on_first_seen: mode === "annual_low",
+    alert_strategy: mode === "annual_low" ? "annual_floor" : "target_or_new_low",
     alert_cooldown_days: 3,
     sources: [source],
   };
@@ -263,6 +640,7 @@ async function handlePriceWatchConfig(request, env) {
   if (request.method !== "GET") return methodNotAllowed();
   return json(200, {
     hasSerpApi: Boolean(envValue(env, "SERPAPI_API_KEY")),
+    hasSkyscanner: Boolean(envValue(env, "SKYSCANNER_API_KEY")),
     hasKv: Boolean(env.PRICE_WATCH_KV),
     requiresToken: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() !== "true",
     publicSearch: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true",
@@ -302,10 +680,23 @@ async function handlePriceWatchSearch(request, env) {
   if (type === "flight") {
     const departureId = compact(payload.departureId, "", 8).toUpperCase();
     const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
-    const outboundDate = compact(payload.outboundDate, "", 16);
-    if (!departureId || !arrivalId || !outboundDate) {
-      return json(400, { error: "departureId, arrivalId and outboundDate are required." });
+    const flightMode = compact(payload.flightMode, "annual_low", 24);
+    const startDate = isoDate(payload.startDate, "");
+    if (!departureId || !arrivalId || (flightMode === "date_window" && !startDate)) {
+      return json(400, { error: "departureId, arrivalId and a valid startDate for date_window are required." });
     }
+    if (flightMode === "annual_low" || flightMode === "date_window") {
+      const flexibleSearch = envValue(env, "SKYSCANNER_API_KEY")
+        ? skyscannerIndicativeSearch
+        : serpApiSampledFlightSearch;
+      return json(200, {
+        type: "flight",
+        currency,
+        ...(await flexibleSearch({ ...payload, departureId, arrivalId, startDate, flightMode }, env)),
+      });
+    }
+    const outboundDate = compact(payload.outboundDate, "", 16);
+    if (!outboundDate) return json(400, { error: "outboundDate is required for fixed date search." });
     const data = await serpApiSearch(
       {
         engine: "google_flights",
@@ -331,6 +722,17 @@ async function handlePriceWatchSearch(request, env) {
   return json(400, { error: "Unsupported search type." });
 }
 
+async function handlePriceWatchPlaces(request, env) {
+  if (request.method === "OPTIONS") return corsPreflight();
+  if (request.method !== "POST") return methodNotAllowed();
+  if (!hasPriceWatchAccess(request, env, true)) return priceWatchAuthError(env);
+  const payload = await request.json().catch(() => ({}));
+  const places = envValue(env, "SKYSCANNER_API_KEY")
+    ? await skyscannerPlaceSearch(payload, env)
+    : await serpApiPlaceSearch(payload, env);
+  return json(200, { places });
+}
+
 async function handlePriceWatchWatches(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (!hasPriceWatchAccess(request, env, false)) return priceWatchAuthError(env);
@@ -343,7 +745,7 @@ async function handlePriceWatchWatches(request, env) {
   const payload = await request.json().catch(() => ({}));
   let watch = payload.watch;
   if (!watch && payload.type === "product") watch = productWatchFromPayload(payload);
-  if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload);
+  if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload, env);
   watch = validateWatch(watch);
 
   const watches = await readPriceWatches(env);
@@ -637,6 +1039,9 @@ export default {
     }
     if (url.pathname === "/api/price-watch/search") {
       return handlePriceWatchSearch(request, env);
+    }
+    if (url.pathname === "/api/price-watch/places") {
+      return handlePriceWatchPlaces(request, env);
     }
     if (url.pathname === "/api/price-watch/watches") {
       return handlePriceWatchWatches(request, env);
