@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101820" />
+    <meta name="application-name" content="Jarvis Price Watch" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Jarvis 價格" />
+    <title>Jarvis Price Watch</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Jarvis</p>
+          <h1>Price Watch</h1>
+        </div>
+        <button class="icon-button" id="settingsButton" type="button" aria-label="設定同步金鑰">
+          <span aria-hidden="true">⋮</span>
+        </button>
+      </header>
+
+      <section class="status-strip" id="statusStrip">
+        <span class="status-dot"></span>
+        <span id="statusText">準備搜尋</span>
+      </section>
+
+      <nav class="tabs" aria-label="搜尋類型" role="tablist">
+        <button class="tab active" data-panel="productPanel" aria-controls="productPanel" aria-selected="true" role="tab" type="button">商品</button>
+        <button class="tab" data-panel="flightPanel" aria-controls="flightPanel" aria-selected="false" role="tab" type="button">機票</button>
+        <button class="tab" data-panel="savedPanel" aria-controls="savedPanel" aria-selected="false" role="tab" type="button">追蹤</button>
+      </nav>
+
+      <section class="panel active" id="productPanel" role="tabpanel">
+        <form class="search-form" id="productForm">
+          <label>
+            <span>商品或型號</span>
+            <input name="query" autocomplete="off" placeholder="iPad Air M3 11 128GB" required />
+          </label>
+          <div class="field-row">
+            <label>
+              <span>目標價</span>
+              <input name="targetPrice" inputmode="numeric" placeholder="16900" />
+            </label>
+            <label>
+              <span>幣別</span>
+              <select name="currency">
+                <option value="TWD">TWD</option>
+                <option value="USD">USD</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </label>
+          </div>
+          <button class="primary-button" type="submit">搜尋商品</button>
+        </form>
+      </section>
+
+      <section class="panel" id="flightPanel" role="tabpanel">
+        <form class="search-form" id="flightForm">
+          <div class="mode-switch" aria-label="機票搜尋模式">
+            <button class="mode-button active" data-flight-mode="annual_low" type="button">全年最低</button>
+            <button class="mode-button" data-flight-mode="date_window" type="button">日期區間</button>
+          </div>
+          <div class="field-row">
+            <label>
+              <span>出發地</span>
+              <input name="departureId" list="departurePlaces" autocomplete="off" placeholder="台北 / TPE" required data-place-input="departure" />
+              <datalist id="departurePlaces"></datalist>
+            </label>
+            <label>
+              <span>目的地</span>
+              <input name="arrivalId" list="arrivalPlaces" autocomplete="off" placeholder="東京 / TYO" required data-place-input="arrival" />
+              <datalist id="arrivalPlaces"></datalist>
+            </label>
+          </div>
+          <div class="field-row">
+            <label>
+              <span>旅行天數</span>
+              <input name="tripDays" type="number" inputmode="numeric" min="0" max="60" value="5" />
+            </label>
+            <label>
+              <span>目標價（選填）</span>
+              <input name="targetPrice" inputmode="numeric" placeholder="8000" />
+            </label>
+          </div>
+          <div class="window-only" id="windowFlightFields" hidden>
+            <div class="field-row">
+              <label>
+                <span>最早出發日</span>
+                <input name="startDate" type="date" />
+              </label>
+              <label>
+                <span>往後搜尋</span>
+                <select name="lookaheadDays">
+                  <option value="7">7 天</option>
+                  <option value="14">14 天</option>
+                  <option value="30" selected>30 天</option>
+                  <option value="60">60 天</option>
+                  <option value="90">90 天</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="field-row">
+            <label>
+              <span>幣別</span>
+              <select name="currency">
+                <option value="TWD">TWD</option>
+                <option value="USD">USD</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </label>
+            <label>
+              <span>市場</span>
+              <select name="market">
+                <option value="TW">台灣</option>
+                <option value="JP">日本</option>
+                <option value="US">美國</option>
+              </select>
+            </label>
+          </div>
+          <button class="primary-button" id="flightSubmitButton" type="submit">找未來一年最低價</button>
+        </form>
+      </section>
+
+      <section class="panel" id="savedPanel" role="tabpanel">
+        <div class="saved-toolbar">
+          <h2>追蹤清單</h2>
+          <button class="ghost-button" id="refreshSavedButton" type="button">更新</button>
+        </div>
+        <div class="saved-list" id="savedList"></div>
+      </section>
+
+      <section class="results-zone">
+        <div class="results-head">
+          <h2 id="resultsTitle">搜尋結果</h2>
+          <span id="resultCount"></span>
+        </div>
+        <div class="flight-year-stats" id="flightYearStats" hidden>
+          <div class="year-stat">
+            <span id="currentYearLabel">該年平均</span>
+            <strong id="currentYearAverage">尚無資料</strong>
+            <small id="currentYearMeta"></small>
+          </div>
+          <div class="year-stat">
+            <span id="previousYearLabel">去年平均</span>
+            <strong id="previousYearAverage">尚無資料</strong>
+            <small id="previousYearMeta"></small>
+          </div>
+        </div>
+        <div class="result-list" id="resultList"></div>
+      </section>
+    </main>
+
+    <dialog class="settings-dialog" id="settingsDialog">
+      <form method="dialog">
+        <header>
+          <h2>同步設定</h2>
+          <button class="icon-button" value="cancel" aria-label="關閉" type="submit">×</button>
+        </header>
+        <label>
+          <span>同步金鑰</span>
+          <input id="accessTokenInput" type="password" autocomplete="off" placeholder="PRICE_WATCH_ACCESS_TOKEN" />
+        </label>
+        <label>
+          <span>API 位址</span>
+          <input id="apiBaseInput" type="url" autocomplete="off" placeholder="https://your-worker.example.com" />
+        </label>
+        <button class="primary-button" id="saveSettingsButton" value="default" type="submit">儲存</button>
+      </form>
+    </dialog>
+
+    <template id="emptyTemplate">
+      <div class="empty-state">
+        <strong>沒有資料</strong>
+        <span>換個條件再試一次。</span>
+      </div>
+    </template>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
