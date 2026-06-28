@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173b33">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Jarvis 衣櫃">
+  <meta name="description" content="Jarvis AI 衣櫃——把衣服拍下來，讓每天的穿搭變簡單。">
+  <title>Jarvis Wardrobe — AI 智慧衣櫃</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="engine.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Jarvis Wardrobe 首頁"><span class="brand-mark">J</span><span>JARVIS / WARDROBE</span></a>
+    <nav aria-label="主要導覽">
+      <button class="nav-link active" data-view="wardrobe">我的衣櫃</button>
+      <button class="nav-link" data-view="looks">穿搭收藏 <span id="savedCount">0</span></button>
+    </nav>
+    <button class="icon-button" id="resetButton" aria-label="重設示範資料" title="重設示範資料">↻</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span></span> YOUR DAILY EDIT</div>
+      <h1>今天，<br><em>穿什麼？</em></h1>
+      <p>把你的衣服交給 Jarvis。依照場合、天氣與你的風格，從自己的衣櫃裡找到剛剛好的組合。</p>
+      <div class="hero-meta">
+        <div><strong id="itemCount">0</strong><span>件單品</span></div>
+        <div><strong id="lookCount">0</strong><span>種組合</span></div>
+        <div><strong>30s</strong><span>完成搭配</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div><div class="hanger">⌒</div><div class="fabric fabric-a"></div><div class="fabric fabric-b"></div>
+      </div>
+    </section>
+
+    <section class="workspace" id="wardrobeView">
+      <div class="section-heading">
+        <div><span class="step">01</span><h2>先看看你的衣櫃</h2></div>
+        <p>上傳衣物正面照，照片只會保留在這台裝置上。</p>
+      </div>
+
+      <div class="wardrobe-layout">
+        <button class="upload-card" id="uploadTrigger">
+          <span class="upload-icon">⌁</span>
+          <strong>拍下你的衣服</strong>
+          <small>使用相機，或從相簿選取</small>
+        </button>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        <div class="clothes-grid" id="clothesGrid"></div>
+      </div>
+
+      <div class="filter-row" id="categoryFilters" aria-label="衣物分類"></div>
+
+      <div class="section-heading generator-heading">
+        <div><span class="step">02</span><h2>告訴我今天的情境</h2></div>
+        <p>不用想太多，選最接近的就好。</p>
+      </div>
+
+      <form class="generator" id="generatorForm">
+        <fieldset>
+          <legend>今天要去哪裡？</legend>
+          <div class="choice-row" data-choice="occasion">
+            <label><input type="radio" name="occasion" value="工作" checked><span>工作日</span></label>
+            <label><input type="radio" name="occasion" value="約會"><span>約會</span></label>
+            <label><input type="radio" name="occasion" value="週末"><span>週末散步</span></label>
+            <label><input type="radio" name="occasion" value="聚會"><span>朋友聚會</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>體感溫度</legend>
+          <div class="temperature-control">
+            <input type="range" id="temperature" min="12" max="34" value="26">
+            <output id="tempOutput">26°C</output>
+            <span id="weatherHint">微熱，適合透氣單品</span>
+          </div>
+        </fieldset>
+        <button class="generate-button" type="submit"><span>生成今日穿搭</span><b>→</b></button>
+      </form>
+
+      <section class="results hidden" id="results" aria-live="polite">
+        <div class="results-title"><div><span class="step">03</span><h2>今天可以這樣穿</h2></div><button id="regenerate">換一批 ↻</button></div>
+        <div class="looks-grid" id="looksGrid"></div>
+      </section>
+    </section>
+
+    <section class="workspace hidden" id="looksView">
+      <div class="section-heading">
+        <div><span class="step">♥</span><h2>穿搭收藏</h2></div>
+        <p>喜歡的組合留在這裡，下次不用再想一次。</p>
+      </div>
+      <div class="saved-grid" id="savedGrid"></div>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="手機主要導覽">
+    <button class="mobile-tab active" data-view="wardrobe"><span>⌂</span>衣櫃</button>
+    <button class="mobile-capture" id="mobileUpload" aria-label="拍攝衣物"><span>＋</span></button>
+    <button class="mobile-tab" data-view="looks"><span>♡</span>收藏</button>
+  </nav>
+
+  <dialog id="itemDialog">
+    <form method="dialog" id="itemForm">
+      <button class="dialog-close" value="cancel" aria-label="關閉">×</button>
+      <div class="preview-wrap"><img id="uploadPreview" alt="上傳衣物預覽"></div>
+      <div class="dialog-content">
+        <span class="eyebrow">NEW PIECE</span>
+        <h2>這是一件什麼單品？</h2>
+        <label>單品名稱<input id="itemName" required placeholder="例如：米白亞麻襯衫"></label>
+        <div class="form-grid">
+          <label>分類<select id="itemCategory"><option value="上身">上身</option><option value="下身">下身</option><option value="外套">外套</option><option value="鞋履">鞋履</option><option value="配件">配件</option></select></label>
+          <label>主色<input id="itemColor" type="color" value="#b6a78f"><small>已從照片預估，可自行調整</small></label>
+          <label>材質<select id="itemMaterial"><option value="棉麻">棉／麻</option><option value="針織">針織</option><option value="丹寧">丹寧</option><option value="西裝料">西裝料</option><option value="皮革">皮革</option><option value="機能">機能布料</option></select></label>
+          <label>正式程度<select id="itemFormality"><option value="1">休閒</option><option value="2">輕鬆整齊</option><option value="3" selected>Smart casual</option><option value="4">商務</option><option value="5">正式</option></select></label>
+          <label>風格<select id="itemStyle"><option value="極簡">極簡</option><option value="自然">自然</option><option value="都會">都會</option><option value="浪漫">浪漫</option><option value="街頭">街頭</option><option value="運動">運動</option></select></label>
+        </div>
+        <button class="save-item" value="default">收進衣櫃</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
