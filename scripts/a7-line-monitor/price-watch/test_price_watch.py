@@ -86,7 +86,7 @@ class PriceWatchTests(unittest.TestCase):
             data = json.loads(config_path.read_text(encoding="utf-8"))
             watch = data["watches"][0]
             source = watch["sources"][0]
-            self.assertEqual(source["type"], "skyscanner_indicative_flights")
+            self.assertEqual(source["type"], "serpapi_google_flights_sampled")
             self.assertEqual(source["departure_id"], "TPE")
             self.assertEqual(source["mode"], "annual_low")
             self.assertEqual(source["trip_days"], 5)

@@ -410,11 +410,50 @@ def get_google_flights_candidates(
             "error": "",
             "raw": {
                 "provider": "serpapi_google_flights",
+                "departure_date": str(source.get("outbound_date") or ""),
+                "return_date": str(source.get("return_date") or ""),
+                "trip_days": int(source.get("trip_days") or 0),
+                "range_start": str(source.get("range_start") or source.get("outbound_date") or ""),
+                "range_end": str(source.get("range_end") or source.get("outbound_date") or ""),
                 "price_level": insights.get("price_level"),
                 "typical_price_range": insights.get("typical_price_range"),
             },
         }
     ]
+
+
+def get_serpapi_sampled_flight_candidates(
+    watch: dict[str, Any],
+    source: dict[str, Any],
+    file_config: dict[str, str],
+    timeout: int,
+) -> list[dict[str, Any]]:
+    mode = str(source.get("mode") or "annual_low")
+    today = datetime.now()
+    start = today + timedelta(days=14) if mode == "annual_low" else parse_iso_date(source.get("start_date"), today)
+    horizon_days = 351 if mode == "annual_low" else max(0, min(int(source.get("lookahead_days") or 30), 365))
+    span = horizon_days + 1
+    offset = today.toordinal() % span
+    outbound = start + timedelta(days=offset)
+    trip_days = max(0, min(int(source.get("trip_days") or 0), 60))
+    sampled_source = dict(source)
+    sampled_source.update(
+        {
+            "type": "serpapi_google_flights",
+            "outbound_date": outbound.strftime("%Y-%m-%d"),
+            "return_date": (outbound + timedelta(days=trip_days)).strftime("%Y-%m-%d") if trip_days else "",
+            "flight_type": "1" if trip_days else "2",
+            "gl": str(source.get("market") or source.get("gl") or "TW").lower(),
+            "hl": str(source.get("locale") or source.get("hl") or "zh-TW").lower(),
+            "range_start": start.strftime("%Y-%m-%d"),
+            "range_end": (start + timedelta(days=horizon_days)).strftime("%Y-%m-%d"),
+        }
+    )
+    candidates = get_google_flights_candidates(watch, sampled_source, file_config, timeout)
+    for candidate in candidates:
+        candidate["raw"]["provider"] = "serpapi_google_flights_sampled"
+        candidate["raw"]["sampled"] = True
+    return candidates
 
 
 def get_skyscanner_indicative_candidates(
@@ -534,6 +573,8 @@ def get_source_candidates(
         return get_google_shopping_candidates(watch, source, file_config, timeout)
     if source_type == "serpapi_google_flights":
         return get_google_flights_candidates(watch, source, file_config, timeout)
+    if source_type == "serpapi_google_flights_sampled":
+        return get_serpapi_sampled_flight_candidates(watch, source, file_config, timeout)
     if source_type == "skyscanner_indicative_flights":
         return get_skyscanner_indicative_candidates(watch, source, file_config, timeout)
     raise RuntimeError(f"Unsupported source type: {source_type}")

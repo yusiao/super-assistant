@@ -109,9 +109,9 @@ def add_flight(args: argparse.Namespace) -> int:
     require_unique_id(data, watch_id)
 
     source: dict[str, Any] = {
-        "type": "skyscanner_indicative_flights",
-        "id": "skyscanner-indicative",
-        "name": "Skyscanner Indicative",
+        "type": "serpapi_google_flights_sampled",
+        "id": "google-flights-sampled",
+        "name": "Google Flights 抽樣",
         "mode": args.mode,
         "departure_id": args.departure_id,
         "arrival_id": args.arrival_id,
@@ -204,7 +204,7 @@ def build_parser() -> argparse.ArgumentParser:
     flight.add_argument("--currency", default="TWD")
     flight.add_argument("--market", default="TW")
     flight.add_argument("--locale", default="zh-TW")
-    flight.add_argument("--check-interval-hours", default=12, type=int)
+    flight.add_argument("--check-interval-hours", default=24, type=int)
     flight.add_argument("--cooldown-days", default=3, type=int)
     flight.add_argument("--enabled", action="store_true")
     flight.set_defaults(handler=add_flight)
