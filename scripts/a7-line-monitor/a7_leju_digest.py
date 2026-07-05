@@ -1648,6 +1648,76 @@ def get_housefun_city_projects(city: dict[str, Any]) -> tuple[list[dict[str, str
     return deduped, errors
 
 
+def parse_expected_completion_month(content: str) -> tuple[int, int] | None:
+    text = re.sub(r"\s+", " ", html_to_text(content))
+    match = re.search(
+        r"(?:預期完工|預計完工|交屋日期|預計交屋)\s*[：:]?\s*(\d{4})年\s*"
+        r"(?:(上半年|下半年)|第?([一二三四1234])季(?:度)?|第?([一二三四1234])季度|([01]?\d)月)?",
+        text,
+    )
+    if not match:
+        return None
+    year = int(match.group(1))
+    if match.group(2) == "上半年":
+        return year, 6
+    if match.group(2) == "下半年":
+        return year, 12
+    quarter_text = match.group(3) or match.group(4)
+    if quarter_text:
+        quarter_map = {"一": 1, "二": 2, "三": 3, "四": 4}
+        quarter = quarter_map.get(quarter_text, int(quarter_text) if quarter_text.isdigit() else 4)
+        return year, quarter * 3
+    if match.group(5):
+        return year, min(max(int(match.group(5)), 1), 12)
+    return year, 12
+
+
+def has_issued_usage_permit(content: str) -> bool:
+    text = re.sub(r"\s+", " ", html_to_text(content))
+    match = re.search(r"使用執照\s*(.{0,50})", text)
+    if not match:
+        return False
+    value = match.group(1).strip()
+    return bool(value) and not value.startswith(("暫無", "無", "尚未"))
+
+
+def verify_housefun_presale_project(project: dict[str, Any], local_now: datetime) -> tuple[bool, str]:
+    content = fetch_text(str(project.get("url", "")))
+    if has_issued_usage_permit(content):
+        return False, "已取得使用執照"
+    completion = parse_expected_completion_month(content)
+    if completion is None:
+        return False, "無法確認未來完工日期"
+    year, month = completion
+    if (year, month) < (local_now.year, local_now.month):
+        return False, f"預計完工日期已過（{year}-{month:02d}）"
+    project["completion"] = f"{year}-{month:02d}"
+    return True, ""
+
+
+def filter_verified_housefun_presales(
+    items: list[dict[str, Any]],
+    local_now: datetime,
+    workers: int = 6,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    verified: list[dict[str, Any]] = []
+    errors: list[str] = []
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, 8))) as executor:
+        futures = {executor.submit(verify_housefun_presale_project, item, local_now): item for item in items}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                valid, reason = future.result()
+                if valid:
+                    verified.append(item)
+                elif reason:
+                    item["excluded_reason"] = reason
+            except Exception as exc:
+                errors.append(f"{item.get('name', '未命名建案')}詳細頁驗證失敗：{exc}")
+    verified.sort(key=lambda item: item.get("discount_percent", 0), reverse=True)
+    return verified, errors
+
+
 def get_housefun_bargain_items(config: dict[str, Any], threshold_percent: float) -> tuple[list[dict[str, Any]], list[str]]:
     all_projects: list[dict[str, str]] = []
     errors: list[str] = []
@@ -1695,7 +1765,13 @@ def get_housefun_bargain_items(config: dict[str, Any], threshold_percent: float)
                 "discount_percent": discount_percent,
             }
         )
-    return items, errors
+    verified_items, verification_errors = filter_verified_housefun_presales(
+        items,
+        datetime.now(ZoneInfo("Asia/Taipei")),
+        int(config.get("detail_workers", 6)),
+    )
+    errors.extend(verification_errors)
+    return verified_items, errors
 
 
 def get_bargain_watch_results(config: dict[str, Any]) -> dict[str, Any]:
@@ -1784,6 +1860,8 @@ def format_bargain_watch_line(item: dict[str, Any]) -> list[str]:
         lines.append(f"  位置：{item['address']}")
     if item.get("source"):
         lines.append(f"  來源：{item['source']}")
+    if item.get("completion"):
+        lines.append(f"  預計完工：{item['completion']}")
     if item.get("url"):
         lines.append(f"  {item['url']}")
     return lines
