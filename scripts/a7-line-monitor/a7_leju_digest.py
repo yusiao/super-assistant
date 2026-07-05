@@ -14,6 +14,7 @@ import urllib.request
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from email.utils import parsedate_to_datetime
 from html import unescape
 from pathlib import Path
 from typing import Any
@@ -1872,6 +1873,78 @@ def split_sentences(text: str) -> list[str]:
     return [part.strip() for part in rough_parts if len(part.strip()) >= 8]
 
 
+def encode_iri_url(url: str) -> str:
+    parts = urllib.parse.urlsplit(url)
+    return urllib.parse.urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            urllib.parse.quote(parts.path, safe="/%:@"),
+            urllib.parse.quote(parts.query, safe="=&+%:@"),
+            urllib.parse.quote(parts.fragment, safe="%"),
+        )
+    )
+
+
+def get_xml_tag_text(content: str, tag: str) -> str:
+    match = re.search(rf"<{tag}[^>]*>(.*?)</{tag}>", content, re.DOTALL | re.IGNORECASE)
+    if not match:
+        return ""
+    value = re.sub(r"<!\[CDATA\[(.*?)\]\]>", r"\1", match.group(1), flags=re.DOTALL)
+    return html_to_text(unescape(value)).strip()
+
+
+def parse_market_source_entries(
+    content: str,
+    source_name: str,
+    source_url: str,
+    cutoff: datetime,
+) -> list[dict[str, str]]:
+    rss_items = re.findall(r"<item[^>]*>(.*?)</item>", content, re.DOTALL | re.IGNORECASE)
+    entries: list[dict[str, str]] = []
+    if rss_items:
+        for item in rss_items:
+            title = get_xml_tag_text(item, "title")
+            description = get_xml_tag_text(item, "description")
+            link = get_xml_tag_text(item, "link") or source_url
+            published = get_xml_tag_text(item, "pubDate")
+            if published:
+                try:
+                    published_at = parsedate_to_datetime(published)
+                    comparable_cutoff = cutoff
+                    if published_at.tzinfo is not None and comparable_cutoff.tzinfo is None:
+                        comparable_cutoff = comparable_cutoff.replace(tzinfo=published_at.tzinfo)
+                    if published_at < comparable_cutoff:
+                        continue
+                except (TypeError, ValueError, OverflowError):
+                    pass
+            text = " ".join(part for part in [title, description] if part)
+            if text:
+                entries.append(
+                    {
+                        "title": title or text[:100],
+                        "text": text,
+                        "url": link,
+                        "source": source_name,
+                        "published": published,
+                    }
+                )
+        return entries
+
+    page_text = html_to_text(content)
+    for sentence in split_sentences(page_text)[:120]:
+        entries.append(
+            {
+                "title": sentence[:100],
+                "text": sentence,
+                "url": source_url,
+                "source": source_name,
+                "published": "",
+            }
+        )
+    return entries
+
+
 def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, Any]:
     if not config.get("enabled", True):
         return {"enabled": False, "items": [], "errors": []}
@@ -1879,8 +1952,9 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
     districts = [str(item).strip() for item in config.get("districts", []) if str(item).strip()]
     keywords = [str(item).strip() for item in config.get("keywords", []) if str(item).strip()]
     max_districts = int(config.get("max_districts", 8))
-    source_hits: list[dict[str, str]] = []
+    source_hits: list[dict[str, Any]] = []
     errors: list[str] = []
+    cutoff = local_now - timedelta(days=int(config.get("days_back", 7)))
 
     for source in config.get("source_urls", []):
         source_name = str(source.get("name", "未命名來源"))
@@ -1888,11 +1962,13 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
         if not source_url:
             continue
         try:
-            content = fetch_text(source_url)
+            request_url = encode_iri_url(source_url)
+            content = fetch_text(request_url)
             if "Just a moment..." in content and "Cloudflare" in content:
                 raise RuntimeError("Cloudflare challenge")
-            text = html_to_text(content)
-            source_hits.append({"name": source_name, "url": source_url, "text": text})
+            entries = parse_market_source_entries(content, source_name, source_url, cutoff)
+            if entries:
+                source_hits.append({"name": source_name, "url": source_url, "entries": entries})
         except Exception as exc:
             if not source.get("report_errors", True):
                 continue
@@ -1906,23 +1982,25 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
         mention_count = 0
         keyword_counts: dict[str, int] = {}
         examples: list[str] = []
+        example_entries: list[dict[str, str]] = []
         sources: set[str] = set()
         for source in source_hits:
-            text = source["text"]
-            count = text.count(district)
-            if count <= 0:
-                continue
-            mention_count += count
-            sources.add(source["name"])
-            for keyword in keywords:
-                key_count = len(re.findall(rf"{re.escape(district)}[^。！？!?]{{0,80}}{re.escape(keyword)}|{re.escape(keyword)}[^。！？!?]{{0,80}}{re.escape(district)}", text))
-                if key_count:
-                    keyword_counts[keyword] = keyword_counts.get(keyword, 0) + key_count
-            if len(examples) < 2:
-                for sentence in split_sentences(text):
-                    if district in sentence:
-                        examples.append(sentence[:90])
-                        break
+            for entry in source.get("entries", []):
+                text = entry.get("text", "")
+                count = text.count(district)
+                if count <= 0:
+                    continue
+                mention_count += count
+                sources.add(source["name"])
+                for keyword in keywords:
+                    key_count = text.count(keyword)
+                    if key_count:
+                        keyword_counts[keyword] = keyword_counts.get(keyword, 0) + key_count
+                if len(example_entries) < 3:
+                    key = entry.get("url", "") or entry.get("title", "")
+                    if key and all((row.get("url", "") or row.get("title", "")) != key for row in example_entries):
+                        example_entries.append(entry)
+                        examples.append(entry.get("title", text[:90])[:100])
 
         if mention_count:
             district_items.append(
@@ -1930,7 +2008,9 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
                     "district": district,
                     "mention_count": mention_count,
                     "keywords": sorted(keyword_counts, key=keyword_counts.get, reverse=True)[:4],
+                    "keyword_counts": keyword_counts,
                     "examples": examples[:2],
+                    "example_entries": example_entries[:2],
                     "sources": sorted(sources),
                 }
             )
@@ -1955,6 +2035,26 @@ def format_market_pulse_line(item: dict[str, Any]) -> list[str]:
     return lines
 
 
+def explain_market_topic(topic: str) -> tuple[str, str]:
+    if topic in {"房貸", "限貸"}:
+        return "資金面偏緊", "核貸成數與交屋資金壓力可能壓低成交速度，需注意建商是否增加付款優惠。"
+    if topic in {"讓利", "低價"}:
+        return "價格競爭升高", "公開價或付款方案開始轉弱，應比較同區實價與實際可談折數，避免只看廣告價。"
+    if topic in {"去化", "餘屋", "完銷"}:
+        return "供需與庫存變化", "去化速度能反映真實買氣；餘屋增加通常比新聞熱度更值得警戒。"
+    if topic in {"開案", "待開案", "新案", "預售"}:
+        return "新增供給", "新案密集公開會測試區域價格上限，也可能分散既有建案買氣。"
+    if topic in {"房價", "實價", "交易"}:
+        return "量價訊號", "需同時看成交件數與單價；只有價格、沒有量，可能只是少數高價個案。"
+    if topic in {"捷運", "重劃區"}:
+        return "建設題材", "題材能支撐預期，但要核對工程進度、通勤時間與實際生活機能，不能只看遠期想像。"
+    if topic in {"交屋"}:
+        return "交屋壓力", "集中交屋會增加貸款、轉售與出租供給，可能讓短期議價空間擴大。"
+    if topic in {"建商", "代銷"}:
+        return "推案策略變化", "可觀察延後公開、縮小案量或付款方案調整，這些通常比口頭開價更早反映市場溫度。"
+    return "市場關注", "需回到成交量、實價與供給量驗證，新聞提及次數本身不等於買氣。"
+
+
 def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = False) -> list[str]:
     items = market_pulse.get("items", []) if market_pulse else []
     if not items:
@@ -1962,34 +2062,68 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
 
     top_items = items[:3]
     top_names = [str(item.get("district", "")).strip() for item in top_items if item.get("district")]
-    all_keywords: list[str] = []
+    aggregate_keyword_counts: dict[str, int] = {}
     for item in top_items:
-        all_keywords.extend([str(keyword) for keyword in item.get("keywords", []) if str(keyword).strip()])
-    keyword_counts: dict[str, int] = {}
-    for keyword in all_keywords:
-        keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
-    key_topics = sorted(keyword_counts, key=keyword_counts.get, reverse=True)[:4]
+        for keyword, count in item.get("keyword_counts", {}).items():
+            aggregate_keyword_counts[keyword] = aggregate_keyword_counts.get(keyword, 0) + int(count)
+    key_topics = sorted(aggregate_keyword_counts, key=aggregate_keyword_counts.get, reverse=True)[:3]
     source_count = market_pulse.get("source_count", 0)
 
     lines: list[str] = []
     if top_names:
-        lines.append(f"- 本週新聞/報告討論熱點集中在：{'、'.join(top_names)}。")
+        focus_parts = [
+            f"{item.get('district')}（{item.get('mention_count', 0)}次）"
+            for item in top_items
+            if item.get("district")
+        ]
+        lines.append(f"- 本週焦點區域：{'、'.join(focus_parts)}。")
     if key_topics:
-        lines.append(f"- 反覆出現的題材是：{'、'.join(key_topics)}；可優先對照預售開價、待開案量與成交速度。")
+        grouped_signals: dict[str, dict[str, Any]] = {}
+        for topic in key_topics:
+            signal, explanation = explain_market_topic(topic)
+            group = grouped_signals.setdefault(
+                signal,
+                {"topics": [], "count": 0, "explanation": explanation},
+            )
+            group["topics"].append(topic)
+            group["count"] += aggregate_keyword_counts[topic]
+        for signal, group in sorted(
+            grouped_signals.items(),
+            key=lambda row: row[1]["count"],
+            reverse=True,
+        )[:2]:
+            topic_text = "、".join(group["topics"])
+            lines.append(f"- 市場訊號｜{topic_text}（{group['count']}次）：{signal}。{group['explanation']}")
+    else:
+        lines.append("- 市場訊號：目前沒有單一題材形成明顯共識，應以實價成交量與新增供給判斷。")
 
     districts = set(top_names)
-    if {"A7", "青埔", "龜山", "林口", "桃園"} & districts:
-        lines.append("- 桃園/A7相關題材仍有曝光，重點不是新聞次數，而是後續待開案是否用更高單價試水溫。")
-    elif {"中和", "板橋", "新莊", "三重", "土城", "新店", "淡水"} & districts:
-        lines.append("- 雙北外圍區被提及較多，代表市場仍在比較捷運、重劃區與相對低總價產品。")
-    elif {"大安", "信義", "松山", "中山", "內湖"} & districts:
-        lines.append("- 台北核心區熱度偏向價格指標與資金風向，不能直接套用到 A7，但可作為買氣溫度參考。")
+    if {"A7", "青埔", "龜山區", "林口區", "桃園區", "中壢區"} & districts:
+        lines.append("- 對A7/桃園的意義：優先追蹤新案開價、待開案數與同區去化；題材曝光若沒有成交量配合，不視為價格轉強。")
+    elif {"中和區", "板橋區", "新莊區", "三重區", "土城區", "新店區", "淡水區"} & districts:
+        lines.append("- 對雙北外圍的意義：市場仍在比較捷運、重劃區與低總價產品，應特別留意供給增加後的議價空間。")
+    elif {"大安區", "信義區", "松山區", "中山區", "內湖區"} & districts:
+        lines.append("- 對市場的意義：台北核心區較像資金與價格指標，不能直接套用到A7，但可作為高資產買氣溫度計。")
 
-    examples = [example for item in top_items for example in item.get("examples", [])[:1]]
-    if examples and not line_mode:
-        lines.append(f"- 代表性內容：{examples[0][:120]}")
+    lines.append("- 下週觀察：新增預售案數、實價登錄件數、公開價是否下修，以及低首付/工程款優惠是否增加。")
+
+    evidence: list[dict[str, str]] = []
+    seen_evidence: set[str] = set()
+    for item in top_items:
+        for entry in item.get("example_entries", []):
+            key = entry.get("url", "") or entry.get("title", "")
+            if not key or key in seen_evidence:
+                continue
+            seen_evidence.add(key)
+            evidence.append(entry)
+    evidence_limit = 1 if line_mode else 2
+    for entry in evidence[:evidence_limit]:
+        source = f"（{entry.get('source')}）" if entry.get("source") else ""
+        lines.append(f"- 代表資訊：{entry.get('title', '')[:100]}{source}")
+        if entry.get("url"):
+            lines.append(f"  {entry['url']}")
     if source_count:
-        lines.append(f"- 本段依 {source_count} 個可讀來源彙整；若來源被擋，結論會偏保守。")
+        lines.append(f"- 判讀範圍：{source_count} 個可讀來源；新聞熱度僅作線索，仍以實價與供給驗證。")
     return lines
 
 
