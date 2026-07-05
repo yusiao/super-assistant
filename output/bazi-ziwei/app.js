@@ -387,10 +387,16 @@ const FLYING_MUTAGEN_TABLE = {
   "壬": { "祿": "天梁", "權": "紫微", "科": "左輔", "忌": "武曲" },
   "癸": { "祿": "破軍", "權": "巨門", "科": "太陰", "忌": "貪狼" },
 };
+const FOUR_TRANSFORMATION_META = {
+  "祿": { color: "#16845b", markerId: "arrow-lu", meaning: "資源與機會" },
+  "權": { color: "#c44a23", markerId: "arrow-quan", meaning: "權責與推動" },
+  "科": { color: "#2563b8", markerId: "arrow-ke", meaning: "名聲與緩和" },
+  "忌": { color: "#7a2b83", markerId: "arrow-ji", meaning: "牽掛與課題" },
+};
 const ZIWEI_IMAGE_TYPES = {
   flying: { label: "飛星", title: "紫微飛星圖", filename: "ziwei-flying-stars" },
   sanhe: { label: "三合", title: "三合三方四正圖", filename: "ziwei-sanhe" },
-  sihua: { label: "四化", title: "生年四化圖", filename: "ziwei-sihua" },
+  sihua: { label: "四化飛星", title: "本命與流運四化飛星圖", filename: "ziwei-sihua" },
 };
 const PARTNER_CAREER_RULES = [
   [["天機", "文昌", "文曲"], ["產品經理", "資料分析師", "管理顧問", "教育研究員"]],
@@ -3433,7 +3439,7 @@ function updateReading() {
   readingOutput.innerHTML = buildReading(currentChart);
   renderPartnerProfile(currentChart);
   renderAstrolabe(currentChart.astrolabe, context.periodIndex);
-  renderZiweiImage(currentChart.astrolabe, context.periodIndex);
+  renderZiweiImage(currentChart.astrolabe, context);
   updateBaziReading();
 }
 
@@ -3707,17 +3713,89 @@ function palaceSanheText(palace, astrolabe) {
   ].join("；");
 }
 
-function palaceFourTransformationText(palace) {
-  const items = allPalaceStars(palace)
-    .filter((star) => star?.mutagen)
-    .map((star) => `${starPlainName(star)}化${toTraditional(star.mutagen)}`);
-  return items.length ? `本宮四化：${uniqueItems(items).join("、")}` : "本宮未見生年四化星";
+function buildFourTransformationLayers(astrolabe, context = null) {
+  const layers = [];
+  const addLayer = ({ key, label, short, stem, sourceIndex = null }) => {
+    const normalizedStem = toTraditional(stem || "");
+    const table = FLYING_MUTAGEN_TABLE[normalizedStem];
+    if (!table) return;
+    const sourcePalace = Number.isInteger(sourceIndex) ? astrolabe.palaces[sourceIndex] : null;
+    const transformations = Object.entries(table).map(([mutagen, star]) => {
+      const targetPalace = findPalaceByStarName(astrolabe, star);
+      return {
+        mutagen,
+        star,
+        targetPalace,
+        isSelf: Boolean(sourcePalace && targetPalace && sourcePalace.index === targetPalace.index),
+      };
+    });
+    layers.push({
+      key,
+      label,
+      short,
+      stem: normalizedStem,
+      sourcePalace,
+      transformations,
+    });
+  };
+
+  addLayer({
+    key: "natal",
+    label: "本命",
+    short: "本",
+    stem: astrolabe.rawDates?.chineseDate?.yearly?.[0],
+  });
+
+  const horoscope = context?.horoscope;
+  const visiblePeriodLayers = {
+    decadal: ["decadal"],
+    yearly: ["decadal", "yearly"],
+    monthly: ["decadal", "yearly", "monthly"],
+  }[context?.scope] || [];
+  const layerMeta = {
+    decadal: { label: "大限", short: "限" },
+    yearly: { label: "流年", short: "年" },
+    monthly: { label: "流月", short: "月" },
+  };
+
+  visiblePeriodLayers.forEach((key) => {
+    const period = horoscope?.[key];
+    if (!period) return;
+    addLayer({
+      key,
+      label: layerMeta[key].label,
+      short: layerMeta[key].short,
+      stem: period.heavenlyStem,
+      sourceIndex: period.index,
+    });
+  });
+
+  return layers;
 }
 
-function palaceImageContent(palace, astrolabe, imageType) {
+function fourTransformationSourceText(layer) {
+  const palace = layer.sourcePalace;
+  return palace
+    ? `${layer.label}${layer.stem}・${normalizePalaceName(palace.name)}`
+    : `${layer.label}${layer.stem}年干`;
+}
+
+function palaceFourTransformationText(palace, transformationLayers = []) {
+  const incoming = transformationLayers.flatMap((layer) => layer.transformations
+    .filter((item) => item.targetPalace?.index === palace.index)
+    .map((item) => {
+      const selfText = item.isSelf ? "・自化" : "";
+      return `${layer.short}${item.mutagen}${item.star}←${fourTransformationSourceText(layer)}${selfText}`;
+    }));
+  return incoming.length
+    ? uniqueItems(incoming).slice(0, 5).join("；")
+    : "目前層級未見四化飛入";
+}
+
+function palaceImageContent(palace, astrolabe, imageType, transformationLayers = []) {
   if (imageType === "flying") return palaceFlyingText(palace, astrolabe);
   if (imageType === "sanhe") return palaceSanheText(palace, astrolabe);
-  if (imageType === "sihua") return palaceFourTransformationText(palace);
+  if (imageType === "sihua") return palaceFourTransformationText(palace, transformationLayers);
   return palaceImageStars(palace);
 }
 
@@ -3758,7 +3836,111 @@ function centerModeTabsSvg(imageType, x, y) {
   }).join("");
 }
 
-function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null, causeIndex = null) {
+function fourTransformationArrowDefs() {
+  return Object.entries(FOUR_TRANSFORMATION_META).map(([mutagen, meta]) => `
+    <marker id="${meta.markerId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="${meta.color}" />
+    </marker>
+  `).join("");
+}
+
+function palaceInnerAnchor(palace) {
+  const grid = BRANCH_GRID[palace?.earthlyBranch] || [1, 1];
+  const cell = 330;
+  const margin = 40;
+  const x = margin + (grid[1] - 1) * cell;
+  const y = margin + (grid[0] - 1) * cell;
+  if (grid[0] === 1) return { x: x + cell / 2, y: y + cell };
+  if (grid[0] === 4) return { x: x + cell / 2, y };
+  if (grid[1] === 1) return { x: x + cell, y: y + cell / 2 };
+  return { x, y: y + cell / 2 };
+}
+
+function fourTransformationFlightSvg(transformationLayers) {
+  const activeLayer = transformationLayers[transformationLayers.length - 1];
+  if (!activeLayer) return "";
+  const source = activeLayer.sourcePalace
+    ? palaceInnerAnchor(activeLayer.sourcePalace)
+    : { x: 700, y: 700 };
+  const dash = {
+    natal: "",
+    decadal: "14 8",
+    yearly: "5 7",
+    monthly: "16 6 4 6",
+  }[activeLayer.key] || "";
+
+  return activeLayer.transformations.map((item, index) => {
+    if (!item.targetPalace) return "";
+    const target = palaceInnerAnchor(item.targetPalace);
+    const meta = FOUR_TRANSFORMATION_META[item.mutagen];
+    if (!meta) return "";
+    let path;
+    let labelX;
+    let labelY;
+
+    if (item.isSelf) {
+      const vx = 700 - source.x;
+      const vy = 700 - source.y;
+      const length = Math.hypot(vx, vy) || 1;
+      const nx = vx / length;
+      const ny = vy / length;
+      const px = -ny;
+      const py = nx;
+      const first = { x: source.x + nx * 100 + px * 58, y: source.y + ny * 100 + py * 58 };
+      const second = { x: source.x + nx * 100 - px * 58, y: source.y + ny * 100 - py * 58 };
+      path = `M ${source.x} ${source.y} C ${first.x} ${first.y}, ${second.x} ${second.y}, ${source.x} ${source.y}`;
+      labelX = source.x + nx * 112;
+      labelY = source.y + ny * 112;
+    } else {
+      const midX = (source.x + target.x) / 2;
+      const midY = (source.y + target.y) / 2;
+      const dx = target.x - source.x;
+      const dy = target.y - source.y;
+      const length = Math.hypot(dx, dy) || 1;
+      const offset = (index - 1.5) * 28;
+      const controlX = midX - (dy / length) * offset;
+      const controlY = midY + (dx / length) * offset;
+      path = `M ${source.x} ${source.y} Q ${controlX} ${controlY}, ${target.x} ${target.y}`;
+      labelX = source.x * 0.25 + controlX * 0.5 + target.x * 0.25;
+      labelY = source.y * 0.25 + controlY * 0.5 + target.y * 0.25;
+    }
+
+    const label = `${activeLayer.short}${item.mutagen}${item.isSelf ? "自" : ""}`;
+    return `
+      <path d="${path}" fill="none" stroke="#ffffff" stroke-width="9" opacity="0.88" />
+      <path d="${path}" fill="none" stroke="${meta.color}" stroke-width="4.5" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ""} marker-end="url(#${meta.markerId})" opacity="0.9" />
+      <rect x="${labelX - 25}" y="${labelY - 14}" width="50" height="27" rx="4" fill="#ffffff" stroke="${meta.color}" stroke-width="1.5" />
+      <text x="${labelX}" y="${labelY + 6}" fill="${meta.color}" font-size="15" font-weight="950" text-anchor="middle">${svgEscape(label)}</text>
+    `;
+  }).join("");
+}
+
+function fourTransformationPanelSvg(transformationLayers, x, y) {
+  if (!transformationLayers.length) {
+    return `<text x="${x}" y="${y + 24}" fill="#66716c" font-size="17" font-weight="760">目前未取得四化飛星資料</text>`;
+  }
+  return transformationLayers.map((layer, rowIndex) => {
+    const rowY = y + rowIndex * 62;
+    const sourcePalaceKey = layer.sourcePalace ? palaceKey(layer.sourcePalace.name) : "";
+    const sourceLabel = `${layer.short}${layer.stem}${sourcePalaceKey}`;
+    return `
+      <rect x="${x}" y="${rowY}" width="584" height="52" rx="4" fill="#ffffff" stroke="#cbd5e6" />
+      <text x="${x + 10}" y="${rowY + 31}" fill="#343840" font-size="15" font-weight="950">${svgEscape(sourceLabel)}</text>
+      ${layer.transformations.map((item, index) => {
+        const meta = FOUR_TRANSFORMATION_META[item.mutagen];
+        const boxX = x + 76 + index * 126;
+        const targetName = item.targetPalace ? palaceKey(item.targetPalace.name) : "未定";
+        const label = `${item.mutagen}${item.star}→${targetName}${item.isSelf ? "自" : ""}`;
+        return `
+          <rect x="${boxX}" y="${rowY + 7}" width="118" height="38" rx="4" fill="#fdfefe" stroke="${meta.color}" stroke-width="1.6" />
+          <text x="${boxX + 59}" y="${rowY + 31}" fill="${meta.color}" font-size="13" font-weight="900" text-anchor="middle">${svgEscape(label)}</text>
+        `;
+      }).join("")}
+    `;
+  }).join("");
+}
+
+function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null, causeIndex = null, transformationLayers = []) {
   const grid = BRANCH_GRID[palace.earthlyBranch] || [1, 1];
   const cell = 330;
   const gap = 0;
@@ -3813,7 +3995,7 @@ function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null
       ${adjectiveText ? svgTextBlock(adjectiveText, x + 166, y + 168, { maxChars: 10, maxLines: 2, size: 16, lineHeight: 22, fill: "#7d3ea8", weight: 780 }) : ""}
       ${auxiliaryText ? svgTextBlock(auxiliaryText, x + 12, y + 220, { maxChars: 15, maxLines: 1, size: 15, lineHeight: 20, fill: "#56706a", weight: 760 }) : ""}
       <text x="${x + 12}" y="${y + 262}" fill="${modeColor}" font-size="16" font-weight="950">${svgEscape(modeTitle)}</text>
-      ${svgTextBlock(palaceImageContent(palace, astrolabe, imageType), x + 12, y + 284, { maxChars: 17, maxLines: 2, size: 14, lineHeight: 19, fill: modeColor, weight: 780 })}
+      ${svgTextBlock(palaceImageContent(palace, astrolabe, imageType, transformationLayers), x + 12, y + 284, { maxChars: 17, maxLines: 2, size: 14, lineHeight: 19, fill: modeColor, weight: 780 })}
       <text x="${x + 12}" y="${y + cell - 8}" fill="#66716c" font-size="15" font-weight="760">${svgEscape(toTraditional(palace.changsheng12 || ""))}</text>
       <text x="${x + cell - 52}" y="${y + cell - 8}" fill="#66716c" font-size="15" font-weight="760" text-anchor="end">${svgEscape(stage)}</text>
       <text x="${x + cell - 14}" y="${y + cell - 8}" fill="#111827" font-size="30" font-weight="950" text-anchor="end">${svgEscape(toTraditional(palace.earthlyBranch || ""))}</text>
@@ -3824,14 +4006,18 @@ function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null
 function centerModeNote(imageType) {
   if (imageType === "flying") return "飛星圖以各宮宮干起飛，顯示祿、權、科、忌分別飛入的目標宮位。";
   if (imageType === "sanhe") return "三合圖顯示各宮位的三合、對宮與三方四正，用來看事件互相牽動的結構。";
-  if (imageType === "sihua") return "四化圖標示本命生年四化落宮，用來觀察資源、權力、名聲與卡點。";
+  if (imageType === "sihua") return "四化飛星圖分層顯示本命、大限、流年與流月；圖上四色箭頭呈現目前層級的祿、權、科、忌飛向。";
   return "飛星、三合、四化圖皆保留命宮、身宮、來因宮與流運標記。";
 }
 
-function buildZiweiChartSvg(astrolabe, periodIndex = null, imageType = "sanhe") {
+function buildZiweiChartSvg(astrolabe, context = null, imageType = "sanhe") {
   const causePalace = getCausePalace(astrolabe);
   const lifePalace = getLifePalace(astrolabe);
   const bodyPalace = getBodyPalace(astrolabe);
+  const periodIndex = context?.periodIndex ?? null;
+  const transformationLayers = imageType === "sihua"
+    ? buildFourTransformationLayers(astrolabe, context)
+    : [];
   const imageMeta = ZIWEI_IMAGE_TYPES[imageType] || ZIWEI_IMAGE_TYPES.sanhe;
   const centerFacts = [
     `命宮：${palaceLabel(lifePalace)}`,
@@ -3848,18 +4034,22 @@ function buildZiweiChartSvg(astrolabe, periodIndex = null, imageType = "sanhe") 
 
   return `
     <svg class="ziwei-generated-svg" data-image-type="${svgEscape(imageType)}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1400" role="img" aria-label="${svgEscape(imageMeta.title)}">
+      <defs>${fourTransformationArrowDefs()}</defs>
       <rect width="1400" height="1400" fill="#eef1f6" />
       <rect x="40" y="40" width="1320" height="1320" fill="#ffffff" stroke="#343840" stroke-width="2" />
-      ${astrolabe.palaces.map((palace) => renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex, causePalace?.index ?? null)).join("")}
+      ${astrolabe.palaces.map((palace) => renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex, causePalace?.index ?? null, transformationLayers)).join("")}
       <rect x="${centerX}" y="${centerY}" width="${centerSize}" height="${centerSize}" fill="#ffffff" stroke="#343840" stroke-width="2" />
       <rect x="${centerX + 20}" y="${centerY + 20}" width="${centerSize - 40}" height="${centerSize - 40}" fill="#f8f9fc" stroke="#d4dbea" stroke-width="1.4" />
       <line x1="${centerX + 42}" y1="${centerY + 42}" x2="${centerX + centerSize - 42}" y2="${centerY + centerSize - 42}" stroke="#dfe5f1" stroke-width="1.2" stroke-dasharray="8 10" />
       <line x1="${centerX + centerSize - 42}" y1="${centerY + 42}" x2="${centerX + 42}" y2="${centerY + centerSize - 42}" stroke="#dfe5f1" stroke-width="1.2" stroke-dasharray="8 10" />
+      ${imageType === "sihua" ? fourTransformationFlightSvg(transformationLayers) : ""}
       <text x="${centerMid}" y="${centerY + 58}" fill="#b23a2e" font-size="22" font-weight="900" text-anchor="middle">${svgEscape(ASTRO_SCHOOL_LABEL)}</text>
       <text x="${centerMid}" y="${centerY + 110}" fill="#1f2523" font-size="42" font-weight="950" text-anchor="middle">${svgEscape(imageMeta.title)}</text>
       <text x="${centerMid}" y="${centerY + 150}" fill="#66716c" font-size="22" font-weight="800" text-anchor="middle">${svgEscape(toTraditional(astrolabe.chineseDate))}</text>
       ${centerModeTabsSvg(imageType, centerX + 156, centerY + 178)}
-      ${centerFacts.map((fact, index) => {
+      ${imageType === "sihua"
+        ? fourTransformationPanelSvg(transformationLayers, centerX + 38, centerY + 250)
+        : centerFacts.map((fact, index) => {
         const col = index % 2;
         const row = Math.floor(index / 2);
         const x = centerX + 58 + col * 304;
@@ -3869,19 +4059,25 @@ function buildZiweiChartSvg(astrolabe, periodIndex = null, imageType = "sanhe") 
           ${svgTextBlock(fact, x + 14, y + 1, { maxChars: 15, maxLines: 1, size: 17, lineHeight: 22, weight: 850 })}
         `;
       }).join("")}
-      <text x="${centerMid}" y="${centerY + 555}" fill="#66716c" font-size="18" font-weight="760" text-anchor="middle">命宮、身宮、來因宮與流運皆以色框標示。</text>
+      <text x="${centerMid}" y="${centerY + 555}" fill="#66716c" font-size="18" font-weight="760" text-anchor="middle">${imageType === "sihua" ? "祿綠・權橘・科藍・忌紫；箭頭顯示目前最細層級。" : "命宮、身宮、來因宮與流運皆以色框標示。"}</text>
       ${svgTextBlock(centerModeNote(imageType), centerX + 70, centerY + 602, { maxChars: 31, maxLines: 2, size: 17, lineHeight: 24, fill: "#66716c", weight: 760 })}
     </svg>
   `;
 }
 
-function renderZiweiImage(astrolabe, periodIndex = null) {
+function renderZiweiImage(astrolabe, context = null) {
   if (!ziweiImageOutput) return;
   const imageMeta = ZIWEI_IMAGE_TYPES[ziweiImageType] || ZIWEI_IMAGE_TYPES.sanhe;
+  const transformationLayers = ziweiImageType === "sihua"
+    ? buildFourTransformationLayers(astrolabe, context)
+    : [];
+  const layerText = transformationLayers.length
+    ? `目前四化層：${transformationLayers.map(fourTransformationSourceText).join("、")}。`
+    : "";
   ziweiImageOutput.innerHTML = `
     <div class="ziwei-image-card">
       <div class="ziwei-image-preview">
-        ${buildZiweiChartSvg(astrolabe, periodIndex, ziweiImageType)}
+        ${buildZiweiChartSvg(astrolabe, context, ziweiImageType)}
       </div>
       <div class="ziwei-image-actions">
         <div class="ziwei-image-tabs" role="tablist" aria-label="命盤圖片類型">
@@ -3889,7 +4085,7 @@ function renderZiweiImage(astrolabe, periodIndex = null) {
             <button type="button" class="${key === ziweiImageType ? "is-active" : ""}" data-ziwei-image-type="${escapeHtml(key)}">${escapeHtml(item.label)}</button>
           `).join("")}
         </div>
-        <p>目前顯示「${escapeHtml(imageMeta.label)}」命盤圖，可切換飛星、三合與四化查看不同的判讀結構。</p>
+        <p>目前顯示「${escapeHtml(imageMeta.label)}」命盤圖，可切換宮干飛星、三合與四化飛星查看不同的判讀結構。${escapeHtml(layerText)}</p>
       </div>
     </div>
   `;
@@ -4097,7 +4293,7 @@ document.addEventListener("click", (event) => {
     ziweiImageType = imageTypeButton.dataset.ziweiImageType || "sanhe";
     if (currentChart) {
       const context = buildPeriodContext(currentChart);
-      renderZiweiImage(currentChart.astrolabe, context.periodIndex);
+      renderZiweiImage(currentChart.astrolabe, context);
     }
   }
   if (event.target.matches("[data-regenerate-partner]")) {
