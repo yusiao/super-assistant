@@ -2,7 +2,8 @@ name: A7 LINE Digest
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    # Taiwan time: 08:00, 12:00, 16:00, 20:00
+    - cron: "0 0,4,8,12 * * *"
   workflow_dispatch:
     inputs:
       force_send:
@@ -25,6 +26,8 @@ jobs:
       MARKET_PULSE_CONFIG_PATH: scripts/a7-line-monitor/market-pulse-config.json
       LINE_SCHEDULE: weekly
       WEEKLY_REPORT_DAY: "6"
+      WEEKLY_REPORT_HOUR: "20"
+      INTRADAY_ALERTS: "true"
       URGENT_PENDING_PRESALE_ALERT: "true"
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
