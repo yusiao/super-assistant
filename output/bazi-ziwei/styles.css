@@ -134,6 +134,49 @@ h3 {
   gap: 8px;
 }
 
+.time-correction-panel {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.time-correction-panel summary {
+  color: var(--jade);
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.time-correction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.time-correction-grid > label {
+  display: grid;
+  gap: 6px;
+}
+
+.time-correction-grid > label > span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.time-correction-grid .check-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.check-field input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--jade);
+}
+
 .field-row label,
 .segmented-field legend {
   color: var(--muted);
@@ -480,8 +523,12 @@ button {
   font-size: 0.62rem;
 }
 
-.pillar-footer span + span {
+.pillar-footer span:nth-child(even) {
   border-left: 1px solid var(--line);
+}
+
+.pillar-footer span:nth-child(n + 3) {
+  border-top: 1px solid var(--line);
 }
 
 .pillar-ten-god.has-tooltip,
@@ -608,6 +655,10 @@ button {
   grid-column: span 2;
 }
 
+.bazi-insight-card.is-wide {
+  grid-column: span 2;
+}
+
 .bazi-ten-god-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -669,7 +720,96 @@ button {
 }
 
 .bazi-reading-controls {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.bazi-calibration-section {
+  margin-top: 20px;
+}
+
+.calibration-controls {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(150px, 1fr) minmax(220px, 1.6fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.calibration-controls button {
+  min-height: 44px;
+}
+
+.bazi-calibration-output {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.calibration-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.calibration-events,
+.calibration-candidates {
+  display: grid;
+  gap: 8px;
+}
+
+.calibration-event,
+.calibration-candidate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface);
+}
+
+.calibration-event > span,
+.calibration-candidate > span {
+  color: var(--vermillion);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.calibration-event strong,
+.calibration-candidate strong,
+.calibration-event small,
+.calibration-candidate small {
+  display: block;
+}
+
+.calibration-event small,
+.calibration-candidate small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.calibration-remove {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.calibration-candidate.is-leading {
+  border-color: rgba(24, 107, 90, 0.52);
+  background: #f4faf7;
+}
+
+.calibration-heading {
+  margin: 8px 0 0;
+  color: var(--charcoal);
+  font-size: 0.92rem;
 }
 
 .select-field {
@@ -1890,8 +2030,18 @@ button {
   .palace-overview-grid,
   .partner-main,
   .partner-grid,
-  .ziwei-image-card {
+  .ziwei-image-card,
+  .time-correction-grid,
+  .calibration-controls {
     grid-template-columns: 1fr;
+  }
+
+  .bazi-ten-god-card {
+    grid-column: auto;
+  }
+
+  .bazi-insight-card.is-wide {
+    grid-column: auto;
   }
 
   .reading-side {

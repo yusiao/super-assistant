@@ -147,6 +147,15 @@ const BAZI_SCOPE_LABELS = {
   natal: "原局",
   decadal: "大運",
   yearly: "流年",
+  monthly: "流月",
+};
+const CALIBRATION_EVENT_TYPES = {
+  career: { label: "工作／升學", gods: ["正官", "七殺", "正印", "偏印", "食神", "傷官"], pillars: [1, 3] },
+  marriage: { label: "感情／婚姻", gods: ["正官", "七殺", "正財", "偏財", "食神", "傷官"], pillars: [2] },
+  property: { label: "財務／置產", gods: ["正財", "偏財", "食神", "傷官"], pillars: [1, 2] },
+  family: { label: "家庭／搬遷", gods: ["正印", "偏印", "比肩", "劫財"], pillars: [0, 1] },
+  children: { label: "子女／作品", gods: ["食神", "傷官", "正印", "偏印"], pillars: [3] },
+  health: { label: "健康／壓力", gods: ["正印", "偏印", "正官", "七殺", "傷官"], pillars: [2, 3] },
 };
 const HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
 const EARTHLY_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
@@ -175,6 +184,28 @@ const BRANCH_TRIAD_RULES = [
   ["寅", "午", "戌", "火"],
   ["巳", "酉", "丑", "金"],
 ];
+const BRANCH_MEETING_RULES = [
+  ["亥", "子", "丑", "水"],
+  ["寅", "卯", "辰", "木"],
+  ["巳", "午", "未", "火"],
+  ["申", "酉", "戌", "金"],
+];
+const BRANCH_BREAK_RULES = [["子", "酉"], ["午", "卯"], ["辰", "丑"], ["戌", "未"], ["寅", "亥"], ["巳", "申"]];
+const HIDDEN_STEM_WEIGHTS = {
+  1: [1],
+  2: [0.7, 0.3],
+  3: [0.6, 0.3, 0.1],
+};
+const PILLAR_LIFE_AREAS = [
+  "家族、外部環境與早年根基",
+  "父母手足、職場制度與成長環境",
+  "命主自身、伴侶與親密關係",
+  "子女、作品、晚年安排與長期成果",
+];
+const STEM_LU_BRANCH = {
+  "甲": "寅", "乙": "卯", "丙": "巳", "丁": "午", "戊": "巳",
+  "己": "午", "庚": "申", "辛": "酉", "壬": "亥", "癸": "子",
+};
 const BAZI_TEN_GOD_GROUPS = [
   { label: "比劫", gods: ["比肩", "劫財"], note: "看自我、同輩、人脈、競爭與資源分配" },
   { label: "食傷", gods: ["食神", "傷官"], note: "看才華、輸出、創意、表達與作品" },
@@ -470,6 +501,10 @@ const TW_MAP = {
   "岁": "歲",
   "驿": "驛",
   "临": "臨",
+  "长": "長",
+  "带": "帶",
+  "绝": "絕",
+  "养": "養",
   "将": "將",
   "阴": "陰",
   "贵": "貴",
@@ -481,6 +516,12 @@ const birthYearSelect = document.querySelector("#birth-year");
 const birthMonthSelect = document.querySelector("#birth-month");
 const birthDaySelect = document.querySelector("#birth-day");
 const timeInput = document.querySelector("#birth-time");
+const placeInput = document.querySelector("#place-note");
+const timezoneOffsetInput = document.querySelector("#timezone-offset");
+const birthLongitudeInput = document.querySelector("#birth-longitude");
+const trueSolarTimeInput = document.querySelector("#true-solar-time");
+const daylightSavingInput = document.querySelector("#daylight-saving");
+const dayBoundaryRuleSelect = document.querySelector("#day-boundary-rule");
 const errorMessage = document.querySelector("#error-message");
 const summaryStrip = document.querySelector("#summary-strip");
 const pillarGrid = document.querySelector("#pillar-grid");
@@ -490,11 +531,18 @@ const baziInsightOutput = document.querySelector("#bazi-insight-output");
 const baziScopeSelect = document.querySelector("#bazi-scope-select");
 const baziDecadalSelect = document.querySelector("#bazi-decadal-select");
 const baziTargetYearInput = document.querySelector("#bazi-target-year");
+const baziTargetMonthInput = document.querySelector("#bazi-target-month");
 const baziDecadalControl = document.querySelector("#bazi-decadal-control");
 const baziYearControl = document.querySelector("#bazi-year-control");
+const baziMonthControl = document.querySelector("#bazi-month-control");
 const baziTopicSelect = document.querySelector("#bazi-topic-select");
 const baziReadingOutput = document.querySelector("#bazi-reading-output");
 const baziPartnerOutput = document.querySelector("#bazi-partner-output");
+const calibrationYearInput = document.querySelector("#calibration-year");
+const calibrationTypeSelect = document.querySelector("#calibration-type");
+const calibrationNoteInput = document.querySelector("#calibration-note");
+const addCalibrationEventButton = document.querySelector("#add-calibration-event");
+const baziCalibrationOutput = document.querySelector("#bazi-calibration-output");
 const astrolabeGrid = document.querySelector("#astrolabe-grid");
 const ziweiImageOutput = document.querySelector("#ziwei-image-output");
 const scopeSelect = document.querySelector("#scope-select");
@@ -518,6 +566,8 @@ let currentChart = null;
 let partnerRenderSalt = 0;
 let ziweiImageType = "sanhe";
 let activeReadingMethod = "bazi";
+let baziCalibrationEvents = [];
+let calibrationChartSignature = "";
 let partnerImageState = {
   status: "idle",
   imageUrl: "",
@@ -541,7 +591,7 @@ function escapeHtml(value) {
 }
 
 function toTraditional(value) {
-  return String(value ?? "").replace(/[阳阴时财禄权宫迁仆机杀贪罗铃辅马钺钧龙凤鸾寿厨华盖虚伤灾岁驿临将贵]/g, (char) => TW_MAP[char] || char);
+  return String(value ?? "").replace(/[阳阴时财禄权宫迁仆机杀贪罗铃辅马钺钧龙凤鸾寿厨华盖虚伤灾岁驿临长带绝养将贵]/g, (char) => TW_MAP[char] || char);
 }
 
 function stripStarBrightnessText(value) {
@@ -556,15 +606,97 @@ function getFormValues() {
   const day = Number(birthDaySelect.value);
   const birthTime = timeInput.value;
   const gender = form.querySelector('input[name="gender"]:checked')?.value || "女";
+  const timezoneOffset = Number(timezoneOffsetInput?.value ?? 8);
+  const longitude = Number(birthLongitudeInput?.value ?? 121.5654);
+  const placeName = placeInput?.value.trim() || "未填出生地";
+  const useTrueSolarTime = Boolean(trueSolarTimeInput?.checked);
+  const daylightSaving = Boolean(daylightSavingInput?.checked);
+  const dayBoundaryRule = dayBoundaryRuleSelect?.value === "midnight" ? "midnight" : "zi";
 
   if (!year || !month || !day || !birthTime) {
     throw new Error("請填入完整出生日期與時間。");
+  }
+  if (!Number.isFinite(timezoneOffset) || timezoneOffset < -12 || timezoneOffset > 14) {
+    throw new Error("時區需介於 UTC-12 至 UTC+14。");
+  }
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    throw new Error("出生地經度需介於 -180 至 180 度。");
   }
 
   const [hour, minute] = birthTime.split(":").map(Number);
   const birthDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-  return { birthDate, birthTime, gender, year, month, day, hour, minute };
+  return {
+    birthDate,
+    birthTime,
+    inputBirthDate: birthDate,
+    inputBirthTime: birthTime,
+    gender,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    timezoneOffset,
+    longitude,
+    placeName,
+    useTrueSolarTime,
+    daylightSaving,
+    dayBoundaryRule,
+  };
+}
+
+function dayOfYear(year, month, day) {
+  const start = Date.UTC(year, 0, 1);
+  const current = Date.UTC(year, month - 1, day);
+  return Math.floor((current - start) / 86400000) + 1;
+}
+
+function equationOfTimeMinutes(year, month, day) {
+  const n = dayOfYear(year, month, day);
+  const b = (2 * Math.PI * (n - 81)) / 364;
+  return 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
+}
+
+function normalizeBirthMoment(values) {
+  const standardMeridian = values.timezoneOffset * 15;
+  const longitudeCorrection = values.useTrueSolarTime
+    ? (values.longitude - standardMeridian) * 4
+    : 0;
+  const equationCorrection = values.useTrueSolarTime
+    ? equationOfTimeMinutes(values.year, values.month, values.day)
+    : 0;
+  const daylightCorrection = values.daylightSaving ? -60 : 0;
+  const correctionMinutes = longitudeCorrection + equationCorrection + daylightCorrection;
+  const adjusted = new Date(Date.UTC(
+    values.year,
+    values.month - 1,
+    values.day,
+    values.hour,
+    values.minute + correctionMinutes,
+  ));
+  const year = adjusted.getUTCFullYear();
+  const month = adjusted.getUTCMonth() + 1;
+  const day = adjusted.getUTCDate();
+  const hour = adjusted.getUTCHours();
+  const minute = adjusted.getUTCMinutes();
+  const birthDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const birthTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
+  return {
+    ...values,
+    birthDate,
+    birthTime,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    correctionMinutes,
+    longitudeCorrection,
+    equationCorrection,
+    daylightCorrection,
+  };
 }
 
 function setSelectOptions(select, values, selectedValue, formatLabel) {
@@ -702,6 +834,65 @@ function seasonForBranch(branch) {
   return "冬";
 }
 
+function hiddenStemRecords(dayStem, branch) {
+  const stems = BRANCH_HIDDEN_STEMS[branch] || [];
+  const weights = HIDDEN_STEM_WEIGHTS[stems.length] || [];
+  return stems.map((stem, index) => ({
+    stem,
+    element: GAN_ELEMENT[stem] || "",
+    god: getTenGod(dayStem, stem),
+    weight: weights[index] || 0,
+    role: index === 0 ? "主氣" : index === 1 ? "中氣" : "餘氣",
+  }));
+}
+
+function baziElementPower(chart) {
+  const pillars = chart.pillars || [];
+  const dayStem = splitPillar(pillars[2]).stem;
+  const power = Object.fromEntries(ELEMENTS.map((element) => [element, 0]));
+  const stemWeights = [0.8, 1, 1, 0.85];
+  const branchWeights = [1, 2.4, 1.35, 1];
+
+  pillars.forEach((pillar, index) => {
+    const { stem, branch } = splitPillar(pillar);
+    const stemElement = GAN_ELEMENT[stem];
+    if (stemElement) power[stemElement] += stemWeights[index] || 0.8;
+    hiddenStemRecords(dayStem, branch).forEach((record) => {
+      if (record.element) power[record.element] += record.weight * (branchWeights[index] || 1);
+    });
+  });
+
+  return power;
+}
+
+function baziHiddenStemProfile(chart) {
+  const pillars = chart.pillars || [];
+  const dayStem = splitPillar(pillars[2]).stem;
+  const visibleStems = pillars.map((pillar) => splitPillar(pillar).stem);
+  const dayElement = GAN_ELEMENT[dayStem] || "";
+  const records = pillars.map((pillar, index) => {
+    const branch = splitPillar(pillar).branch;
+    const hidden = hiddenStemRecords(dayStem, branch).map((record) => ({
+      ...record,
+      visible: visibleStems.includes(record.stem),
+      root: record.element === dayElement,
+    }));
+    return { pillar: PILLAR_NAMES[index], branch, hidden };
+  });
+  const roots = records.flatMap((record) => record.hidden
+    .filter((item) => item.root)
+    .map((item) => `${record.pillar}${record.branch}藏${item.stem}${item.role}`));
+  const visible = records.flatMap((record) => record.hidden
+    .filter((item) => item.visible)
+    .map((item) => `${record.pillar}${item.stem}${item.god}透干`));
+  return {
+    records,
+    roots: uniqueItems(roots),
+    visible: uniqueItems(visible),
+    text: `${records.map((record) => `${record.pillar}${record.branch}藏${record.hidden.map((item) => `${item.stem}${item.god}${Math.round(item.weight * 100)}%`).join("、")}`).join("；")}。${roots.length ? `日主通根見${uniqueItems(roots).join("、")}。` : "日主在四支未見同五行通根，較仰賴印比與行運生扶。"}${visible.length ? `藏干透出：${uniqueItems(visible).join("、")}。` : "藏干未明顯透出天干，力量較偏內在或等待行運引動。"}`,
+  };
+}
+
 function baziDayMasterProfile(chart) {
   const dayStem = splitPillar(chart.pillars?.[2]).stem;
   const monthBranch = splitPillar(chart.pillars?.[1]).branch;
@@ -711,16 +902,13 @@ function baziDayMasterProfile(chart) {
   const outputElement = ELEMENT_GENERATES[dayElement] || "";
   const wealthElement = ELEMENT_CONTROLS[dayElement] || "";
   const officerElement = elementControlledBy(dayElement);
-  const counts = chart.elementCounts || countElements(chart.pillars || []);
-  const supportScore = (counts[dayElement] || 0) + (counts[resourceElement] || 0);
-  const drainScore = (counts[outputElement] || 0) + (counts[wealthElement] || 0) + (counts[officerElement] || 0);
-  const monthAdjustment = [dayElement, resourceElement].includes(monthElement)
-    ? 2
-    : [outputElement, wealthElement, officerElement].includes(monthElement)
-      ? -2
-      : 0;
-  const score = supportScore - drainScore + monthAdjustment;
-  const strength = score >= 3 ? "偏旺" : score <= -3 ? "偏弱" : "中和";
+  const power = baziElementPower(chart);
+  const totalPower = Object.values(power).reduce((sum, value) => sum + value, 0) || 1;
+  const supportScore = (power[dayElement] || 0) + (power[resourceElement] || 0);
+  const drainScore = totalPower - supportScore;
+  const supportRatio = supportScore / totalPower;
+  const score = (supportRatio - 0.5) * 10;
+  const strength = supportRatio >= 0.62 ? "偏旺" : supportRatio <= 0.38 ? "偏弱" : "中和";
   const favorable = strength === "偏弱"
     ? [resourceElement, dayElement]
     : strength === "偏旺"
@@ -733,6 +921,10 @@ function baziDayMasterProfile(chart) {
       : [];
   const monthMainStem = (BRANCH_HIDDEN_STEMS[monthBranch] || [])[0] || "";
   const monthGod = monthMainStem ? getTenGod(dayStem, monthMainStem) : "";
+  const hiddenProfile = baziHiddenStemProfile(chart);
+  const rootText = hiddenProfile.roots.length
+    ? `通根見${hiddenProfile.roots.join("、")}`
+    : "四支同氣根較少";
 
   return {
     dayStem,
@@ -746,11 +938,113 @@ function baziDayMasterProfile(chart) {
     officerElement,
     strength,
     score,
+    supportScore,
+    drainScore,
+    supportRatio,
+    power,
+    hiddenProfile,
     favorable: uniqueItems(favorable.filter(Boolean)),
     caution: uniqueItems(caution.filter(Boolean)),
     monthMainStem,
     monthGod,
-    text: `日主為${dayStem}${dayElement}，生於${monthBranch}月（${seasonForBranch(monthBranch)}季${monthElement}氣）。以月令、同類與生扶對比洩耗剋制，日主呈${strength}；五行運用宜先讓${uniqueItems(favorable.filter(Boolean)).join("、")}形成流通${caution.filter(Boolean).length ? `，避免${uniqueItems(caution.filter(Boolean)).join("、")}過度堆疊` : ""}。`,
+    text: `日主為${dayStem}${dayElement}，生於${monthBranch}月（${seasonForBranch(monthBranch)}季${monthElement}氣）。月令與藏干加權後，生扶約占${Math.round(supportRatio * 100)}%，洩耗剋約占${Math.round((1 - supportRatio) * 100)}%，${rootText}，因此判為${strength}；宜先讓${uniqueItems(favorable.filter(Boolean)).join("、")}形成流通${caution.filter(Boolean).length ? `，避免${uniqueItems(caution.filter(Boolean)).join("、")}過度堆疊` : ""}。`,
+  };
+}
+
+function baziStructureProfile(chart) {
+  const profile = baziDayMasterProfile(chart);
+  const counts = tenGodCounts(chart);
+  const visibleStems = chart.pillars.map((pillar) => splitPillar(pillar).stem);
+  const monthGod = profile.monthGod || "月令主氣";
+  const isLu = STEM_LU_BRANCH[profile.dayStem] === profile.monthBranch;
+  const name = isLu
+    ? "建祿格"
+    : monthGod === "劫財"
+      ? "月劫格"
+      : monthGod === "比肩"
+        ? "月令比肩格"
+        : `${monthGod}格`;
+  const visible = visibleStems.includes(profile.monthMainStem);
+  const supportRules = {
+    "正官": ["正印", "偏印", "正財", "偏財"],
+    "七殺": ["食神", "正印", "偏印"],
+    "正財": ["食神", "傷官", "正官"],
+    "偏財": ["食神", "傷官", "七殺"],
+    "食神": ["正財", "偏財"],
+    "傷官": ["正財", "偏財", "正印"],
+    "正印": ["正官", "七殺", "比肩"],
+    "偏印": ["七殺", "比肩", "劫財"],
+    "比肩": ["食神", "傷官", "正官"],
+    "劫財": ["食神", "傷官", "七殺"],
+  }[monthGod] || [];
+  const supports = supportRules.filter((god) => counts[god]);
+  const pressures = [];
+  if (["正官", "七殺"].includes(monthGod) && (counts["傷官"] || 0) >= 2) pressures.push("傷官對官殺形成牽制");
+  if (["正財", "偏財"].includes(monthGod) && ((counts["比肩"] || 0) + (counts["劫財"] || 0)) >= 3) pressures.push("比劫較重，財星易被分奪");
+  if (["正印", "偏印"].includes(monthGod) && ((counts["正財"] || 0) + (counts["偏財"] || 0)) >= 3) pressures.push("財星較重，印星承壓");
+  if (["食神", "傷官"].includes(monthGod) && ((counts["正印"] || 0) + (counts["偏印"] || 0)) >= 3) pressures.push("印星較重，食傷輸出受抑");
+  const status = visible && supports.length && !pressures.length
+    ? "格神透干且有承接"
+    : visible || supports.length
+      ? "格局條件部分成立"
+      : "格神藏支，待行運引動";
+  const extreme = Math.abs(profile.score) >= 3.8;
+  const special = extreme
+    ? `日主力量偏向極端，需再檢查是否具從格條件；目前仍以${name}及一般扶抑法為主，不直接定從格。`
+    : "日主未達極端失衡，先以月令格局與一般扶抑法判讀。";
+  return {
+    name,
+    status,
+    visible,
+    supports,
+    pressures,
+    text: `以月令${profile.monthBranch}主氣${profile.monthMainStem}${monthGod}立${name}；${visible ? "格神已透出天干" : "格神未透干、主要藏於月支"}。${supports.length ? `成格助力見${supports.join("、")}。` : "成格助力未集中，需靠行運補足。"}${pressures.length ? `破格或混雜點：${pressures.join("、")}。` : "未見明顯破格衝突。"}${special}`,
+  };
+}
+
+function baziUsefulGodProfile(chart) {
+  const profile = baziDayMasterProfile(chart);
+  const powerOrder = Object.entries(profile.power).sort((first, second) => second[1] - first[1]);
+  const primary = profile.strength === "偏弱"
+    ? profile.resourceElement
+    : profile.strength === "偏旺"
+      ? profile.outputElement
+      : profile.wealthElement || profile.outputElement;
+  const secondary = profile.favorable.find((element) => element !== primary) || "";
+  const regulating = ["亥", "子", "丑"].includes(profile.monthBranch)
+    ? "火"
+    : ["巳", "午", "未"].includes(profile.monthBranch)
+      ? "水"
+      : profile.season === "春"
+        ? "金"
+        : "火";
+  const topElements = powerOrder.slice(0, 2).map(([element]) => element);
+  let bridge = "";
+  const [first, second] = topElements;
+  if (ELEMENT_CONTROLS[first] === second) bridge = ELEMENT_GENERATES[first];
+  if (ELEMENT_CONTROLS[second] === first) bridge = ELEMENT_GENERATES[second];
+  return {
+    primary,
+    secondary,
+    regulating,
+    bridge,
+    text: `扶抑用神先取${primary || "五行流通"}${secondary ? `，次取${secondary}` : ""}，用來調整日主${profile.strength}；${profile.season}季調候重點為${regulating}，用來處理寒暖燥濕。${bridge ? `命局較強的${first}、${second}之間有制約，通關可考慮${bridge}。` : "主要五行未形成明顯兩強相戰，通關以整體流通為先。"}喜用神是命理取向，不等同現實中只能使用某種顏色、職業或方位。`,
+  };
+}
+
+function baziTwelveStageProfile(chart) {
+  const eightChar = chart.eightChar;
+  const stageMethods = ["getYearDiShi", "getMonthDiShi", "getDayDiShi", "getTimeDiShi"];
+  const voidMethods = ["getYearXunKong", "getMonthXunKong", "getDayXunKong", "getTimeXunKong"];
+  const records = PILLAR_NAMES.map((name, index) => ({
+    name,
+    pillar: chart.pillars[index],
+    stage: toTraditional(eightChar?.[stageMethods[index]]?.() || "未取得"),
+    void: toTraditional(eightChar?.[voidMethods[index]]?.() || "未取得"),
+  }));
+  return {
+    records,
+    text: records.map((record) => `${record.name}${record.pillar}為${record.stage}，旬空${record.void}`).join("；"),
   };
 }
 
@@ -907,10 +1201,17 @@ function relationLabel(values) {
 function baziRelationAnalysis(pillars) {
   const stems = pillars.map((pillar) => splitPillar(pillar).stem).filter(Boolean);
   const branches = pillars.map((pillar) => splitPillar(pillar).branch).filter(Boolean);
+  const monthElement = ZHI_ELEMENT[branches[1]] || "";
   const hasBoth = (values, first, second) => values.includes(first) && values.includes(second);
   const stemCombines = STEM_COMBINATION_RULES
     .filter(([first, second]) => hasBoth(stems, first, second))
     .map(([first, second, element]) => `${first}${second}合${element}`);
+  const stemTransformations = STEM_COMBINATION_RULES
+    .filter(([first, second]) => hasBoth(stems, first, second))
+    .map(([first, second, element]) => {
+      const supported = monthElement === element || ELEMENT_GENERATES[monthElement] === element;
+      return `${first}${second}合${element}${supported ? "，得月令聲援、合化條件較足" : "，月令未助、先論合絆不直接論化"}`;
+    });
   const stemClashes = STEM_CLASH_RULES
     .filter(([first, second]) => hasBoth(stems, first, second))
     .map(([first, second]) => `${first}${second}沖`);
@@ -923,6 +1224,9 @@ function baziRelationAnalysis(pillars) {
   const branchHarms = BRANCH_HARM_RULES
     .filter(([first, second]) => hasBoth(branches, first, second))
     .map(([first, second]) => `${first}${second}害`);
+  const branchBreaks = BRANCH_BREAK_RULES
+    .filter(([first, second]) => hasBoth(branches, first, second))
+    .map(([first, second]) => `${first}${second}破`);
   const branchPunishments = BRANCH_PUNISHMENT_RULES
     .filter((rule) => {
       if (rule.length === 2 && rule[0] === rule[1]) {
@@ -940,13 +1244,33 @@ function baziRelationAnalysis(pillars) {
       return hits.length === 3 ? `${first}${second}${third}三合${element}局` : `${hits.join("")}半合${element}勢`;
     })
     .filter(Boolean);
-  const supports = uniqueItems([...stemCombines, ...branchCombines, ...triads]);
-  const tensions = uniqueItems([...stemClashes, ...branchClashes, ...branchHarms, ...branchPunishments]);
+  const meetings = BRANCH_MEETING_RULES
+    .map(([first, second, third, element]) => {
+      const hits = [first, second, third].filter((branch) => branches.includes(branch));
+      if (hits.length < 2) return "";
+      return hits.length === 3 ? `${first}${second}${third}三會${element}局` : `${hits.join("")}會${element}勢`;
+    })
+    .filter(Boolean);
+  const tombs = branches
+    .map((branch, index) => ["辰", "戌", "丑", "未"].includes(branch) ? `${PILLAR_NAMES[index]}${branch}墓庫` : "")
+    .filter(Boolean);
+  const tombClashes = BRANCH_CLASH_RULES
+    .filter(([first, second]) => ["辰", "戌", "丑", "未"].includes(first) && hasBoth(branches, first, second))
+    .map(([first, second]) => `${first}${second}沖庫`);
+  const supports = uniqueItems([...stemCombines, ...branchCombines, ...triads, ...meetings]);
+  const tensions = uniqueItems([...stemClashes, ...branchClashes, ...branchHarms, ...branchBreaks, ...branchPunishments]);
+  const specials = uniqueItems([...stemTransformations, ...tombs, ...tombClashes]);
 
   return {
     supports,
     tensions,
-    text: `${supports.length ? `合局與流通訊號：${supports.join("、")}。` : "合局訊號不集中，需靠十神與行運引動。"}${tensions.length ? `結構張力：${tensions.join("、")}，代表人生主題容易出現拉扯、移動、意見衝突或關係調整，須看落在哪一柱與行運何時觸發。` : "四柱未見明顯沖害刑，原局節奏相對可用穩定規劃承接。"}`,
+    specials,
+    stemTransformations,
+    meetings,
+    branchBreaks,
+    tombs,
+    tombClashes,
+    text: `${supports.length ? `合會與流通訊號：${supports.join("、")}。` : "合會訊號不集中，需靠十神與行運引動。"}${tensions.length ? `結構張力：${tensions.join("、")}，代表人生主題容易出現拉扯、移動、意見衝突或關係調整。` : "四柱未見明顯沖害刑破，原局節奏較能穩定承接。"}${specials.length ? `特殊結構：${specials.join("；")}。` : "未見明顯墓庫開合或天干合化條件。"}`,
   };
 }
 
@@ -959,21 +1283,66 @@ function stepStemBranch(pillar, direction, steps) {
   return `${HEAVENLY_STEMS[wrap(stemIndex + direction * steps, HEAVENLY_STEMS.length)]}${EARTHLY_BRANCHES[wrap(branchIndex + direction * steps, EARTHLY_BRANCHES.length)]}`;
 }
 
+function getBaziYun(chart) {
+  const gender = chart.formValues.gender === "男" ? 1 : 0;
+  const eightChar = chart.eightChar || chart.lunar?.getEightChar?.();
+  if (!eightChar?.getYun) return null;
+  if (eightChar.setSect) eightChar.setSect(chart.formValues.dayBoundaryRule === "midnight" ? 2 : 1);
+  return eightChar.getYun(gender);
+}
+
+function baziLuckMeta(chart) {
+  try {
+    const yun = getBaziYun(chart);
+    if (!yun) throw new Error("Yun unavailable");
+    const startSolar = yun.getStartSolar?.();
+    const startDate = startSolar?.toYmdHms?.() || startSolar?.toYmd?.() || "未取得";
+    const startYear = Number(yun.getStartYear?.()) || 0;
+    const startMonth = Number(yun.getStartMonth?.()) || 0;
+    const startDay = Number(yun.getStartDay?.()) || 0;
+    const startHour = Number(yun.getStartHour?.()) || 0;
+    const durationParts = [
+      startYear ? `${startYear}年` : "",
+      startMonth ? `${startMonth}月` : "",
+      startDay ? `${startDay}天` : "",
+      startHour ? `${startHour}小時` : "",
+    ].filter(Boolean).join("") || "出生後不久";
+    return {
+      direction: yun.isForward?.() ? "順行" : "逆行",
+      startDate: String(startDate).replace(/:00$/, ""),
+      durationText: durationParts,
+      text: `大運採${yun.isForward?.() ? "順行" : "逆行"}，約出生後${durationParts}起運，交運時間為${String(startDate).replace(/:00$/, "")}。交運前後數月常是節奏切換期，應合原局與實際事件觀察。`,
+    };
+  } catch (error) {
+    return {
+      direction: "依年干陰陽與性別推定",
+      startDate: "資料不足",
+      durationText: "資料不足",
+      text: "目前函式庫未提供精確交運日期，先以大運順逆與十年區間判讀。",
+    };
+  }
+}
+
 function getBaziLuckCycles(chart) {
   try {
-    const gender = chart.formValues.gender === "男" ? 1 : 0;
-    const yun = chart.lunar?.getEightChar?.().getYun?.(gender);
+    const yun = getBaziYun(chart);
     const cycles = yun?.getDaYun?.(10) || [];
     const records = cycles
       .map((cycle, index) => {
         const pillar = String(cycle?.getGanZhi?.() || "");
+        const validPillar = splitPillar(pillar).stem && splitPillar(pillar).branch;
         const startAge = Number(cycle?.getStartAge?.());
         const endAge = Number(cycle?.getEndAge?.());
+        const startYear = Number(cycle?.getStartYear?.());
+        const endYear = Number(cycle?.getEndYear?.());
         return {
           index,
           pillar,
           startAge: Number.isFinite(startAge) ? startAge : null,
           endAge: Number.isFinite(endAge) ? endAge : null,
+          startYear: Number.isFinite(startYear) ? startYear : null,
+          endYear: Number.isFinite(endYear) ? endYear : null,
+          xunKong: validPillar ? toTraditional(cycle?.getXunKong?.() || "") : "",
           source: "lunar",
         };
       })
@@ -994,6 +1363,9 @@ function getBaziLuckCycles(chart) {
     pillar: stepStemBranch(monthPillar, direction, index + 1),
     startAge: null,
     endAge: null,
+    startYear: null,
+    endYear: null,
+    xunKong: "",
     source: "fallback",
   }));
 }
@@ -1002,12 +1374,18 @@ function renderBaziDecadalOptions(chart) {
   if (!baziDecadalSelect) return;
   const previous = baziDecadalSelect.value;
   const cycles = getBaziLuckCycles(chart);
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
   baziDecadalSelect.innerHTML = cycles
     .map((cycle, index) => {
       const ageText = Number.isFinite(cycle.startAge) && Number.isFinite(cycle.endAge)
         ? `${cycle.startAge}-${cycle.endAge}歲`
         : `第${index + 1}運`;
-      return `<option value="${index}">${escapeHtml(`${ageText} ${cycle.pillar}`)}</option>`;
+      const yearText = Number.isFinite(cycle.startYear) && Number.isFinite(cycle.endYear)
+        ? ` ${cycle.startYear}-${cycle.endYear}`
+        : "";
+      const cycleGod = getTenGod(dayStem, splitPillar(cycle.pillar).stem);
+      const voidText = cycle.xunKong ? ` 空${cycle.xunKong}` : "";
+      return `<option value="${index}">${escapeHtml(`${ageText}${yearText} ${cycle.pillar} ${cycleGod}${voidText}`)}</option>`;
     })
     .join("");
   if ([...baziDecadalSelect.options].some((option) => option.value === previous)) {
@@ -1017,25 +1395,61 @@ function renderBaziDecadalOptions(chart) {
 
 function getBaziYearPillar(year) {
   try {
-    return Solar.fromYmdHms(year, 7, 1, 12, 0, 0).getLunar().getBaZi()?.[0] || "";
+    return Solar.fromYmdHms(year, 7, 1, 12, 0, 0).getLunar().getEightChar().getYear() || "";
   } catch (error) {
     return "";
   }
 }
 
+function getBaziMonthPillar(year, month) {
+  try {
+    return Solar.fromYmdHms(year, month, 15, 12, 0, 0).getLunar().getEightChar().getMonth() || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function baziLuckCycleForYear(chart, year) {
+  return getBaziLuckCycles(chart).find((cycle) => Number.isFinite(cycle.startYear)
+    && Number.isFinite(cycle.endYear)
+    && year >= cycle.startYear
+    && year <= cycle.endYear) || null;
+}
+
 function buildBaziPeriodContext(chart) {
   const scope = BAZI_SCOPE_LABELS[baziScopeSelect?.value] ? baziScopeSelect.value : "natal";
   const targetYear = getSafeNumber(baziTargetYearInput, new Date().getFullYear(), 1900, 2100);
+  const targetMonth = getSafeNumber(baziTargetMonthInput, new Date().getMonth() + 1, 1, 12);
   if (scope === "natal") {
-    return { scope, periodName: BAZI_SCOPE_LABELS.natal, pillar: "", targetYear };
-  }
-  if (scope === "yearly") {
-    const pillar = getBaziYearPillar(targetYear);
-    return { scope, periodName: `${targetYear} 流年`, pillar, targetYear };
+    return { scope, periodName: BAZI_SCOPE_LABELS.natal, pillar: "", targetYear, targetMonth, layers: [] };
   }
   const cycles = getBaziLuckCycles(chart);
-  const index = getSafeNumber(baziDecadalSelect, 0, 0, Math.max(0, cycles.length - 1));
-  const cycle = cycles[index] || {};
+  const selectedIndex = getSafeNumber(baziDecadalSelect, 0, 0, Math.max(0, cycles.length - 1));
+  const cycle = scope === "decadal"
+    ? cycles[selectedIndex] || {}
+    : baziLuckCycleForYear(chart, targetYear);
+  const layers = [];
+  if (cycle?.pillar) layers.push({ label: "大運", pillar: cycle.pillar, cycle });
+
+  if (scope === "yearly" || scope === "monthly") {
+    const yearlyPillar = getBaziYearPillar(targetYear);
+    if (yearlyPillar) layers.push({ label: "流年", pillar: yearlyPillar });
+  }
+  if (scope === "monthly") {
+    const monthlyPillar = getBaziMonthPillar(targetYear, targetMonth);
+    if (monthlyPillar) layers.push({ label: "流月", pillar: monthlyPillar });
+  }
+
+  if (scope === "yearly") {
+    const pillar = layers.find((layer) => layer.label === "流年")?.pillar || "";
+    return { scope, periodName: `${targetYear} 流年`, pillar, targetYear, targetMonth, cycle, layers };
+  }
+  if (scope === "monthly") {
+    const pillar = layers.find((layer) => layer.label === "流月")?.pillar || "";
+    return { scope, periodName: `${targetYear}年${targetMonth}月 流月`, pillar, targetYear, targetMonth, cycle, layers };
+  }
+
+  const index = selectedIndex;
   const ageText = Number.isFinite(cycle.startAge) && Number.isFinite(cycle.endAge)
     ? `${cycle.startAge}-${cycle.endAge}歲`
     : `第${index + 1}運`;
@@ -1044,18 +1458,84 @@ function buildBaziPeriodContext(chart) {
     periodName: `${ageText} 大運`,
     pillar: cycle.pillar || "",
     targetYear,
+    targetMonth,
     cycle,
+    layers,
+  };
+}
+
+function baziPairInteractions(natalPillar, flowPillar) {
+  const natal = splitPillar(natalPillar);
+  const flow = splitPillar(flowPillar);
+  const interactions = [];
+  STEM_COMBINATION_RULES.forEach(([first, second, element]) => {
+    if ([natal.stem, flow.stem].includes(first) && [natal.stem, flow.stem].includes(second)) interactions.push(`${flow.stem}${natal.stem}天干合${element}`);
+  });
+  STEM_CLASH_RULES.forEach(([first, second]) => {
+    if ([natal.stem, flow.stem].includes(first) && [natal.stem, flow.stem].includes(second)) interactions.push(`${flow.stem}${natal.stem}天干沖`);
+  });
+  BRANCH_COMBINATION_RULES.forEach(([first, second, element]) => {
+    if ([natal.branch, flow.branch].includes(first) && [natal.branch, flow.branch].includes(second)) interactions.push(`${flow.branch}${natal.branch}六合${element}`);
+  });
+  BRANCH_CLASH_RULES.forEach(([first, second]) => {
+    if ([natal.branch, flow.branch].includes(first) && [natal.branch, flow.branch].includes(second)) interactions.push(`${flow.branch}${natal.branch}沖`);
+  });
+  BRANCH_HARM_RULES.forEach(([first, second]) => {
+    if ([natal.branch, flow.branch].includes(first) && [natal.branch, flow.branch].includes(second)) interactions.push(`${flow.branch}${natal.branch}害`);
+  });
+  BRANCH_BREAK_RULES.forEach(([first, second]) => {
+    if ([natal.branch, flow.branch].includes(first) && [natal.branch, flow.branch].includes(second)) interactions.push(`${flow.branch}${natal.branch}破`);
+  });
+  BRANCH_PUNISHMENT_RULES.filter((rule) => rule.length === 2).forEach(([first, second]) => {
+    if (first === second) {
+      if (natal.branch === first && flow.branch === first) interactions.push(`${flow.branch}${natal.branch}自刑`);
+    } else if ([natal.branch, flow.branch].includes(first) && [natal.branch, flow.branch].includes(second)) {
+      interactions.push(`${flow.branch}${natal.branch}刑`);
+    }
+  });
+  return uniqueItems(interactions);
+}
+
+function baziPeriodInteractionAnalysis(chart, period) {
+  const layers = period?.layers || [];
+  const records = layers.flatMap((layer) => chart.pillars.flatMap((pillar, index) => baziPairInteractions(pillar, layer.pillar)
+    .map((interaction) => ({
+      layer: layer.label,
+      flowPillar: layer.pillar,
+      natalPillar: PILLAR_NAMES[index],
+      area: PILLAR_LIFE_AREAS[index],
+      interaction,
+    }))));
+  const fullRelations = layers.map((layer) => ({
+    label: layer.label,
+    pillar: layer.pillar,
+    relations: baziRelationAnalysis([...(chart.pillars || []), layer.pillar]),
+  }));
+  const recordText = records.length
+    ? records.map((record) => `${record.layer}${record.flowPillar}與${record.natalPillar}形成${record.interaction}，牽動${record.area}`).join("；")
+    : "目前行運與四柱沒有形成直接六合、沖、刑、害或破，事件較多從十神增減與五行強弱表現。";
+  const tripleText = uniqueItems(fullRelations.flatMap((item) => [
+    ...item.relations.meetings,
+    ...item.relations.stemTransformations,
+    ...item.relations.tombClashes,
+  ])).join("；");
+  return {
+    records,
+    text: `${recordText}${tripleText ? `；行運加入後另見${tripleText}` : ""}。`,
   };
 }
 
 function baziPeriodReading(chart, period) {
   if (!period.pillar) return "原局先看日主、月令、十神與四柱干支關係；行運尚未疊加。";
   const dayStem = splitPillar(chart.pillars?.[2]).stem;
-  const { stem, branch } = splitPillar(period.pillar);
-  const stemGod = getTenGod(dayStem, stem);
-  const hiddenGods = getHiddenStemGods(dayStem, branch).map((item) => `${item.stem}${item.god}`);
-  const relations = baziRelationAnalysis([...(chart.pillars || []), period.pillar]);
-  return `${period.periodName}為${period.pillar}：天干${stem}對日主是${stemGod || "五行作用"}，地支${branch}藏${hiddenGods.join("、") || "干"}。${relations.text}`;
+  const layerText = (period.layers || [{ label: period.periodName, pillar: period.pillar }]).map((layer) => {
+    const { stem, branch } = splitPillar(layer.pillar);
+    const stemGod = getTenGod(dayStem, stem);
+    const hiddenGods = getHiddenStemGods(dayStem, branch).map((item) => `${item.stem}${item.god}`);
+    return `${layer.label}${layer.pillar}：天干${stemGod || "五行作用"}，地支藏${hiddenGods.join("、") || "干"}`;
+  }).join("；");
+  const interaction = baziPeriodInteractionAnalysis(chart, period);
+  return `${period.periodName}疊加：${layerText}。${interaction.text}${period.scope === "monthly" ? "流月干支以該月十五日所處節氣月代表；節氣交接日前後需再用具體日期細校。" : ""}`;
 }
 
 function getNaYinElement(name) {
@@ -1763,10 +2243,11 @@ function godCountText(counts, gods) {
 function baziPeriodTopicAdvice(topicKey, chart, period) {
   if (!period?.pillar) return "原局重點在先把日主、月令與十神是否流通看清楚，再決定行動節奏。";
   const dayStem = splitPillar(chart.pillars?.[2]).stem;
-  const { stem, branch } = splitPillar(period.pillar);
-  const stemGod = getTenGod(dayStem, stem);
-  const hiddenGods = getHiddenStemGods(dayStem, branch).map((item) => item.god);
-  const periodGods = [stemGod, ...hiddenGods].filter(Boolean);
+  const layerPillars = period.layers?.length ? period.layers : [{ label: period.periodName, pillar: period.pillar }];
+  const periodGods = uniqueItems(layerPillars.flatMap((layer) => {
+    const { stem, branch } = splitPillar(layer.pillar);
+    return [getTenGod(dayStem, stem), ...getHiddenStemGods(dayStem, branch).map((item) => item.god)].filter(Boolean);
+  }));
   const hasAny = (gods) => periodGods.some((god) => gods.includes(god));
   const focus = {
     property: hasAny(["正財", "偏財"])
@@ -1792,7 +2273,7 @@ function baziPeriodTopicAdvice(topicKey, chart, period) {
         : "五行平衡與作息仍是本期健康重點；不適應以醫師與正式檢查為準。",
   }[topicKey] || "行運需配合原局與實際選擇判讀。";
 
-  return `${period.periodName}${period.pillar ? ` ${period.pillar}` : ""}的十神重點為${periodGods.join("、") || "未取得"}。${focus}`;
+  return `${period.periodName}疊加${layerPillars.map((layer) => `${layer.label}${layer.pillar}`).join("、")}，十神重點為${periodGods.join("、") || "未取得"}。${focus}`;
 }
 
 function baziTopicAnalysis(topicKey, chart, topic, period = null) {
@@ -3236,6 +3717,11 @@ function renderPalaceOverview(astrolabe) {
 function renderBaziInsights(chart) {
   if (!baziInsightOutput) return;
   const profile = baziDayMasterProfile(chart);
+  const structure = baziStructureProfile(chart);
+  const usefulGod = baziUsefulGodProfile(chart);
+  const hidden = profile.hiddenProfile;
+  const stages = baziTwelveStageProfile(chart);
+  const luck = baziLuckMeta(chart);
   const groups = baziTenGodGroupSummary(chart);
   const relations = baziRelationAnalysis(chart.pillars || []);
   const monthText = profile.monthMainStem
@@ -3250,13 +3736,29 @@ function renderBaziInsights(chart) {
         <p>${escapeHtml(monthText)} ${escapeHtml(profile.text)}</p>
       </article>
       <article class="bazi-insight-card">
-        <span>喜用方向</span>
-        <strong>${escapeHtml(profile.favorable.join("、") || "以流通為先")}</strong>
-        <p>${escapeHtml(profile.strength === "偏弱"
-          ? "日主偏弱時，優先需要生扶與同類資源，重點是先穩住體力、專業與支持系統。"
-          : profile.strength === "偏旺"
-            ? "日主偏旺時，宜用輸出、財星與規範讓能量落地，避免只累積想法或固執。"
-            : "日主中和時，重點不是偏補某一行，而是讓才華、財務與責任形成順暢循環。")}</p>
+        <span>格局判定</span>
+        <strong>${escapeHtml(`${structure.name} · ${structure.status}`)}</strong>
+        <p>${escapeHtml(structure.text)}</p>
+      </article>
+      <article class="bazi-insight-card">
+        <span>喜用與調候</span>
+        <strong>${escapeHtml(`扶抑${usefulGod.primary || "流通"} · 調候${usefulGod.regulating}${usefulGod.bridge ? ` · 通關${usefulGod.bridge}` : ""}`)}</strong>
+        <p>${escapeHtml(usefulGod.text)}</p>
+      </article>
+      <article class="bazi-insight-card">
+        <span>精準起運</span>
+        <strong>${escapeHtml(`${luck.direction} · ${luck.startDate}`)}</strong>
+        <p>${escapeHtml(luck.text)}</p>
+      </article>
+      <article class="bazi-insight-card is-wide">
+        <span>藏干、透干與通根</span>
+        <strong>${escapeHtml(hidden.roots.length ? `通根 ${hidden.roots.length} 處` : "日主同氣根較少")}</strong>
+        <p>${escapeHtml(hidden.text)}</p>
+      </article>
+      <article class="bazi-insight-card is-wide">
+        <span>十二長生與旬空</span>
+        <strong>${escapeHtml(stages.records.map((record) => `${record.name}${record.stage}`).join(" · "))}</strong>
+        <p>${escapeHtml(stages.text)}</p>
       </article>
       <article class="bazi-insight-card bazi-ten-god-card">
         <span>十神配置</span>
@@ -3270,8 +3772,8 @@ function renderBaziInsights(chart) {
         </div>
         <p class="bazi-ten-god-reading">${escapeHtml(baziTenGodInterpretation(chart))}</p>
       </article>
-      <article class="bazi-insight-card">
-        <span>干支結構</span>
+      <article class="bazi-insight-card is-wide">
+        <span>合沖刑害破、三合三會與墓庫</span>
         <strong>${escapeHtml(relations.supports.length ? "有流通訊號" : "以原局平衡為先")}</strong>
         <p>${escapeHtml(relations.text)}</p>
       </article>
@@ -3283,6 +3785,9 @@ function buildBaziReading(chart) {
   const topicKey = baziTopicSelect?.value || "property";
   const topic = TOPIC_CONFIG[topicKey];
   const profile = baziDayMasterProfile(chart);
+  const structure = baziStructureProfile(chart);
+  const usefulGod = baziUsefulGodProfile(chart);
+  const luck = baziLuckMeta(chart);
   const counts = tenGodCounts(chart);
   const groups = baziTenGodGroupSummary(chart);
   const relations = baziRelationAnalysis(chart.pillars || []);
@@ -3292,9 +3797,11 @@ function buildBaziReading(chart) {
   const tone = scoreTone(analysis.element.score + profile.score * 0.45);
   const periodText = baziPeriodReading(chart, period);
   const why = [
-    `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；日主判為${profile.strength}。`,
+    `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；藏干加權後生扶約${Math.round(profile.supportRatio * 100)}%，日主判為${profile.strength}。`,
+    `格局以月令主氣立${structure.name}，目前為${structure.status}。${structure.pressures.length ? `混雜點：${structure.pressures.join("、")}。` : "未見明顯破格衝突。"}`,
     `十神結構：${godCountText(counts, ["比肩", "劫財", "食神", "傷官", "正財", "偏財", "正官", "七殺", "正印", "偏印"])}。`,
-    `喜用方向：${profile.favorable.join("、") || "以五行流通為先"}${profile.caution.length ? `；需避免${profile.caution.join("、")}過度集中` : ""}。`,
+    `扶抑用神取${usefulGod.primary || "流通"}${usefulGod.secondary ? `、${usefulGod.secondary}` : ""}，調候重${usefulGod.regulating}${usefulGod.bridge ? `，通關取${usefulGod.bridge}` : ""}。`,
+    luck.text,
     relations.text,
     periodText,
   ];
@@ -3302,6 +3809,8 @@ function buildBaziReading(chart) {
     `${profile.dayStem}${profile.dayElement}日主`,
     `身強弱：${profile.strength}`,
     `月令：${profile.monthBranch}${profile.monthGod || ""}`,
+    `格局：${structure.name}`,
+    `用神：${usefulGod.primary || "流通"}`,
     ...groups.filter((group) => group.count).map((group) => `${group.label}${group.count}`),
     period.periodName,
   ];
@@ -3316,6 +3825,10 @@ function buildBaziReading(chart) {
           <p>${escapeHtml(profile.text)}</p>
         </section>
         <section class="reading-block">
+          <h4>格局、喜用與調候</h4>
+          <p>${escapeHtml(`${structure.text} ${usefulGod.text}`)}</p>
+        </section>
+        <section class="reading-block">
           <h4>${escapeHtml(topic.label)}八字解讀</h4>
           <p>${escapeHtml(analysis.text)}</p>
         </section>
@@ -3324,7 +3837,7 @@ function buildBaziReading(chart) {
           <p>${escapeHtml(supplement)}</p>
         </section>
         <section class="reading-block">
-          <h4>${escapeHtml(period.periodName)}重點</h4>
+          <h4>${escapeHtml(period.periodName)}交互作用</h4>
           <p>${escapeHtml(periodText)}</p>
         </section>
         <section class="reading-block">
@@ -3348,9 +3861,151 @@ function buildBaziReading(chart) {
 function updateBaziReading() {
   if (!currentChart) return;
   if (baziDecadalControl) baziDecadalControl.hidden = baziScopeSelect?.value !== "decadal";
-  if (baziYearControl) baziYearControl.hidden = baziScopeSelect?.value !== "yearly";
+  if (baziYearControl) baziYearControl.hidden = !["yearly", "monthly"].includes(baziScopeSelect?.value);
+  if (baziMonthControl) baziMonthControl.hidden = baziScopeSelect?.value !== "monthly";
   if (baziReadingOutput) baziReadingOutput.innerHTML = buildBaziReading(currentChart);
   renderBaziPartnerProfile(currentChart);
+  renderBaziCalibration();
+}
+
+function buildBaziTimeCandidate(chart, hourOffset) {
+  const values = chart.formValues;
+  const date = new Date(Date.UTC(values.year, values.month - 1, values.day, values.hour + hourOffset, values.minute));
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const hour = date.getUTCHours();
+  const minute = date.getUTCMinutes();
+  const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+  const lunar = solar.getLunar();
+  const eightChar = lunar.getEightChar();
+  eightChar.setSect(values.dayBoundaryRule === "midnight" ? 2 : 1);
+  const pillars = [eightChar.getYear(), eightChar.getMonth(), eightChar.getDay(), eightChar.getTime()];
+  return {
+    formValues: {
+      ...values,
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      birthDate: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+      birthTime: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+    },
+    lunar,
+    eightChar,
+    pillars,
+    naYin: [eightChar.getYearNaYin(), eightChar.getMonthNaYin(), eightChar.getDayNaYin(), eightChar.getTimeNaYin()],
+    elementCounts: countElements(pillars),
+  };
+}
+
+function calibrationEventScore(candidate, event) {
+  const config = CALIBRATION_EVENT_TYPES[event.type] || CALIBRATION_EVENT_TYPES.career;
+  const yearPillar = getBaziYearPillar(event.year);
+  const cycle = baziLuckCycleForYear(candidate, event.year);
+  const layers = [
+    cycle?.pillar ? { label: "大運", pillar: cycle.pillar } : null,
+    yearPillar ? { label: "流年", pillar: yearPillar } : null,
+  ].filter(Boolean);
+  const dayStem = splitPillar(candidate.pillars[2]).stem;
+  let score = 0;
+  const reasons = [];
+
+  layers.forEach((layer) => {
+    const { stem, branch } = splitPillar(layer.pillar);
+    const gods = [getTenGod(dayStem, stem), ...getHiddenStemGods(dayStem, branch).map((item) => item.god)].filter(Boolean);
+    const matchedGods = uniqueItems(gods.filter((god) => config.gods.includes(god)));
+    if (matchedGods.length) {
+      score += matchedGods.length * 1.15;
+      reasons.push(`${layer.label}${layer.pillar}帶動${matchedGods.join("、")}`);
+    }
+    candidate.pillars.forEach((pillar, index) => {
+      const interactions = baziPairInteractions(pillar, layer.pillar);
+      if (!interactions.length) return;
+      const weight = config.pillars.includes(index) ? 1.5 : 0.55;
+      score += interactions.length * weight;
+      reasons.push(`${layer.label}與${PILLAR_NAMES[index]}見${interactions.join("、")}`);
+    });
+  });
+
+  const natalCounts = tenGodCounts(candidate);
+  const natalSupport = config.gods.reduce((sum, god) => sum + (natalCounts[god] || 0), 0);
+  score += Math.min(1.6, natalSupport * 0.18);
+  if (!reasons.length) reasons.push("大運與流年未直接碰到關鍵柱，事件需從生活選擇與較細月份再校正");
+  return { score, reasons: uniqueItems(reasons).slice(0, 4), yearPillar, cycle };
+}
+
+function calibrationCandidates(chart) {
+  const offsets = [
+    { offset: -2, label: "前一時辰" },
+    { offset: 0, label: "目前時辰" },
+    { offset: 2, label: "後一時辰" },
+  ];
+  return offsets.map((item) => {
+    const candidate = buildBaziTimeCandidate(chart, item.offset);
+    const eventResults = baziCalibrationEvents.map((event) => ({
+      event,
+      ...calibrationEventScore(candidate, event),
+    }));
+    return {
+      ...item,
+      candidate,
+      score: eventResults.reduce((sum, result) => sum + result.score, 0),
+      eventResults,
+    };
+  }).sort((first, second) => second.score - first.score || Math.abs(first.offset) - Math.abs(second.offset));
+}
+
+function renderBaziCalibration() {
+  if (!baziCalibrationOutput) return;
+  if (!currentChart) {
+    baziCalibrationOutput.innerHTML = `<p class="calibration-empty">排盤後可加入過往事件。</p>`;
+    return;
+  }
+  if (!baziCalibrationEvents.length) {
+    baziCalibrationOutput.innerHTML = `<p class="calibration-empty">加入至少兩筆具體年份的事件，系統會比較相鄰三個時辰的大運、流年與四柱作用。</p>`;
+    return;
+  }
+
+  const candidates = calibrationCandidates(currentChart);
+  const eventHtml = baziCalibrationEvents.map((event) => {
+    const config = CALIBRATION_EVENT_TYPES[event.type] || CALIBRATION_EVENT_TYPES.career;
+    return `
+      <article class="calibration-event">
+        <span>${escapeHtml(String(event.year))}</span>
+        <div>
+          <strong>${escapeHtml(config.label)}</strong>
+          <small>${escapeHtml(event.note || "未填事件摘要")}</small>
+        </div>
+        <button class="calibration-remove" type="button" data-remove-calibration="${escapeHtml(String(event.id))}" aria-label="移除此事件" title="移除此事件">×</button>
+      </article>
+    `;
+  }).join("");
+  const candidateHtml = candidates.map((result, index) => {
+    const timeIndex = getTimeIndex(result.candidate.formValues.hour);
+    const reasons = uniqueItems(result.eventResults.flatMap((item) => item.reasons)).slice(0, 4);
+    return `
+      <article class="calibration-candidate ${index === 0 ? "is-leading" : ""}">
+        <span>${index === 0 ? "較集中" : "對照"}</span>
+        <div>
+          <strong>${escapeHtml(`${result.label} · ${HOUR_BRANCHES[timeIndex]}時 ${getTimeRange(timeIndex)} · ${result.candidate.pillars.join(" ")}`)}</strong>
+          <small>${escapeHtml(reasons.join("；"))}</small>
+        </div>
+        <b>${result.score.toFixed(1)}分</b>
+      </article>
+    `;
+  }).join("");
+  const confidence = baziCalibrationEvents.length >= 3
+    ? "已有三筆以上事件，可把最高分時辰視為優先核對候選。"
+    : "事件仍少，分數只能作初步對照；建議至少加入三筆不同類型事件。";
+
+  baziCalibrationOutput.innerHTML = `
+    <div class="calibration-events">${eventHtml}</div>
+    <h3 class="calibration-heading">相鄰時辰比較</h3>
+    <div class="calibration-candidates">${candidateHtml}</div>
+    <p class="calibration-empty">${escapeHtml(confidence)} 時辰校準是命理回溯，不是科學驗證，不會自動更改目前命盤。</p>
+  `;
 }
 
 function setActiveReadingMethod(method) {
@@ -3452,8 +4107,19 @@ function renderSummary(astrolabe, lunar, formValues, timeIndex) {
   const bodyPalaceLabel = palaceLabel(bodyPalace);
   const causePalaceLabel = palaceLabel(causePalace);
   const fiveElementsClass = toTraditional(astrolabe.fiveElementsClass);
+  const correction = Math.round((formValues.correctionMinutes || 0) * 10) / 10;
+  const solarCorrection = Math.round(((formValues.longitudeCorrection || 0) + (formValues.equationCorrection || 0)) * 10) / 10;
+  const correctionDetail = [
+    `出生地：${formValues.placeName}`,
+    `時區：UTC${formValues.timezoneOffset >= 0 ? "+" : ""}${formValues.timezoneOffset}`,
+    formValues.useTrueSolarTime ? `真太陽時校正${solarCorrection >= 0 ? "+" : ""}${solarCorrection}分鐘` : "未啟用真太陽時",
+    formValues.daylightSaving ? "已扣除日光節約時間60分鐘" : "未套用日光節約時間",
+    `總校正${correction >= 0 ? "+" : ""}${correction}分鐘`,
+    formValues.dayBoundaryRule === "zi" ? "23:00子初換日" : "00:00午夜換日",
+  ].join("；");
   const summary = [
-    { label: "公曆", value: `${formValues.birthDate} ${formValues.birthTime}` },
+    { label: "輸入時間", value: `${formValues.inputBirthDate} ${formValues.inputBirthTime}` },
+    { label: "排盤時間", value: `${formValues.birthDate} ${formValues.birthTime}`, tooltip: correctionDetail },
     { label: "農曆", value: toTraditional(lunarDate) },
     { label: "時辰", value: `${HOUR_BRANCHES[timeIndex]}時 ${getTimeRange(timeIndex)}` },
     { label: "性別", value: formValues.gender },
@@ -3484,22 +4150,25 @@ function renderSummary(astrolabe, lunar, formValues, timeIndex) {
     .join("");
 }
 
-function renderPillars(pillars) {
+function renderPillars(chart) {
+  const pillars = chart.pillars || [];
   const dayStem = splitPillar(pillars[2] || "").stem;
+  const stages = baziTwelveStageProfile(chart).records;
   pillarGrid.innerHTML = pillars
     .map((pillar, index) => {
       const { stem, branch } = splitPillar(pillar);
       const stemElement = GAN_ELEMENT[stem] || "-";
       const branchElement = ZHI_ELEMENT[branch] || "-";
       const stemGod = index === 2 ? "日主" : getTenGod(dayStem, stem);
-      const hiddenGods = getHiddenStemGods(dayStem, branch);
+      const hiddenGods = hiddenStemRecords(dayStem, branch);
       const stemGodLabel = stemGod || "-";
       const stemGodTooltip = tenGodTooltip(stemGodLabel);
       const hiddenGodHtml = hiddenGods.length
         ? hiddenGods
-            .map(({ stem: hiddenStem, god }) => {
-              const tooltip = `${hiddenStem}${god}：地支「${branch}」藏${hiddenStem}，對日主形成${god}。${TEN_GOD_MEANINGS[god] || ""}`;
-              return `<span class="pillar-hidden-god has-tooltip" tabindex="0" aria-label="${tooltipAttribute(tooltip)}" data-tooltip="${tooltipAttribute(tooltip)}">${escapeHtml(hiddenStem)}${escapeHtml(god)}</span>`;
+            .map(({ stem: hiddenStem, god, weight, role }) => {
+              const percentage = Math.round(weight * 100);
+              const tooltip = `${hiddenStem}${god}：地支「${branch}」的${role}藏干，比例權重約${percentage}%，對日主形成${god}。${TEN_GOD_MEANINGS[god] || ""}`;
+              return `<span class="pillar-hidden-god has-tooltip" tabindex="0" aria-label="${tooltipAttribute(tooltip)}" data-tooltip="${tooltipAttribute(tooltip)}">${escapeHtml(hiddenStem)}${escapeHtml(god)} ${percentage}%</span>`;
             })
             .join("")
         : `<span class="pillar-hidden-god muted">無藏干</span>`;
@@ -3522,6 +4191,8 @@ function renderPillars(pillars) {
           <footer class="pillar-footer">
             <span>天干 ${escapeHtml(stemElement)}</span>
             <span>地支 ${escapeHtml(branchElement)}</span>
+            <span>長生 ${escapeHtml(stages[index]?.stage || "-")}</span>
+            <span>旬空 ${escapeHtml(stages[index]?.void || "-")}</span>
           </footer>
         </article>
       `;
@@ -4168,7 +4839,12 @@ function calculate() {
     throw new Error("排盤函式庫尚未載入。");
   }
 
-  const formValues = getFormValues();
+  const formValues = normalizeBirthMoment(getFormValues());
+  const nextCalibrationSignature = `${formValues.inputBirthDate}|${formValues.inputBirthTime}|${formValues.birthDate}|${formValues.birthTime}|${formValues.dayBoundaryRule}`;
+  if (calibrationChartSignature && calibrationChartSignature !== nextCalibrationSignature) {
+    baziCalibrationEvents = [];
+  }
+  calibrationChartSignature = nextCalibrationSignature;
   const solar = Solar.fromYmdHms(
     formValues.year,
     formValues.month,
@@ -4178,6 +4854,8 @@ function calculate() {
     0,
   );
   const lunar = solar.getLunar();
+  const eightChar = lunar.getEightChar();
+  eightChar.setSect(formValues.dayBoundaryRule === "midnight" ? 2 : 1);
   const timeIndex = getTimeIndex(formValues.hour);
   // iztro accepts English gender identifiers; the form keeps Chinese labels for the UI.
   const iztroGender = formValues.gender === "男" ? "male" : "female";
@@ -4189,14 +4867,17 @@ function calculate() {
     true,
     "zh-TW",
   );
-  const pillars = lunar.getBaZi();
+  const pillars = [eightChar.getYear(), eightChar.getMonth(), eightChar.getDay(), eightChar.getTime()];
+  const naYin = [eightChar.getYearNaYin(), eightChar.getMonthNaYin(), eightChar.getDayNaYin(), eightChar.getTimeNaYin()];
   const elementCounts = countElements(pillars);
 
   currentChart = {
     astrolabe,
     elementCounts,
     formValues,
+    eightChar,
     lunar,
+    naYin,
     pillars,
     timeIndex,
   };
@@ -4218,11 +4899,17 @@ function calculate() {
   if (baziTargetYearInput && !baziTargetYearInput.value) {
     baziTargetYearInput.value = String(new Date().getFullYear());
   }
+  if (baziTargetMonthInput && !baziTargetMonthInput.value) {
+    baziTargetMonthInput.value = String(new Date().getMonth() + 1);
+  }
+  if (calibrationYearInput && !calibrationYearInput.value) {
+    calibrationYearInput.value = String(Math.max(formValues.year, new Date().getFullYear() - 1));
+  }
 
   renderSummary(astrolabe, lunar, formValues, timeIndex);
-  renderPillars(pillars);
+  renderPillars(currentChart);
   renderElementBars(elementCounts);
-  renderNaYin(lunar.getBaZiNaYin());
+  renderNaYin(naYin);
   renderBaziInsights(currentChart);
   renderBaziDecadalOptions(currentChart);
   renderDecadalOptions(astrolabe, formValues);
@@ -4268,6 +4955,7 @@ form.querySelectorAll('input[name="gender"]').forEach((input) => {
   baziScopeSelect,
   baziDecadalSelect,
   baziTargetYearInput,
+  baziTargetMonthInput,
   baziTopicSelect,
 ].filter(Boolean).forEach((control) => {
   control.addEventListener("change", updateBaziReading);
@@ -4276,6 +4964,28 @@ form.querySelectorAll('input[name="gender"]').forEach((input) => {
 
 methodTabs.forEach((tab) => {
   tab.addEventListener("click", () => setActiveReadingMethod(tab.dataset.readingMethod));
+});
+
+addCalibrationEventButton?.addEventListener("click", () => {
+  if (!currentChart) {
+    showError(new Error("請先完成排盤，再加入過往事件。"));
+    return;
+  }
+  const year = Number(calibrationYearInput?.value);
+  const currentYear = new Date().getFullYear();
+  if (!Number.isInteger(year) || year < currentChart.formValues.year || year > currentYear) {
+    showError(new Error(`事件年份需介於出生年${currentChart.formValues.year}與${currentYear}之間。`));
+    return;
+  }
+  clearError();
+  baziCalibrationEvents.push({
+    id: `${Date.now()}-${baziCalibrationEvents.length}`,
+    year,
+    type: CALIBRATION_EVENT_TYPES[calibrationTypeSelect?.value] ? calibrationTypeSelect.value : "career",
+    note: calibrationNoteInput?.value.trim() || "",
+  });
+  if (calibrationNoteInput) calibrationNoteInput.value = "";
+  renderBaziCalibration();
 });
 
 chatForm.addEventListener("submit", (event) => {
@@ -4288,6 +4998,13 @@ chatForm.addEventListener("submit", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  const removeCalibrationButton = event.target.closest("[data-remove-calibration]");
+  if (removeCalibrationButton) {
+    const id = removeCalibrationButton.dataset.removeCalibration;
+    baziCalibrationEvents = baziCalibrationEvents.filter((item) => String(item.id) !== String(id));
+    renderBaziCalibration();
+    return;
+  }
   const imageTypeButton = event.target.closest("[data-ziwei-image-type]");
   if (imageTypeButton) {
     ziweiImageType = imageTypeButton.dataset.ziweiImageType || "sanhe";

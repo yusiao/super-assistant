@@ -45,9 +45,38 @@
           </fieldset>
 
           <div class="field-row">
-            <label for="place-note">出生地時間</label>
-            <input id="place-note" name="placeNote" type="text" value="UTC+08 台北時間" />
+            <label for="place-note">出生地</label>
+            <input id="place-note" name="placeNote" type="text" value="台北" />
           </div>
+
+          <details class="time-correction-panel">
+            <summary>出生時間進階校正</summary>
+            <div class="time-correction-grid">
+              <label>
+                <span>時區 UTC</span>
+                <input id="timezone-offset" type="number" min="-12" max="14" step="0.5" value="8" />
+              </label>
+              <label>
+                <span>出生地經度</span>
+                <input id="birth-longitude" type="number" min="-180" max="180" step="0.0001" value="121.5654" />
+              </label>
+              <label>
+                <span>子時換日</span>
+                <select id="day-boundary-rule">
+                  <option value="zi">23:00 子初換日</option>
+                  <option value="midnight">00:00 午夜換日</option>
+                </select>
+              </label>
+              <label class="check-field">
+                <input id="true-solar-time" type="checkbox" />
+                <span>使用真太陽時</span>
+              </label>
+              <label class="check-field">
+                <input id="daylight-saving" type="checkbox" />
+                <span>出生時有日光節約時間</span>
+              </label>
+            </div>
+          </details>
 
           <div class="action-row">
             <button class="primary-button" type="submit">排盤</button>
@@ -111,6 +140,7 @@
                     <option value="natal">原局</option>
                     <option value="decadal">大運</option>
                     <option value="yearly">流年</option>
+                    <option value="monthly">流月</option>
                   </select>
                 </label>
                 <label class="select-field" id="bazi-decadal-control" hidden>
@@ -120,6 +150,10 @@
                 <label class="select-field" id="bazi-year-control" hidden>
                   <span>流年年份</span>
                   <input id="bazi-target-year" type="number" min="1900" max="2100" />
+                </label>
+                <label class="select-field" id="bazi-month-control" hidden>
+                  <span>流月月份</span>
+                  <input id="bazi-target-month" type="number" min="1" max="12" />
                 </label>
                 <label class="select-field">
                   <span>主題</span>
@@ -133,6 +167,39 @@
                 </label>
               </div>
               <div id="bazi-reading-output" class="reading-output"></div>
+            </section>
+
+            <section class="bazi-calibration-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Event Calibration</p>
+                  <h2>過往事件校準</h2>
+                </div>
+                <span class="section-note">比較前一、目前與後一時辰的事件吻合度</span>
+              </div>
+              <div class="calibration-controls">
+                <label class="select-field">
+                  <span>事件年份</span>
+                  <input id="calibration-year" type="number" min="1900" max="2100" />
+                </label>
+                <label class="select-field">
+                  <span>事件類型</span>
+                  <select id="calibration-type">
+                    <option value="career">工作／升學</option>
+                    <option value="marriage">感情／婚姻</option>
+                    <option value="property">財務／置產</option>
+                    <option value="family">家庭／搬遷</option>
+                    <option value="children">子女／作品</option>
+                    <option value="health">健康／壓力</option>
+                  </select>
+                </label>
+                <label class="select-field calibration-note-field">
+                  <span>事件摘要</span>
+                  <input id="calibration-note" type="text" maxlength="80" placeholder="例如：換工作、結婚、搬家" />
+                </label>
+                <button id="add-calibration-event" class="secondary-button" type="button">加入事件</button>
+              </div>
+              <div id="bazi-calibration-output" class="bazi-calibration-output"></div>
             </section>
 
             <section class="partner-section bazi-partner-section">
