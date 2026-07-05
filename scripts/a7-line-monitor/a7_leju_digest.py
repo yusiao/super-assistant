@@ -12,7 +12,9 @@ import sys
 import urllib.error
 import urllib.request
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from html import unescape
 from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
@@ -130,13 +132,15 @@ def load_area_config(path: Path | None) -> list[dict[str, Any]]:
 def load_bargain_watch_config(path: Path | None) -> dict[str, Any]:
     config_path = path or get_default_bargain_watch_config_path()
     if not config_path.exists():
-        return {"enabled": False, "threshold_percent": 10, "max_items": 8, "areas": []}
+        return {"enabled": False, "threshold_percent": 20, "max_items": 8, "areas": [], "housefun_cities": []}
     loaded = read_json_file(config_path)
     if isinstance(loaded, dict):
         loaded.setdefault("enabled", True)
-        loaded.setdefault("threshold_percent", 10)
+        loaded.setdefault("threshold_percent", 20)
         loaded.setdefault("max_items", 8)
         loaded.setdefault("areas", [])
+        loaded.setdefault("housefun_cities", [])
+        loaded.setdefault("min_comparables", 3)
         return loaded
     raise RuntimeError(f"Bargain watch config file is invalid: {config_path}")
 
@@ -1024,7 +1028,13 @@ def get_state_file(path: Path) -> dict[str, Any]:
     return state
 
 
-def save_state_file(path: Path, existing_state: dict[str, Any], area_snapshots: list[dict[str, Any]], local_now: datetime) -> None:
+def save_state_file(
+    path: Path,
+    existing_state: dict[str, Any],
+    area_snapshots: list[dict[str, Any]],
+    local_now: datetime,
+    bargain_watch: dict[str, Any] | None = None,
+) -> None:
     history = list(existing_state.get("history", []))
     today = local_now.strftime("%Y-%m-%d")
     history = [entry for entry in history if entry.get("date") != today]
@@ -1037,7 +1047,19 @@ def save_state_file(path: Path, existing_state: dict[str, Any], area_snapshots: 
                 kept_history.append(entry)
         except Exception:
             continue
-    write_json_file(path, {"last_run_at": local_now.isoformat(), "runs": area_snapshots, "history": kept_history})
+    write_json_file(
+        path,
+        {
+            "last_run_at": local_now.isoformat(),
+            "runs": area_snapshots,
+            "history": kept_history,
+            "bargain_watch_items": (
+                bargain_watch.get("all_items", bargain_watch.get("items", []))
+                if bargain_watch is not None
+                else existing_state.get("bargain_watch_items", [])
+            ),
+        },
+    )
 
 
 def get_previous_area(state: dict[str, Any], area_name: str) -> dict[str, Any] | None:
@@ -1063,6 +1085,21 @@ def get_new_pending_launch_projects(snapshots: list[dict[str, Any]], state: dict
             item["name"] = f"{area['name']} / {item.get('name', '未命名建案')}"
             new_items.append(item)
     return new_items
+
+
+def get_new_bargain_watch_items(bargain_watch: dict[str, Any], state: dict[str, Any]) -> list[dict[str, Any]]:
+    if "bargain_watch_items" not in state:
+        return []
+    previous_keys = {
+        item.get("url", "") or f"{item.get('region_group')}|{item.get('area_name')}|{item.get('name')}"
+        for item in state.get("bargain_watch_items", [])
+    }
+    return [
+        item
+        for item in bargain_watch.get("all_items", bargain_watch.get("items", []))
+        if (item.get("url", "") or f"{item.get('region_group')}|{item.get('area_name')}|{item.get('name')}")
+        not in previous_keys
+    ][:20]
 
 
 def is_weekly_report_day(local_now: datetime, weekly_day: int) -> bool:
@@ -1498,15 +1535,181 @@ def get_bargain_benchmark(area: dict[str, Any], price_snapshot: dict[str, str], 
     return None, ""
 
 
+def normalize_housefun_price_text(value: str) -> str:
+    value = unescape(value).strip().replace(",", "")
+    match = re.fullmatch(r"(\d+(?:\.\d+)?)[~-](\d+(?:\.\d+)?)", value)
+    if not match:
+        return value
+    low = float(match.group(1))
+    high = float(match.group(2))
+    if high < low and high < 10 <= low:
+        high *= 10
+    return f"{low:g}-{high:g}"
+
+
+def normalize_project_identity(value: str) -> str:
+    return re.sub(r"[^0-9A-Za-z\u4e00-\u9fff]", "", value).lower()
+
+
+def parse_housefun_projects(content: str, source_url: str) -> list[dict[str, str]]:
+    projects: list[dict[str, str]] = []
+    sections = re.findall(r'<section class="building-case[^>]*>(.*?)</section>', content, re.DOTALL | re.IGNORECASE)
+    for section in sections:
+        id_match = re.search(r'name="buildIds"\s+value="(\d+)"', section)
+        name_match = re.search(r'<h3>\s*(.*?)\s*</h3>', section, re.DOTALL | re.IGNORECASE)
+        address_match = re.search(r'<address>.*?<a[^>]*>(.*?)</a>.*?</address>', section, re.DOTALL | re.IGNORECASE)
+        case_type_match = re.search(r'"caseType"\s*:\s*"([^"]+)"', section)
+        purpose_match = re.search(r'"purpose"\s*:\s*"([^"]+)"', section)
+        price_match = re.search(
+            r'<em class="number">\s*([^<]+?)\s*</em>\s*<em class="postfix">\s*萬/坪\s*</em>',
+            section,
+            re.DOTALL | re.IGNORECASE,
+        )
+        if not id_match or not name_match or not address_match:
+            continue
+        case_type = unescape(case_type_match.group(1)).strip() if case_type_match else ""
+        if case_type != "預售屋":
+            continue
+        purpose = unescape(purpose_match.group(1)).strip() if purpose_match else ""
+        if purpose and purpose not in {"住宅用", "住商用"}:
+            continue
+        price_text = normalize_housefun_price_text(price_match.group(1)) if price_match else ""
+        if not parse_price_range(price_text)[0]:
+            continue
+        address = re.sub(r"<[^>]+>", "", unescape(address_match.group(1))).strip()
+        district_match = re.search(r"(?:台北市|臺北市|新北市|桃園市)(.{1,6}?區|.{1,6}?鄉|.{1,6}?鎮|.{1,6}?市)", address)
+        district = district_match.group(1) if district_match else ""
+        project_id = id_match.group(1)
+        projects.append(
+            {
+                "name": re.sub(r"<[^>]+>", "", unescape(name_match.group(1))).strip(),
+                "status": f"{price_text}萬/坪 預售屋",
+                "url": f"https://newhouse.housefun.com.tw/building/{project_id}",
+                "address": address,
+                "district": district,
+                "purpose": purpose,
+                "source": "好房網",
+                "source_url": source_url,
+            }
+        )
+    return projects
+
+
+def get_housefun_page_count(content: str, page_size: int = 10) -> int:
+    match = re.search(r'<pagination-panel[^>]+v-bind:records="(\d+)"', content, re.IGNORECASE)
+    if not match:
+        return 1
+    return max(1, (int(match.group(1)) + page_size - 1) // page_size)
+
+
+def add_query_parameter(url: str, key: str, value: str) -> str:
+    parts = urllib.parse.urlsplit(url)
+    query = dict(urllib.parse.parse_qsl(parts.query, keep_blank_values=True))
+    query[key] = value
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(query), parts.fragment))
+
+
+def get_housefun_city_projects(city: dict[str, Any]) -> tuple[list[dict[str, str]], list[str]]:
+    city_name = str(city.get("name", "未命名城市"))
+    city_url = str(city.get("url", "")).strip()
+    if not city_url:
+        return [], [f"{city_name}：缺少好房網城市網址"]
+
+    errors: list[str] = []
+    first_content = fetch_text(city_url)
+    projects = parse_housefun_projects(first_content, city_url)
+    page_count = min(get_housefun_page_count(first_content), int(city.get("max_pages", 40)))
+    page_urls = [add_query_parameter(city_url, "page", str(page)) for page in range(2, page_count + 1)]
+    worker_count = max(1, min(int(city.get("workers", 6)), 8))
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        future_urls = {executor.submit(fetch_text, url): url for url in page_urls}
+        for future in as_completed(future_urls):
+            url = future_urls[future]
+            try:
+                projects.extend(parse_housefun_projects(future.result(), url))
+            except Exception as exc:
+                errors.append(f"{city_name}分頁抓取失敗：{url}：{exc}")
+
+    deduped: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for project in projects:
+        key = "|".join(
+            [
+                city_name,
+                project.get("district", ""),
+                normalize_project_identity(project.get("name", "")),
+            ]
+        )
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        project["region_group"] = city_name
+        deduped.append(project)
+    return deduped, errors
+
+
+def get_housefun_bargain_items(config: dict[str, Any], threshold_percent: float) -> tuple[list[dict[str, Any]], list[str]]:
+    all_projects: list[dict[str, str]] = []
+    errors: list[str] = []
+    for city in config.get("housefun_cities", []):
+        try:
+            projects, city_errors = get_housefun_city_projects(city)
+            all_projects.extend(projects)
+            errors.extend(city_errors)
+        except Exception as exc:
+            errors.append(f"{city.get('name', '未命名城市')}：{exc}")
+
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for project in all_projects:
+        district = project.get("district", "")
+        if district:
+            grouped.setdefault(f"{project.get('region_group', '')}|{district}", []).append(project)
+
+    min_comparables = int(config.get("min_comparables", 3))
+    items: list[dict[str, Any]] = []
+    for project in all_projects:
+        group_key = f"{project.get('region_group', '')}|{project.get('district', '')}"
+        peers = [item for item in grouped.get(group_key, []) if item.get("url") != project.get("url")]
+        peer_prices = [price for price in (get_project_mid_price(item) for item in peers) if price is not None]
+        if len(peer_prices) < min_comparables:
+            continue
+        benchmark = get_median(peer_prices)
+        low_price = get_project_low_price(project)
+        if benchmark is None or low_price is None or benchmark <= 0:
+            continue
+        discount_percent = (benchmark - low_price) / benchmark * 100
+        if discount_percent < threshold_percent:
+            continue
+        items.append(
+            {
+                "region_group": project.get("region_group", ""),
+                "area_name": project.get("district", ""),
+                "name": project.get("name", "未命名建案"),
+                "status": project.get("status", ""),
+                "url": project.get("url", ""),
+                "address": project.get("address", ""),
+                "source": project.get("source", "好房網"),
+                "low_price": low_price,
+                "benchmark": benchmark,
+                "benchmark_source": f"同行政區其他預售案中位數（{len(peer_prices)}案）",
+                "discount_percent": discount_percent,
+            }
+        )
+    return items, errors
+
+
 def get_bargain_watch_results(config: dict[str, Any]) -> dict[str, Any]:
     if not config.get("enabled", True):
         return {"enabled": False, "items": [], "errors": []}
 
-    threshold_percent = float(config.get("threshold_percent", 10))
-    threshold_ratio = threshold_percent / 100
+    threshold_percent = float(config.get("threshold_percent", 20))
     max_items = int(config.get("max_items", 8))
     items: list[dict[str, Any]] = []
     errors: list[str] = []
+
+    housefun_items, housefun_errors = get_housefun_bargain_items(config, threshold_percent)
+    items.extend(housefun_items)
+    errors.extend(housefun_errors)
 
     for area in config.get("areas", []):
         area_name = str(area.get("name", "未命名區域"))
@@ -1549,11 +1752,19 @@ def get_bargain_watch_results(config: dict[str, Any]) -> dict[str, Any]:
         except Exception as exc:
             errors.append(f"{area_name}：{exc}")
 
-    items.sort(key=lambda item: item["discount_percent"], reverse=True)
+    deduped_items: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+    for item in sorted(items, key=lambda row: row["discount_percent"], reverse=True):
+        key = item.get("url", "") or f"{item.get('region_group')}|{item.get('area_name')}|{item.get('name')}"
+        if key in seen_urls:
+            continue
+        seen_urls.add(key)
+        deduped_items.append(item)
     return {
         "enabled": True,
         "threshold_percent": threshold_percent,
-        "items": items[:max_items],
+        "items": deduped_items[:max_items],
+        "all_items": deduped_items,
         "errors": errors,
     }
 
@@ -1569,6 +1780,10 @@ def format_bargain_watch_line(item: dict[str, Any]) -> list[str]:
         f"低價：{item.get('low_price', 0):.1f}萬/坪"
     )
     lines = [first, second]
+    if item.get("address"):
+        lines.append(f"  位置：{item['address']}")
+    if item.get("source"):
+        lines.append(f"  來源：{item['source']}")
     if item.get("url"):
         lines.append(f"  {item['url']}")
     return lines
@@ -1885,7 +2100,7 @@ def new_report_content(
             for item in items:
                 lines.extend(format_bargain_watch_line(item))
         else:
-            threshold = bargain_watch.get("threshold_percent", 10)
+            threshold = bargain_watch.get("threshold_percent", 20)
             lines.append(f"- 今天未發現公開價格低於周邊基準 {threshold:g}% 以上的預售 / 待開案。")
         errors = bargain_watch.get("errors", [])
         if errors:
@@ -2016,7 +2231,7 @@ def new_line_message(
             for item in items[:4]:
                 lines.extend(format_bargain_watch_line(item))
         else:
-            threshold = bargain_watch.get("threshold_percent", 10)
+            threshold = bargain_watch.get("threshold_percent", 20)
             lines.append(f"- 未發現低於周邊基準 {threshold:g}% 以上的預售 / 待開案。")
         if bargain_watch.get("errors"):
             lines.append(f"- 部分區域抓取失敗：{len(bargain_watch['errors'])} 區")
@@ -2162,6 +2377,13 @@ def main() -> int:
     market_pulse_config_path = resolve_workspace_path(market_pulse_config_path_text)
     line_schedule = get_config_value(file_config, "LINE_SCHEDULE", "weekly").strip().lower()
     weekly_report_day = int(get_config_value(file_config, "WEEKLY_REPORT_DAY", "6"))
+    weekly_report_hour = int(get_config_value(file_config, "WEEKLY_REPORT_HOUR", "20"))
+    intraday_alerts = get_config_value(file_config, "INTRADAY_ALERTS", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
     official_presale_url = get_config_value(
         file_config,
         "OFFICIAL_PRESALE_URL",
@@ -2186,7 +2408,7 @@ def main() -> int:
     report_path = report_root / f"a7-leju-digest-{date_string}.md"
 
     ledger_file = get_ledger_file(ledger_path)
-    if not args.force and test_ledger_already_ran(ledger_file, task_id, date_string):
+    if not args.force and not intraday_alerts and test_ledger_already_ran(ledger_file, task_id, date_string):
         print(f"Task '{task_id}' already ran on {date_string}. Use --force to run again.")
         return 0
 
@@ -2211,13 +2433,29 @@ def main() -> int:
 
     print_extraction_diagnostics(snapshots)
 
-    urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
-    weekly_due = is_weekly_report_day(local_now, weekly_report_day)
-    should_send_line = args.force or line_schedule == "daily" or weekly_due or bool(urgent_pending_projects)
-    report_kind = "即時提醒" if urgent_pending_projects and not weekly_due else "週報"
-
     bargain_watch = get_bargain_watch_results(load_bargain_watch_config(bargain_config_path))
-    market_pulse = get_market_pulse(load_market_pulse_config(market_pulse_config_path), local_now)
+    urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
+    urgent_bargain_items = get_new_bargain_watch_items(bargain_watch, state)
+    weekly_due = is_weekly_report_day(local_now, weekly_report_day) and local_now.hour == weekly_report_hour
+    should_send_line = (
+        args.force
+        or line_schedule == "daily"
+        or weekly_due
+        or bool(urgent_pending_projects)
+        or bool(urgent_bargain_items)
+    )
+    if weekly_due:
+        report_kind = "週報"
+    elif urgent_bargain_items:
+        report_kind = "低價新案提醒"
+    else:
+        report_kind = "即時提醒"
+
+    market_pulse = (
+        get_market_pulse(load_market_pulse_config(market_pulse_config_path), local_now)
+        if weekly_due or args.force
+        else {"enabled": False, "items": [], "errors": []}
+    )
     report_content = new_report_content(
         snapshots,
         state,
@@ -2228,18 +2466,22 @@ def main() -> int:
         urgent_pending_projects,
         area_config,
     )
+    line_bargain_watch = bargain_watch
+    if urgent_bargain_items and not weekly_due:
+        line_bargain_watch = dict(bargain_watch)
+        line_bargain_watch["items"] = urgent_bargain_items
     line_message = new_line_message(
         snapshots,
         state,
         local_now,
-        bargain_watch,
+        line_bargain_watch,
         market_pulse,
         report_kind,
         urgent_pending_projects,
         area_config,
     )
     report_path.write_text(report_content + "\n", encoding="utf-8")
-    save_state_file(state_path, state, snapshots, local_now)
+    save_state_file(state_path, state, snapshots, local_now, bargain_watch)
     update_ledger(ledger_path, ledger_file, task_id, report_path, local_now)
 
     if args.dry_run:
@@ -2261,7 +2503,7 @@ def main() -> int:
             send_line_broadcast(line_token, line_message)
             print("LINE broadcast sent successfully.")
     elif not args.skip_line:
-        print("LINE send skipped: weekly report is not due and no new pending presale project was detected.")
+        print("LINE send skipped: no weekly report, new pending presale, or new 20%-below-market project was detected.")
 
     print(f"Report written to {report_path}")
     return 0

@@ -1,0 +1,63 @@
+{
+  "enabled": true,
+  "threshold_percent": 20,
+  "min_comparables": 3,
+  "max_items": 20,
+  "housefun_cities": [
+    {
+      "name": "台北市",
+      "url": "https://newhouse.housefun.com.tw/region/%E5%8F%B0%E5%8C%97%E5%B8%82_c/",
+      "max_pages": 40,
+      "workers": 6
+    },
+    {
+      "name": "新北市",
+      "url": "https://newhouse.housefun.com.tw/region/%E6%96%B0%E5%8C%97%E5%B8%82_c/",
+      "max_pages": 50,
+      "workers": 6
+    },
+    {
+      "name": "桃園市",
+      "url": "https://newhouse.housefun.com.tw/region/%E6%A1%83%E5%9C%92%E5%B8%82_c/",
+      "max_pages": 40,
+      "workers": 6
+    }
+  ],
+  "areas": [
+    {
+      "name": "A7站重劃區-郵政物流",
+      "region_group": "桃園市",
+      "scope": "life_circle",
+      "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11175",
+      "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11175"
+    },
+    {
+      "name": "A7站重劃區-樂善國小",
+      "region_group": "桃園市",
+      "scope": "life_circle",
+      "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11176",
+      "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11176"
+    },
+    {
+      "name": "A7站重劃區-中心商業區",
+      "region_group": "桃園市",
+      "scope": "life_circle",
+      "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11173",
+      "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11173"
+    },
+    {
+      "name": "A7站重劃區-文青國小",
+      "region_group": "桃園市",
+      "scope": "life_circle",
+      "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11174",
+      "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11174"
+    },
+    {
+      "name": "A7站重劃區-體育大學",
+      "region_group": "桃園市",
+      "scope": "life_circle",
+      "new_build_list_url": "https://www.leju.com.tw/community_list?area=H333&city=H&is_new=1&sid=11177",
+      "price_url": "https://www.leju.com.tw/map/region?area=H333&city=H&mode=price&sid=11177"
+    }
+  ]
+}
