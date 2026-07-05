@@ -122,6 +122,17 @@
               <div id="bazi-insight-output" class="bazi-insight-output"></div>
             </section>
 
+            <section class="bazi-luck-section">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Luck Calendar</p>
+                  <h2>大運・流年・流月表</h2>
+                </div>
+                <span class="section-note">逐層查看干支、十神與旬空</span>
+              </div>
+              <div id="bazi-luck-table-output" class="bazi-luck-table-output"></div>
+            </section>
+
             <section class="bazi-reading-section">
               <div class="section-heading">
                 <div>
@@ -233,14 +244,17 @@
                     <span
                       class="info-tooltip"
                       tabindex="0"
-                      aria-label="大限：十年一階段的長期運勢；流年：單一年份的年度焦點；流月：單一月份的短期事件節奏。"
-                      data-tooltip="大限：十年一階段的長期運勢。流年：單一年份的年度焦點。流月：單一月份的短期事件節奏。"
+                      aria-label="大限：十年階段；小限：虛歲年度宮位；流年：年度焦點；流月：月份節奏；流日與流時：短期觸發。"
+                      data-tooltip="大限：十年階段。小限：虛歲年度宮位。流年：年度焦點。流月：月份節奏。流日、流時：短期觸發，應以大限與流年為背景。"
                     >?</span>
                   </span>
                   <select id="scope-select">
                     <option value="decadal">大限</option>
+                    <option value="age">小限</option>
                     <option value="yearly">流年</option>
                     <option value="monthly">流月</option>
+                    <option value="daily">流日</option>
+                    <option value="hourly">流時</option>
                   </select>
                 </label>
 
@@ -257,6 +271,16 @@
                 <label class="select-field" id="month-control">
                   <span>流月月份</span>
                   <input id="target-month" type="number" min="1" max="12" />
+                </label>
+
+                <label class="select-field" id="day-control">
+                  <span>流日日期</span>
+                  <input id="target-day" type="number" min="1" max="31" />
+                </label>
+
+                <label class="select-field" id="hour-control">
+                  <span>流時小時</span>
+                  <input id="target-hour" type="number" min="0" max="23" />
                 </label>
 
                 <label class="select-field">
@@ -295,6 +319,11 @@
               <div class="astrolabe-grid" id="astrolabe-grid"></div>
             </section>
           </section>
+
+          <details class="combined-check-panel">
+            <summary>雙盤綜合核對</summary>
+            <div id="combined-check-output" class="combined-check-output"></div>
+          </details>
         </section>
       </section>
 

@@ -140,8 +140,11 @@ const TOPIC_CONFIG = {
 };
 const SCOPE_LABELS = {
   decadal: "大限",
+  age: "小限",
   yearly: "流年",
   monthly: "流月",
+  daily: "流日",
+  hourly: "流時",
 };
 const BAZI_SCOPE_LABELS = {
   natal: "原局",
@@ -528,6 +531,7 @@ const pillarGrid = document.querySelector("#pillar-grid");
 const elementBars = document.querySelector("#element-bars");
 const nayinList = document.querySelector("#nayin-list");
 const baziInsightOutput = document.querySelector("#bazi-insight-output");
+const baziLuckTableOutput = document.querySelector("#bazi-luck-table-output");
 const baziScopeSelect = document.querySelector("#bazi-scope-select");
 const baziDecadalSelect = document.querySelector("#bazi-decadal-select");
 const baziTargetYearInput = document.querySelector("#bazi-target-year");
@@ -549,13 +553,18 @@ const scopeSelect = document.querySelector("#scope-select");
 const decadalSelect = document.querySelector("#decadal-select");
 const targetYearInput = document.querySelector("#target-year");
 const targetMonthInput = document.querySelector("#target-month");
+const targetDayInput = document.querySelector("#target-day");
+const targetHourInput = document.querySelector("#target-hour");
 const topicSelect = document.querySelector("#topic-select");
 const decadalControl = document.querySelector("#decadal-control");
 const yearControl = document.querySelector("#year-control");
 const monthControl = document.querySelector("#month-control");
+const dayControl = document.querySelector("#day-control");
+const hourControl = document.querySelector("#hour-control");
 const palaceOverviewOutput = document.querySelector("#palace-overview-output");
 const readingOutput = document.querySelector("#reading-output");
 const partnerOutput = document.querySelector("#partner-output");
+const combinedCheckOutput = document.querySelector("#combined-check-output");
 const chatLog = document.querySelector("#chat-log");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
@@ -1048,6 +1057,56 @@ function baziTwelveStageProfile(chart) {
   };
 }
 
+function baziAuxiliaryPalaceProfile(chart) {
+  const eightChar = chart.eightChar;
+  const records = [
+    { label: "胎元", value: eightChar?.getTaiYuan?.(), naYin: eightChar?.getTaiYuanNaYin?.(), meaning: "受孕與先天承接氣，補看家族資源及早期環境。" },
+    { label: "胎息", value: eightChar?.getTaiXi?.(), naYin: eightChar?.getTaiXiNaYin?.(), meaning: "補看內在生命節奏、潛在反應與身心底色。" },
+    { label: "命宮", value: eightChar?.getMingGong?.(), naYin: eightChar?.getMingGongNaYin?.(), meaning: "八字輔助命宮，用來補看人生承載與外在處境。" },
+    { label: "身宮", value: eightChar?.getShenGong?.(), naYin: eightChar?.getShenGongNaYin?.(), meaning: "八字輔助身宮，用來補看實際行動與後天投入位置。" },
+  ].map((record) => ({ ...record, value: toTraditional(record.value || "未取得"), naYin: toTraditional(record.naYin || "") }));
+  return {
+    records,
+    text: records.map((record) => `${record.label}${record.value}${record.naYin ? `（${record.naYin}）` : ""}：${record.meaning}`).join(" "),
+  };
+}
+
+function branchGroupValue(branch, values) {
+  const groups = [
+    { branches: ["申", "子", "辰"], value: values[0] },
+    { branches: ["寅", "午", "戌"], value: values[1] },
+    { branches: ["巳", "酉", "丑"], value: values[2] },
+    { branches: ["亥", "卯", "未"], value: values[3] },
+  ];
+  return groups.find((group) => group.branches.includes(branch))?.value || "";
+}
+
+function baziShenShaProfile(chart) {
+  const dayStem = splitPillar(chart.pillars[2]).stem;
+  const yearBranch = splitPillar(chart.pillars[0]).branch;
+  const dayBranch = splitPillar(chart.pillars[2]).branch;
+  const branches = chart.pillars.map((pillar) => splitPillar(pillar).branch);
+  const rules = [
+    { name: "天乙貴人", targets: { "甲": ["丑", "未"], "戊": ["丑", "未"], "庚": ["丑", "未"], "乙": ["子", "申"], "己": ["子", "申"], "丙": ["亥", "酉"], "丁": ["亥", "酉"], "壬": ["卯", "巳"], "癸": ["卯", "巳"], "辛": ["寅", "午"] }[dayStem] || [], meaning: "危難時較容易接上制度、長輩或專業協助。" },
+    { name: "文昌貴人", targets: [{ "甲": "巳", "乙": "午", "丙": "申", "丁": "酉", "戊": "申", "己": "酉", "庚": "亥", "辛": "子", "壬": "寅", "癸": "卯" }[dayStem]].filter(Boolean), meaning: "學習、文字、證照、表達與整理能力較容易被引動。" },
+    { name: "祿神", targets: [STEM_LU_BRANCH[dayStem]].filter(Boolean), meaning: "工作收入、自我立足與穩定資源的入口。" },
+    { name: "驛馬", targets: uniqueItems([branchGroupValue(yearBranch, ["寅", "申", "亥", "巳"]), branchGroupValue(dayBranch, ["寅", "申", "亥", "巳"])]), meaning: "移動、旅行、換環境、跨城市與行動帶來機會。" },
+    { name: "桃花", targets: uniqueItems([branchGroupValue(yearBranch, ["酉", "卯", "午", "子"]), branchGroupValue(dayBranch, ["酉", "卯", "午", "子"])]), meaning: "人際吸引力、審美、社交與感情入口。" },
+    { name: "華蓋", targets: uniqueItems([branchGroupValue(yearBranch, ["辰", "戌", "丑", "未"]), branchGroupValue(dayBranch, ["辰", "戌", "丑", "未"])]), meaning: "研究、精神性、藝術、獨處與專門技藝。" },
+    { name: "將星", targets: uniqueItems([branchGroupValue(yearBranch, ["子", "午", "酉", "卯"]), branchGroupValue(dayBranch, ["子", "午", "酉", "卯"])]), meaning: "組織、帶領、號召與在群體中承擔位置。" },
+  ];
+  const records = rules.map((rule) => {
+    const hits = branches.map((branch, index) => rule.targets.includes(branch) ? `${PILLAR_NAMES[index]}${branch}` : "").filter(Boolean);
+    return { ...rule, hits };
+  }).filter((record) => record.hits.length);
+  return {
+    records,
+    text: records.length
+      ? `${records.map((record) => `${record.name}落${record.hits.join("、")}，${record.meaning}`).join(" ")}神煞只作輔助定位，仍以月令格局、喜用與行運為主。`
+      : "常用輔助神煞未明顯入四柱，不代表吉凶不足；仍以月令格局、喜用與行運為主。",
+  };
+}
+
 function baziTenGodGroupSummary(chart) {
   const counts = tenGodCounts(chart);
   return BAZI_TEN_GOD_GROUPS.map((group) => ({
@@ -1391,6 +1450,106 @@ function renderBaziDecadalOptions(chart) {
   if ([...baziDecadalSelect.options].some((option) => option.value === previous)) {
     baziDecadalSelect.value = previous;
   }
+}
+
+function getBaziLuckTimeline(chart) {
+  try {
+    const yun = getBaziYun(chart);
+    const dayStem = splitPillar(chart.pillars?.[2]).stem;
+    return (yun?.getDaYun?.(10) || [])
+      .filter((cycle) => splitPillar(cycle?.getGanZhi?.() || "").stem)
+      .map((cycle) => {
+        const pillar = String(cycle.getGanZhi());
+        const years = (cycle.getLiuNian?.(10) || []).map((year) => {
+          const yearPillar = String(year.getGanZhi?.() || "");
+          return {
+            year: Number(year.getYear?.()),
+            age: Number(year.getAge?.()),
+            pillar: yearPillar,
+            god: getTenGod(dayStem, splitPillar(yearPillar).stem),
+            xunKong: toTraditional(year.getXunKong?.() || ""),
+            source: year,
+          };
+        });
+        return {
+          pillar,
+          god: getTenGod(dayStem, splitPillar(pillar).stem),
+          startAge: Number(cycle.getStartAge?.()),
+          endAge: Number(cycle.getEndAge?.()),
+          startYear: Number(cycle.getStartYear?.()),
+          endYear: Number(cycle.getEndYear?.()),
+          xunKong: toTraditional(cycle.getXunKong?.() || ""),
+          years,
+        };
+      });
+  } catch (error) {
+    return getBaziLuckCycles(chart).map((cycle) => ({ ...cycle, god: "", years: [] }));
+  }
+}
+
+function baziMonthsForYear(chart, year) {
+  const timeline = getBaziLuckTimeline(chart);
+  const yearRecord = timeline.flatMap((cycle) => cycle.years).find((record) => record.year === year);
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  if (yearRecord?.source?.getLiuYue) {
+    return yearRecord.source.getLiuYue().map((month) => {
+      const pillar = String(month.getGanZhi?.() || "");
+      return {
+        label: `${toTraditional(month.getMonthInChinese?.() || "")}月`,
+        pillar,
+        god: getTenGod(dayStem, splitPillar(pillar).stem),
+        xunKong: toTraditional(month.getXunKong?.() || ""),
+      };
+    });
+  }
+  return Array.from({ length: 12 }, (_, index) => {
+    const pillar = getBaziMonthPillar(year, index + 1);
+    return {
+      label: `${index + 1}月`,
+      pillar,
+      god: getTenGod(dayStem, splitPillar(pillar).stem),
+      xunKong: "",
+    };
+  });
+}
+
+function renderBaziLuckTable(chart) {
+  if (!baziLuckTableOutput) return;
+  const targetYear = getSafeNumber(baziTargetYearInput, new Date().getFullYear(), 1900, 2100);
+  const timeline = getBaziLuckTimeline(chart);
+  const cycleHtml = timeline.map((cycle) => {
+    const active = targetYear >= cycle.startYear && targetYear <= cycle.endYear;
+    return `
+      <details class="luck-cycle" ${active ? "open" : ""}>
+        <summary>
+          <strong>${escapeHtml(`${cycle.pillar} ${cycle.god || ""}`)}</strong>
+          <span>${escapeHtml(`${cycle.startAge}-${cycle.endAge}歲 · ${cycle.startYear}-${cycle.endYear}${cycle.xunKong ? ` · 旬空${cycle.xunKong}` : ""}`)}</span>
+        </summary>
+        <div class="luck-year-grid">
+          ${cycle.years.length ? cycle.years.map((year) => `
+            <div class="luck-time-item ${year.year === targetYear ? "is-current" : ""}">
+              <b>${escapeHtml(String(year.year))}</b>
+              <strong>${escapeHtml(`${year.pillar} ${year.god || ""}`)}</strong>
+              <small>${escapeHtml(`${year.age}歲${year.xunKong ? ` · 空${year.xunKong}` : ""}`)}</small>
+            </div>
+          `).join("") : `<p class="calibration-empty">此大運未取得逐年資料。</p>`}
+        </div>
+      </details>
+    `;
+  }).join("");
+  const monthHtml = baziMonthsForYear(chart, targetYear).map((month) => `
+    <div class="luck-time-item">
+      <b>${escapeHtml(month.label)}</b>
+      <strong>${escapeHtml(`${month.pillar} ${month.god || ""}`)}</strong>
+      <small>${escapeHtml(month.xunKong ? `旬空${month.xunKong}` : "節氣月")}</small>
+    </div>
+  `).join("");
+
+  baziLuckTableOutput.innerHTML = `
+    <div class="luck-cycle-list">${cycleHtml}</div>
+    <h3 class="calibration-heading">${escapeHtml(String(targetYear))} 流月</h3>
+    <div class="luck-month-grid">${monthHtml}</div>
+  `;
 }
 
 function getBaziYearPillar(year) {
@@ -1876,7 +2035,10 @@ function buildPeriodContext(chart) {
   const selectedDecadalIndex = getSafeNumber(decadalSelect, 0, 0, 11);
   const targetYear = getSafeNumber(targetYearInput, new Date().getFullYear(), 1900, 2100);
   const targetMonth = getSafeNumber(targetMonthInput, new Date().getMonth() + 1, 1, 12);
-  let targetDate = `${targetYear}-${String(targetMonth).padStart(2, "0")}-01`;
+  const maxDay = new Date(targetYear, targetMonth, 0).getDate();
+  const targetDay = getSafeNumber(targetDayInput, new Date().getDate(), 1, maxDay);
+  const targetHour = getSafeNumber(targetHourInput, new Date().getHours(), 0, 23);
+  let targetDate = `${targetYear}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")} ${String(targetHour).padStart(2, "0")}:00`;
   let horoscope = null;
   let periodIndex = null;
   let periodName = SCOPE_LABELS[scope];
@@ -1891,21 +2053,31 @@ function buildPeriodContext(chart) {
   }
 
   if (scope === "yearly") {
-    horoscope = getHoroscopeSafe(chart.astrolabe, `${targetYear}-01-01`);
+    horoscope = getHoroscopeSafe(chart.astrolabe, `${targetYear}-07-01 12:00`);
     periodIndex = horoscope?.yearly?.index ?? null;
     periodName = `${targetYear} ${SCOPE_LABELS[scope]}`;
   }
 
-  if (scope === "monthly") {
+  if (["age", "monthly", "daily", "hourly"].includes(scope)) {
     horoscope = getHoroscopeSafe(chart.astrolabe, targetDate);
-    periodIndex = horoscope?.monthly?.index ?? null;
-    periodName = `${targetYear}年${targetMonth}月 ${SCOPE_LABELS[scope]}`;
+    const period = horoscope?.[scope];
+    periodIndex = period?.index ?? null;
+    periodName = scope === "age"
+      ? `${targetYear} 小限（虛歲${period?.nominalAge || "未定"}）`
+      : scope === "monthly"
+        ? `${targetYear}年${targetMonth}月 流月`
+        : scope === "daily"
+          ? `${targetYear}年${targetMonth}月${targetDay}日 流日`
+          : `${targetYear}年${targetMonth}月${targetDay}日${targetHour}時 流時`;
   }
 
   return {
     scope,
     targetYear,
     targetMonth,
+    targetDay,
+    targetHour,
+    targetDate,
     horoscope,
     periodIndex,
     periodName,
@@ -1913,12 +2085,19 @@ function buildPeriodContext(chart) {
   };
 }
 
+function periodLayerKeys(scope) {
+  const layers = [];
+  if (["decadal", "age", "yearly", "monthly", "daily", "hourly"].includes(scope)) layers.push("decadal");
+  if (["age", "yearly", "monthly", "daily", "hourly"].includes(scope)) layers.push("yearly");
+  if (["monthly", "daily", "hourly"].includes(scope)) layers.push("monthly");
+  if (["daily", "hourly"].includes(scope)) layers.push("daily");
+  if (scope === "hourly") layers.push("hourly");
+  return layers;
+}
+
 function periodStarsAt(context, index) {
   if (!context.horoscope || !Number.isInteger(index)) return [];
-  const layers = [];
-  if (["decadal", "yearly", "monthly"].includes(context.scope)) layers.push("decadal");
-  if (["yearly", "monthly"].includes(context.scope)) layers.push("yearly");
-  if (context.scope === "monthly") layers.push("monthly");
+  const layers = periodLayerKeys(context.scope);
   return layers.flatMap((layer) => context.horoscope?.[layer]?.stars?.[index] || []);
 }
 
@@ -3721,6 +3900,8 @@ function renderBaziInsights(chart) {
   const usefulGod = baziUsefulGodProfile(chart);
   const hidden = profile.hiddenProfile;
   const stages = baziTwelveStageProfile(chart);
+  const auxiliary = baziAuxiliaryPalaceProfile(chart);
+  const shenSha = baziShenShaProfile(chart);
   const luck = baziLuckMeta(chart);
   const groups = baziTenGodGroupSummary(chart);
   const relations = baziRelationAnalysis(chart.pillars || []);
@@ -3759,6 +3940,16 @@ function renderBaziInsights(chart) {
         <span>十二長生與旬空</span>
         <strong>${escapeHtml(stages.records.map((record) => `${record.name}${record.stage}`).join(" · "))}</strong>
         <p>${escapeHtml(stages.text)}</p>
+      </article>
+      <article class="bazi-insight-card is-wide">
+        <span>胎元、胎息、命宮與身宮</span>
+        <strong>${escapeHtml(auxiliary.records.map((record) => `${record.label}${record.value}`).join(" · "))}</strong>
+        <p>${escapeHtml(auxiliary.text)}</p>
+      </article>
+      <article class="bazi-insight-card is-wide">
+        <span>輔助神煞</span>
+        <strong>${escapeHtml(shenSha.records.map((record) => record.name).join("、") || "未見集中")}</strong>
+        <p>${escapeHtml(shenSha.text)}</p>
       </article>
       <article class="bazi-insight-card bazi-ten-god-card">
         <span>十神配置</span>
@@ -3858,14 +4049,55 @@ function buildBaziReading(chart) {
   `;
 }
 
+function renderCombinedCheck(chart) {
+  if (!combinedCheckOutput || !chart) return;
+  const baziPeriod = buildBaziPeriodContext(chart);
+  const ziweiContext = buildPeriodContext(chart);
+  const profile = baziDayMasterProfile(chart);
+  const topicKeys = ["property", "career", "marriage", "children", "health"];
+  const direction = (score) => score >= 1 ? "support" : score <= -1 ? "pressure" : "mixed";
+  const cards = topicKeys.map((topicKey) => {
+    const topic = TOPIC_CONFIG[topicKey];
+    const bazi = baziTopicAnalysis(topicKey, chart, topic, baziPeriod);
+    const network = evaluateTopicNetwork(topicKey, chart, ziweiContext);
+    const baziScore = bazi.element.score + profile.score * 0.45;
+    const baziDirection = direction(baziScore);
+    const ziweiDirection = direction(network.score);
+    const aligned = baziDirection === ziweiDirection;
+    const status = aligned
+      ? baziDirection === "support" ? "雙盤同向有支撐" : baziDirection === "pressure" ? "雙盤同向需保守" : "雙盤皆屬混合訊號"
+      : "雙盤訊號分歧，需分層判讀";
+    const baziSignals = bazi.tags.slice(0, 4).join("、");
+    const ziweiSignals = [
+      `主宮${palaceListText(network.basePalaces, 4)}`,
+      network.supportStars.length ? `助力${network.supportStars.slice(0, 3).join("、")}` : "助力不集中",
+      network.pressureStars.length ? `壓力${network.pressureStars.slice(0, 3).join("、")}` : "煞忌不重",
+    ].join("；");
+    const note = aligned
+      ? "兩套系統方向一致時，可提高該主題的優先關注度，但仍不是事件保證。"
+      : "八字偏能量與時間節奏，紫微偏宮位與事件場景；分歧時應保留兩種條件，不強行合成吉凶。";
+    return `
+      <article class="combined-check-item" data-status="${baziDirection === ziweiDirection ? baziDirection : "split"}">
+        <header><strong>${escapeHtml(topic.label)}</strong><span>${escapeHtml(status)}</span></header>
+        <p><b>八字</b>${escapeHtml(baziSignals)}；${escapeHtml(baziPeriod.periodName)}</p>
+        <p><b>紫微</b>${escapeHtml(ziweiSignals)}；${escapeHtml(ziweiContext.periodName)}</p>
+        <small>${escapeHtml(note)}</small>
+      </article>
+    `;
+  }).join("");
+  combinedCheckOutput.innerHTML = `<div class="combined-check-grid">${cards}</div>`;
+}
+
 function updateBaziReading() {
   if (!currentChart) return;
   if (baziDecadalControl) baziDecadalControl.hidden = baziScopeSelect?.value !== "decadal";
   if (baziYearControl) baziYearControl.hidden = !["yearly", "monthly"].includes(baziScopeSelect?.value);
   if (baziMonthControl) baziMonthControl.hidden = baziScopeSelect?.value !== "monthly";
   if (baziReadingOutput) baziReadingOutput.innerHTML = buildBaziReading(currentChart);
+  renderBaziLuckTable(currentChart);
   renderBaziPartnerProfile(currentChart);
   renderBaziCalibration();
+  renderCombinedCheck(currentChart);
 }
 
 function buildBaziTimeCandidate(chart, hourOffset) {
@@ -4088,12 +4320,14 @@ function updateReading() {
   if (!currentChart) return;
   const context = buildPeriodContext(currentChart);
   decadalControl.hidden = scopeSelect.value !== "decadal";
-  yearControl.hidden = !["yearly", "monthly"].includes(scopeSelect.value);
-  monthControl.hidden = scopeSelect.value !== "monthly";
+  yearControl.hidden = !["age", "yearly", "monthly", "daily", "hourly"].includes(scopeSelect.value);
+  monthControl.hidden = !["monthly", "daily", "hourly"].includes(scopeSelect.value);
+  dayControl.hidden = !["daily", "hourly"].includes(scopeSelect.value);
+  hourControl.hidden = scopeSelect.value !== "hourly";
   if (palaceOverviewOutput) palaceOverviewOutput.innerHTML = renderPalaceOverview(currentChart.astrolabe);
   readingOutput.innerHTML = buildReading(currentChart);
   renderPartnerProfile(currentChart);
-  renderAstrolabe(currentChart.astrolabe, context.periodIndex);
+  renderAstrolabe(currentChart.astrolabe, context);
   renderZiweiImage(currentChart.astrolabe, context);
   updateBaziReading();
 }
@@ -4420,13 +4654,19 @@ function buildFourTransformationLayers(astrolabe, context = null) {
   const horoscope = context?.horoscope;
   const visiblePeriodLayers = {
     decadal: ["decadal"],
+    age: ["decadal", "yearly", "age"],
     yearly: ["decadal", "yearly"],
     monthly: ["decadal", "yearly", "monthly"],
+    daily: ["decadal", "yearly", "monthly", "daily"],
+    hourly: ["decadal", "yearly", "monthly", "daily", "hourly"],
   }[context?.scope] || [];
   const layerMeta = {
     decadal: { label: "大限", short: "限" },
+    age: { label: "小限", short: "小" },
     yearly: { label: "流年", short: "年" },
     monthly: { label: "流月", short: "月" },
+    daily: { label: "流日", short: "日" },
+    hourly: { label: "流時", short: "時" },
   };
 
   visiblePeriodLayers.forEach((key) => {
@@ -4536,8 +4776,11 @@ function fourTransformationFlightSvg(transformationLayers) {
   const dash = {
     natal: "",
     decadal: "14 8",
+    age: "10 6 2 6",
     yearly: "5 7",
     monthly: "16 6 4 6",
+    daily: "4 5",
+    hourly: "2 4",
   }[activeLayer.key] || "";
 
   return activeLayer.transformations.map((item, index) => {
@@ -4590,21 +4833,23 @@ function fourTransformationPanelSvg(transformationLayers, x, y) {
   if (!transformationLayers.length) {
     return `<text x="${x}" y="${y + 24}" fill="#66716c" font-size="17" font-weight="760">目前未取得四化飛星資料</text>`;
   }
+  const rowHeight = transformationLayers.length > 4 ? 48 : 62;
   return transformationLayers.map((layer, rowIndex) => {
-    const rowY = y + rowIndex * 62;
+    const rowY = y + rowIndex * rowHeight;
+    const boxHeight = rowHeight - 10;
     const sourcePalaceKey = layer.sourcePalace ? palaceKey(layer.sourcePalace.name) : "";
     const sourceLabel = `${layer.short}${layer.stem}${sourcePalaceKey}`;
     return `
-      <rect x="${x}" y="${rowY}" width="584" height="52" rx="4" fill="#ffffff" stroke="#cbd5e6" />
-      <text x="${x + 10}" y="${rowY + 31}" fill="#343840" font-size="15" font-weight="950">${svgEscape(sourceLabel)}</text>
+      <rect x="${x}" y="${rowY}" width="584" height="${rowHeight - 6}" rx="4" fill="#ffffff" stroke="#cbd5e6" />
+      <text x="${x + 10}" y="${rowY + rowHeight / 2 + 5}" fill="#343840" font-size="${rowHeight < 60 ? 13 : 15}" font-weight="950">${svgEscape(sourceLabel)}</text>
       ${layer.transformations.map((item, index) => {
         const meta = FOUR_TRANSFORMATION_META[item.mutagen];
         const boxX = x + 76 + index * 126;
         const targetName = item.targetPalace ? palaceKey(item.targetPalace.name) : "未定";
         const label = `${item.mutagen}${item.star}→${targetName}${item.isSelf ? "自" : ""}`;
         return `
-          <rect x="${boxX}" y="${rowY + 7}" width="118" height="38" rx="4" fill="#fdfefe" stroke="${meta.color}" stroke-width="1.6" />
-          <text x="${boxX + 59}" y="${rowY + 31}" fill="${meta.color}" font-size="13" font-weight="900" text-anchor="middle">${svgEscape(label)}</text>
+          <rect x="${boxX}" y="${rowY + 4}" width="118" height="${boxHeight}" rx="4" fill="#fdfefe" stroke="${meta.color}" stroke-width="1.6" />
+          <text x="${boxX + 59}" y="${rowY + rowHeight / 2 + 5}" fill="${meta.color}" font-size="${rowHeight < 60 ? 12 : 13}" font-weight="900" text-anchor="middle">${svgEscape(label)}</text>
         `;
       }).join("")}
     `;
@@ -4677,7 +4922,7 @@ function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null
 function centerModeNote(imageType) {
   if (imageType === "flying") return "飛星圖以各宮宮干起飛，顯示祿、權、科、忌分別飛入的目標宮位。";
   if (imageType === "sanhe") return "三合圖顯示各宮位的三合、對宮與三方四正，用來看事件互相牽動的結構。";
-  if (imageType === "sihua") return "四化飛星圖分層顯示本命、大限、流年與流月；圖上四色箭頭呈現目前層級的祿、權、科、忌飛向。";
+  if (imageType === "sihua") return "四化飛星圖分層顯示本命、大限、小限、流年、流月、流日與流時；四色箭頭呈現目前最細層級的祿、權、科、忌飛向。";
   return "飛星、三合、四化圖皆保留命宮、身宮、來因宮與流運標記。";
 }
 
@@ -4762,7 +5007,23 @@ function renderZiweiImage(astrolabe, context = null) {
   `;
 }
 
-function renderPalace(palace, periodIndex = null, causeIndex = null) {
+function renderPeriodStarGroups(context, palaceIndex) {
+  if (!context?.horoscope) return "";
+  const labels = { decadal: "大限", yearly: "流年", monthly: "流月", daily: "流日", hourly: "流時" };
+  return periodLayerKeys(context.scope).map((key) => {
+    const stars = context.horoscope?.[key]?.stars?.[palaceIndex] || [];
+    if (!stars.length) return "";
+    return `
+      <div class="flow-star-group">
+        <b>${labels[key]}</b>
+        ${renderStarChips(stars, "flow", 8)}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderPalace(palace, context = null, causeIndex = null) {
+  const periodIndex = context?.periodIndex ?? null;
   const position = BRANCH_GRID[palace.earthlyBranch] || [1, 1];
   const isLifePalace = palaceKey(palace.name) === "命";
   const classes = [
@@ -4778,6 +5039,7 @@ function renderPalace(palace, periodIndex = null, causeIndex = null) {
   const minor = renderStarChips(palace.minorStars, "minor", 99);
   const adjective = renderStarChips(palace.adjectiveStars, "", 99);
   const auxiliary = renderAuxiliaryChips(palace);
+  const periodStars = renderPeriodStarGroups(context, palace.index);
   const empty = !major && !minor && !adjective && !auxiliary ? `<span class="muted">空宮</span>` : "";
   const stage = palace.decadal?.range ? `${palace.decadal.range[0]}-${palace.decadal.range[1]}` : "";
   const markers = [
@@ -4804,6 +5066,7 @@ function renderPalace(palace, periodIndex = null, causeIndex = null) {
         ${minor}
         ${adjective}
         ${auxiliary}
+        ${periodStars}
         ${empty}
       </div>
       <footer class="palace-foot">
@@ -4814,11 +5077,11 @@ function renderPalace(palace, periodIndex = null, causeIndex = null) {
   `;
 }
 
-function renderAstrolabe(astrolabe, periodIndex = null) {
+function renderAstrolabe(astrolabe, context = null) {
   const causeIndex = getCausePalace(astrolabe)?.index ?? null;
   astrolabeGrid.innerHTML = [
     renderCenterPlate(astrolabe),
-    ...astrolabe.palaces.map((palace) => renderPalace(palace, periodIndex, causeIndex)),
+    ...astrolabe.palaces.map((palace) => renderPalace(palace, context, causeIndex)),
   ].join("");
 }
 
@@ -4896,6 +5159,8 @@ function calculate() {
 
   if (!targetYearInput.value) targetYearInput.value = String(new Date().getFullYear());
   if (!targetMonthInput.value) targetMonthInput.value = String(new Date().getMonth() + 1);
+  if (!targetDayInput.value) targetDayInput.value = String(new Date().getDate());
+  if (!targetHourInput.value) targetHourInput.value = String(new Date().getHours());
   if (baziTargetYearInput && !baziTargetYearInput.value) {
     baziTargetYearInput.value = String(new Date().getFullYear());
   }
@@ -4945,6 +5210,8 @@ form.querySelectorAll('input[name="gender"]').forEach((input) => {
   decadalSelect,
   targetYearInput,
   targetMonthInput,
+  targetDayInput,
+  targetHourInput,
   topicSelect,
 ].forEach((control) => {
   control.addEventListener("change", updateReading);

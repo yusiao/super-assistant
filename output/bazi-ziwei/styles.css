@@ -708,13 +708,96 @@ button {
   margin-top: 20px;
 }
 
+.bazi-luck-section {
+  margin-top: 20px;
+}
+
+.bazi-luck-table-output,
+.luck-cycle-list {
+  display: grid;
+  gap: 8px;
+}
+
+.luck-cycle {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.luck-cycle summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.luck-cycle summary strong {
+  color: var(--jade);
+}
+
+.luck-cycle summary span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.luck-year-grid,
+.luck-month-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.luck-year-grid {
+  border-top: 1px solid var(--line);
+  padding: 10px;
+}
+
+.luck-time-item {
+  min-width: 0;
+  border: 1px solid #e7dfd1;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fff;
+}
+
+.luck-time-item b,
+.luck-time-item strong,
+.luck-time-item small {
+  display: block;
+}
+
+.luck-time-item b {
+  color: var(--vermillion);
+  font-size: 0.74rem;
+}
+
+.luck-time-item strong {
+  margin-top: 3px;
+  color: var(--charcoal);
+  font-size: 0.8rem;
+}
+
+.luck-time-item small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.luck-time-item.is-current {
+  border-color: rgba(24, 107, 90, 0.55);
+  background: #f2f9f5;
+}
+
 .bazi-partner-section {
   margin-top: 20px;
 }
 
 .reading-controls {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -725,6 +808,78 @@ button {
 
 .bazi-calibration-section {
   margin-top: 20px;
+}
+
+.combined-check-panel {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.combined-check-panel > summary {
+  width: fit-content;
+  color: var(--jade);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.combined-check-output {
+  margin-top: 12px;
+}
+
+.combined-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.combined-check-item {
+  border: 1px solid var(--line);
+  border-left: 4px solid #8b9490;
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface);
+}
+
+.combined-check-item[data-status="support"] {
+  border-left-color: var(--jade);
+}
+
+.combined-check-item[data-status="pressure"] {
+  border-left-color: var(--vermillion);
+}
+
+.combined-check-item[data-status="split"] {
+  border-left-color: #b98731;
+}
+
+.combined-check-item header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.combined-check-item header span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.combined-check-item p,
+.combined-check-item small {
+  display: block;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.combined-check-item p b {
+  margin-right: 6px;
+  color: var(--charcoal);
 }
 
 .calibration-controls {
@@ -1953,6 +2108,28 @@ button {
   color: var(--jade);
 }
 
+.flow-star-group {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: start;
+  gap: 5px;
+  margin-top: 5px;
+  border-top: 1px dashed #d8d1c5;
+  padding-top: 5px;
+}
+
+.flow-star-group > b {
+  color: var(--muted);
+  font-size: 0.66rem;
+  line-height: 1.6;
+}
+
+.star-chip.flow {
+  border: 1px solid rgba(185, 135, 49, 0.26);
+  background: #fff8e8;
+  color: #8b641f;
+}
+
 .aux-chip {
   position: relative;
   display: inline-flex;
@@ -2032,8 +2209,20 @@ button {
   .partner-grid,
   .ziwei-image-card,
   .time-correction-grid,
-  .calibration-controls {
+  .calibration-controls,
+  .luck-year-grid,
+  .luck-month-grid,
+  .combined-check-grid {
     grid-template-columns: 1fr;
+  }
+
+  .luck-cycle summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .luck-cycle summary span {
+    text-align: left;
   }
 
   .bazi-ten-god-card {
