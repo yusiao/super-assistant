@@ -1037,7 +1037,8 @@ function baziUsefulGodProfile(chart) {
     secondary,
     regulating,
     bridge,
-    text: `扶抑用神先取${primary || "五行流通"}${secondary ? `，次取${secondary}` : ""}，用來調整日主${profile.strength}；${profile.season}季調候重點為${regulating}，用來處理寒暖燥濕。${bridge ? `命局較強的${first}、${second}之間有制約，通關可考慮${bridge}。` : "主要五行未形成明顯兩強相戰，通關以整體流通為先。"}喜用神是命理取向，不等同現實中只能使用某種顏色、職業或方位。`,
+    avoid: profile.caution,
+    text: `扶抑用神先取${primary || "五行流通"}${secondary ? `，次取${secondary}` : ""}，用來調整日主${profile.strength}；忌神或需節制的五行為${profile.caution.length ? profile.caution.join("、") : "不宜單點定忌，重在流通"}。${profile.season}季調候重點為${regulating}，用來處理寒暖燥濕。${bridge ? `命局較強的${first}、${second}之間有制約，通關可考慮${bridge}。` : "主要五行未形成明顯兩強相戰，通關以整體流通為先。"}喜用神是命理取向，不等同現實中只能使用某種顏色、職業或方位。`,
   };
 }
 
@@ -1105,6 +1106,217 @@ function baziShenShaProfile(chart) {
       ? `${records.map((record) => `${record.name}落${record.hits.join("、")}，${record.meaning}`).join(" ")}神煞只作輔助定位，仍以月令格局、喜用與行運為主。`
       : "常用輔助神煞未明顯入四柱，不代表吉凶不足；仍以月令格局、喜用與行運為主。",
   };
+}
+
+function clampScore(value) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function baziPillarMatrix(chart) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const shenSha = baziShenShaProfile(chart).records;
+  return (chart.pillars || []).map((pillar, index) => {
+    const { stem, branch } = splitPillar(pillar);
+    const hidden = hiddenStemRecords(dayStem, branch);
+    const pillarName = PILLAR_NAMES[index];
+    const shenShaNames = shenSha
+      .filter((record) => record.hits.some((hit) => hit.startsWith(pillarName)))
+      .map((record) => record.name);
+    return {
+      pillarName,
+      pillar,
+      stem,
+      stemGod: index === 2 ? "日主" : getTenGod(dayStem, stem),
+      branch,
+      hidden,
+      shenSha: uniqueItems(shenShaNames),
+    };
+  });
+}
+
+function baziShenShaCombinations(chart) {
+  const matrix = baziPillarMatrix(chart);
+  const comboRules = [
+    { names: ["桃花", "驛馬"], text: "桃花與驛馬同柱，感情、人際或曝光常被移動、外地、旅行、換環境引動。" },
+    { names: ["桃花", "將星"], text: "桃花與將星同柱，容易在人群中有存在感，吸引力帶主導感，但關係中也要避免太強勢。" },
+    { names: ["天乙貴人", "文昌貴人"], text: "天乙與文昌同柱，學習、考證、文書、專業表達較容易接到貴人或制度支援。" },
+    { names: ["祿神", "將星"], text: "祿神與將星同柱，收入、自我定位與承擔責任有連動，適合把專業位置做穩。" },
+    { names: ["祿神", "驛馬"], text: "祿神與驛馬同柱，奔波、跨域、外地或工作移動有機會帶財。" },
+    { names: ["華蓋", "文昌貴人"], text: "華蓋與文昌同柱，研究、藝術、身心靈、技術專精或小眾知識能形成辨識度。" },
+    { names: ["天乙貴人", "祿神"], text: "天乙與祿神同柱，資源入口常帶有長輩、制度、專業人士或關鍵介紹人的影子。" },
+  ];
+  const combos = matrix.flatMap((record) => comboRules
+    .filter((rule) => rule.names.every((name) => record.shenSha.includes(name)))
+    .map((rule) => ({
+      pillarName: record.pillarName,
+      pillar: record.pillar,
+      names: rule.names,
+      text: `${record.pillarName}${record.pillar}：${rule.text}`,
+    })));
+  const keySignals = baziShenShaProfile(chart).records
+    .map((record) => `${record.name}(${record.hits.join("、")})`)
+    .slice(0, 6);
+  return {
+    combos,
+    keySignals,
+    text: combos.length
+      ? combos.map((combo) => combo.text).join(" ")
+      : "關鍵神煞未見明顯兩顆以上同柱組合，神煞以單點輔助訊號看，不宜越過格局、喜用與行運直接斷吉凶。",
+  };
+}
+
+function baziTenGodPower(chart) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const power = Object.fromEntries(["比肩", "劫財", "食神", "傷官", "偏財", "正財", "七殺", "正官", "偏印", "正印"].map((god) => [god, 0]));
+  const records = [];
+  const stemWeights = [1, 1.15, 0, 0.95];
+  const branchWeights = [0.9, 1.35, 1.05, 0.9];
+  (chart.pillars || []).forEach((pillar, index) => {
+    const { stem, branch } = splitPillar(pillar);
+    const stemGod = index === 2 ? "" : getTenGod(dayStem, stem);
+    if (stemGod && power[stemGod] !== undefined) {
+      power[stemGod] += stemWeights[index] || 1;
+      records.push({ pillar: PILLAR_NAMES[index], source: "天干", stem, god: stemGod, weight: stemWeights[index] || 1 });
+    }
+    hiddenStemRecords(dayStem, branch).forEach((item) => {
+      if (!item.god || power[item.god] === undefined) return;
+      const weight = item.weight * (branchWeights[index] || 1);
+      power[item.god] += weight;
+      records.push({ pillar: PILLAR_NAMES[index], source: `${item.role}藏干`, stem: item.stem, god: item.god, weight });
+    });
+  });
+  const total = Object.values(power).reduce((sum, value) => sum + value, 0) || 1;
+  const ratios = Object.fromEntries(Object.entries(power).map(([god, value]) => [god, value / total]));
+  const ranked = Object.entries(ratios).sort((first, second) => second[1] - first[1]);
+  return { power, ratios, ranked, total, records };
+}
+
+function percentText(value) {
+  return `${Math.round((value || 0) * 100)}%`;
+}
+
+function baziLuckYearSignal(chart, year) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const pillar = getBaziYearPillar(year);
+  const { stem, branch } = splitPillar(pillar);
+  const gods = [getTenGod(dayStem, stem), ...getHiddenStemGods(dayStem, branch).map((item) => item.god)].filter(Boolean);
+  const interactions = baziPairInteractions(chart.pillars?.[2] || "", pillar);
+  const relation = baziRelationAnalysis([...(chart.pillars || []), pillar]);
+  const labels = [];
+  if (gods.some((god) => ["正財", "偏財"].includes(god))) labels.push("財務與資源");
+  if (gods.some((god) => ["食神", "傷官"].includes(god))) labels.push("作品輸出");
+  if (gods.some((god) => ["正官", "七殺"].includes(god))) labels.push("職位責任");
+  if (gods.some((god) => ["正印", "偏印"].includes(god))) labels.push("學習修復");
+  if (gods.some((god) => ["比肩", "劫財"].includes(god))) labels.push("合作競爭");
+  const caution = interactions.filter((item) => /沖|刑|害|破/.test(item));
+  const action = labels.includes("財務與資源") || labels.includes("作品輸出")
+    ? "適合把技能、合作與現金流做成成果"
+    : labels.includes("職位責任")
+      ? "適合承接考核、職務、證照與制度型目標"
+      : labels.includes("學習修復")
+        ? "適合進修、整理身心與打底"
+        : "適合調整人際邊界與合作模式";
+  return {
+    year,
+    pillar,
+    gods: uniqueItems(gods),
+    labels: uniqueItems(labels),
+    interactions,
+    relation,
+    caution,
+    action: `${action}${caution.length ? `；但${caution.join("、")}要放慢決策、先控風險` : ""}`,
+  };
+}
+
+function baziDecisionTimingProfile(chart) {
+  const targetYear = getSafeNumber(baziTargetYearInput, new Date().getFullYear(), 1900, 2100);
+  const period = buildBaziPeriodContext(chart);
+  const currentCycle = baziLuckCycleForYear(chart, targetYear);
+  const years = Array.from({ length: 6 }, (_, index) => baziLuckYearSignal(chart, targetYear + index));
+  const wealthYears = years.filter((year) => year.labels.includes("財務與資源") || year.labels.includes("作品輸出")).slice(0, 2);
+  const careerYears = years.filter((year) => year.labels.includes("職位責任") || year.labels.includes("學習修復")).slice(0, 2);
+  const cautionYears = years.filter((year) => year.caution.length).slice(0, 2);
+  return {
+    targetYear,
+    period,
+    currentCycle,
+    years,
+    text: [
+      `目前參照${period.periodName}${currentCycle?.pillar ? `，所在大運為${currentCycle.pillar}` : ""}。`,
+      wealthYears.length ? `財富與行動窗口可優先看${wealthYears.map((year) => `${year.year}${year.pillar}`).join("、")}。` : "近年財務訊號不是直接強攻型，宜先整理基本盤與技能定價。",
+      careerYears.length ? `事業與學習窗口可優先看${careerYears.map((year) => `${year.year}${year.pillar}`).join("、")}。` : "近年職位與學習訊號不算集中，適合先以作品、合作與累積為主。",
+      cautionYears.length ? `需保守的年份：${cautionYears.map((year) => `${year.year}${year.caution.join("、")}`).join("；")}。` : "近六年與日支未見強烈沖刑害破，決策可更多看資源成熟度。",
+    ].join(" "),
+  };
+}
+
+function baziContextProfile(chart) {
+  const profile = baziDayMasterProfile(chart);
+  const useful = baziUsefulGodProfile(chart);
+  const structure = baziStructureProfile(chart);
+  const tenGod = baziTenGodPower(chart);
+  const hidden = profile.hiddenProfile;
+  const shenSha = baziShenShaProfile(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const leadingGods = tenGod.ranked.slice(0, 3).map(([god, ratio]) => `${god}${percentText(ratio)}`);
+  const nobleSignals = shenSha.records.filter((record) => ["天乙貴人", "文昌貴人", "祿神", "將星"].includes(record.name));
+  return {
+    timing: `天時：生於${profile.season}季${profile.monthBranch}月，月令主氣為${profile.monthMainStem || profile.monthElement}，立${structure.name}。調候先看${useful.regulating}，目前日主${profile.strength}，適合在${profile.favorable.join("、") || "五行流通"}到位時推進。`,
+    people: `人和：十神占比前三為${leadingGods.join("、") || "未取得"}。${nobleSignals.length ? `關鍵助力見${nobleSignals.map((record) => record.name).join("、")}，較容易靠專業、制度或介紹人接上資源。` : "貴人與名聲型神煞不集中，合作要靠明確權責與長期信任累積。"}`,
+    place: `地利：${hidden.roots.length ? `日主通根於${hidden.roots.join("、")}` : "日主同氣根較少"}；${relations.supports.length ? `地支流通見${relations.supports.join("、")}` : "地支合會不集中"}。地利重點在把可用資源落到居住、資產、專業平台與穩定作息。`,
+  };
+}
+
+function baziCoreScores(chart) {
+  const profile = baziDayMasterProfile(chart);
+  const structure = baziStructureProfile(chart);
+  const tenGod = baziTenGodPower(chart);
+  const shenSha = baziShenShaProfile(chart);
+  const shenCombos = baziShenShaCombinations(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const peachSignals = baziPeachBlossomSignals(chart);
+  const relationship = baziRelationshipSignal(chart);
+  const ratio = (gods) => gods.reduce((sum, god) => sum + (tenGod.ratios[god] || 0), 0);
+  const hasShen = (name) => shenSha.records.some((record) => record.name === name);
+  const hasTension = relations.tensions.length > 0;
+  const stableRelation = ratio(["正官", "正財", "正印"]) * 100;
+  const love = clampScore(38 + peachSignals.length * 12 + ratio(["正官", "七殺", "正財", "偏財"]) * 70 + ratio(["食神", "傷官"]) * 24 + (shenCombos.combos.some((combo) => combo.names.includes("桃花")) ? 8 : 0));
+  const stability = clampScore(42 + stableRelation * 0.42 + ratio(["偏印", "偏財"]) * 16 + (hasTension ? -12 : 8) + (profile.strength === "中和" ? 10 : 2));
+  const wealth = clampScore(36 + ratio(["正財", "偏財"]) * 82 + ratio(["食神", "傷官"]) * 34 + ((profile.power["土"] || 0) / Object.values(profile.power).reduce((sum, value) => sum + value, 0)) * 28 - ratio(["比肩", "劫財"]) * 26);
+  const career = clampScore(38 + ratio(["正官", "七殺"]) * 78 + ratio(["正印", "偏印"]) * 30 + (structure.supports.length * 5) - (structure.pressures.length * 9) + (hasShen("將星") ? 7 : 0));
+  const learning = clampScore(40 + ratio(["正印", "偏印"]) * 82 + ratio(["食神", "傷官"]) * 18 + (hasShen("文昌貴人") ? 12 : 0) + (hasShen("華蓋") ? 7 : 0) + (hasShen("天乙貴人") ? 5 : 0));
+  return [
+    {
+      key: "love",
+      label: "戀愛吸引訊號",
+      score: love,
+      text: `桃花${peachSignals.length}處，關係星占比${percentText(ratio(["正官", "七殺", "正財", "偏財"]))}，食傷表達占比${percentText(ratio(["食神", "傷官"]))}。`,
+    },
+    {
+      key: "stability",
+      label: "長期關係穩定訊號",
+      score: stability,
+      text: `正官、正財、正印合計${percentText(ratio(["正官", "正財", "正印"]))}，${hasTension ? `原局見${relations.tensions.slice(0, 3).join("、")}需磨合` : "原局沖刑害破壓力不重"}。`,
+    },
+    {
+      key: "wealth",
+      label: "財富承載力",
+      score: wealth,
+      text: `財星占比${percentText(ratio(["正財", "偏財"]))}，食傷生財占比${percentText(ratio(["食神", "傷官"]))}，比劫分財占比${percentText(ratio(["比肩", "劫財"]))}。`,
+    },
+    {
+      key: "career",
+      label: "事業結構力",
+      score: career,
+      text: `官殺占比${percentText(ratio(["正官", "七殺"]))}，印星占比${percentText(ratio(["正印", "偏印"]))}，格局為${structure.name}。`,
+    },
+    {
+      key: "learning",
+      label: "學習結構力",
+      score: learning,
+      text: `印星占比${percentText(ratio(["正印", "偏印"]))}，文昌/華蓋/天乙作為學習與專業支援。`,
+    },
+  ];
 }
 
 function baziTenGodGroupSummary(chart) {
@@ -2513,6 +2725,291 @@ function ziweiTopicAnalysis(topicKey, chart, context, network) {
   ].filter(Boolean).join(" ");
 }
 
+function mutagenScore(mutagen) {
+  return {
+    "祿": 1.4,
+    "權": 0.55,
+    "科": 1,
+    "忌": -1.45,
+  }[toTraditional(mutagen)] || 0;
+}
+
+function formatFlyingRecord(record, options = {}) {
+  const { includeSource = true, includeLayer = false } = options;
+  const sourceName = record.sourcePalace
+    ? normalizePalaceName(record.sourcePalace.name)
+    : (record.sourceLabel || (record.layerLabel ? `${record.layerLabel}${record.stem || ""}` : "年干"));
+  const targetName = record.targetPalace ? normalizePalaceName(record.targetPalace.name) : "未落宮";
+  const sourceText = includeSource ? `${sourceName}${record.sourcePalace ? `${record.stem || ""}干` : ""}` : "";
+  const layerText = includeLayer && record.layerLabel && record.sourcePalace ? `${record.layerLabel}` : "";
+  const selfText = record.isSelf ? "，形成自化" : "";
+  return `${layerText}${sourceText}化${toTraditional(record.mutagen)}${record.star}飛入${targetName}${selfText}`;
+}
+
+function summarizeFlyingRecords(records, fallback, limit = 4, options = {}) {
+  const lines = uniqueItems((records || [])
+    .filter((record) => record?.targetPalace)
+    .map((record) => formatFlyingRecord(record, options)));
+  return lines.length ? lines.slice(0, limit).join("；") : fallback;
+}
+
+function createFourTransformationLayer(astrolabe, { key, label, short, stem, sourceIndex = null }) {
+  const normalizedStem = toTraditional(stem || "");
+  const table = FLYING_MUTAGEN_TABLE[normalizedStem];
+  if (!table) return null;
+  const sourcePalace = Number.isInteger(sourceIndex) ? astrolabe.palaces[sourceIndex] : null;
+  const transformations = Object.entries(table).map(([mutagen, star]) => {
+    const targetPalace = findPalaceByStarName(astrolabe, star);
+    return {
+      mutagen,
+      star,
+      targetPalace,
+      isSelf: Boolean(sourcePalace && targetPalace && sourcePalace.index === targetPalace.index),
+    };
+  });
+  return {
+    key,
+    label,
+    short,
+    stem: normalizedStem,
+    sourcePalace,
+    transformations,
+  };
+}
+
+function layerFlyingRecords(layer) {
+  if (!layer) return [];
+  return layer.transformations.map((item) => ({
+    ...item,
+    layerKey: layer.key,
+    layerLabel: layer.label,
+    short: layer.short,
+    stem: layer.stem,
+    sourcePalace: layer.sourcePalace,
+    sourceLabel: fourTransformationSourceText(layer),
+  }));
+}
+
+function palaceStemTransformations(astrolabe, sourcePalace) {
+  const layer = createFourTransformationLayer(astrolabe, {
+    key: `palace-${sourcePalace.index}`,
+    label: normalizePalaceName(sourcePalace.name),
+    short: normalizePalaceName(sourcePalace.name).slice(0, 1),
+    stem: sourcePalace.heavenlyStem,
+    sourceIndex: sourcePalace.index,
+  });
+  return layerFlyingRecords(layer).map((record) => ({ ...record, sourceType: "palace-stem" }));
+}
+
+function allPalaceStemTransformations(astrolabe) {
+  return astrolabe.palaces.flatMap((palace) => palaceStemTransformations(astrolabe, palace));
+}
+
+function buildReferenceFlowTransformationLayers(astrolabe, context = null) {
+  const year = context?.targetYear || new Date().getFullYear();
+  const month = context?.targetMonth || new Date().getMonth() + 1;
+  const day = Math.min(context?.targetDay || 15, new Date(year, month, 0).getDate());
+  const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")} 12:00`;
+  const horoscope = getHoroscopeSafe(astrolabe, date) || context?.horoscope;
+  const metas = [
+    { key: "yearly", label: "流年", short: "年" },
+    { key: "monthly", label: "流月", short: "月" },
+  ];
+  return metas
+    .map((meta) => {
+      const period = horoscope?.[meta.key];
+      if (!period) return null;
+      return createFourTransformationLayer(astrolabe, {
+        ...meta,
+        stem: period.heavenlyStem,
+        sourceIndex: period.index,
+      });
+    })
+    .filter(Boolean);
+}
+
+function focusLayerRecords(layer, focusIndexes) {
+  return layerFlyingRecords(layer).filter((record) => (
+    record.targetPalace && focusIndexes.has(record.targetPalace.index)
+  ) || (
+    record.sourcePalace && focusIndexes.has(record.sourcePalace.index)
+  ));
+}
+
+function findSelfTransformations(records, focusIndexes) {
+  return records.filter((record) => record.isSelf && focusIndexes.has(record.sourcePalace?.index));
+}
+
+function findMutualTransformations(records, focusIndexes) {
+  const pairs = [];
+  const seen = new Set();
+  records.forEach((first) => {
+    if (!first.sourcePalace || !first.targetPalace || first.sourcePalace.index === first.targetPalace.index) return;
+    if (!focusIndexes.has(first.sourcePalace.index) && !focusIndexes.has(first.targetPalace.index)) return;
+    records.forEach((second) => {
+      if (!second.sourcePalace || !second.targetPalace) return;
+      const isReverse = first.sourcePalace.index === second.targetPalace.index
+        && first.targetPalace.index === second.sourcePalace.index;
+      if (!isReverse) return;
+      const key = [first.sourcePalace.index, first.targetPalace.index].sort((a, b) => a - b).join("-");
+      if (seen.has(key)) return;
+      seen.add(key);
+      pairs.push({ first, second });
+    });
+  });
+  return pairs;
+}
+
+function formatMutualTransformation(pair) {
+  const a = pair.first;
+  const b = pair.second;
+  return `${normalizePalaceName(a.sourcePalace.name)}與${normalizePalaceName(a.targetPalace.name)}互飛：${a.sourcePalace.heavenlyStem}干化${a.mutagen}${a.star}去${normalizePalaceName(a.targetPalace.name)}，${b.sourcePalace.heavenlyStem}干化${b.mutagen}${b.star}回${normalizePalaceName(b.targetPalace.name)}`;
+}
+
+function findTransformationLoops(records, focusIndexes, maxDepth = 4) {
+  const edges = records.filter((record) => record.sourcePalace && record.targetPalace && record.sourcePalace.index !== record.targetPalace.index);
+  const bySource = new Map();
+  edges.forEach((edge) => {
+    const key = edge.sourcePalace.index;
+    if (!bySource.has(key)) bySource.set(key, []);
+    bySource.get(key).push(edge);
+  });
+  const loops = [];
+  const seen = new Set();
+
+  const canonicalKey = (cycle) => {
+    const indexes = cycle.map((edge) => edge.sourcePalace.index);
+    const rotations = indexes.map((_, index) => [...indexes.slice(index), ...indexes.slice(0, index)].join("-"));
+    return rotations.sort()[0];
+  };
+
+  const walk = (startIndex, currentIndex, path, used) => {
+    const nextEdges = bySource.get(currentIndex) || [];
+    nextEdges.forEach((edge) => {
+      const nextIndex = edge.targetPalace.index;
+      if (nextIndex === startIndex && path.length >= 2) {
+        const cycle = [...path, edge];
+        const key = canonicalKey(cycle);
+        if (!seen.has(key) && cycle.some((item) => focusIndexes.has(item.sourcePalace.index) || focusIndexes.has(item.targetPalace.index))) {
+          seen.add(key);
+          loops.push(cycle);
+        }
+        return;
+      }
+      if (path.length >= maxDepth || used.has(nextIndex)) return;
+      walk(startIndex, nextIndex, [...path, edge], new Set([...used, nextIndex]));
+    });
+  };
+
+  [...focusIndexes].forEach((startIndex) => {
+    walk(startIndex, startIndex, [], new Set([startIndex]));
+  });
+
+  return loops.slice(0, 5);
+}
+
+function formatTransformationLoop(cycle) {
+  const names = [cycle[0].sourcePalace, ...cycle.map((edge) => edge.targetPalace)]
+    .map((palace) => normalizePalaceName(palace.name));
+  const mutagens = cycle.map((edge) => `化${edge.mutagen}`).join("、");
+  return `${names.join("→")}（${mutagens}）`;
+}
+
+function ziweiFlyingAnalysis(topicKey, chart, context, network) {
+  const astrolabe = chart.astrolabe;
+  const basePalaces = network.basePalaces || resolveTopicPalaces(topicKey, chart);
+  const squarePalaces = basePalaces.flatMap((palace) => sanfangSizhengPalaces(astrolabe, palace));
+  const causePalace = getCausePalace(astrolabe);
+  const bodyPalace = getBodyPalace(astrolabe);
+  const focusPalaces = uniquePalaces([
+    ...basePalaces,
+    ...squarePalaces,
+    causePalace,
+    bodyPalace,
+    context?.periodPalace,
+  ]);
+  const baseIndexes = new Set(basePalaces.map((palace) => palace.index));
+  const focusIndexes = new Set(focusPalaces.map((palace) => palace.index));
+  const palaceRecords = allPalaceStemTransformations(astrolabe);
+  const incoming = palaceRecords.filter((record) => record.targetPalace && baseIndexes.has(record.targetPalace.index));
+  const outgoing = palaceRecords.filter((record) => record.sourcePalace && baseIndexes.has(record.sourcePalace.index));
+  const selfRecords = findSelfTransformations(palaceRecords, focusIndexes);
+  const mutualPairs = findMutualTransformations(palaceRecords, focusIndexes);
+  const loops = findTransformationLoops(palaceRecords, focusIndexes);
+  const transformationLayers = buildFourTransformationLayers(astrolabe, context);
+  const natalLayer = transformationLayers.find((layer) => layer.key === "natal") || createFourTransformationLayer(astrolabe, {
+    key: "natal",
+    label: "本命",
+    short: "本",
+    stem: astrolabe.rawDates?.chineseDate?.yearly?.[0],
+  });
+  const natalFocus = focusLayerRecords(natalLayer, focusIndexes);
+  const flowLayers = buildReferenceFlowTransformationLayers(astrolabe, context);
+  const flowFocus = flowLayers.flatMap((layer) => focusLayerRecords(layer, focusIndexes));
+  const baseMainStars = cleanReadingStarNames(basePalaces.flatMap((palace) => palace.majorStars || []).map(starReadingDisplayName), 8);
+  const squareMainStars = cleanReadingStarNames(squarePalaces.flatMap((palace) => palace.majorStars || []).map(starReadingDisplayName), 8);
+  const scoreRecords = [...incoming, ...outgoing, ...natalFocus, ...flowFocus];
+  const score = scoreRecords.reduce((sum, record) => sum + mutagenScore(record.mutagen) + (record.isSelf ? mutagenScore(record.mutagen) * 0.35 : 0), 0) * 0.18;
+  const scoreClamped = Math.max(-3, Math.min(3, score));
+  const loopText = loops.length ? loops.map(formatTransformationLoop).join("；") : "未見主題宮形成明顯四化閉環";
+  const mutualText = mutualPairs.length ? mutualPairs.slice(0, 3).map(formatMutualTransformation).join("；") : "未見明顯互飛";
+  const selfText = summarizeFlyingRecords(selfRecords, "未見主題網絡自化", 3);
+  const natalText = summarizeFlyingRecords(natalFocus, "生年四化未直接飛入主題宮或其三方四正", 4, { includeLayer: true });
+  const palaceText = [
+    summarizeFlyingRecords(outgoing, "主題宮宮干四化飛出不明顯", 4),
+    summarizeFlyingRecords(incoming, "其他宮干暫未直接飛入主題宮", 4),
+  ].join("；");
+  const flowText = summarizeFlyingRecords(flowFocus, "目前參照的流年、流月四化未直接飛入主題宮或三方四正", 5, { includeLayer: true });
+  const mainText = baseMainStars.length
+    ? `主題主宮主星先看${baseMainStars.join("、")}，再用三方四正主星${squareMainStars.join("、") || "未見明顯主星"}修正。`
+    : `主題主宮無主星時，先借對宮與三方四正定調，再看宮干四化是否把事件拉出去。`;
+
+  const summary = [
+    mainText,
+    `生年四化：${natalText}。`,
+    `宮干四化與飛入飛出：${palaceText}。`,
+    `自化、互飛與閉環：${selfText}；${mutualText}；${loopText}。`,
+    `流年流月觸發：${flowText}。`,
+    causePalace ? `來因宮${palaceLabel(causePalace)}作為原局事件入口；若四化鏈碰到來因、主題宮或流年流月宮位，事件感會更明顯。` : "",
+  ].filter(Boolean).join(" ");
+
+  return {
+    summary,
+    score: scoreClamped,
+    tags: uniqueItems([
+      natalFocus.length ? "生年四化入主題" : "",
+      incoming.length ? "有飛入" : "",
+      outgoing.length ? "有飛出" : "",
+      selfRecords.length ? "自化" : "",
+      mutualPairs.length ? "互飛" : "",
+      loops.length ? "閉環" : "",
+      flowFocus.length ? "流年流月觸發" : "",
+    ]),
+    cards: [
+      { title: "主星與三方四正", text: `${mainText} 三方四正包含${palaceListText(focusPalaces, 10)}。` },
+      { title: "生年四化", text: natalText },
+      { title: "宮干四化", text: palaceText },
+      { title: "自化・互飛・閉環", text: `${selfText}；${mutualText}；${loopText}` },
+      { title: "流年流月", text: flowText },
+    ],
+    why: `飛星判讀先看主星與三方四正定盤面，再以生年四化定原局課題、宮干四化看飛入飛出，最後用流年與流月確認當期觸發。`,
+  };
+}
+
+function renderFlyingStructure(flying) {
+  if (!flying?.cards?.length) return "";
+  return `
+    <div class="flying-structure-grid">
+      ${flying.cards.map((card) => `
+        <article class="flying-structure-card">
+          <strong>${escapeHtml(card.title)}</strong>
+          <p>${escapeHtml(card.text)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function integratedTopicSummary(topicKey, chart, context, network, bazi) {
   const topic = TOPIC_CONFIG[topicKey];
   const ziweiTone = scoreTone(network.score + bazi.element.score);
@@ -3603,12 +4100,14 @@ function chatTopicAnswer(topicKey) {
   const context = buildPeriodContext(currentChart);
   const network = evaluateTopicNetwork(topicKey, currentChart, context);
   const ziweiText = ziweiTopicAnalysis(topicKey, currentChart, context, network);
+  const flying = ziweiFlyingAnalysis(topicKey, currentChart, context, network);
   const peachText = topicKey === "marriage"
     ? nativePeachBlossomAnalysis(currentChart, network, { includeBazi: false }).text
     : "";
 
   return [
     `我先從紫微的${topic.label}主宮與三方四正開始看：${ziweiText}`,
+    `飛星四化方面：${flying.summary}`,
     peachText,
     `時間節奏方面：${timelinePlainText(topicKey, currentChart)}`,
   ].filter(Boolean).join(" ");
@@ -3680,6 +4179,12 @@ function buildBotAnswer(question) {
     return activeReadingMethod === "bazi" ? chatBaziPartnerAnswer() : chatPartnerAnswer();
   }
 
+  if (activeReadingMethod === "bazi" && /核心|分數|評分|天時|人和|地利|格局分/.test(q)) {
+    const scores = baziCoreScores(currentChart).map((item) => `${item.label}${item.score}/100：${item.text}`).join(" ");
+    const contextProfile = baziContextProfile(currentChart);
+    return `${scores} ${contextProfile.timing} ${contextProfile.people} ${contextProfile.place}`;
+  }
+
   if (/來因/.test(q)) {
     return causePalace
       ? `來因宮是${palaceLabel(causePalace)}。判定方式是用生年天干${currentChart.astrolabe.rawDates?.chineseDate?.yearly?.[0] || ""}對照十二宮宮干；解盤時我會把它當作事件入口與原局動機。${palaceChatSummary(causePalace)}`
@@ -3692,12 +4197,22 @@ function buildBotAnswer(question) {
       : "目前沒有取得身宮。";
   }
 
-  if (/大限|流年|流月|今年|本月/.test(q)) {
+  if (/大限|流年|流月|今年|本月/.test(q) && !/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
     if (activeReadingMethod === "bazi") {
       const baziPeriod = buildBaziPeriodContext(currentChart);
       return `目前八字選的是${baziPeriod.periodName}。${baziPeriodReading(currentChart, baziPeriod)}`;
     }
     return `${context.periodName}目前${context.periodPalace ? `落在${palaceLabel(context.periodPalace)}，` : ""}我會把這個宮位視為當期事件焦點，再疊加你問的主題宮位。`;
+  }
+
+  if (/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
+    if (activeReadingMethod === "bazi") {
+      return "四化飛星是紫微斗數的判讀法；目前在八字模式，可以切到紫微斗數後問我飛星、四化、互飛或閉環。";
+    }
+    const topicKey = topicSelect.value || "property";
+    const network = evaluateTopicNetwork(topicKey, currentChart, context);
+    const flying = ziweiFlyingAnalysis(topicKey, currentChart, context, network);
+    return `目前以「${TOPIC_CONFIG[topicKey].label}」主題看飛星：${flying.summary}`;
   }
 
   const palaceAnswer = chatPalaceAnswer(q);
@@ -3893,6 +4408,95 @@ function renderPalaceOverview(astrolabe) {
   `;
 }
 
+function renderBaziPillarMatrix(chart) {
+  const matrix = baziPillarMatrix(chart);
+  return `
+    <div class="bazi-pillar-matrix">
+      ${matrix.map((record) => `
+        <article class="bazi-pillar-row">
+          <header>
+            <b>${escapeHtml(record.pillarName)}</b>
+            <strong>${escapeHtml(record.pillar)}</strong>
+          </header>
+          <dl>
+            <div><dt>天干</dt><dd>${escapeHtml(record.stem)}・${escapeHtml(record.stemGod || "-")}</dd></div>
+            <div><dt>地支</dt><dd>${escapeHtml(record.branch)}・${escapeHtml(ZHI_ELEMENT[record.branch] || "-")}</dd></div>
+            <div><dt>地支藏干</dt><dd>${escapeHtml(record.hidden.map((item) => `${item.stem}${item.god}${Math.round(item.weight * 100)}%`).join("、") || "無")}</dd></div>
+            <div><dt>神煞</dt><dd>${escapeHtml(record.shenSha.join("、") || "未見")}</dd></div>
+          </dl>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderBaziRatioBars(title, items, className = "") {
+  return `
+    <article class="bazi-ratio-panel ${className}">
+      <h4>${escapeHtml(title)}</h4>
+      <div class="bazi-ratio-list">
+        ${items.map((item) => {
+          const value = Math.max(0, Math.min(1, item.value || 0));
+          return `
+            <div class="bazi-ratio-row">
+              <span>${escapeHtml(item.label)}</span>
+              <div><i style="width: ${Math.max(3, value * 100)}%"></i></div>
+              <b>${escapeHtml(percentText(value))}</b>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderBaziCoreScores(scores) {
+  return `
+    <div class="bazi-score-grid">
+      ${scores.map((item) => `
+        <article class="bazi-score-card" data-score="${escapeHtml(item.key)}">
+          <div class="score-ring" style="--score: ${item.score}">
+            <strong>${escapeHtml(String(item.score))}</strong>
+            <span>/100</span>
+          </div>
+          <div>
+            <b>${escapeHtml(item.label)}</b>
+            <p>${escapeHtml(item.text)}</p>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderBaziContextCards(contextProfile) {
+  return `
+    <div class="bazi-context-grid">
+      <article><b>天時</b><p>${escapeHtml(contextProfile.timing)}</p></article>
+      <article><b>人和</b><p>${escapeHtml(contextProfile.people)}</p></article>
+      <article><b>地利</b><p>${escapeHtml(contextProfile.place)}</p></article>
+    </div>
+  `;
+}
+
+function renderBaziDecisionTiming(timing) {
+  return `
+    <div class="bazi-timing-panel">
+      <p>${escapeHtml(timing.text)}</p>
+      <div class="bazi-timing-grid">
+        ${timing.years.map((year) => `
+          <article class="${year.caution.length ? "has-caution" : ""}">
+            <b>${escapeHtml(String(year.year))}</b>
+            <strong>${escapeHtml(`${year.pillar} ${year.gods.slice(0, 3).join("、")}`)}</strong>
+            <small>${escapeHtml(year.labels.join("、") || "調整節奏")}</small>
+            <p>${escapeHtml(year.action)}</p>
+          </article>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderBaziInsights(chart) {
   if (!baziInsightOutput) return;
   const profile = baziDayMasterProfile(chart);
@@ -3902,14 +4506,50 @@ function renderBaziInsights(chart) {
   const stages = baziTwelveStageProfile(chart);
   const auxiliary = baziAuxiliaryPalaceProfile(chart);
   const shenSha = baziShenShaProfile(chart);
+  const shenShaCombos = baziShenShaCombinations(chart);
   const luck = baziLuckMeta(chart);
   const groups = baziTenGodGroupSummary(chart);
   const relations = baziRelationAnalysis(chart.pillars || []);
+  const tenGodPower = baziTenGodPower(chart);
+  const coreScores = baziCoreScores(chart);
+  const contextProfile = baziContextProfile(chart);
+  const timingProfile = baziDecisionTimingProfile(chart);
+  const elementPower = baziElementPower(chart);
+  const elementTotal = Object.values(elementPower).reduce((sum, value) => sum + value, 0) || 1;
+  const tenGodItems = tenGodPower.ranked.map(([god, ratio]) => ({ label: god, value: ratio }));
+  const elementItems = ELEMENTS.map((element) => ({ label: element, value: (elementPower[element] || 0) / elementTotal }));
   const monthText = profile.monthMainStem
     ? `月令${profile.monthBranch}的主氣藏干為${profile.monthMainStem}，對日主形成${profile.monthGod || "五行作用"}。`
     : `月令為${profile.monthBranch}，以${profile.monthElement}氣為主要季節背景。`;
 
   baziInsightOutput.innerHTML = `
+    <section class="bazi-system-overview">
+      <div class="bazi-subheading">
+        <span>BaZi Structure</span>
+        <h3>八字結構總覽</h3>
+      </div>
+      ${renderBaziPillarMatrix(chart)}
+      <div class="bazi-distribution-grid">
+        ${renderBaziRatioBars("十神占比", tenGodItems, "ten-god")}
+        ${renderBaziRatioBars("五行分布", elementItems, "elements")}
+      </div>
+      ${renderBaziContextCards(contextProfile)}
+      <div class="bazi-subheading">
+        <span>Core Pattern Scores</span>
+        <h3>核心格局分數（滿分 100）</h3>
+      </div>
+      ${renderBaziCoreScores(coreScores)}
+      <article class="bazi-insight-card is-wide bazi-combo-card">
+        <span>關鍵神煞與同柱組合</span>
+        <strong>${escapeHtml(shenShaCombos.keySignals.join("、") || "未見關鍵神煞集中")}</strong>
+        <p>${escapeHtml(`${shenShaCombos.text} ${shenSha.text}`)}</p>
+      </article>
+      <article class="bazi-insight-card is-wide">
+        <span>大運、流年訊號與決策時機</span>
+        <strong>${escapeHtml(`${timingProfile.targetYear} 起六年節奏`)}</strong>
+        ${renderBaziDecisionTiming(timingProfile)}
+      </article>
+    </section>
     <div class="bazi-insight-grid">
       <article class="bazi-insight-card">
         <span>日主與月令</span>
@@ -3985,16 +4625,21 @@ function buildBaziReading(chart) {
   const period = buildBaziPeriodContext(chart);
   const analysis = baziTopicAnalysis(topicKey, chart, topic, period);
   const supplement = baziTopicSupplement(topicKey, chart);
+  const coreScores = baziCoreScores(chart);
+  const timingProfile = baziDecisionTimingProfile(chart);
   const tone = scoreTone(analysis.element.score + profile.score * 0.45);
   const periodText = baziPeriodReading(chart, period);
+  const scoreSummary = coreScores.map((item) => `${item.label}${item.score}`).join("、");
   const why = [
     `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；藏干加權後生扶約${Math.round(profile.supportRatio * 100)}%，日主判為${profile.strength}。`,
     `格局以月令主氣立${structure.name}，目前為${structure.status}。${structure.pressures.length ? `混雜點：${structure.pressures.join("、")}。` : "未見明顯破格衝突。"}`,
     `十神結構：${godCountText(counts, ["比肩", "劫財", "食神", "傷官", "正財", "偏財", "正官", "七殺", "正印", "偏印"])}。`,
     `扶抑用神取${usefulGod.primary || "流通"}${usefulGod.secondary ? `、${usefulGod.secondary}` : ""}，調候重${usefulGod.regulating}${usefulGod.bridge ? `，通關取${usefulGod.bridge}` : ""}。`,
+    `核心格局分數：${scoreSummary}，分數是原局結構訊號，不代表命定結果。`,
     luck.text,
     relations.text,
     periodText,
+    timingProfile.text,
   ];
   const tags = [
     `${profile.dayStem}${profile.dayElement}日主`,
@@ -4028,8 +4673,16 @@ function buildBaziReading(chart) {
           <p>${escapeHtml(supplement)}</p>
         </section>
         <section class="reading-block">
+          <h4>核心格局分數（滿分 100）</h4>
+          ${renderBaziCoreScores(coreScores)}
+        </section>
+        <section class="reading-block">
           <h4>${escapeHtml(period.periodName)}交互作用</h4>
           <p>${escapeHtml(periodText)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>人生節奏與決策時機</h4>
+          ${renderBaziDecisionTiming(timingProfile)}
         </section>
         <section class="reading-block">
           <h4>十神怎麼用在行動上</h4>
@@ -4261,7 +4914,8 @@ function buildReading(chart) {
   const yearStem = chart.astrolabe.rawDates?.chineseDate?.yearly?.[0] || "";
   const network = evaluateTopicNetwork(topicKey, chart, context);
   const primary = network.baseEvaluations[0] || network.evaluations[0];
-  const finalScore = network.score;
+  const flying = ziweiFlyingAnalysis(topicKey, chart, context, network);
+  const finalScore = network.score + flying.score;
   const tone = scoreTone(finalScore);
   const causeText = causePalace
     ? `來因宮以生年天干${yearStem}對照宮干定位，本盤落在${palaceLabel(causePalace)}；解盤會把它視為原局動機與事件入口。`
@@ -4273,6 +4927,7 @@ function buildReading(chart) {
     `${ASTRO_SCHOOL_LABEL}：星曜安置與神煞顯示使用 iztro 的 zhongzhou 演算法設定。`,
     `${topic.label}主題先取${topicPalacesText}，再加入三方四正、對宮、來因宮、身宮與當期流運宮位，避免單宮斷事。`,
     primary ? describePalaceEvaluation(primary) : "找不到主宮資料，因此以輔助宮位與當期流運補看。",
+    flying.why,
     peach ? peach.text : "",
     causeText,
   ].filter(Boolean);
@@ -4283,6 +4938,7 @@ function buildReading(chart) {
     network.supportStars.length ? `助力：${network.supportStars.slice(0, 3).join("、")}` : "",
     network.pressureStars.length ? `壓力：${network.pressureStars.slice(0, 3).join("、")}` : "",
     network.flowerStars.length ? `桃花：${network.flowerStars.join("、")}` : "",
+    ...flying.tags,
     ...(peach?.tags || []),
   ].filter(Boolean);
 
@@ -4294,6 +4950,11 @@ function buildReading(chart) {
         <section class="reading-block">
           <h4>紫微斗數</h4>
           <p>${escapeHtml(ziweiText)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>飛星四化</h4>
+          <p>${escapeHtml(flying.summary)}</p>
+          ${renderFlyingStructure(flying)}
         </section>
         ${peach ? `
           <section class="reading-block">
@@ -4562,15 +5223,14 @@ function findPalaceByStarName(astrolabe, starNameValue) {
 }
 
 function palaceFlyingText(palace, astrolabe) {
-  const stem = toTraditional(palace.heavenlyStem || "");
-  const table = FLYING_MUTAGEN_TABLE[stem];
-  if (!table) return `宮干${stem || "未定"}，飛星資料不足`;
-  return Object.entries(table)
-    .map(([mutagen, star]) => {
-      const target = findPalaceByStarName(astrolabe, star);
-      return `${mutagen}${star}→${target ? normalizePalaceName(target.name) : "未落宮"}`;
-    })
-    .join("；");
+  const outgoing = palaceStemTransformations(astrolabe, palace);
+  if (!outgoing.length) return `宮干${toTraditional(palace.heavenlyStem || "") || "未定"}，飛星資料不足`;
+  const incoming = allPalaceStemTransformations(astrolabe)
+    .filter((record) => record.targetPalace?.index === palace.index && record.sourcePalace?.index !== palace.index);
+  const outgoingText = summarizeFlyingRecords(outgoing, "飛出未定", 2, { includeSource: false });
+  const incomingText = summarizeFlyingRecords(incoming, "暫無飛入", 2);
+  const selfText = outgoing.some((record) => record.isSelf) ? "有自化" : "";
+  return [`飛出：${outgoingText}`, `飛入：${incomingText}`, selfText].filter(Boolean).join("；");
 }
 
 function sameTriadBranches(branch) {

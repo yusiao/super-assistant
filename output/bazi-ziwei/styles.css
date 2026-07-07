@@ -622,6 +622,299 @@ button {
   margin-top: 10px;
 }
 
+.bazi-system-overview {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.bazi-subheading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bazi-subheading span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bazi-subheading h3 {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 1rem;
+}
+
+.bazi-pillar-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bazi-pillar-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.bazi-pillar-row header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 9px;
+  background: var(--surface-2);
+}
+
+.bazi-pillar-row header b {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.bazi-pillar-row header strong {
+  color: var(--charcoal);
+  font-size: 1.05rem;
+}
+
+.bazi-pillar-row dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.bazi-pillar-row dl div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+  border-bottom: 1px solid #eee7dc;
+  padding: 7px 9px;
+}
+
+.bazi-pillar-row dl div:last-child {
+  border-bottom: 0;
+}
+
+.bazi-pillar-row dt,
+.bazi-pillar-row dd {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.bazi-pillar-row dt {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.bazi-pillar-row dd {
+  color: #39423e;
+  font-weight: 760;
+}
+
+.bazi-distribution-grid,
+.bazi-context-grid,
+.bazi-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bazi-context-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bazi-ratio-panel,
+.bazi-context-grid article,
+.bazi-score-card,
+.bazi-timing-grid article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.bazi-ratio-panel {
+  padding: 12px;
+}
+
+.bazi-ratio-panel h4 {
+  margin: 0 0 8px;
+  color: var(--vermillion);
+  font-size: 0.82rem;
+}
+
+.bazi-ratio-list {
+  display: grid;
+  gap: 7px;
+}
+
+.bazi-ratio-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+}
+
+.bazi-ratio-row span,
+.bazi-ratio-row b {
+  font-size: 0.73rem;
+}
+
+.bazi-ratio-row span {
+  color: var(--charcoal);
+  font-weight: 850;
+}
+
+.bazi-ratio-row b {
+  color: var(--muted);
+  text-align: right;
+}
+
+.bazi-ratio-row div {
+  height: 8px;
+  border-radius: 999px;
+  background: #eee8dc;
+  overflow: hidden;
+}
+
+.bazi-ratio-row i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--jade);
+}
+
+.bazi-ratio-panel.elements .bazi-ratio-row i {
+  background: var(--gold);
+}
+
+.bazi-context-grid article {
+  padding: 12px;
+}
+
+.bazi-context-grid b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--vermillion);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.bazi-context-grid p {
+  margin: 0;
+  color: #44504a;
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.bazi-score-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.bazi-score-card {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+}
+
+.score-ring {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #fffdf7 0 55%, transparent 56%),
+    conic-gradient(var(--jade) calc(var(--score) * 1%), #ece5d8 0);
+}
+
+.score-ring strong {
+  color: var(--charcoal);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.score-ring span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+.bazi-score-card b {
+  display: block;
+  color: var(--charcoal);
+  font-size: 0.82rem;
+}
+
+.bazi-score-card p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.bazi-combo-card {
+  margin-top: 0;
+}
+
+.bazi-timing-panel > p {
+  margin: 0 0 10px;
+  color: #44504a;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.bazi-timing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bazi-timing-grid article {
+  padding: 10px;
+}
+
+.bazi-timing-grid article.has-caution {
+  border-color: rgba(178, 58, 46, 0.34);
+  background: #fff8f5;
+}
+
+.bazi-timing-grid b,
+.bazi-timing-grid strong,
+.bazi-timing-grid small {
+  display: block;
+}
+
+.bazi-timing-grid b {
+  color: var(--vermillion);
+  font-size: 0.76rem;
+}
+
+.bazi-timing-grid strong {
+  margin-top: 3px;
+  color: var(--charcoal);
+  font-size: 0.86rem;
+}
+
+.bazi-timing-grid small {
+  margin-top: 3px;
+  color: var(--jade);
+  font-size: 0.69rem;
+  font-weight: 850;
+}
+
+.bazi-timing-grid p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
 .bazi-insight-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1092,6 +1385,34 @@ button {
 
 .reading-block p {
   margin-bottom: 0;
+}
+
+.flying-structure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.flying-structure-card {
+  border: 1px solid #ece5d8;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fffdf8;
+}
+
+.flying-structure-card strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--charcoal);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.flying-structure-card p {
+  color: #4c5651;
+  font-size: 0.8rem;
+  line-height: 1.58;
 }
 
 .reading-timeline {
@@ -1897,8 +2218,8 @@ button {
 .astrolabe-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(4, minmax(170px, auto));
-  gap: 8px;
+  grid-template-rows: repeat(4, minmax(148px, auto));
+  gap: 6px;
 }
 
 .center-plate {
@@ -1906,8 +2227,8 @@ button {
   grid-row: 2 / span 2;
   display: grid;
   align-content: center;
-  gap: 12px;
-  padding: 18px;
+  gap: 9px;
+  padding: 14px;
   background:
     linear-gradient(135deg, rgba(24, 107, 90, 0.12), transparent 42%),
     linear-gradient(315deg, rgba(178, 58, 46, 0.1), transparent 46%),
@@ -1923,13 +2244,13 @@ button {
 .center-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .center-facts div {
   border: 1px solid #e2dacb;
   border-radius: var(--radius);
-  padding: 10px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.6);
 }
 
@@ -1938,7 +2259,7 @@ button {
   min-width: 0;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 170px;
+  min-height: 148px;
   overflow: visible;
 }
 
@@ -1973,12 +2294,13 @@ button {
   justify-content: space-between;
   gap: 8px;
   border-bottom: 1px solid var(--line);
-  padding: 10px;
+  padding: 8px;
   background: var(--surface-2);
 }
 
 .palace-title {
   font-weight: 900;
+  font-size: 0.92rem;
 }
 
 .palace-badges {
@@ -1992,34 +2314,34 @@ button {
 
 .palace-marker {
   border-radius: 999px;
-  padding: 3px 7px;
+  padding: 2px 6px;
   background: rgba(49, 95, 141, 0.12);
   color: #315f8d;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 900;
 }
 
 .branch-chip {
   flex: 0 0 auto;
   border-radius: 999px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   background: #ece6da;
   color: var(--charcoal);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 800;
 }
 
 .star-groups {
   display: grid;
   align-content: start;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .star-line {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
 }
 
 .aux-line {
@@ -2036,10 +2358,10 @@ button {
   align-items: center;
   max-width: 100%;
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 3px 7px;
   background: #efeadf;
   color: var(--charcoal);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 750;
 }
 
@@ -2202,9 +2524,15 @@ button {
   .pillar-grid,
   .analysis-grid,
   .bazi-insight-grid,
+  .bazi-pillar-matrix,
+  .bazi-distribution-grid,
+  .bazi-context-grid,
+  .bazi-score-grid,
+  .bazi-timing-grid,
   .reading-controls,
   .reading-main,
   .palace-overview-grid,
+  .flying-structure-grid,
   .partner-main,
   .partner-grid,
   .ziwei-image-card,
