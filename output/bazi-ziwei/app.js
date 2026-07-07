@@ -2696,6 +2696,181 @@ function baziTopicAnalysis(topicKey, chart, topic, period = null) {
   };
 }
 
+function baziMonthlyActionForTopic(topicKey, chart, period, profile, tenGodPower) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const layers = period.layers?.length ? period.layers : [{ label: period.periodName, pillar: period.pillar }];
+  const monthlyLayer = layers.find((layer) => layer.label === "流月") || layers[layers.length - 1] || {};
+  const monthly = splitPillar(monthlyLayer.pillar || "");
+  const monthlyGods = uniqueItems([
+    getTenGod(dayStem, monthly.stem),
+    ...getHiddenStemGods(dayStem, monthly.branch).map((item) => item.god),
+  ].filter(Boolean));
+  const allGods = uniqueItems(layers.flatMap((layer) => {
+    const { stem, branch } = splitPillar(layer.pillar || "");
+    return [getTenGod(dayStem, stem), ...getHiddenStemGods(dayStem, branch).map((item) => item.god)].filter(Boolean);
+  }));
+  const ratio = (gods) => gods.reduce((sum, god) => sum + (tenGodPower.ratios[god] || 0), 0);
+  const hasAny = (gods) => allGods.some((god) => gods.includes(god));
+  const monthlyHasAny = (gods) => monthlyGods.some((god) => gods.includes(god));
+  const interaction = baziPeriodInteractionAnalysis(chart, period);
+  const tension = interaction.records.some((record) => /沖|刑|害|破/.test(record.interaction));
+  const usefulHit = [GAN_ELEMENT[monthly.stem], ZHI_ELEMENT[monthly.branch]].filter(Boolean).some((element) => profile.favorable.includes(element));
+  const baseScore = 52 + (usefulHit ? 8 : 0) - (tension ? 8 : 0);
+  const data = {
+    property: {
+      score: baseScore + ratio(["正財", "偏財"]) * 34 + ratio(["食神", "傷官"]) * 18 + (monthlyHasAny(["正財", "偏財"]) ? 16 : 0),
+      action: monthlyHasAny(["正財", "偏財"])
+        ? "談收款、報價、預算、投資紀律與資產配置尤佳"
+        : monthlyHasAny(["食神", "傷官"])
+          ? "把技能、內容、作品或副業變現尤佳"
+          : "整理現金流、債務、合約與長期資產基本盤尤佳",
+      reason: `原局財星占比${percentText(ratio(["正財", "偏財"]))}、食傷占比${percentText(ratio(["食神", "傷官"]))}，本月十神見${monthlyGods.join("、") || "未取得"}。`,
+      caution: tension ? "有沖刑害破時不宜重倉或衝動簽約。" : "可推進，但仍要把風險上限寫清楚。",
+    },
+    career: {
+      score: baseScore + ratio(["正官", "七殺"]) * 34 + ratio(["正印", "偏印"]) * 18 + (monthlyHasAny(["正官", "七殺", "正印", "偏印"]) ? 14 : 0),
+      action: monthlyHasAny(["正官", "七殺"])
+        ? "面試、談職責、提案、承接考核與建立制度尤佳"
+        : monthlyHasAny(["正印", "偏印"])
+          ? "進修、考照、找導師與整理專業底盤尤佳"
+          : "整理履歷、作品集、工作流程與合作窗口尤佳",
+      reason: `原局官殺占比${percentText(ratio(["正官", "七殺"]))}、印星占比${percentText(ratio(["正印", "偏印"]))}，本月十神見${monthlyGods.join("、") || "未取得"}。`,
+      caution: tension ? "月運有衝突訊號，職場溝通要留紀錄、避免硬碰硬。" : "適合把抽象能力變成可被看見的成果。",
+    },
+    marriage: {
+      score: baseScore + ratio(["正官", "七殺", "正財", "偏財"]) * 32 + ratio(["食神", "傷官"]) * 15 + (monthlyHasAny(["正官", "七殺", "正財", "偏財"]) ? 18 : 0),
+      action: monthlyHasAny(["正官", "七殺", "正財", "偏財"])
+        ? "認識新對象、確認關係、談承諾與相處規則尤佳"
+        : monthlyHasAny(["食神", "傷官"])
+          ? "增加社交、約會、聊天互動與展現個人魅力尤佳"
+          : "修正生活圈、朋友介紹與穩定曝光尤佳",
+      reason: `原局關係星占比${percentText(ratio(["正官", "七殺", "正財", "偏財"]))}，流月也需合看日支、桃花與干支互動；本月十神見${monthlyGods.join("、") || "未取得"}。`,
+      caution: tension ? "若流月沖到日支，容易有曖昧拉扯或溝通誤會，先慢慢觀察。" : "桃花仍需要實際社交場景，不出門就不顯著。",
+    },
+    children: {
+      score: baseScore + ratio(["食神", "傷官"]) * 34 + ratio(["正印", "偏印"]) * 16 + (monthlyHasAny(["食神", "傷官"]) ? 18 : 0),
+      action: monthlyHasAny(["食神", "傷官"])
+        ? "親子陪伴、備孕規劃、作品創作、教學與照顧安排尤佳"
+        : monthlyHasAny(["正印", "偏印"])
+          ? "安排教育資源、照護系統與身心修復尤佳"
+          : "調整家庭時間、親子溝通與長期照顧分工尤佳",
+      reason: `原局食傷占比${percentText(ratio(["食神", "傷官"]))}、印星占比${percentText(ratio(["正印", "偏印"]))}；食傷看子女/作品，印星看照顧與教育資源。`,
+      caution: tension ? "有沖刑害破時，親子與家務溝通要減少情緒決策。" : "適合把創造與照顧排入固定行程。",
+    },
+    health: {
+      score: baseScore + ratio(["正印", "偏印"]) * 26 - ratio(["七殺", "傷官"]) * 12 + (monthlyHasAny(["正印", "偏印"]) ? 14 : 0) - (monthlyHasAny(["七殺", "傷官"]) ? 10 : 0),
+      action: monthlyHasAny(["正印", "偏印"])
+        ? "健檢、休養、睡眠修復、復健與建立保養制度尤佳"
+        : monthlyHasAny(["七殺", "傷官"])
+          ? "降載、減壓、調整作息與處理過勞警訊尤佳"
+          : "穩定運動、飲食紀錄、作息規律與壓力管理尤佳",
+      reason: `原局印星占比${percentText(ratio(["正印", "偏印"]))}，官殺與傷官代表壓力/耗能，本月十神見${monthlyGods.join("、") || "未取得"}。`,
+      caution: "健康只給保養方向；不舒服仍以醫師檢查與專業診斷為準。",
+    },
+  }[topicKey];
+  return {
+    topicKey,
+    label: TOPIC_CONFIG[topicKey].label,
+    score: clampScore(data.score),
+    action: data.action,
+    reason: data.reason,
+    caution: data.caution,
+    source: `四柱${chart.pillars.join("、")}；大運/流年/流月為${layers.map((layer) => `${layer.label}${layer.pillar}`).join("、")}；喜用${profile.favorable.join("、") || "流通"}。`,
+  };
+}
+
+function baziMonthlyActionGuide(chart, period) {
+  if (period?.scope !== "monthly") return null;
+  const profile = baziDayMasterProfile(chart);
+  const tenGodPower = baziTenGodPower(chart);
+  const cards = Object.keys(TOPIC_CONFIG).map((topicKey) => baziMonthlyActionForTopic(topicKey, chart, period, profile, tenGodPower));
+  return {
+    title: `${period.periodName}五主題行動建議`,
+    intro: "此處不是單看流月，而是以原局四柱、天干地支、十神占比、喜用忌、格局，再疊加大運、流年與流月干支後，判斷本月做什麼尤佳。",
+    cards,
+  };
+}
+
+function ziweiMonthlyActionForTopic(topicKey, chart, context) {
+  const network = evaluateTopicNetwork(topicKey, chart, context);
+  const flying = ziweiFlyingAnalysis(topicKey, chart, context, network);
+  const primary = network.baseEvaluations[0] || network.evaluations[0];
+  const support = network.supportStars.slice(0, 3);
+  const pressure = network.pressureStars.slice(0, 3);
+  const periodPalace = context.periodPalace;
+  const score = clampScore(58 + network.score * 3.8 + flying.score * 8);
+  const hasFlow = flying.tags.includes("流年流月觸發");
+  const hasPressure = pressure.length > support.length;
+  const action = {
+    property: hasFlow
+      ? "整理收入、資產配置、房產資料、合約與資金入口尤佳"
+      : "先盤點現金流、負債、田宅與工作帶財的承接力尤佳",
+    career: hasFlow
+      ? "提案、面試、曝光作品、談權責與修正工作流程尤佳"
+      : "先整合資源、人脈與專業定位，再等待流月觸發點尤佳",
+    marriage: hasFlow
+      ? "增加社交、約會、確認關係節奏與談相處規則尤佳"
+      : "先整理互動模式、生活圈與擇偶條件，穩定曝光尤佳",
+    children: hasFlow
+      ? "安排親子活動、教育資源、備孕準備或作品創作尤佳"
+      : "先把家庭分工、照護資源與生活節奏調穩尤佳",
+    health: hasPressure
+      ? "減壓、休息、健檢、調作息與處理身體警訊尤佳"
+      : "建立規律保養、運動、飲食與睡眠節奏尤佳",
+  }[topicKey];
+  return {
+    topicKey,
+    label: TOPIC_CONFIG[topicKey].label,
+    score,
+    action,
+    reason: `原命以${palaceListText(network.basePalaces, 4)}為主，三方四正納入${palaceListText(network.networkPalaces, 8)}；${periodPalace ? `流月落${palaceLabel(periodPalace)}。` : ""}${support.length ? `助力見${support.join("、")}。` : ""}${pressure.length ? `壓力見${pressure.join("、")}。` : ""}`,
+    caution: pressure.length ? "煞忌或壓力星較明顯時，宜先控風險與溝通成本。" : "可推進，但仍需看現實資源與實際行動。",
+    source: `${flying.summary}`,
+    primary: primary?.palace ? palaceLabel(primary.palace) : "未取得主宮",
+  };
+}
+
+function ziweiMonthlyActionGuide(chart, context) {
+  if (context?.scope !== "monthly") return null;
+  const cards = Object.keys(TOPIC_CONFIG).map((topicKey) => ziweiMonthlyActionForTopic(topicKey, chart, context));
+  return {
+    title: `${context.periodName}五主題行動建議`,
+    intro: "此處不是單看流月宮位，而是用原命主題宮、主星、三方四正、生年四化、宮干飛星、飛入飛出、自化互飛閉環，再疊加流年與流月飛星判斷本月做什麼尤佳。",
+    cards,
+  };
+}
+
+function renderMonthlyActionGuide(guide, mode = "bazi") {
+  if (!guide) return "";
+  return `
+    <section class="monthly-action-guide ${mode}">
+      <div class="monthly-action-head">
+        <span>Monthly Actions</span>
+        <h4>${escapeHtml(guide.title)}</h4>
+        <p>${escapeHtml(guide.intro)}</p>
+      </div>
+      <div class="monthly-action-grid">
+        ${guide.cards.map((card) => `
+          <article class="monthly-action-card" data-topic="${escapeHtml(card.topicKey)}">
+            <header>
+              <strong>${escapeHtml(card.label)}</strong>
+              <b>${escapeHtml(String(card.score))}</b>
+            </header>
+            <p class="monthly-action-main">${escapeHtml(card.action)}</p>
+            <p>${escapeHtml(card.reason)}</p>
+            <small>${escapeHtml(card.caution)}</small>
+          </article>
+        `).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function monthlyGuidePlainText(guide) {
+  if (!guide) return "";
+  return `${guide.title}：${guide.cards.map((card) => `${card.label}宜${card.action}`).join("；")}。${guide.intro}`;
+}
+
 function ziweiTopicAnalysis(topicKey, chart, context, network) {
   const topic = TOPIC_CONFIG[topicKey];
   const primary = network.baseEvaluations[0] || network.evaluations[0];
@@ -4200,9 +4375,11 @@ function buildBotAnswer(question) {
   if (/大限|流年|流月|今年|本月/.test(q) && !/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
     if (activeReadingMethod === "bazi") {
       const baziPeriod = buildBaziPeriodContext(currentChart);
-      return `目前八字選的是${baziPeriod.periodName}。${baziPeriodReading(currentChart, baziPeriod)}`;
+      const guide = baziMonthlyActionGuide(currentChart, baziPeriod);
+      return `目前八字選的是${baziPeriod.periodName}。${baziPeriodReading(currentChart, baziPeriod)}${guide ? ` ${monthlyGuidePlainText(guide)}` : ""}`;
     }
-    return `${context.periodName}目前${context.periodPalace ? `落在${palaceLabel(context.periodPalace)}，` : ""}我會把這個宮位視為當期事件焦點，再疊加你問的主題宮位。`;
+    const guide = ziweiMonthlyActionGuide(currentChart, context);
+    return `${context.periodName}目前${context.periodPalace ? `落在${palaceLabel(context.periodPalace)}，` : ""}我會把這個宮位視為當期事件焦點，再疊加你問的主題宮位。${guide ? ` ${monthlyGuidePlainText(guide)}` : ""}`;
   }
 
   if (/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
@@ -4629,6 +4806,7 @@ function buildBaziReading(chart) {
   const timingProfile = baziDecisionTimingProfile(chart);
   const tone = scoreTone(analysis.element.score + profile.score * 0.45);
   const periodText = baziPeriodReading(chart, period);
+  const monthlyGuide = baziMonthlyActionGuide(chart, period);
   const scoreSummary = coreScores.map((item) => `${item.label}${item.score}`).join("、");
   const why = [
     `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；藏干加權後生扶約${Math.round(profile.supportRatio * 100)}%，日主判為${profile.strength}。`,
@@ -4680,6 +4858,12 @@ function buildBaziReading(chart) {
           <h4>${escapeHtml(period.periodName)}交互作用</h4>
           <p>${escapeHtml(periodText)}</p>
         </section>
+        ${monthlyGuide ? `
+          <section class="reading-block">
+            <h4>流月五主題行動建議</h4>
+            ${renderMonthlyActionGuide(monthlyGuide, "bazi")}
+          </section>
+        ` : ""}
         <section class="reading-block">
           <h4>人生節奏與決策時機</h4>
           ${renderBaziDecisionTiming(timingProfile)}
@@ -4923,6 +5107,7 @@ function buildReading(chart) {
   const topicPalacesText = topicPalaceLabels(topicKey, chart).join("、") || topic.palaces.join("、");
   const ziweiText = ziweiTopicAnalysis(topicKey, chart, context, network);
   const peach = topicKey === "marriage" ? nativePeachBlossomAnalysis(chart, network, { includeBazi: false }) : null;
+  const monthlyGuide = ziweiMonthlyActionGuide(chart, context);
   const why = [
     `${ASTRO_SCHOOL_LABEL}：星曜安置與神煞顯示使用 iztro 的 zhongzhou 演算法設定。`,
     `${topic.label}主題先取${topicPalacesText}，再加入三方四正、對宮、來因宮、身宮與當期流運宮位，避免單宮斷事。`,
@@ -4956,6 +5141,12 @@ function buildReading(chart) {
           <p>${escapeHtml(flying.summary)}</p>
           ${renderFlyingStructure(flying)}
         </section>
+        ${monthlyGuide ? `
+          <section class="reading-block">
+            <h4>流月五主題行動建議</h4>
+            ${renderMonthlyActionGuide(monthlyGuide, "ziwei")}
+          </section>
+        ` : ""}
         ${peach ? `
           <section class="reading-block">
             <h4>命主桃花分析</h4>
