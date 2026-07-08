@@ -122,16 +122,15 @@
               <div id="bazi-insight-output" class="bazi-insight-output"></div>
             </section>
 
-            <section class="bazi-luck-section">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Luck Calendar</p>
-                  <h2>大運・流年・流月表</h2>
-                </div>
-                <span class="section-note">逐層查看干支、十神與旬空</span>
-              </div>
+            <details class="bazi-luck-section collapsible-section">
+              <summary>
+                <span>
+                  <b>大運・流年・流月表</b>
+                  <small>逐層查看干支、十神與旬空</small>
+                </span>
+              </summary>
               <div id="bazi-luck-table-output" class="bazi-luck-table-output"></div>
-            </section>
+            </details>
 
             <section class="bazi-reading-section">
               <div class="section-heading">
@@ -180,14 +179,13 @@
               <div id="bazi-reading-output" class="reading-output"></div>
             </section>
 
-            <section class="bazi-calibration-section">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Event Calibration</p>
-                  <h2>過往事件校準</h2>
-                </div>
-                <span class="section-note">比較前一、目前與後一時辰的事件吻合度</span>
-              </div>
+            <details class="bazi-calibration-section collapsible-section">
+              <summary>
+                <span>
+                  <b>過往事件校準</b>
+                  <small>比較前一、目前與後一時辰的事件吻合度</small>
+                </span>
+              </summary>
               <div class="calibration-controls">
                 <label class="select-field">
                   <span>事件年份</span>
@@ -211,7 +209,7 @@
                 <button id="add-calibration-event" class="secondary-button" type="button">加入事件</button>
               </div>
               <div id="bazi-calibration-output" class="bazi-calibration-output"></div>
-            </section>
+            </details>
 
             <section class="partner-section bazi-partner-section">
               <div class="section-heading">
@@ -308,16 +306,16 @@
               <div id="partner-output" class="partner-output"></div>
             </section>
 
-            <section class="ziwei-section">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">Zi Wei Dou Shu</p>
-                  <h2>紫微十二宮</h2>
-                </div>
-              </div>
+            <details class="ziwei-section collapsible-section" open>
+              <summary>
+                <span>
+                  <b>紫微十二宮</b>
+                  <small>三合、飛星、四化圖與十二宮盤面</small>
+                </span>
+              </summary>
               <div id="ziwei-image-output" class="ziwei-image-output"></div>
               <div class="astrolabe-grid" id="astrolabe-grid"></div>
-            </section>
+            </details>
           </section>
 
           <details class="combined-check-panel">

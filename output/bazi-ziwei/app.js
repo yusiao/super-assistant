@@ -3090,8 +3090,148 @@ function formatTransformationLoop(cycle) {
   return `${names.join("→")}（${mutagens}）`;
 }
 
+const FLYING_PERIOD_META = {
+  decadal: { label: "大限", short: "限" },
+  yearly: { label: "流年", short: "年" },
+  monthly: { label: "流月", short: "月" },
+};
+
+function referenceHoroscopeForFlying(astrolabe, context = null) {
+  const now = new Date();
+  const year = context?.targetYear || now.getFullYear();
+  const month = context?.targetMonth || now.getMonth() + 1;
+  const maxDay = new Date(year, month, 0).getDate();
+  const day = Math.min(context?.targetDay || 15, maxDay);
+  const hour = context?.targetHour ?? 12;
+  const targetDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")} ${String(hour).padStart(2, "0")}:00`;
+  return getHoroscopeSafe(astrolabe, targetDate) || context?.horoscope || null;
+}
+
+function createPeriodFlyingLayer(astrolabe, context, key) {
+  const meta = FLYING_PERIOD_META[key];
+  if (!meta) return null;
+  if (key === "decadal" && context?.scope === "decadal" && context?.periodPalace) {
+    return createFourTransformationLayer(astrolabe, {
+      key,
+      ...meta,
+      stem: context.periodPalace.heavenlyStem,
+      sourceIndex: context.periodPalace.index,
+    });
+  }
+  const horoscope = referenceHoroscopeForFlying(astrolabe, context);
+  const period = horoscope?.[key] || context?.horoscope?.[key];
+  if (!period) return null;
+  const sourceIndex = Number.isInteger(period.index) ? period.index : null;
+  const sourcePalace = Number.isInteger(sourceIndex) ? astrolabe.palaces[sourceIndex] : null;
+  return createFourTransformationLayer(astrolabe, {
+    key,
+    ...meta,
+    stem: period.heavenlyStem || sourcePalace?.heavenlyStem,
+    sourceIndex,
+  });
+}
+
+function layerFocusText(layer, focusIndexes, fallback, limit = 4) {
+  const focusRecords = focusLayerRecords(layer, focusIndexes);
+  const records = focusRecords.length ? focusRecords : layerFlyingRecords(layer);
+  return summarizeFlyingRecords(records, fallback, limit, { includeLayer: true });
+}
+
+function layerSourceText(layer, label) {
+  if (!layer?.sourcePalace) return `${label}命宮未取得`;
+  return `${label}命宮落${palaceLabel(layer.sourcePalace)}，以${layer.stem || layer.sourcePalace.heavenlyStem || "未定"}干起四化`;
+}
+
+function uniqueFlyingRecords(records) {
+  const seen = new Set();
+  return (records || []).filter((record) => {
+    if (!record?.targetPalace) return false;
+    const source = record.sourcePalace?.index ?? record.sourceLabel ?? record.layerLabel ?? "source";
+    const key = [
+      record.layerKey || record.sourceType || "layer",
+      source,
+      record.mutagen,
+      record.star,
+      record.targetPalace.index,
+    ].join("-");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function summarizeFourfoldIntersections(records, focusIndexes) {
+  const orderedMutagens = ["祿", "權", "科", "忌"];
+  const byMutagen = new Map(orderedMutagens.map((item) => [item, []]));
+  const byTarget = new Map();
+
+  uniqueFlyingRecords(records).forEach((record) => {
+    const mutagen = toTraditional(record.mutagen);
+    if (!byMutagen.has(mutagen)) return;
+    const targetName = normalizePalaceName(record.targetPalace.name);
+    const focusMark = focusIndexes.has(record.targetPalace.index) ? "（主題網絡）" : "";
+    byMutagen.get(mutagen).push(`${record.star}到${targetName}${focusMark}`);
+    if (!byTarget.has(record.targetPalace.index)) {
+      byTarget.set(record.targetPalace.index, {
+        palace: record.targetPalace,
+        mutagens: new Set(),
+      });
+    }
+    byTarget.get(record.targetPalace.index).mutagens.add(mutagen);
+  });
+
+  const mutagenText = orderedMutagens.map((mutagen) => {
+    const items = uniqueItems(byMutagen.get(mutagen)).slice(0, 3);
+    const meaning = FOUR_TRANSFORMATION_META[mutagen]?.meaning || "事件訊號";
+    return `${mutagen}代表${meaning}：${items.length ? items.join("、") : "未見明顯集中"}`;
+  }).join("；");
+  const intersections = [...byTarget.values()]
+    .filter((item) => item.mutagens.size >= 2)
+    .map((item) => `${normalizePalaceName(item.palace.name)}同時接到${[...item.mutagens].join("、")}`)
+    .slice(0, 4);
+  const intersectionText = intersections.length
+    ? `交會點在${intersections.join("；")}，表示事件容易在這些宮位被放大。`
+    : "目前未見多組四化集中同一宮，事件判斷要回到主題宮與流月觸發，不宜單點放大。";
+  return `${mutagenText}。${intersectionText}`;
+}
+
+function flyingEventText(topicKey, topic, context, basePalaces, monthlyPalace, monthlyStemFocus, intersectionRecords, scoreClamped) {
+  const baseNames = palaceListText(basePalaces, 5);
+  const monthlyName = monthlyPalace ? palaceLabel(monthlyPalace) : "未取得";
+  const hitBase = monthlyPalace && basePalaces.some((palace) => palace.index === monthlyPalace.index);
+  const hitText = hitBase
+    ? `流月命宮直接落入${topic.label}主題宮，事件感會比一般月份更明顯`
+    : `流月命宮落${monthlyName}，需看它是否透過四化、三方四正連到${baseNames}`;
+  const stemHitText = monthlyStemFocus.length
+    ? `流月宮干四化已牽動主題網絡：${summarizeFlyingRecords(monthlyStemFocus, "", 3)}`
+    : "流月宮干四化沒有直接打到主題宮，事件多半靠三方四正或外部條件慢慢推動";
+  const focusHits = uniqueFlyingRecords(intersectionRecords).filter((record) => focusIndexesHas(record, basePalaces));
+  const strength = scoreClamped >= 1.2
+    ? "可主動推進"
+    : scoreClamped <= -1.2
+      ? "宜保守、先避開衝突與高風險決策"
+      : "適合觀察訊號後小步調整";
+  const action = {
+    property: "財富事件可落在收入、資產配置、房產承載或現金流安排",
+    career: "事業事件可落在職務變動、責任增加、曝光機會或工作模式調整",
+    marriage: "姻緣事件可落在相遇、確認關係、溝通磨合或關係選擇",
+    children: "子女事件可落在備孕、生養安排、親子互動、晚輩或作品成果",
+    health: "健康事件可落在作息、壓力修復、檢查追蹤與長期保養",
+  }[topicKey] || `${topic.label}事件可落在主題宮所代表的人事物`;
+  const hitSummary = focusHits.length
+    ? `其中${summarizeFlyingRecords(focusHits, "", 3)}是較明顯的落點。`
+    : "目前沒有大量四化同時壓到主題主宮，仍要把三方四正一起看。";
+  return `${hitText}。${stemHitText}。${action}；以本盤交會強弱來看，${strength}。${hitSummary}`;
+}
+
+function focusIndexesHas(record, palaces) {
+  const indexes = new Set((palaces || []).map((palace) => palace.index));
+  return indexes.has(record.targetPalace?.index) || indexes.has(record.sourcePalace?.index);
+}
+
 function ziweiFlyingAnalysis(topicKey, chart, context, network) {
   const astrolabe = chart.astrolabe;
+  const topic = TOPIC_CONFIG[topicKey];
   const basePalaces = network.basePalaces || resolveTopicPalaces(topicKey, chart);
   const squarePalaces = basePalaces.flatMap((palace) => sanfangSizhengPalaces(astrolabe, palace));
   const causePalace = getCausePalace(astrolabe);
@@ -3119,11 +3259,39 @@ function ziweiFlyingAnalysis(topicKey, chart, context, network) {
     stem: astrolabe.rawDates?.chineseDate?.yearly?.[0],
   });
   const natalFocus = focusLayerRecords(natalLayer, focusIndexes);
-  const flowLayers = buildReferenceFlowTransformationLayers(astrolabe, context);
-  const flowFocus = flowLayers.flatMap((layer) => focusLayerRecords(layer, focusIndexes));
+  const decadalLayer = transformationLayers.find((layer) => layer.key === "decadal") || createPeriodFlyingLayer(astrolabe, context, "decadal");
+  const yearlyLayer = transformationLayers.find((layer) => layer.key === "yearly") || createPeriodFlyingLayer(astrolabe, context, "yearly");
+  const monthlyLayer = transformationLayers.find((layer) => layer.key === "monthly") || createPeriodFlyingLayer(astrolabe, context, "monthly");
+  const decadalFocus = focusLayerRecords(decadalLayer, focusIndexes);
+  const yearlyFocus = focusLayerRecords(yearlyLayer, focusIndexes);
+  const monthlyFocus = focusLayerRecords(monthlyLayer, focusIndexes);
+  const flowFocus = [...decadalFocus, ...yearlyFocus, ...monthlyFocus];
+  const monthlyPalace = monthlyLayer?.sourcePalace || null;
+  const monthlyStemRecords = monthlyPalace ? palaceStemTransformations(astrolabe, monthlyPalace) : [];
+  const monthlyStemFocus = monthlyStemRecords.filter((record) => (
+    record.targetPalace && focusIndexes.has(record.targetPalace.index)
+  ) || (
+    record.sourcePalace && focusIndexes.has(record.sourcePalace.index)
+  ));
+  const monthlySquarePalaces = monthlyPalace ? sanfangSizhengPalaces(astrolabe, monthlyPalace) : [];
+  const monthlySquareStars = cleanReadingStarNames(monthlySquarePalaces
+    .flatMap((palace) => [
+      ...(palace.majorStars || []),
+      ...periodStarsAt(context, palace.index),
+    ])
+    .map(starReadingDisplayName), 8);
   const baseMainStars = cleanReadingStarNames(basePalaces.flatMap((palace) => palace.majorStars || []).map(starReadingDisplayName), 8);
   const squareMainStars = cleanReadingStarNames(squarePalaces.flatMap((palace) => palace.majorStars || []).map(starReadingDisplayName), 8);
-  const scoreRecords = [...incoming, ...outgoing, ...natalFocus, ...flowFocus];
+  const intersectionRecords = uniqueFlyingRecords([
+    ...layerFlyingRecords(natalLayer),
+    ...outgoing,
+    ...incoming,
+    ...layerFlyingRecords(decadalLayer),
+    ...layerFlyingRecords(yearlyLayer),
+    ...layerFlyingRecords(monthlyLayer),
+    ...monthlyStemRecords,
+  ]);
+  const scoreRecords = [...incoming, ...outgoing, ...natalFocus, ...flowFocus, ...monthlyStemFocus];
   const score = scoreRecords.reduce((sum, record) => sum + mutagenScore(record.mutagen) + (record.isSelf ? mutagenScore(record.mutagen) * 0.35 : 0), 0) * 0.18;
   const scoreClamped = Math.max(-3, Math.min(3, score));
   const loopText = loops.length ? loops.map(formatTransformationLoop).join("；") : "未見主題宮形成明顯四化閉環";
@@ -3131,20 +3299,41 @@ function ziweiFlyingAnalysis(topicKey, chart, context, network) {
   const selfText = summarizeFlyingRecords(selfRecords, "未見主題網絡自化", 3);
   const natalText = summarizeFlyingRecords(natalFocus, "生年四化未直接飛入主題宮或其三方四正", 4, { includeLayer: true });
   const palaceText = [
-    summarizeFlyingRecords(outgoing, "主題宮宮干四化飛出不明顯", 4),
-    summarizeFlyingRecords(incoming, "其他宮干暫未直接飛入主題宮", 4),
+    `飛出：${summarizeFlyingRecords(outgoing, "主題宮宮干四化飛出不明顯", 4)}`,
+    `飛入：${summarizeFlyingRecords(incoming, "其他宮干暫未直接飛入主題宮", 4)}`,
   ].join("；");
-  const flowText = summarizeFlyingRecords(flowFocus, "目前參照的流年、流月四化未直接飛入主題宮或三方四正", 5, { includeLayer: true });
+  const decadalText = `${layerSourceText(decadalLayer, "大限")}；${layerFocusText(decadalLayer, focusIndexes, "大限四化未直接飛入主題宮或其三方四正", 4)}`;
+  const yearlyText = `${layerSourceText(yearlyLayer, "流年")}；${layerFocusText(yearlyLayer, focusIndexes, "流年四化未直接飛入主題宮或其三方四正", 4)}`;
+  const monthlyPalaceText = monthlyPalace
+    ? `流月命宮落${palaceLabel(monthlyPalace)}，先看它與${topic.label}主宮${palaceListText(basePalaces, 5)}、來因宮${causePalace ? palaceLabel(causePalace) : "未取得"}、身宮${bodyPalace ? palaceLabel(bodyPalace) : "未取得"}是否同宮或互相牽動。${monthlyFocus.length ? summarizeFlyingRecords(monthlyFocus, "", 4, { includeLayer: true }) : "流月四化未直接打入主題網絡，需等宮干與三方四正補判。"}`
+    : "流月命宮未取得，暫以流年與大限訊號推估事件節奏。";
+  const monthlyStemText = monthlyPalace
+    ? `${palaceLabel(monthlyPalace)}宮干四化：${summarizeFlyingRecords(monthlyStemFocus.length ? monthlyStemFocus : monthlyStemRecords, "流月宮干未形成可讀四化", 4)}`
+    : "流月宮干四化未取得。";
+  const monthlySquareText = monthlyPalace
+    ? `流月三方四正為${palaceListText(monthlySquarePalaces, 8)}；主星與流運星重點${monthlySquareStars.join("、") || "未見明顯集中"}。這一步用來判斷本月事件是由本人主動、外界舞台、財務資源或關係互動哪一端推動。`
+    : "流月三方四正未取得。";
+  const intersectionText = summarizeFourfoldIntersections(intersectionRecords, focusIndexes);
   const mainText = baseMainStars.length
-    ? `主題主宮主星先看${baseMainStars.join("、")}，再用三方四正主星${squareMainStars.join("、") || "未見明顯主星"}修正。`
-    : `主題主宮無主星時，先借對宮與三方四正定調，再看宮干四化是否把事件拉出去。`;
+    ? `本命先定${topic.label}主宮${palaceListText(basePalaces, 5)}，主星為${baseMainStars.join("、")}；三方四正再看${squareMainStars.join("、") || "未見明顯主星"}，用來修正格局高低、助力與壓力來源。`
+    : `本命${topic.label}主宮${palaceListText(basePalaces, 5)}無主星時，先借對宮與三方四正定調，再看宮干四化是否把事件拉出去。`;
+  const eventText = flyingEventText(topicKey, topic, context, basePalaces, monthlyPalace, monthlyStemFocus, intersectionRecords, scoreClamped);
+
+  const cards = [
+    { title: "本命", text: `${mainText} 本命網絡包含${palaceListText(focusPalaces, 10)}。` },
+    { title: "生年四化", text: natalText },
+    { title: "宮干四化", text: palaceText },
+    { title: "大限命宮大限四化", text: decadalText },
+    { title: "流年命宮流年四化", text: yearlyText },
+    { title: "流月命宮", text: monthlyPalaceText },
+    { title: "流月宮干四化", text: monthlyStemText },
+    { title: "流月三方四正", text: monthlySquareText },
+    { title: "四化交會（祿權科忌）", text: `${intersectionText} 自化、互飛與閉環補充：${selfText}；${mutualText}；${loopText}` },
+    { title: "事件", text: eventText },
+  ];
 
   const summary = [
-    mainText,
-    `生年四化：${natalText}。`,
-    `宮干四化與飛入飛出：${palaceText}。`,
-    `自化、互飛與閉環：${selfText}；${mutualText}；${loopText}。`,
-    `流年流月觸發：${flowText}。`,
+    ...cards.map((card, index) => `${index + 1}. ${card.title}：${card.text}`),
     causePalace ? `來因宮${palaceLabel(causePalace)}作為原局事件入口；若四化鏈碰到來因、主題宮或流年流月宮位，事件感會更明顯。` : "",
   ].filter(Boolean).join(" ");
 
@@ -3158,16 +3347,12 @@ function ziweiFlyingAnalysis(topicKey, chart, context, network) {
       selfRecords.length ? "自化" : "",
       mutualPairs.length ? "互飛" : "",
       loops.length ? "閉環" : "",
-      flowFocus.length ? "流年流月觸發" : "",
+      decadalFocus.length ? "大限四化觸發" : "",
+      yearlyFocus.length ? "流年四化觸發" : "",
+      monthlyFocus.length || monthlyStemFocus.length ? "流月四化觸發" : "",
     ]),
-    cards: [
-      { title: "主星與三方四正", text: `${mainText} 三方四正包含${palaceListText(focusPalaces, 10)}。` },
-      { title: "生年四化", text: natalText },
-      { title: "宮干四化", text: palaceText },
-      { title: "自化・互飛・閉環", text: `${selfText}；${mutualText}；${loopText}` },
-      { title: "流年流月", text: flowText },
-    ],
-    why: `飛星判讀先看主星與三方四正定盤面，再以生年四化定原局課題、宮干四化看飛入飛出，最後用流年與流月確認當期觸發。`,
+    cards,
+    why: `飛星判讀順序依序為本命、生年四化、宮干四化、大限命宮大限四化、流年命宮流年四化、流月命宮、流月宮干四化、流月三方四正、四化交會（祿權科忌），最後才落到事件。`,
   };
 }
 
@@ -3183,6 +3368,94 @@ function renderFlyingStructure(flying) {
       `).join("")}
     </div>
   `;
+}
+
+function ziweiProfessionalAudit(topicKey, chart, context, network, flying) {
+  const topic = TOPIC_CONFIG[topicKey];
+  const basePalaces = network.basePalaces || resolveTopicPalaces(topicKey, chart);
+  const squarePalaces = basePalaces.flatMap((palace) => sanfangSizhengPalaces(chart.astrolabe, palace));
+  const causePalace = getCausePalace(chart.astrolabe);
+  const bodyPalace = getBodyPalace(chart.astrolabe);
+  const supportCount = network.supportStars.length;
+  const pressureCount = network.pressureStars.length;
+  const periodTags = flying.tags.filter((tag) => /大限|流年|流月/.test(tag));
+  const confidence = clampScore(58
+    + Math.min(16, supportCount * 2)
+    + Math.min(15, flying.tags.length * 2)
+    + (periodTags.length ? 8 : 0)
+    + (context.scope === "monthly" ? 4 : 0)
+    - Math.min(16, pressureCount * 2)
+    - (supportCount && pressureCount ? 5 : 0));
+  const conflicts = [
+    supportCount && pressureCount ? `助力星與壓力星並見：助力${network.supportStars.slice(0, 4).join("、")}；壓力${network.pressureStars.slice(0, 4).join("、")}，不可單看吉星或煞星。` : "",
+    !periodTags.length ? "大限、流年或流月四化未明顯打入主題網絡，事件需等實際行動與外部條件觸發。" : "",
+    !basePalaces.length ? "主題主宮未取得，需回到十二宮資料檢查。" : "",
+    baziCalibrationEvents.length < 3 ? "若出生時辰有疑慮，紫微命宮、身宮與流月命宮都會跟著偏移；建議先做事件校準。" : "",
+  ].filter(Boolean);
+  return {
+    mode: "紫微斗數",
+    title: `${topic.label}權重判斷面板`,
+    summary: `以主宮、三方四正、生年四化、宮干飛化與${context.periodName}疊合判斷事件落點。`,
+    confidence,
+    weights: [
+      { label: "主星主宮", weight: 30 },
+      { label: "三方四正", weight: 25 },
+      { label: "生年四化", weight: 15 },
+      { label: "宮干飛化", weight: 15 },
+      { label: "大限流年流月", weight: 15 },
+    ],
+    evidence: [
+      `${topic.label}主宮取${palaceListText(basePalaces, 5)}；三方四正看${palaceListText(squarePalaces, 8)}。`,
+      network.supportStars.length ? `助力星：${network.supportStars.slice(0, 6).join("、")}。` : "助力星不集中，需看流運是否補足。",
+      network.pressureStars.length ? `壓力星：${network.pressureStars.slice(0, 6).join("、")}。` : "煞忌壓力不重。",
+      flying.tags.length ? `飛星標籤：${flying.tags.join("、")}。` : "飛星未見明顯集中標籤。",
+      causePalace ? `來因宮${palaceLabel(causePalace)}，作為原局事件入口。` : "",
+      bodyPalace ? `身宮${palaceLabel(bodyPalace)}，用來看命主實際投入位置。` : "",
+      `當期層級：${context.periodName}${context.periodPalace ? `，命宮落${palaceLabel(context.periodPalace)}` : ""}。`,
+    ].filter(Boolean),
+    conflicts,
+    nextSteps: [
+      "先確認出生時辰，再判斷命宮、身宮、來因宮與流月命宮。",
+      "事件不要只看單宮，需合主宮、三方四正、四化交會與流運宮位。",
+      "若紫微與八字方向分歧，優先把八字視為時間能量，紫微視為事件場景。",
+    ],
+  };
+}
+
+function ziweiEventRuleCards(topicKey, chart, context, network, flying) {
+  const base = palaceListText(network.basePalaces, 5);
+  const support = network.supportStars.slice(0, 4).join("、") || "助力不集中";
+  const pressure = network.pressureStars.slice(0, 4).join("、") || "煞忌壓力不重";
+  const period = context.periodPalace ? palaceLabel(context.periodPalace) : "未取得";
+  const flyingHit = flying.tags.length ? flying.tags.join("、") : "四化未明顯集中";
+  const rules = {
+    property: [
+      ["財富事件", `財富先看${base}，若財帛、田宅、官祿與祿權科交會，較容易出現收入、投資或資產配置事件。`],
+      ["房產緣", `田宅宮需能接到財帛與官祿支撐；助力見${support}時，房產緣較容易落地，壓力見${pressure}時需控貸款與持有成本。`],
+      ["當期觸發", `${context.periodName}命宮落${period}，飛星訊號為${flyingHit}；若再牽動田宅或財帛，事件感更明顯。`],
+    ],
+    career: [
+      ["職涯主軸", `事業看${base}，官祿定職涯位置，命宮看能力，遷移看外部舞台與轉換機會。`],
+      ["職業適配", `助力見${support}時適合承接專業、管理、曝光或制度資源；壓力見${pressure}時要避開過度消耗與模糊權責。`],
+      ["當期觸發", `${context.periodName}命宮落${period}，若飛星碰到官祿、遷移、父母或財帛，容易出現換工作、升遷、考核或新合作。`],
+    ],
+    marriage: [
+      ["正緣入口", `姻緣看${base}，夫妻宮定正式關係，遷移看外部相遇，福德看相處舒適度。`],
+      ["桃花品質", `桃花星或祿科進入夫妻三方時較利吸引與互動；壓力見${pressure}時，要把溝通、距離與承諾談清楚。`],
+      ["當期觸發", `${context.periodName}命宮落${period}，若四化交會到夫妻、遷移、福德或命宮，容易出現相遇、確認關係或關係選擇。`],
+    ],
+    children: [
+      ["子女訊號", `子女看${base}，子女宮主晚輩與作品成果，田宅看家庭承載，福德看相處與照顧舒適度。`],
+      ["照顧承載", `助力見${support}時，照顧資源、晚輩緣或作品成果較易成形；壓力見${pressure}時，需先安排時間、健康與支援系統。`],
+      ["當期觸發", `${context.periodName}命宮落${period}，若飛星引動子女、田宅、夫妻或福德，子女/作品/照顧議題會更明顯。`],
+    ],
+    health: [
+      ["健康主軸", `健康看${base}，疾厄看身體弱點，命宮看體質，福德看睡眠、精神與修復。`],
+      ["保養方向", `助力見${support}時利健檢、調理與建立規律；壓力見${pressure}時要優先管理睡眠、壓力與高耗能行程。`],
+      ["當期觸發", `${context.periodName}命宮落${period}，若飛星牽動疾厄、官祿、遷移或福德，身體感受與壓力反應會更突出。`],
+    ],
+  }[topicKey] || [];
+  return rules.map(([title, text]) => ({ title, text }));
 }
 
 function integratedTopicSummary(topicKey, chart, context, network, bazi) {
@@ -4674,6 +4947,175 @@ function renderBaziDecisionTiming(timing) {
   `;
 }
 
+function confidenceBand(score) {
+  if (score >= 76) return { label: "高可信", tone: "strong" };
+  if (score >= 58) return { label: "中可信", tone: "medium" };
+  return { label: "需校準", tone: "caution" };
+}
+
+function renderProfessionalAudit(audit) {
+  const band = confidenceBand(audit.confidence);
+  return `
+    <section class="professional-audit" data-tone="${escapeHtml(band.tone)}">
+      <header class="professional-audit-head">
+        <div>
+          <span>${escapeHtml(audit.mode)}</span>
+          <h4>${escapeHtml(audit.title)}</h4>
+          <p>${escapeHtml(audit.summary)}</p>
+        </div>
+        <div class="confidence-meter" style="--confidence: ${audit.confidence}">
+          <strong>${escapeHtml(String(audit.confidence))}</strong>
+          <small>${escapeHtml(band.label)}</small>
+        </div>
+      </header>
+      ${audit.weights?.length ? `
+        <div class="audit-weight-grid">
+          ${audit.weights.map((item) => `
+            <div>
+              <span>${escapeHtml(item.label)}</span>
+              <b>${escapeHtml(String(item.weight))}%</b>
+              <i style="width: ${Math.max(4, Math.min(100, item.weight))}%"></i>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+      <div class="audit-grid">
+        <article>
+          <b>證據鏈</b>
+          <ul>
+            ${audit.evidence.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <article>
+          <b>矛盾與校準</b>
+          <ul>
+            ${(audit.conflicts.length ? audit.conflicts : ["目前未見重大矛盾，但仍需用實際事件校準。"]).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+        <article>
+          <b>下一步</b>
+          <ul>
+            ${audit.nextSteps.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </article>
+      </div>
+    </section>
+  `;
+}
+
+function baziEventRuleCards(topicKey, chart, period) {
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const relation = baziRelationAnalysis(chart.pillars || []);
+  const periodInteraction = baziPeriodInteractionAnalysis(chart, period);
+  const layers = period.layers?.length ? period.layers : period.pillar ? [{ label: period.periodName, pillar: period.pillar }] : [];
+  const periodGods = uniqueItems(layers.flatMap((layer) => {
+    const { stem, branch } = splitPillar(layer.pillar || "");
+    return [getTenGod(dayStem, stem), ...getHiddenStemGods(dayStem, branch).map((item) => item.god)].filter(Boolean);
+  }));
+  const hasGod = (gods) => periodGods.some((god) => gods.includes(god));
+  const topicRules = {
+    property: [
+      ["財富觸發", hasGod(["正財", "偏財"]) ? "財星被行運帶動，適合看收入、報價、投資、收款與資產配置。" : "財星未直接被帶動時，先看食傷能否生財，以及現金流是否能承接。"],
+      ["房產承接", hasGod(["正財", "偏財", "正印", "偏印"]) ? "財星與印星可接到資產、契約、長期承載與居住安排。" : "田宅與不動產要回看土氣、正財、印星與現實貸款條件。"],
+      ["風險控管", periodInteraction.records.some((item) => /沖|刑|害|破/.test(item.interaction)) ? "行運有沖刑害破，投資、借貸、簽約需降低槓桿。" : "行運衝突不重，可用預算、合約與停損線管理風險。"],
+    ],
+    career: [
+      ["職位責任", hasGod(["正官", "七殺"]) ? "官殺被帶動，容易出現職責、考核、升遷、轉職或競爭壓力。" : "官殺不強時，事業更靠作品、履歷、合作與可被看見的成果。"],
+      ["專業支撐", hasGod(["正印", "偏印"]) ? "印星被帶動，利進修、證照、導師、制度資源與專業底盤。" : "印星不突出時，要靠實作、輸出與市場回饋累積可信度。"],
+      ["變動訊號", periodInteraction.records.some((item) => /沖|破/.test(item.interaction)) ? "沖破牽動時，換工作、換團隊、搬遷或工作模式調整機率上升。" : "變動訊號不強，適合先把現有位置做深。"],
+    ],
+    marriage: [
+      ["相遇入口", hasGod(["正官", "七殺", "正財", "偏財"]) ? "伴侶星被行運帶動，較容易出現有現實感的認識、互動或關係選擇。" : "伴侶星不直接時，感情需靠社交場域、朋友介紹或共同興趣打開。"],
+      ["關係穩定", relation.tensions.length ? `原局見${relation.tensions.slice(0, 2).join("、")}，關係需重視溝通節奏與邊界。` : "原局沖刑害破不重，關係穩定度更多看生活節奏與價值觀。"],
+      ["桃花提醒", baziPeachBlossomAnalysis(chart)],
+    ],
+    children: [
+      ["子女/作品", hasGod(["食神", "傷官"]) ? "食傷被帶動，子女、晚輩、作品、創造與照顧議題較容易浮現。" : "食傷未直接時，先整理身心與生活承載。"],
+      ["照顧資源", hasGod(["正印", "偏印"]) ? "印星出現可看照顧、教育、長輩支援與修復資源。" : "印星不強時，照顧分工、時間與資源配置要先談清楚。"],
+      ["壓力辨識", periodInteraction.records.some((item) => /刑|害|沖/.test(item.interaction)) ? "行運衝突較多，生養照顧或作品壓力需放慢安排。" : "衝突不重，可用穩定節奏推進。"],
+    ],
+    health: [
+      ["身體壓力", hasGod(["七殺", "傷官"]) ? "七殺或傷官被帶動，壓力、耗能、作息與情緒反應要優先管理。" : "壓力星不強時，仍以五行偏盛偏枯與作息平衡為主。"],
+      ["修復資源", hasGod(["正印", "偏印"]) ? "印星被帶動，適合健檢、休養、復健、建立保養與睡眠規律。" : "印星不足時，修復要靠固定習慣與外部專業協助。"],
+      ["醫療提醒", "健康判讀只作保養方向，不替代醫師診斷；若有症狀或檢查異常，以正式醫療為準。"],
+    ],
+  }[topicKey] || [];
+  return topicRules.map(([title, text]) => ({ title, text }));
+}
+
+function renderEventRulePanel(title, cards) {
+  return `
+    <div class="event-rule-grid">
+      ${cards.map((card) => `
+        <article>
+          <b>${escapeHtml(card.title)}</b>
+          <p>${escapeHtml(card.text)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function baziProfessionalAudit(topicKey, chart, period, analysis, coreScores) {
+  const topic = TOPIC_CONFIG[topicKey];
+  const profile = baziDayMasterProfile(chart);
+  const structure = baziStructureProfile(chart);
+  const usefulGod = baziUsefulGodProfile(chart);
+  const tenGod = baziTenGodPower(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const periodInteraction = baziPeriodInteractionAnalysis(chart, period);
+  const leadingGods = tenGod.ranked.slice(0, 4).map(([god, ratio]) => `${god}${percentText(ratio)}`);
+  const calibrationCount = baziCalibrationEvents.length;
+  const relationPenalty = Math.min(14, relations.tensions.length * 3 + periodInteraction.records.filter((item) => /沖|刑|害|破/.test(item.interaction)).length * 2);
+  const confidence = clampScore(56
+    + Math.min(18, calibrationCount * 6)
+    + (structure.supports.length ? 7 : 0)
+    + (!structure.pressures.length ? 6 : -6)
+    + (period.pillar ? 5 : 0)
+    - relationPenalty
+    - (Math.abs(profile.score) >= 3.8 ? 5 : 0));
+  const scoreFocus = coreScores.find((item) => ({
+    property: "wealth",
+    career: "career",
+    marriage: "stability",
+    children: "love",
+    health: "learning",
+  }[topicKey] === item.key));
+  const conflicts = [
+    structure.pressures.length ? `格局混雜：${structure.pressures.join("、")}。` : "",
+    relations.tensions.length ? `原局地支有${relations.tensions.slice(0, 4).join("、")}，事件判斷需保留磨合或變動。` : "",
+    periodInteraction.records.some((item) => /沖|刑|害|破/.test(item.interaction)) ? "當期大運、流年或流月與原局形成沖刑害破，時間點需更細切到節氣與實際事件。" : "",
+    calibrationCount < 3 ? "過往事件少於三筆，出生時辰可信度仍需校準。" : "",
+  ].filter(Boolean);
+  return {
+    mode: "八字",
+    title: `${topic.label}專業判斷面板`,
+    summary: `以日主旺衰、月令格局、喜用調候、十神占比與${period.periodName}事件觸發交叉判斷。`,
+    confidence,
+    weights: [
+      { label: "四柱原局", weight: 30 },
+      { label: "月令旺衰", weight: 20 },
+      { label: "格局喜用", weight: 20 },
+      { label: "合沖刑害", weight: 15 },
+      { label: "大運流年流月", weight: 15 },
+    ],
+    evidence: [
+      `日主${profile.dayStem}${profile.dayElement}，生扶${Math.round(profile.supportRatio * 100)}%，判為${profile.strength}。`,
+      `月令${profile.monthBranch}主氣${profile.monthMainStem}${profile.monthGod}，立${structure.name}，狀態為${structure.status}。`,
+      `喜用：扶抑取${usefulGod.primary || "流通"}${usefulGod.secondary ? `、${usefulGod.secondary}` : ""}，調候取${usefulGod.regulating}。`,
+      `十神占比前段：${leadingGods.join("、") || "未取得"}。`,
+      `${period.periodName}${period.pillar ? `為${period.pillar}` : "以原局為主"}；${analysis.tags.slice(0, 4).join("、")}。`,
+      scoreFocus ? `${scoreFocus.label}為${scoreFocus.score}/100：${scoreFocus.text}` : "",
+    ].filter(Boolean),
+    conflicts,
+    nextSteps: [
+      "加入至少三筆不同年份的過往事件，先確認時辰再看精準流月。",
+      "重要事件用節氣月、實際日期與當時選擇再細校，不只看公曆月份。",
+      "八字提供能量與時間節奏，仍需與紫微的宮位事件落點互相核對。",
+    ],
+  };
+}
+
 function renderBaziInsights(chart) {
   if (!baziInsightOutput) return;
   const profile = baziDayMasterProfile(chart);
@@ -4808,6 +5250,8 @@ function buildBaziReading(chart) {
   const periodText = baziPeriodReading(chart, period);
   const monthlyGuide = baziMonthlyActionGuide(chart, period);
   const scoreSummary = coreScores.map((item) => `${item.label}${item.score}`).join("、");
+  const audit = baziProfessionalAudit(topicKey, chart, period, analysis, coreScores);
+  const eventRules = baziEventRuleCards(topicKey, chart, period);
   const why = [
     `日主為${profile.dayStem}${profile.dayElement}，月令${profile.monthBranch}屬${profile.season}季${profile.monthElement}氣；藏干加權後生扶約${Math.round(profile.supportRatio * 100)}%，日主判為${profile.strength}。`,
     `格局以月令主氣立${structure.name}，目前為${structure.status}。${structure.pressures.length ? `混雜點：${structure.pressures.join("、")}。` : "未見明顯破格衝突。"}`,
@@ -4834,6 +5278,7 @@ function buildBaziReading(chart) {
       <div class="reading-copy">
         <div class="reading-status">${escapeHtml(period.periodName)} · ${escapeHtml(topic.label)}</div>
         <h3>${escapeHtml(topic.label)}：${escapeHtml(tone)}</h3>
+        ${renderProfessionalAudit(audit)}
         <section class="reading-block">
           <h4>原局骨架</h4>
           <p>${escapeHtml(profile.text)}</p>
@@ -4849,6 +5294,10 @@ function buildBaziReading(chart) {
         <section class="reading-block">
           <h4>${escapeHtml(topic.label)}延伸重點</h4>
           <p>${escapeHtml(supplement)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>事件觸發規則</h4>
+          ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
         </section>
         <section class="reading-block">
           <h4>核心格局分數（滿分 100）</h4>
@@ -5108,6 +5557,8 @@ function buildReading(chart) {
   const ziweiText = ziweiTopicAnalysis(topicKey, chart, context, network);
   const peach = topicKey === "marriage" ? nativePeachBlossomAnalysis(chart, network, { includeBazi: false }) : null;
   const monthlyGuide = ziweiMonthlyActionGuide(chart, context);
+  const audit = ziweiProfessionalAudit(topicKey, chart, context, network, flying);
+  const eventRules = ziweiEventRuleCards(topicKey, chart, context, network, flying);
   const why = [
     `${ASTRO_SCHOOL_LABEL}：星曜安置與神煞顯示使用 iztro 的 zhongzhou 演算法設定。`,
     `${topic.label}主題先取${topicPalacesText}，再加入三方四正、對宮、來因宮、身宮與當期流運宮位，避免單宮斷事。`,
@@ -5132,6 +5583,7 @@ function buildReading(chart) {
       <div class="reading-copy">
         <div class="reading-status">${escapeHtml(context.periodName)} · ${escapeHtml(topic.label)}</div>
         <h3>${escapeHtml(topic.label)}：${escapeHtml(tone)}</h3>
+        ${renderProfessionalAudit(audit)}
         <section class="reading-block">
           <h4>紫微斗數</h4>
           <p>${escapeHtml(ziweiText)}</p>
@@ -5140,6 +5592,10 @@ function buildReading(chart) {
           <h4>飛星四化</h4>
           <p>${escapeHtml(flying.summary)}</p>
           ${renderFlyingStructure(flying)}
+        </section>
+        <section class="reading-block">
+          <h4>事件觸發規則</h4>
+          ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
         </section>
         ${monthlyGuide ? `
           <section class="reading-block">
