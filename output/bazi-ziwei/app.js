@@ -143,8 +143,6 @@ const SCOPE_LABELS = {
   age: "小限",
   yearly: "流年",
   monthly: "流月",
-  daily: "流日",
-  hourly: "流時",
 };
 const BAZI_SCOPE_LABELS = {
   natal: "原局",
@@ -2016,7 +2014,7 @@ function renderAuxiliaryChips(palace) {
 }
 
 function getSafeNumber(input, fallback, min, max) {
-  const value = Number(input.value || fallback);
+  const value = Number(input?.value || fallback);
   if (Number.isNaN(value)) return fallback;
   return Math.min(max, Math.max(min, value));
 }
@@ -2248,8 +2246,8 @@ function buildPeriodContext(chart) {
   const targetYear = getSafeNumber(targetYearInput, new Date().getFullYear(), 1900, 2100);
   const targetMonth = getSafeNumber(targetMonthInput, new Date().getMonth() + 1, 1, 12);
   const maxDay = new Date(targetYear, targetMonth, 0).getDate();
-  const targetDay = getSafeNumber(targetDayInput, new Date().getDate(), 1, maxDay);
-  const targetHour = getSafeNumber(targetHourInput, new Date().getHours(), 0, 23);
+  const targetDay = scope === "monthly" ? Math.min(15, maxDay) : getSafeNumber(targetDayInput, 15, 1, maxDay);
+  const targetHour = scope === "monthly" ? 12 : getSafeNumber(targetHourInput, 12, 0, 23);
   let targetDate = `${targetYear}-${String(targetMonth).padStart(2, "0")}-${String(targetDay).padStart(2, "0")} ${String(targetHour).padStart(2, "0")}:00`;
   let horoscope = null;
   let periodIndex = null;
@@ -2270,17 +2268,13 @@ function buildPeriodContext(chart) {
     periodName = `${targetYear} ${SCOPE_LABELS[scope]}`;
   }
 
-  if (["age", "monthly", "daily", "hourly"].includes(scope)) {
+  if (["age", "monthly"].includes(scope)) {
     horoscope = getHoroscopeSafe(chart.astrolabe, targetDate);
     const period = horoscope?.[scope];
     periodIndex = period?.index ?? null;
     periodName = scope === "age"
       ? `${targetYear} 小限（虛歲${period?.nominalAge || "未定"}）`
-      : scope === "monthly"
-        ? `${targetYear}年${targetMonth}月 流月`
-        : scope === "daily"
-          ? `${targetYear}年${targetMonth}月${targetDay}日 流日`
-          : `${targetYear}年${targetMonth}月${targetDay}日${targetHour}時 流時`;
+      : `${targetYear}年${targetMonth}月 流月`;
   }
 
   return {
@@ -2299,11 +2293,9 @@ function buildPeriodContext(chart) {
 
 function periodLayerKeys(scope) {
   const layers = [];
-  if (["decadal", "age", "yearly", "monthly", "daily", "hourly"].includes(scope)) layers.push("decadal");
-  if (["age", "yearly", "monthly", "daily", "hourly"].includes(scope)) layers.push("yearly");
-  if (["monthly", "daily", "hourly"].includes(scope)) layers.push("monthly");
-  if (["daily", "hourly"].includes(scope)) layers.push("daily");
-  if (scope === "hourly") layers.push("hourly");
+  if (["decadal", "age", "yearly", "monthly"].includes(scope)) layers.push("decadal");
+  if (["age", "yearly", "monthly"].includes(scope)) layers.push("yearly");
+  if (scope === "monthly") layers.push("monthly");
   return layers;
 }
 
@@ -2798,8 +2790,43 @@ function ziweiMonthlyActionForTopic(topicKey, chart, context) {
   const support = network.supportStars.slice(0, 3);
   const pressure = network.pressureStars.slice(0, 3);
   const periodPalace = context.periodPalace;
-  const score = clampScore(58 + network.score * 3.8 + flying.score * 8);
-  const hasFlow = flying.tags.includes("流年流月觸發");
+  const topicHit = Boolean(periodPalace && network.basePalaces.some((palace) => palace.index === periodPalace.index));
+  const weights = {
+    natal: Math.max(8, Math.min(25, Math.round(14 + Math.max(-2, Math.min(4, network.score)) * 2.4 + (primary ? 3 : 0)))),
+    sanfang: Math.max(6, Math.min(20, Math.round(10 + support.length * 3 - pressure.length * 2))),
+    transformations: Math.max(0, Math.min(20, [
+      flying.tags.includes("生年四化入主題") ? 6 : 0,
+      flying.tags.includes("有飛入") ? 5 : 0,
+      flying.tags.includes("有飛出") ? 4 : 0,
+      flying.tags.includes("自化") ? 3 : 0,
+      flying.tags.includes("互飛") || flying.tags.includes("閉環") ? 4 : 0,
+    ].reduce((sum, value) => sum + value, 2))),
+    period: Math.max(0, Math.min(15, [
+      flying.tags.includes("大限四化觸發") ? 5 : 0,
+      flying.tags.includes("流年四化觸發") ? 5 : 0,
+      periodPalace ? 3 : 0,
+      topicHit ? 2 : 0,
+    ].reduce((sum, value) => sum + value, 0))),
+    monthly: Math.max(0, Math.min(20, [
+      context.scope === "monthly" ? 5 : 0,
+      flying.tags.includes("流月四化觸發") ? 9 : 0,
+      periodPalace ? 3 : 0,
+      topicHit ? 4 : 0,
+      pressure.length > support.length ? -3 : 0,
+    ].reduce((sum, value) => sum + value, 0))),
+  };
+  const weightItems = [
+    { label: "原命主題", value: weights.natal, max: 25 },
+    { label: "三方四正", value: weights.sanfang, max: 20 },
+    { label: "四化牽動", value: weights.transformations, max: 20 },
+    { label: "大限流年", value: weights.period, max: 15 },
+    { label: "流月觸發", value: weights.monthly, max: 20 },
+  ];
+  const score = clampScore(Object.values(weights).reduce((sum, value) => sum + value, 0));
+  const hasFlow = flying.tags.includes("流月四化觸發")
+    || flying.tags.includes("流年四化觸發")
+    || flying.tags.includes("大限四化觸發")
+    || topicHit;
   const hasPressure = pressure.length > support.length;
   const action = {
     property: hasFlow
@@ -2823,9 +2850,10 @@ function ziweiMonthlyActionForTopic(topicKey, chart, context) {
     label: TOPIC_CONFIG[topicKey].label,
     score,
     action,
-    reason: `原命以${palaceListText(network.basePalaces, 4)}為主，三方四正納入${palaceListText(network.networkPalaces, 8)}；${periodPalace ? `流月落${palaceLabel(periodPalace)}。` : ""}${support.length ? `助力見${support.join("、")}。` : ""}${pressure.length ? `壓力見${pressure.join("、")}。` : ""}`,
+    reason: `原命以${palaceListText(network.basePalaces, 4)}為主，三方四正納入${palaceListText(network.networkPalaces, 8)}；${periodPalace ? `流月命宮落${palaceLabel(periodPalace)}。` : ""}${topicHit ? "流月命宮直接碰到主題宮。" : ""}${support.length ? `助力見${support.join("、")}。` : ""}${pressure.length ? `壓力見${pressure.join("、")}。` : ""}`,
     caution: pressure.length ? "煞忌或壓力星較明顯時，宜先控風險與溝通成本。" : "可推進，但仍需看現實資源與實際行動。",
-    source: `${flying.summary}`,
+    source: `${flying.conclusion || flying.summary}`,
+    weights: weightItems,
     primary: primary?.palace ? palaceLabel(primary.palace) : "未取得主宮",
   };
 }
@@ -2857,6 +2885,17 @@ function renderMonthlyActionGuide(guide, mode = "bazi") {
               <b>${escapeHtml(String(card.score))}</b>
             </header>
             <p class="monthly-action-main">${escapeHtml(card.action)}</p>
+            ${card.weights?.length ? `
+              <div class="monthly-weight-list">
+                ${card.weights.map((item) => `
+                  <div>
+                    <span>${escapeHtml(item.label)}</span>
+                    <i style="width: ${Math.max(4, Math.round((item.value / item.max) * 100))}%"></i>
+                    <b>${escapeHtml(`${item.value}/${item.max}`)}</b>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
             <p>${escapeHtml(card.reason)}</p>
             <small>${escapeHtml(card.caution)}</small>
           </article>
@@ -3336,8 +3375,22 @@ function ziweiFlyingAnalysis(topicKey, chart, context, network) {
     ...cards.map((card, index) => `${index + 1}. ${card.title}：${card.text}`),
     causePalace ? `來因宮${palaceLabel(causePalace)}作為原局事件入口；若四化鏈碰到來因、主題宮或流年流月宮位，事件感會更明顯。` : "",
   ].filter(Boolean).join(" ");
+  const triggerTone = scoreClamped >= 1.2
+    ? "四化支撐較明顯，可以主動推進"
+    : scoreClamped <= -1.2
+      ? "四化壓力較重，適合保守處理"
+      : "四化訊號中等，宜先觀察再推進";
+  const monthlyConclusion = context?.scope === "monthly" && monthlyPalace
+    ? `本流月命宮落${palaceLabel(monthlyPalace)}，${monthlyStemFocus.length ? "流月宮干四化有牽動主題網絡" : "流月宮干四化未直接打到主題主宮"}。`
+    : "";
+  const conclusion = [
+    `${topic.label}飛星結論：${triggerTone}。`,
+    `${eventText}`,
+    monthlyConclusion,
+  ].filter(Boolean).join(" ");
 
   return {
+    conclusion,
     summary,
     score: scoreClamped,
     tags: uniqueItems([
@@ -3356,9 +3409,9 @@ function ziweiFlyingAnalysis(topicKey, chart, context, network) {
   };
 }
 
-function renderFlyingStructure(flying) {
+function renderFlyingStructure(flying, options = {}) {
   if (!flying?.cards?.length) return "";
-  return `
+  const grid = `
     <div class="flying-structure-grid">
       ${flying.cards.map((card) => `
         <article class="flying-structure-card">
@@ -3367,6 +3420,16 @@ function renderFlyingStructure(flying) {
         </article>
       `).join("")}
     </div>
+  `;
+  if (!options.collapsible) return grid;
+  return `
+    <details class="flying-detail-panel">
+      <summary>
+        <span>展開飛星四化流程</span>
+        <small>本命、生年、宮干、大限、流年、流月與四化交會</small>
+      </summary>
+      ${grid}
+    </details>
   `;
 }
 
@@ -4555,7 +4618,7 @@ function chatTopicAnswer(topicKey) {
 
   return [
     `我先從紫微的${topic.label}主宮與三方四正開始看：${ziweiText}`,
-    `飛星四化方面：${flying.summary}`,
+    `飛星四化方面：${flying.conclusion || flying.summary}`,
     peachText,
     `時間節奏方面：${timelinePlainText(topicKey, currentChart)}`,
   ].filter(Boolean).join(" ");
@@ -4662,7 +4725,7 @@ function buildBotAnswer(question) {
     const topicKey = topicSelect.value || "property";
     const network = evaluateTopicNetwork(topicKey, currentChart, context);
     const flying = ziweiFlyingAnalysis(topicKey, currentChart, context, network);
-    return `目前以「${TOPIC_CONFIG[topicKey].label}」主題看飛星：${flying.summary}`;
+    return `目前以「${TOPIC_CONFIG[topicKey].label}」主題看飛星：${flying.conclusion || flying.summary}`;
   }
 
   const palaceAnswer = chatPalaceAnswer(q);
@@ -5584,25 +5647,25 @@ function buildReading(chart) {
         <div class="reading-status">${escapeHtml(context.periodName)} · ${escapeHtml(topic.label)}</div>
         <h3>${escapeHtml(topic.label)}：${escapeHtml(tone)}</h3>
         ${renderProfessionalAudit(audit)}
-        <section class="reading-block">
-          <h4>紫微斗數</h4>
-          <p>${escapeHtml(ziweiText)}</p>
-        </section>
-        <section class="reading-block">
-          <h4>飛星四化</h4>
-          <p>${escapeHtml(flying.summary)}</p>
-          ${renderFlyingStructure(flying)}
-        </section>
-        <section class="reading-block">
-          <h4>事件觸發規則</h4>
-          ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
-        </section>
         ${monthlyGuide ? `
           <section class="reading-block">
             <h4>流月五主題行動建議</h4>
             ${renderMonthlyActionGuide(monthlyGuide, "ziwei")}
           </section>
         ` : ""}
+        <section class="reading-block">
+          <h4>紫微斗數</h4>
+          <p>${escapeHtml(ziweiText)}</p>
+        </section>
+        <section class="reading-block">
+          <h4>飛星四化</h4>
+          <p>${escapeHtml(flying.conclusion || flying.summary)}</p>
+          ${renderFlyingStructure(flying, { collapsible: true })}
+        </section>
+        <section class="reading-block">
+          <h4>事件觸發規則</h4>
+          ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
+        </section>
         ${peach ? `
           <section class="reading-block">
             <h4>命主桃花分析</h4>
@@ -5628,10 +5691,10 @@ function updateReading() {
   if (!currentChart) return;
   const context = buildPeriodContext(currentChart);
   decadalControl.hidden = scopeSelect.value !== "decadal";
-  yearControl.hidden = !["age", "yearly", "monthly", "daily", "hourly"].includes(scopeSelect.value);
-  monthControl.hidden = !["monthly", "daily", "hourly"].includes(scopeSelect.value);
-  dayControl.hidden = !["daily", "hourly"].includes(scopeSelect.value);
-  hourControl.hidden = scopeSelect.value !== "hourly";
+  yearControl.hidden = !["age", "yearly", "monthly"].includes(scopeSelect.value);
+  monthControl.hidden = scopeSelect.value !== "monthly";
+  dayControl.hidden = true;
+  hourControl.hidden = true;
   if (palaceOverviewOutput) palaceOverviewOutput.innerHTML = renderPalaceOverview(currentChart.astrolabe);
   readingOutput.innerHTML = buildReading(currentChart);
   renderPartnerProfile(currentChart);
@@ -5964,16 +6027,12 @@ function buildFourTransformationLayers(astrolabe, context = null) {
     age: ["decadal", "yearly", "age"],
     yearly: ["decadal", "yearly"],
     monthly: ["decadal", "yearly", "monthly"],
-    daily: ["decadal", "yearly", "monthly", "daily"],
-    hourly: ["decadal", "yearly", "monthly", "daily", "hourly"],
   }[context?.scope] || [];
   const layerMeta = {
     decadal: { label: "大限", short: "限" },
     age: { label: "小限", short: "小" },
     yearly: { label: "流年", short: "年" },
     monthly: { label: "流月", short: "月" },
-    daily: { label: "流日", short: "日" },
-    hourly: { label: "流時", short: "時" },
   };
 
   visiblePeriodLayers.forEach((key) => {
@@ -6086,8 +6145,6 @@ function fourTransformationFlightSvg(transformationLayers) {
     age: "10 6 2 6",
     yearly: "5 7",
     monthly: "16 6 4 6",
-    daily: "4 5",
-    hourly: "2 4",
   }[activeLayer.key] || "";
 
   return activeLayer.transformations.map((item, index) => {
@@ -6229,7 +6286,7 @@ function renderPalaceImageBlock(palace, astrolabe, imageType, periodIndex = null
 function centerModeNote(imageType) {
   if (imageType === "flying") return "飛星圖以各宮宮干起飛，顯示祿、權、科、忌分別飛入的目標宮位。";
   if (imageType === "sanhe") return "三合圖顯示各宮位的三合、對宮與三方四正，用來看事件互相牽動的結構。";
-  if (imageType === "sihua") return "四化飛星圖分層顯示本命、大限、小限、流年、流月、流日與流時；四色箭頭呈現目前最細層級的祿、權、科、忌飛向。";
+  if (imageType === "sihua") return "四化飛星圖分層顯示本命、大限、小限、流年與流月；四色箭頭呈現目前層級的祿、權、科、忌飛向。";
   return "飛星、三合、四化圖皆保留命宮、身宮、來因宮與流運標記。";
 }
 
@@ -6316,7 +6373,7 @@ function renderZiweiImage(astrolabe, context = null) {
 
 function renderPeriodStarGroups(context, palaceIndex) {
   if (!context?.horoscope) return "";
-  const labels = { decadal: "大限", yearly: "流年", monthly: "流月", daily: "流日", hourly: "流時" };
+  const labels = { decadal: "大限", yearly: "流年", monthly: "流月" };
   return periodLayerKeys(context.scope).map((key) => {
     const stars = context.horoscope?.[key]?.stars?.[palaceIndex] || [];
     if (!stars.length) return "";

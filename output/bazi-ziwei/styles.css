@@ -1628,6 +1628,63 @@ button {
   margin-top: 10px;
 }
 
+.flying-detail-panel {
+  margin-top: 10px;
+  border: 1px solid #ece5d8;
+  border-radius: 8px;
+  background: #fffdf8;
+  overflow: hidden;
+}
+
+.flying-detail-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+  background: #f8f3e7;
+}
+
+.flying-detail-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.flying-detail-panel summary::after {
+  content: "+";
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--charcoal);
+  color: #fffdf7;
+  font-weight: 950;
+}
+
+.flying-detail-panel[open] summary::after {
+  content: "−";
+}
+
+.flying-detail-panel summary span {
+  color: var(--charcoal);
+  font-size: 0.84rem;
+  font-weight: 950;
+}
+
+.flying-detail-panel summary small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.flying-detail-panel .flying-structure-grid {
+  margin: 0;
+  padding: 10px;
+}
+
 .flying-structure-card {
   border: 1px solid #ece5d8;
   border-radius: 8px;
@@ -1725,6 +1782,33 @@ button {
   font-size: 0.84rem;
   font-weight: 900;
   line-height: 1.5 !important;
+}
+
+.monthly-weight-list {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.monthly-weight-list div {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 44px;
+  gap: 7px;
+  align-items: center;
+}
+
+.monthly-weight-list span,
+.monthly-weight-list b {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.monthly-weight-list i {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--jade);
 }
 
 .monthly-action-card p:not(.monthly-action-main) {

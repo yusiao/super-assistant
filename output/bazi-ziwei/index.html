@@ -242,8 +242,8 @@
                     <span
                       class="info-tooltip"
                       tabindex="0"
-                      aria-label="大限：十年階段；小限：虛歲年度宮位；流年：年度焦點；流月：月份節奏；流日與流時：短期觸發。"
-                      data-tooltip="大限：十年階段。小限：虛歲年度宮位。流年：年度焦點。流月：月份節奏。流日、流時：短期觸發，應以大限與流年為背景。"
+                      aria-label="大限：十年階段；小限：虛歲年度宮位；流年：年度焦點；流月：月份節奏，應以大限與流年為背景。"
+                      data-tooltip="大限：十年階段。小限：虛歲年度宮位。流年：年度焦點。流月：月份節奏，應以大限與流年為背景。"
                     >?</span>
                   </span>
                   <select id="scope-select">
@@ -251,8 +251,6 @@
                     <option value="age">小限</option>
                     <option value="yearly">流年</option>
                     <option value="monthly">流月</option>
-                    <option value="daily">流日</option>
-                    <option value="hourly">流時</option>
                   </select>
                 </label>
 
@@ -271,15 +269,8 @@
                   <input id="target-month" type="number" min="1" max="12" />
                 </label>
 
-                <label class="select-field" id="day-control">
-                  <span>流日日期</span>
-                  <input id="target-day" type="number" min="1" max="31" />
-                </label>
-
-                <label class="select-field" id="hour-control">
-                  <span>流時小時</span>
-                  <input id="target-hour" type="number" min="0" max="23" />
-                </label>
+                <input id="target-day" type="hidden" value="15" />
+                <input id="target-hour" type="hidden" value="12" />
 
                 <label class="select-field">
                   <span>主題</span>
