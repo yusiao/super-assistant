@@ -127,9 +127,9 @@ const TOPIC_CONFIG = {
   },
   children: {
     label: "子女",
-    palaces: ["子女宮", "田宅宮", "福德宮"],
+    palaces: ["子女宮", "福德宮", "夫妻宮", "田宅宮"],
     elements: ["木", "水"],
-    prompt: "看子女緣、親子互動、生養照顧、晚輩關係與家庭延續。",
+    prompt: "看子女緣、親子互動、生養照顧、晚輩關係、作品創造與親密表達。",
   },
   health: {
     label: "健康",
@@ -155,7 +155,7 @@ const CALIBRATION_EVENT_TYPES = {
   marriage: { label: "感情／婚姻", gods: ["正官", "七殺", "正財", "偏財", "食神", "傷官"], pillars: [2] },
   property: { label: "財務／置產", gods: ["正財", "偏財", "食神", "傷官"], pillars: [1, 2] },
   family: { label: "家庭／搬遷", gods: ["正印", "偏印", "比肩", "劫財"], pillars: [0, 1] },
-  children: { label: "子女／作品", gods: ["食神", "傷官", "正印", "偏印"], pillars: [3] },
+  children: { label: "子女／作品／親密", gods: ["食神", "傷官", "正印", "偏印"], pillars: [3] },
   health: { label: "健康／壓力", gods: ["正印", "偏印", "正官", "七殺", "傷官"], pillars: [2, 3] },
 };
 const HEAVENLY_STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
@@ -218,7 +218,7 @@ const PALACE_OVERVIEWS = [
   ["命宮", "先天個性、人生主軸、外在呈現與做事基調。"],
   ["兄弟宮", "手足、同輩、合作默契、競爭關係與資源分攤。"],
   ["夫妻宮", "伴侶、婚姻、正式關係、對象類型與相處模式。"],
-  ["子女宮", "子女緣、晚輩、創作成果、生育照顧與親子互動。"],
+  ["子女宮", "子女緣、晚輩、創作成果、生育照顧、親子互動與親密表達。"],
   ["財帛宮", "收入模式、金錢流動、理財習慣與可掌握資源。"],
   ["疾厄宮", "身體狀態、壓力反應、健康弱點與修復方式。"],
   ["遷移宮", "外部舞台、出差旅行、跨城市機會與對外形象。"],
@@ -1433,6 +1433,65 @@ function baziPeachBlossomAnalysis(chart) {
   return `${level}。${signals.length ? `四柱訊號：${signals.join("；")}。` : "四柱未見明顯桃花入柱。"}${relationText}${lifestyleWarning}`;
 }
 
+function intimacyOrientationNotice() {
+  return "提醒：命盤不能判定性取向、性別認同或生理性別；這裡只把子女宮與八字食傷延伸為親密互動、慾望表達、界線與安全感的象徵式分析。";
+}
+
+function hasLuckTransformationInPalace(palace) {
+  return allPalaceStars(palace).some((star) => {
+    const name = starReadingDisplayName(star);
+    const mutagen = toTraditional(star?.mutagen || "");
+    return name.includes("化祿") || mutagen.includes("祿");
+  });
+}
+
+function ziweiIntimacyExpressionText(chart, network = null) {
+  const childPalace = findPalaceByName(chart.astrolabe, "子女宮");
+  const fortunePalace = findPalaceByName(chart.astrolabe, "福德宮");
+  const spousePalace = findPalaceByName(chart.astrolabe, "夫妻宮");
+  const childStars = summarizeReadingStarNames(overviewStarsForPalace(childPalace), "子女宮主星與桃花星不集中");
+  const childHasLuck = hasLuckTransformationInPalace(childPalace);
+  const emptyPalaces = [
+    fortunePalace && !(fortunePalace.majorStars || []).length ? "福德宮" : "",
+    spousePalace && !(spousePalace.majorStars || []).length ? "夫妻宮" : "",
+  ].filter(Boolean);
+  const support = network?.supportStars?.slice(0, 3) || [];
+  const pressure = network?.pressureStars?.slice(0, 3) || [];
+  const flowText = childHasLuck
+    ? "子女宮見化祿時，親密愉悅、被喜歡、想靠近或想被肯定的需求會被放大，較容易把吸引力表現在作品、互動、身體感受與關係熱度上。"
+    : "子女宮未見明顯化祿時，親密需求不一定外放，需再看福德宮的享受感與夫妻宮的關係投射。";
+  const emptyText = emptyPalaces.length
+    ? `${emptyPalaces.join("、")}無主星，代表親密安全感或關係投射更需要借對宮、三方四正與四化補判，不能直接等同某種性取向。`
+    : "福德宮與夫妻宮有主星時，親密安全感與關係投射較有明確星曜可定調，仍需合看三方四正。";
+  const starText = childPalace
+    ? `子女宮${palaceLabel(childPalace)}，重點星曜為${childStars}。`
+    : "目前未取得子女宮。";
+  const networkText = [
+    support.length ? `助力星${support.join("、")}會讓親密互動較容易被理解、被接住。` : "",
+    pressure.length ? `壓力星${pressure.join("、")}則提醒界線、節奏與期待要說清楚。` : "",
+  ].filter(Boolean).join("");
+  return `親密表達延伸：${starText}${flowText}${emptyText}${networkText}${intimacyOrientationNotice()}`;
+}
+
+function baziIntimacyExpressionText(chart) {
+  const counts = tenGodCounts(chart);
+  const output = (counts["食神"] || 0) + (counts["傷官"] || 0);
+  const print = (counts["正印"] || 0) + (counts["偏印"] || 0);
+  const relation = (counts["正官"] || 0) + (counts["七殺"] || 0) + (counts["正財"] || 0) + (counts["偏財"] || 0);
+  const outputTone = output >= 3
+    ? "食傷較旺，親密表達通常比較需要趣味、回饋、身體感受與被欣賞。"
+    : output >= 1
+      ? "食傷有根，親密表達需要互動感，但不一定會一直外放。"
+      : "食傷不明顯，親密需求可能較慢熱，常要先有安全感與信任才會打開。";
+  const printTone = print >= 3
+    ? "印星較重時，安全感、防衛心、照顧與被照顧的需求會明顯，界線感要講清楚。"
+    : "印星不算過重時，親密互動比較能透過實際相處與表達慢慢校準。";
+  const relationTone = relation
+    ? "伴侶星也有訊號，代表親密偏好會被正式關係、承諾感或對象特質修正。"
+    : "伴侶星不集中時，親密偏好更受日支、合沖與行運場景影響。";
+  return `親密表達：八字以食傷看慾望表達、玩心、身體愉悅與創造出口，以印星看安全感與防衛，以伴侶星看關係對象與承諾投射。本盤食傷${output}、印星${print}、伴侶星${relation}。${outputTone}${printTone}${relationTone}${intimacyOrientationNotice()}`;
+}
+
 function baziTopicSupplement(topicKey, chart) {
   const profile = baziDayMasterProfile(chart);
   const counts = tenGodCounts(chart);
@@ -1457,7 +1516,7 @@ function baziTopicSupplement(topicKey, chart) {
   if (topicKey === "children") {
     const output = (counts["食神"] || 0) + (counts["傷官"] || 0);
     const print = (counts["正印"] || 0) + (counts["偏印"] || 0);
-    return `子女與作品：食傷${output}、印星${print}。食傷偏看子女緣、作品與創造力；印星偏看照顧、教育與修復資源。兩者能流通時，較能把照顧與自我發展兼顧。`;
+    return `子女、作品與親密表達：食傷${output}、印星${print}。食傷偏看子女緣、作品、創造力與親密互動的外放程度；印星偏看照顧、教育、修復資源與安全感。兩者能流通時，較能把照顧、自我發展與親密需求兼顧。${baziIntimacyExpressionText(chart)}`;
   }
   const weakText = missing.length ? `偏弱或未見的五行為${missing.join("、")}，` : "五行沒有明顯缺行，";
   return `健康保養：${weakText}日主${profile.strength}。木偏筋骨與壓力伸展、火偏睡眠與發炎、土偏脾胃代謝、金偏呼吸皮膚與肩頸、水偏內分泌與循環；這是保養提醒，不是疾病診斷。`;
@@ -2348,7 +2407,7 @@ function palaceStorySubject(palace) {
     "命": "命主本人",
     "兄弟": "手足同輩與合作圈",
     "夫妻": "另一半與正式關係",
-    "子女": "子女、晚輩與作品成果",
+    "子女": "子女、晚輩、作品成果與親密表達",
     "財帛": "賺錢方式與金錢流動",
     "疾厄": "身體壓力與修復模式",
     "遷移": "外部舞台與遠方機會",
@@ -2481,7 +2540,7 @@ function topicAdvice(topicKey) {
     marriage: "建議看重可長期磨合的生活節奏，不只看短期吸引力。",
     career: "事業分析會看官祿宮的職涯主軸，再用命宮看個人能力，用遷移宮看外部舞台、曝光與跨城市機會。",
     property: "財富分析會特別看田宅宮；若田宅有助力星且財帛/官祿能接上，房產緣較容易落地。仍建議保守估現金流、貸款壓力與維修成本。",
-    children: "子女分析會以子女宮為主，輔看田宅宮的家庭承載與福德宮的相處舒適度；若煞忌較重，重點會落在照顧壓力、溝通節奏或緣分來得較晚。",
+    children: "子女分析會以子女宮為主，輔看福德宮的享受感、夫妻宮的關係投射與田宅宮的家庭承載；可延伸看親密表達、慾望需求與界線，但不判定性取向或性別認同。",
     health: "健康分析以疾厄宮看身體弱點，命宮看體質基調，福德宮看睡眠、精神與壓力修復；命理結果只能作保養提醒，不取代醫師診斷。",
   }[topicKey] || "";
 }
@@ -2647,8 +2706,8 @@ function baziPeriodTopicAdvice(topicKey, chart, period) {
       ? "伴侶星被行運帶動，容易出現較具現實感的認識、確認關係或討論責任分工的機會。"
       : "伴侶星不屬於直接引動，關係更仰賴社交場域、溝通品質與生活節奏是否願意騰出空間。",
     children: hasAny(["食神", "傷官"])
-      ? "食傷被帶動，子女、作品、創造力與照顧議題較容易浮現，適合把時間與資源安排得更具彈性。"
-      : "食傷不直接突出，宜先把身心與生活節奏調整好，讓創造與照顧能有穩定承接。",
+      ? "食傷被帶動，子女、作品、創造力、親密表達與照顧議題較容易浮現，適合把時間、界線與資源安排得更具彈性。"
+      : "食傷不直接突出，宜先把身心、信任感與生活節奏調整好，讓創造、親密需求與照顧能有穩定承接。",
     health: hasAny(["七殺", "傷官"])
       ? "壓力與耗能訊號較明顯，工作節奏、睡眠與情緒反應要優先管理；這是保養提醒，不是疾病診斷。"
       : hasAny(["正印", "偏印"])
@@ -2670,7 +2729,7 @@ function baziTopicAnalysis(topicKey, chart, topic, period = null) {
     property: `${wealthText}偏財運重點不是只看有沒有偏財，而是偏財能否被食傷啟動、又能否回到正財與田宅形成可留住的資產。${outputText}${element.text}`,
     career: `八字事業看官殺的責任壓力、印星的學習證照、食傷的輸出表達與財星的資源變現；本盤${godCountText(counts, ["正官", "七殺", "正印", "偏印", "食神", "傷官"])}。${element.text}`,
     marriage: `八字姻緣看伴侶星與日主互動；女命重看正官、七殺，男命重看正財、偏財，再輔看食傷的相處表達與印星的安全感。本盤${godCountText(counts, ["正官", "七殺", "正財", "偏財", "食神", "傷官"])}。${element.text}`,
-    children: `八字子女看食神、傷官，也看印星是否過重而壓住表達。本盤${godCountText(counts, ["食神", "傷官", "正印", "偏印"])}；食傷越能流通，越利於子女、作品、晚輩緣與創造力。${element.text}`,
+    children: `八字子女看食神、傷官，也看印星是否過重而壓住表達；延伸到親密表達時，食傷看慾望、玩心、身體愉悅與創造出口，印星看安全感與防衛。本盤${godCountText(counts, ["食神", "傷官", "正印", "偏印"])}；食傷越能流通，越利於子女、作品、晚輩緣、創造力與親密互動的自然感。${element.text}`,
     health: `八字健康看五行偏盛偏枯、印星修復力、食傷消耗與官殺壓力；本盤${godCountText(counts, ["正印", "偏印", "食神", "傷官", "正官", "七殺"])}。印星較能看恢復、休養與照護資源，食傷過旺時要留意過度輸出與作息消耗，官殺重時壓力與緊繃感要優先管理。${element.text}`,
   };
 
@@ -2742,12 +2801,12 @@ function baziMonthlyActionForTopic(topicKey, chart, period, profile, tenGodPower
     children: {
       score: baseScore + ratio(["食神", "傷官"]) * 34 + ratio(["正印", "偏印"]) * 16 + (monthlyHasAny(["食神", "傷官"]) ? 18 : 0),
       action: monthlyHasAny(["食神", "傷官"])
-        ? "親子陪伴、備孕規劃、作品創作、教學與照顧安排尤佳"
+        ? "親子陪伴、備孕規劃、作品創作、親密互動與界線溝通尤佳"
         : monthlyHasAny(["正印", "偏印"])
-          ? "安排教育資源、照護系統與身心修復尤佳"
-          : "調整家庭時間、親子溝通與長期照顧分工尤佳",
-      reason: `原局食傷占比${percentText(ratio(["食神", "傷官"]))}、印星占比${percentText(ratio(["正印", "偏印"]))}；食傷看子女/作品，印星看照顧與教育資源。`,
-      caution: tension ? "有沖刑害破時，親子與家務溝通要減少情緒決策。" : "適合把創造與照顧排入固定行程。",
+          ? "安排教育資源、照護系統、身心修復與安全感建立尤佳"
+          : "調整家庭時間、親子溝通、親密需求與長期照顧分工尤佳",
+      reason: `原局食傷占比${percentText(ratio(["食神", "傷官"]))}、印星占比${percentText(ratio(["正印", "偏印"]))}；食傷看子女/作品/親密表達，印星看照顧、教育資源與安全感。`,
+      caution: tension ? "有沖刑害破時，親子、家務與親密界線都要減少情緒決策。" : "適合把創造、照顧與親密溝通排入固定行程。",
     },
     health: {
       score: baseScore + ratio(["正印", "偏印"]) * 26 - ratio(["七殺", "傷官"]) * 12 + (monthlyHasAny(["正印", "偏印"]) ? 14 : 0) - (monthlyHasAny(["七殺", "傷官"]) ? 10 : 0),
@@ -2839,8 +2898,8 @@ function ziweiMonthlyActionForTopic(topicKey, chart, context) {
       ? "增加社交、約會、確認關係節奏與談相處規則尤佳"
       : "先整理互動模式、生活圈與擇偶條件，穩定曝光尤佳",
     children: hasFlow
-      ? "安排親子活動、教育資源、備孕準備或作品創作尤佳"
-      : "先把家庭分工、照護資源與生活節奏調穩尤佳",
+      ? "安排親子活動、教育資源、備孕準備、作品創作或親密界線溝通尤佳"
+      : "先把家庭分工、照護資源、親密需求與生活節奏調穩尤佳",
     health: hasPressure
       ? "減壓、休息、健檢、調作息與處理身體警訊尤佳"
       : "建立規律保養、運動、飲食與睡眠節奏尤佳",
@@ -2924,6 +2983,7 @@ function ziweiTopicAnalysis(topicKey, chart, context, network) {
   const property = topicKey === "property" ? propertyAffinityText(chart, context) : "";
   const career = topicKey === "career" ? careerFitText(chart, context) : "";
   const health = topicKey === "health" ? healthCareText(chart, context) : "";
+  const intimacy = topicKey === "children" ? ziweiIntimacyExpressionText(chart, network) : "";
 
   return [
     `紫微斗數以${topic.label}主宮為起點，但不單看一宮；本次同時納入${palaceListText(network.networkPalaces)}，並以${primary ? normalizePalaceName(primary.palace.name) : "主宮"}的三方四正${palaceListText(squarePalaces)}確認成局。`,
@@ -2935,6 +2995,7 @@ function ziweiTopicAnalysis(topicKey, chart, context, network) {
     property,
     career,
     health,
+    intimacy,
     period,
   ].filter(Boolean).join(" ");
 }
@@ -3508,9 +3569,10 @@ function ziweiEventRuleCards(topicKey, chart, context, network, flying) {
       ["當期觸發", `${context.periodName}命宮落${period}，若四化交會到夫妻、遷移、福德或命宮，容易出現相遇、確認關係或關係選擇。`],
     ],
     children: [
-      ["子女訊號", `子女看${base}，子女宮主晚輩與作品成果，田宅看家庭承載，福德看相處與照顧舒適度。`],
+      ["子女訊號", `子女看${base}，子女宮主晚輩、作品成果與親密表達，福德看享受感，夫妻看關係投射，田宅看家庭承載。`],
       ["照顧承載", `助力見${support}時，照顧資源、晚輩緣或作品成果較易成形；壓力見${pressure}時，需先安排時間、健康與支援系統。`],
-      ["當期觸發", `${context.periodName}命宮落${period}，若飛星引動子女、田宅、夫妻或福德，子女/作品/照顧議題會更明顯。`],
+      ["親密表達", ziweiIntimacyExpressionText(chart, network)],
+      ["當期觸發", `${context.periodName}命宮落${period}，若飛星引動子女、田宅、夫妻或福德，子女/作品/照顧/親密表達議題會更明顯。`],
     ],
     health: [
       ["健康主軸", `健康看${base}，疾厄看身體弱點，命宮看體質，福德看睡眠、精神與修復。`],
@@ -4586,11 +4648,19 @@ function palaceChatSummary(palace) {
 function topicFromQuestion(question) {
   const q = question.replace(/\s+/g, "");
   if (/正緣|姻緣|婚|伴侶|另一半|對象/.test(q)) return "marriage";
-  if (/子女|小孩|孩子|生育|懷孕|親子|晚輩/.test(q)) return "children";
+  if (/子女|小孩|孩子|生育|懷孕|親子|晚輩/.test(q) || isIntimacyQuestion(q)) return "children";
   if (/健康|身體|疾病|疾厄|病|睡眠|壓力|作息|體質|保養|醫/.test(q)) return "health";
   if (/事業|工作|職涯|升遷|公司|官祿/.test(q)) return "career";
   if (/財富|財|錢|收入|資產|房|田宅|投資|房地產|不動產/.test(q)) return "property";
   return null;
+}
+
+function isSexualOrientationQuestion(question) {
+  return /性取向|性傾向|同性戀|雙性戀|異性戀|同志|酷兒/.test(question.replace(/\s+/g, ""));
+}
+
+function isIntimacyQuestion(question) {
+  return /親密|慾望|欲望|性方面|性癖|性需求|性互動|性生活|性愛|床事/.test(question.replace(/\s+/g, ""));
 }
 
 function chatTopicAnswer(topicKey) {
@@ -4685,6 +4755,17 @@ function buildBotAnswer(question) {
   const causePalace = getCausePalace(currentChart.astrolabe);
   const bodyPalace = getBodyPalace(currentChart.astrolabe);
   const context = buildPeriodContext(currentChart);
+
+  if (isSexualOrientationQuestion(q)) {
+    const detail = activeReadingMethod === "bazi"
+      ? baziIntimacyExpressionText(currentChart)
+      : ziweiIntimacyExpressionText(currentChart, evaluateTopicNetwork("children", currentChart, context));
+    return `我不能用命盤判定一個人是同性戀、雙性戀或異性戀，這類身分應以當事人的自我認同為準。命盤可以看的，是親密需求、關係投射、愉悅感、界線與安全感如何運作。${detail}`;
+  }
+
+  if (isIntimacyQuestion(q)) {
+    return chatTopicAnswer("children");
+  }
 
   if (/正緣|另一半|伴侶|對象|長相|身材|職業/.test(q)) {
     return activeReadingMethod === "bazi" ? chatBaziPartnerAnswer() : chatPartnerAnswer();
@@ -5093,8 +5174,9 @@ function baziEventRuleCards(topicKey, chart, period) {
       ["桃花提醒", baziPeachBlossomAnalysis(chart)],
     ],
     children: [
-      ["子女/作品", hasGod(["食神", "傷官"]) ? "食傷被帶動，子女、晚輩、作品、創造與照顧議題較容易浮現。" : "食傷未直接時，先整理身心與生活承載。"],
+      ["子女/作品/親密", hasGod(["食神", "傷官"]) ? "食傷被帶動，子女、晚輩、作品、創造與親密表達議題較容易浮現。" : "食傷未直接時，先整理身心、信任感與生活承載。"],
       ["照顧資源", hasGod(["正印", "偏印"]) ? "印星出現可看照顧、教育、長輩支援與修復資源。" : "印星不強時，照顧分工、時間與資源配置要先談清楚。"],
+      ["親密表達", baziIntimacyExpressionText(chart)],
       ["壓力辨識", periodInteraction.records.some((item) => /刑|害|沖/.test(item.interaction)) ? "行運衝突較多，生養照顧或作品壓力需放慢安排。" : "衝突不重，可用穩定節奏推進。"],
     ],
     health: [
