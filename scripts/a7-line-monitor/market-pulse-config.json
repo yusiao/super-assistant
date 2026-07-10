@@ -2,6 +2,8 @@
   "enabled": true,
   "days_back": 7,
   "max_districts": 8,
+  "max_article_fetches": 28,
+  "min_article_chars": 180,
   "source_urls": [
     {
       "name": "Google News－雙北桃園房市",
@@ -28,18 +30,6 @@
       "url": "https://news.google.com/rss/search?q=住展+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
-      "name": "Google News－ETtoday房產雲",
-      "url": "https://news.google.com/rss/search?q=ETtoday+房產雲+雙北+桃園+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
-    },
-    {
-      "name": "Google News－信義房屋",
-      "url": "https://news.google.com/rss/search?q=信義房屋+雙北+桃園+房價+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
-    },
-    {
-      "name": "Google News－東森房屋",
-      "url": "https://news.google.com/rss/search?q=東森房屋+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
-    },
-    {
       "name": "Google News－房市政策與貸款",
       "url": "https://news.google.com/rss/search?q=房貸+限貸+房市+雙北+桃園+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
@@ -59,5 +49,38 @@
     "預售", "預售屋", "新案", "開案", "待開案", "房價", "交易", "實價", "重劃區",
     "捷運", "低價", "讓利", "去化", "餘屋", "房貸", "限貸", "交屋", "完銷",
     "建商", "代銷", "買氣", "議價", "供給", "庫存"
-  ]
+  ],
+  "infrastructure": {
+    "enabled": true,
+    "max_items": 8,
+    "cities": [
+      "台北市", "新北市", "桃園市", "台中市", "台南市", "高雄市", "基隆市", "新竹縣", "新竹市",
+      "苗栗縣", "彰化縣", "南投縣", "雲林縣", "嘉義縣", "嘉義市", "屏東縣", "宜蘭縣",
+      "花蓮縣", "台東縣", "澎湖縣", "金門縣", "連江縣"
+    ],
+    "keywords": [
+      "重大建設", "公共建設", "交通建設", "捷運", "輕軌", "鐵路", "高鐵", "車站", "交流道",
+      "快速道路", "產業園區", "科學園區", "科技園區", "AI園區", "物流園區", "醫院", "大學",
+      "商場", "百貨", "轉運站", "社會住宅", "都市更新", "重劃區", "開發案", "動工", "核定",
+      "通車", "招商", "設廠", "擴建"
+    ],
+    "source_urls": [
+      {
+        "name": "Google News－全台重大建設",
+        "url": "https://news.google.com/rss/search?q=台灣+重大建設+動工+核定+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      },
+      {
+        "name": "Google News－交通建設",
+        "url": "https://news.google.com/rss/search?q=台灣+捷運+高鐵+鐵路+交通建設+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      },
+      {
+        "name": "Google News－產業園區",
+        "url": "https://news.google.com/rss/search?q=台灣+產業園區+科學園區+設廠+招商+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      },
+      {
+        "name": "Google News－地方建設",
+        "url": "https://news.google.com/rss/search?q=縣市+重大建設+開發案+動工+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      }
+    ]
+  }
 }

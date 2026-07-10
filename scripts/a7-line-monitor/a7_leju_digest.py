@@ -155,9 +155,18 @@ def load_market_pulse_config(path: Path | None) -> dict[str, Any]:
         loaded.setdefault("enabled", True)
         loaded.setdefault("days_back", 7)
         loaded.setdefault("max_districts", 8)
+        loaded.setdefault("max_article_fetches", 24)
+        loaded.setdefault("min_article_chars", 180)
         loaded.setdefault("source_urls", [])
         loaded.setdefault("districts", [])
         loaded.setdefault("keywords", [])
+        loaded.setdefault("infrastructure", {})
+        if isinstance(loaded["infrastructure"], dict):
+            loaded["infrastructure"].setdefault("enabled", True)
+            loaded["infrastructure"].setdefault("max_items", 8)
+            loaded["infrastructure"].setdefault("cities", [])
+            loaded["infrastructure"].setdefault("keywords", [])
+            loaded["infrastructure"].setdefault("source_urls", [])
         return loaded
     raise RuntimeError(f"Market pulse config file is invalid: {config_path}")
 
@@ -1466,11 +1475,8 @@ def append_area_presale_projects(
             continue
         wrote_any = True
         lines.append(f"### {title}" if markdown else title)
-        display_projects = projects[:limit_per_group] if limit_per_group else projects
-        for item in display_projects:
+        for item in projects:
             lines.extend(format_project_line(item))
-        if limit_per_group and len(projects) > limit_per_group:
-            lines.append(f"- 其餘 {len(projects) - limit_per_group} 個略，完整名單請看 GitHub artifact。")
         lines.append("")
     if wrote_any and lines and lines[-1] != "":
         lines.append("")
@@ -1945,6 +1951,236 @@ def parse_market_source_entries(
     return entries
 
 
+def get_meta_content(content: str, key: str) -> str:
+    patterns = [
+        rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+name=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(key)}["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']{re.escape(key)}["\']',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, content, flags=re.IGNORECASE | re.DOTALL)
+        if match:
+            return html_to_text(unescape(match.group(1))).strip()
+    return ""
+
+
+def clean_article_text(text: str) -> str:
+    text = unescape(text)
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"(延伸閱讀|相關新聞|看更多|更多新聞|熱門新聞|加入.*LINE|下載.*APP).*$", "", text)
+    return text.strip()
+
+
+def extract_article_body(content: str) -> str:
+    stripped = re.sub(r"<script\b[^>]*>.*?</script>", " ", content, flags=re.S | re.I)
+    stripped = re.sub(r"<style\b[^>]*>.*?</style>", " ", stripped, flags=re.S | re.I)
+    stripped = re.sub(r"<noscript\b[^>]*>.*?</noscript>", " ", stripped, flags=re.S | re.I)
+    stripped = re.sub(r"<(nav|footer|header|aside)\b[^>]*>.*?</\1>", " ", stripped, flags=re.S | re.I)
+
+    candidates: list[str] = []
+    for tag in ("article", "main"):
+        for match in re.findall(rf"<{tag}\b[^>]*>(.*?)</{tag}>", stripped, flags=re.S | re.I):
+            text = clean_article_text(html_to_text(match))
+            if len(text) >= 40:
+                candidates.append(text)
+
+    paragraphs = [
+        clean_article_text(html_to_text(match))
+        for match in re.findall(r"<p\b[^>]*>(.*?)</p>", stripped, flags=re.S | re.I)
+    ]
+    paragraph_text = " ".join(part for part in paragraphs if len(part) >= 18)
+    if len(paragraph_text) >= 40:
+        candidates.append(paragraph_text)
+
+    meta_parts = [
+        get_meta_content(content, "og:description"),
+        get_meta_content(content, "description"),
+        get_meta_content(content, "twitter:description"),
+    ]
+    meta_text = " ".join(part for part in meta_parts if part)
+    if meta_text:
+        candidates.append(clean_article_text(meta_text))
+
+    if not candidates:
+        candidates.append(clean_article_text(html_to_text(stripped)))
+
+    return max(candidates, key=len, default="")[:5000]
+
+
+def normalize_market_fingerprint(text: str) -> str:
+    text = re.sub(r"https?://\S+", "", text)
+    text = re.sub(r"\d+", "0", text)
+    text = re.sub(r"\s+", "", text)
+    return text[:260]
+
+
+def enrich_market_entries_with_article_body(
+    entries: list[dict[str, str]],
+    max_fetches: int,
+    min_article_chars: int,
+) -> tuple[list[dict[str, str]], list[str]]:
+    enriched: list[dict[str, str]] = []
+    errors: list[str] = []
+    seen: set[str] = set()
+    fetch_candidates = [entry for entry in entries if entry.get("url", "").startswith(("http://", "https://"))]
+    fetch_candidates = fetch_candidates[:max_fetches]
+    by_url = {entry.get("url", ""): entry for entry in fetch_candidates}
+
+    def fetch_article(entry: dict[str, str]) -> tuple[str, str, str]:
+        url = entry.get("url", "")
+        content = fetch_text(encode_iri_url(url))
+        if is_cloudflare_challenge(content):
+            raise RuntimeError("Cloudflare challenge")
+        article_text = extract_article_body(content)
+        return url, article_text, ""
+
+    article_text_by_url: dict[str, str] = {}
+    if fetch_candidates:
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {executor.submit(fetch_article, entry): entry for entry in fetch_candidates}
+            for future in as_completed(futures):
+                entry = futures[future]
+                try:
+                    url, article_text, _ = future.result()
+                    article_text_by_url[url] = article_text
+                except Exception as exc:
+                    title = entry.get("title", "")[:40] or entry.get("url", "")[:60]
+                    errors.append(f"{title}: {exc}")
+
+    for entry in entries:
+        article_text = article_text_by_url.get(entry.get("url", ""), "")
+        text_source = "article" if len(article_text) >= min_article_chars else "rss"
+        merged_text = article_text if text_source == "article" else entry.get("text", "")
+        if not merged_text.strip():
+            continue
+        fingerprint = normalize_market_fingerprint(merged_text)
+        if fingerprint and fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        row = dict(entry)
+        row["text"] = merged_text
+        row["summary_text"] = summarize_article_text(merged_text)
+        row["text_source"] = text_source
+        row["article_chars"] = str(len(article_text))
+        enriched.append(row)
+    return enriched, errors
+
+
+def summarize_article_text(text: str, max_sentences: int = 2) -> str:
+    sentences = split_sentences(text)
+    useful: list[str] = []
+    for sentence in sentences:
+        if any(keyword in sentence for keyword in ("預售", "房價", "交易", "實價", "讓利", "房貸", "限貸", "去化", "餘屋", "開案", "建商", "代銷")):
+            useful.append(sentence[:90])
+        if len(useful) >= max_sentences:
+            break
+    if not useful:
+        useful = [sentence[:90] for sentence in sentences[:max_sentences]]
+    return "；".join(useful)
+
+
+def fetch_market_entries_from_sources(
+    sources: list[dict[str, Any]],
+    cutoff: datetime,
+) -> tuple[list[dict[str, str]], list[str]]:
+    raw_entries: list[dict[str, str]] = []
+    errors: list[str] = []
+    for source in sources:
+        source_name = str(source.get("name", "未命名來源"))
+        source_url = str(source.get("url", "")).strip()
+        if not source_url:
+            continue
+        try:
+            request_url = encode_iri_url(source_url)
+            content = fetch_text(request_url)
+            if "Just a moment..." in content and "Cloudflare" in content:
+                raise RuntimeError("Cloudflare challenge")
+            entries = parse_market_source_entries(content, source_name, source_url, cutoff)
+            raw_entries.extend(entries)
+        except Exception as exc:
+            if not source.get("report_errors", True):
+                continue
+            errors.append(f"{source_name}：{exc}")
+    return raw_entries, errors
+
+
+def extract_infrastructure_name(sentence: str, city: str, keywords: list[str]) -> str:
+    clean = re.sub(r"\s+", "", sentence)
+    patterns = [
+        r"([\u4e00-\u9fffA-Za-z0-9（）()「」《》．·、]{2,32}(?:捷運|輕軌|高鐵|鐵路|車站|交流道|快速道路|園區|醫院|大學|商場|百貨|轉運站|社會住宅|都市更新|重劃區|開發案|建設))",
+        r"((?:捷運|輕軌|高鐵|鐵路|快速道路|產業園區|科學園區|科技園區|物流園區)[\u4e00-\u9fffA-Za-z0-9（）()「」《》．·、]{1,24})",
+    ]
+    for pattern in patterns:
+        for match in re.findall(pattern, clean):
+            if city in match or any(keyword in match for keyword in keywords):
+                return match[:36]
+    for keyword in keywords:
+        if keyword in clean:
+            start = max(0, clean.find(keyword) - 14)
+            end = min(len(clean), clean.find(keyword) + len(keyword) + 18)
+            return clean[start:end]
+    return clean[:32]
+
+
+def summarize_infrastructure_sentence(text: str, city: str, keywords: list[str]) -> str:
+    for sentence in split_sentences(text):
+        if city in sentence and any(keyword in sentence for keyword in keywords):
+            return sentence[:120]
+    return summarize_article_text(text, max_sentences=1)[:120]
+
+
+def get_infrastructure_watch(
+    infra_config: dict[str, Any],
+    cutoff: datetime,
+    max_fetches: int,
+    min_article_chars: int,
+) -> tuple[list[dict[str, str]], list[str]]:
+    if not infra_config.get("enabled", True):
+        return [], []
+
+    cities = [str(item).strip() for item in infra_config.get("cities", []) if str(item).strip()]
+    keywords = [str(item).strip() for item in infra_config.get("keywords", []) if str(item).strip()]
+    sources = [source for source in infra_config.get("source_urls", []) if source.get("url")]
+    max_items = int(infra_config.get("max_items", 8))
+    raw_entries, errors = fetch_market_entries_from_sources(sources, cutoff)
+    enriched_entries, article_errors = enrich_market_entries_with_article_body(
+        raw_entries,
+        max_fetches=max_fetches,
+        min_article_chars=min_article_chars,
+    )
+    if article_errors:
+        errors.extend([f"重大建設內文抓取失敗：{error}" for error in article_errors[:3]])
+
+    items: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for entry in enriched_entries:
+        text = entry.get("text", "")
+        matched_cities = [city for city in cities if city in text]
+        matched_keywords = [keyword for keyword in keywords if keyword in text]
+        if not matched_cities or not matched_keywords:
+            continue
+        for city in matched_cities[:2]:
+            summary = summarize_infrastructure_sentence(text, city, matched_keywords)
+            project_name = extract_infrastructure_name(summary or text, city, matched_keywords)
+            key = f"{city}:{project_name}"
+            if key in seen:
+                continue
+            seen.add(key)
+            items.append(
+                {
+                    "city": city,
+                    "project": project_name,
+                    "summary": summary,
+                    "keywords": "、".join(matched_keywords[:4]),
+                    "source_quality": "已讀內文" if entry.get("text_source") == "article" else "RSS摘要",
+                }
+            )
+            if len(items) >= max_items:
+                return items, errors
+    return items, errors
+
+
 def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, Any]:
     if not config.get("enabled", True):
         return {"enabled": False, "items": [], "errors": []}
@@ -1952,7 +2188,10 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
     districts = [str(item).strip() for item in config.get("districts", []) if str(item).strip()]
     keywords = [str(item).strip() for item in config.get("keywords", []) if str(item).strip()]
     max_districts = int(config.get("max_districts", 8))
+    max_article_fetches = int(config.get("max_article_fetches", 24))
+    min_article_chars = int(config.get("min_article_chars", 180))
     source_hits: list[dict[str, Any]] = []
+    raw_entries: list[dict[str, str]] = []
     errors: list[str] = []
     cutoff = local_now - timedelta(days=int(config.get("days_back", 7)))
 
@@ -1968,14 +2207,43 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
                 raise RuntimeError("Cloudflare challenge")
             entries = parse_market_source_entries(content, source_name, source_url, cutoff)
             if entries:
-                source_hits.append({"name": source_name, "url": source_url, "entries": entries})
+                raw_entries.extend(entries)
         except Exception as exc:
             if not source.get("report_errors", True):
                 continue
             errors.append(f"{source_name}：{exc}")
 
-    if not source_hits and not errors:
+    enriched_entries, article_errors = enrich_market_entries_with_article_body(
+        raw_entries,
+        max_fetches=max_article_fetches,
+        min_article_chars=min_article_chars,
+    )
+    if article_errors:
+        errors.extend([f"新聞內文抓取失敗：{error}" for error in article_errors[:3]])
+
+    entries_by_source: dict[str, list[dict[str, str]]] = {}
+    for entry in enriched_entries:
+        entries_by_source.setdefault(entry.get("source", ""), []).append(entry)
+    source_hits = [
+        {"name": source_name, "url": "", "entries": entries}
+        for source_name, entries in entries_by_source.items()
+        if entries
+    ]
+
+    if not enriched_entries and not errors:
         errors.append("所有房市新聞/報告來源都抓取失敗或沒有可解析內容")
+
+    infrastructure_items: list[dict[str, str]] = []
+    infrastructure_errors: list[str] = []
+    infra_config = config.get("infrastructure", {})
+    if isinstance(infra_config, dict) and infra_config.get("enabled", True):
+        infrastructure_items, infrastructure_errors = get_infrastructure_watch(
+            infra_config,
+            cutoff,
+            max_fetches=max(6, max_article_fetches // 2),
+            min_article_chars=min_article_chars,
+        )
+        errors.extend(infrastructure_errors[:3])
 
     district_items: list[dict[str, Any]] = []
     for district in districts:
@@ -2000,7 +2268,7 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
                     key = entry.get("url", "") or entry.get("title", "")
                     if key and all((row.get("url", "") or row.get("title", "")) != key for row in example_entries):
                         example_entries.append(entry)
-                        examples.append(entry.get("title", text[:90])[:100])
+                        examples.append((entry.get("summary_text") or entry.get("title", text[:90]))[:100])
 
         if mention_count:
             district_items.append(
@@ -2022,6 +2290,9 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
         "items": district_items[:max_districts],
         "errors": errors,
         "source_count": len(source_hits),
+        "article_count": len(enriched_entries),
+        "article_body_count": sum(1 for entry in enriched_entries if entry.get("text_source") == "article"),
+        "infrastructure_items": infrastructure_items,
         "generated_at": local_now.isoformat(),
     }
 
@@ -2239,6 +2510,88 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
     return lines
 
 
+def summarize_market_article_points(entries: list[dict[str, str]], limit: int = 3) -> list[str]:
+    points: list[str] = []
+    seen: set[str] = set()
+    for entry in entries:
+        point = str(entry.get("summary_text") or "").strip()
+        if not point:
+            point = summarize_article_text(str(entry.get("text", "")))
+        point = re.sub(r"\s+", " ", point).strip()
+        if not point:
+            continue
+        fingerprint = normalize_market_fingerprint(point)
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        source_note = "（已讀內文）" if entry.get("text_source") == "article" else "（RSS摘要）"
+        points.append(f"{point[:110]}{source_note}")
+        if len(points) >= limit:
+            break
+    return points
+
+
+def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = False) -> list[str]:
+    items = market_pulse.get("items", []) if market_pulse else []
+    if not items:
+        return ["- 本週沒有抓到足夠可判讀的雙北、桃園房市正文訊號；先不要把零星標題當成趨勢。"]
+
+    top_items = items[:3]
+    aggregate_keyword_counts: dict[str, int] = {}
+    evidence_entries: list[dict[str, str]] = []
+    for item in top_items:
+        for keyword, count in item.get("keyword_counts", {}).items():
+            aggregate_keyword_counts[keyword] = aggregate_keyword_counts.get(keyword, 0) + int(count)
+        evidence_entries.extend(item.get("example_entries", []))
+
+    focus_parts = [
+        f"{item.get('district')}（{item.get('mention_count', 0)}次）"
+        for item in top_items
+        if item.get("district")
+    ]
+    key_topics = sorted(aggregate_keyword_counts, key=aggregate_keyword_counts.get, reverse=True)[:5]
+
+    signal_groups: dict[str, dict[str, Any]] = {}
+    for topic in key_topics:
+        signal, explanation = explain_market_topic(topic)
+        group = signal_groups.setdefault(signal, {"topics": [], "count": 0, "explanation": explanation})
+        group["topics"].append(topic)
+        group["count"] += aggregate_keyword_counts.get(topic, 0)
+
+    lines: list[str] = []
+    if focus_parts:
+        lines.append(f"- 本週正文焦點：{'、'.join(focus_parts)}。")
+
+    for signal, group in sorted(signal_groups.items(), key=lambda row: row[1]["count"], reverse=True)[:3]:
+        topics = "、".join(group["topics"])
+        lines.append(f"- 有用訊號：{signal}。正文反覆提到「{topics}」，{group['explanation']}")
+
+    top_districts = {str(item.get("district", "")).strip() for item in top_items}
+    if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
+        lines.append("- 對你有用的判讀：桃園與A7相關正文訊號若升溫，要同步看預售供給、待開案開價與建商是否用低價或讓利搶客。")
+    if {"板橋區", "新莊區", "新店區", "中和區", "三重區", "林口區", "淡水區"} & top_districts:
+        lines.append("- 對你有用的判讀：新北熱門區若正文提到買氣或價格，會影響桃園買盤的比價基準；桃園價差不夠大時吸引力會下降。")
+    if {"中山區", "大安區", "信義區", "松山區", "內湖區", "南港區", "士林區", "北投區"} & top_districts:
+        lines.append("- 對你有用的判讀：台北市訊號可當景氣溫度計，但不適合直接類比A7；要看它是否造成外溢買盤往桃園移動。")
+
+    article_points = summarize_market_article_points(evidence_entries, limit=2 if line_mode else 3)
+    if article_points:
+        lines.append("- 內文整理重點：")
+        for point in article_points:
+            lines.append(f"  - {point}")
+
+    source_count = market_pulse.get("source_count", 0)
+    article_count = market_pulse.get("article_count", 0)
+    article_body_count = market_pulse.get("article_body_count", 0)
+    if article_count:
+        lines.append(
+            f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天共整理{article_count}則資訊，其中{article_body_count}則成功讀到新聞內文；其餘才用RSS摘要補足。"
+        )
+    elif source_count:
+        lines.append(f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天、{source_count}個來源；本次主要依可讀摘要判斷。")
+    return lines
+
+
 def get_rising_price_watch(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
     watch: list[dict[str, Any]] = []
     for area in areas:
@@ -2317,13 +2670,27 @@ def format_price_rise_text(previous_status: str, current_status: str) -> str:
     return f"{previous_status or '未標示'} -> {current_status or '未標示'}"
 
 
-def build_macro_summary(areas: list[dict[str, Any]], rising_watch: list[dict[str, Any]], falling_watch: list[dict[str, Any]]) -> list[str]:
+def build_macro_summary(
+    areas: list[dict[str, Any]],
+    rising_watch: list[dict[str, Any]],
+    falling_watch: list[dict[str, Any]],
+    market_pulse: dict[str, Any] | None = None,
+) -> list[str]:
     lines: list[str] = []
     valid_areas = [area for area in areas if not area.get("stale")]
     analysis_areas = valid_areas or areas
 
     if not analysis_areas:
-        return ["- 目前可用資料不足，今天先不下市場結論。"]
+        lines.append("- 目前可用 A7 區域資料不足，今天先不下 A7 區域結論。")
+        infrastructure_items = market_pulse.get("infrastructure_items", []) if market_pulse else []
+        if infrastructure_items:
+            lines.append("- 全台重大建設觀察：")
+            for item in infrastructure_items[:8]:
+                lines.append(
+                    f"  - {item.get('city', '未標示縣市')}｜{item.get('project', '未擷取到建設名稱')}｜"
+                    f"{item.get('summary', '')[:90]}（{item.get('source_quality', '資料摘要')}）"
+                )
+        return lines
 
     presale_focus_area = max(analysis_areas, key=lambda area: len(area.get("active_presale_projects", [])))
     pending_focus_area = max(analysis_areas, key=lambda area: len(area.get("pending_launch_projects", [])))
@@ -2366,6 +2733,47 @@ def build_macro_summary(areas: list[dict[str, Any]], rising_watch: list[dict[str
 
     if presale_count == 0 and pending_total == 0:
         lines.append("- 今天沒有抓到明確仍屬預售或未開賣預售的新案，先不把新成屋或已交屋案納入判斷。")
+
+    if market_pulse and market_pulse.get("items"):
+        pulse_topics: dict[str, int] = {}
+        pulse_districts: list[str] = []
+        for item in market_pulse.get("items", [])[:5]:
+            district = str(item.get("district", "")).strip()
+            if district:
+                pulse_districts.append(district)
+            for keyword, count in item.get("keyword_counts", {}).items():
+                pulse_topics[keyword] = pulse_topics.get(keyword, 0) + int(count)
+        top_topics = sorted(pulse_topics, key=pulse_topics.get, reverse=True)[:4]
+        if top_topics:
+            district_text = "、".join(dict.fromkeys(pulse_districts[:4])) or "雙北桃園"
+            lines.append(
+                f"- 結合近一週市場脈動：正文焦點落在 {district_text}，反覆題材是 {'、'.join(top_topics)}；"
+                "因此 A7 不能只看單一建案開價，要同步看待開案供給、預售去化、房貸條件與周邊是否開始讓利。"
+            )
+        if any(topic in pulse_topics for topic in ("房貸", "限貸")):
+            lines.append(
+                "- 市場正文若持續提到房貸/限貸，代表買方槓桿受壓；A7 投資判斷要優先檢查總價帶、首付壓力與未來轉售流動性。"
+            )
+        if any(topic in pulse_topics for topic in ("讓利", "低價", "議價")):
+            lines.append(
+                "- 若讓利/低價/議價題材增加，代表市場開始用價格換成交；A7 新案若仍持續墊高開價，就要更嚴格比對同區實登與待開案開價。"
+            )
+        if any(topic in pulse_topics for topic in ("待開案", "新案", "預售", "預售屋", "供給")) and pending_total > 0:
+            lines.append(
+                f"- A7 目前仍有 {pending_total} 個待開或可觀察預售訊號；若市場同時討論新案供給，後續重點是新案是否低開搶客，或高開拉抬同區預期。"
+            )
+
+    infrastructure_items = market_pulse.get("infrastructure_items", []) if market_pulse else []
+    if infrastructure_items:
+        lines.append("- 全台重大建設觀察：")
+        for item in infrastructure_items[:8]:
+            lines.append(
+                f"  - {item.get('city', '未標示縣市')}｜{item.get('project', '未擷取到建設名稱')}｜"
+                f"{item.get('summary', '')[:90]}（{item.get('source_quality', '資料摘要')}）"
+            )
+        lines.append(
+            "- 建設題材判讀：重大建設通常會先影響市場想像與土地/預售開價，但真正支撐房價仍要看動工、通車/完工時程、就業人口與生活機能是否跟上。"
+        )
 
     if stale_count > 0:
         lines.append(
@@ -2516,7 +2924,7 @@ def new_report_content(
 
     lines.append("## 大數據觀察")
     lines.append("")
-    lines.extend(build_macro_summary(areas, rising_watch, falling_watch))
+    lines.extend(build_macro_summary(areas, rising_watch, falling_watch, market_pulse))
     return "\n".join(lines).strip()
 
 
@@ -2558,7 +2966,10 @@ def new_line_message(
             threshold = bargain_watch.get("threshold_percent", 20)
             lines.append(f"- 未發現低於周邊基準 {threshold:g}% 以上的預售 / 待開案。")
         if bargain_watch.get("errors"):
-            lines.append(f"- 部分區域抓取失敗：{len(bargain_watch['errors'])} 區")
+            errors = [str(error) for error in bargain_watch["errors"] if str(error).strip()]
+            lines.append(f"- 低價新案監控有 {len(errors)} 筆來源/區域抓取異常；這代表該來源本次沒有納入低價判斷，不代表沒有低價案。")
+            for error in errors[:4]:
+                lines.append(f"  - {error}")
         lines.append("")
 
     if rising_watch:
@@ -2605,7 +3016,7 @@ def new_line_message(
                 "",
             ]
         )
-        append_area_presale_projects(lines, area, limit_per_group=4)
+        append_area_presale_projects(lines, area)
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
@@ -2623,7 +3034,7 @@ def new_line_message(
             lines.append("")
 
     lines.append("大數據觀察")
-    lines.extend(build_macro_summary(areas, rising_watch, falling_watch))
+    lines.extend(build_macro_summary(areas, rising_watch, falling_watch, market_pulse))
     message = "\n".join(lines).strip()
     return message[:4897] + "..." if len(message) > 4900 else message
 
