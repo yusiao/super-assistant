@@ -202,6 +202,13 @@ const TOPIC_TREE_BRANCHES = {
     ],
   },
 };
+const TOPIC_TREE_LAYOUT = {
+  property: { branch: "M180 210 C130 205 104 176 78 145", cx: 74, cy: 138, anchor: "end" },
+  career: { branch: "M180 190 C132 160 126 106 112 64", cx: 112, cy: 58, anchor: "middle" },
+  marriage: { branch: "M180 178 C180 130 180 92 180 42", cx: 180, cy: 42, anchor: "middle" },
+  children: { branch: "M180 190 C228 160 234 106 248 64", cx: 248, cy: 58, anchor: "middle" },
+  health: { branch: "M180 210 C230 204 256 176 282 145", cx: 286, cy: 138, anchor: "start" },
+};
 const SCOPE_LABELS = {
   decadal: "大限",
   age: "小限",
@@ -634,7 +641,6 @@ const methodTabs = [...document.querySelectorAll("[data-reading-method]")];
 const methodViews = [...document.querySelectorAll("[data-method-view]")];
 
 let currentChart = null;
-let partnerRenderSalt = 0;
 let ziweiImageType = "sanhe";
 let activeReadingMethod = "bazi";
 let baziCalibrationEvents = [];
@@ -4466,66 +4472,6 @@ function hashText(value) {
   return [...String(value)].reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
-function partnerPalette(profile) {
-  const seed = hashText(profile.supportStars.join("")) + partnerRenderSalt;
-  const palettes = [
-    { bg1: "#dfece6", bg2: "#f8f1df", hair: "#2f2b27", outfit: "#186b5a", accent: "#b98731" },
-    { bg1: "#e9e3f1", bg2: "#f7efe4", hair: "#3a2d32", outfit: "#315f8d", accent: "#b23a2e" },
-    { bg1: "#eef0e5", bg2: "#f3e4dc", hair: "#222927", outfit: "#704f7a", accent: "#186b5a" },
-    { bg1: "#e5edf3", bg2: "#f3ecda", hair: "#362b25", outfit: "#8a4f35", accent: "#315f8d" },
-  ];
-  return palettes[seed % palettes.length];
-}
-
-function buildPartnerPortraitSvg(chart, profile) {
-  const palette = partnerPalette(profile);
-  const targetGender = profile.genderProfile?.label || partnerTargetGender(chart);
-  const presentationKind = partnerPresentationKind(targetGender);
-  const avatar = profile.appearance.avatarClass;
-  const faceWidth = avatar === "tall" ? 88 : avatar === "sharp" ? 94 : avatar === "solid" ? 118 : 106;
-  const shoulderWidth = avatar === "solid" ? 224 : avatar === "athletic" ? 210 : avatar === "tall" ? 168 : 190;
-  const faceShape = avatar === "sharp" ? "M153 109 C158 66 202 60 217 109 C229 153 207 187 185 191 C162 187 140 153 153 109Z" : "M150 110 C150 72 220 72 220 110 C220 160 204 190 185 190 C166 190 150 160 150 110Z";
-  const mouth = namesIncludeAny(profile.supportStars, ["太陽", "紅鸞", "天喜", "天姚"]) ? "M174 161 Q185 169 196 161" : "M176 163 Q185 166 194 163";
-  const eyeY = namesIncludeAny(profile.supportStars, ["天機", "巨門"]) ? 126 : 130;
-  const hairPath = presentationKind === "masculine"
-    ? `M139 112 C136 72 162 52 188 54 C220 56 236 81 226 119 C211 101 181 94 139 112Z`
-    : `M132 121 C128 72 160 46 190 48 C226 50 244 83 235 136 C223 112 203 94 160 102 C146 108 138 115 132 121Z`;
-  const career = profile.careers[0] || "專業人士";
-  const title = `${targetGender}・${career}`;
-  const subtitle = `${profile.appearance.face}｜${profile.appearance.build}`;
-
-  return `
-    <svg class="partner-generated-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 500" role="img" aria-label="正緣概念肖像">
-      <defs>
-        <linearGradient id="portrait-bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="${palette.bg1}" />
-          <stop offset="100%" stop-color="${palette.bg2}" />
-        </linearGradient>
-        <linearGradient id="portrait-cloth" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="${palette.outfit}" />
-          <stop offset="100%" stop-color="${palette.accent}" />
-        </linearGradient>
-      </defs>
-      <rect width="370" height="500" rx="26" fill="url(#portrait-bg)" />
-      <circle cx="74" cy="72" r="34" fill="${palette.accent}" opacity="0.18" />
-      <circle cx="305" cy="120" r="54" fill="${palette.outfit}" opacity="0.12" />
-      <path d="M${185 - shoulderWidth / 2} 322 C${185 - shoulderWidth / 2 + 20} 260 ${185 + shoulderWidth / 2 - 20} 260 ${185 + shoulderWidth / 2} 322 L${185 + shoulderWidth / 2 + 18} 430 L${185 - shoulderWidth / 2 - 18} 430Z" fill="url(#portrait-cloth)" />
-      <path d="M162 260 C166 292 204 292 208 260 L205 222 L165 222Z" fill="#dfb995" />
-      <path d="${hairPath}" fill="${palette.hair}" />
-      <path d="${faceShape}" fill="#edc9a8" />
-      <path d="M${185 - faceWidth / 2} 111 C160 88 209 88 ${185 + faceWidth / 2} 111" fill="none" stroke="${palette.hair}" stroke-width="18" stroke-linecap="round" />
-      <circle cx="170" cy="${eyeY}" r="4" fill="#222927" />
-      <circle cx="200" cy="${eyeY}" r="4" fill="#222927" />
-      <path d="M185 135 C180 145 181 151 187 153" fill="none" stroke="#b98a69" stroke-width="3" stroke-linecap="round" />
-      <path d="${mouth}" fill="none" stroke="#9c5149" stroke-width="4" stroke-linecap="round" />
-      <path d="M143 330 C165 350 205 350 227 330" fill="none" stroke="#fffdf7" stroke-width="10" opacity="0.46" stroke-linecap="round" />
-      <rect x="32" y="394" width="306" height="72" rx="16" fill="#fffdf7" opacity="0.88" />
-      <text x="52" y="424" fill="#1f2523" font-size="18" font-weight="800">${escapeHtml(title.slice(0, 18))}</text>
-      <text x="52" y="449" fill="#66716c" font-size="12">${escapeHtml(subtitle.slice(0, 30))}</text>
-    </svg>
-  `;
-}
-
 function partnerImageEndpointAvailable() {
   return window.location.protocol !== "file:";
 }
@@ -4579,12 +4525,12 @@ function renderPartnerVisual(chart, profile, source = "ziwei") {
   const isLoading = state.status === "loading";
   const visual = hasAiImage
     ? `<img class="partner-ai-image" src="${escapeHtml(state.imageUrl)}" alt="AI 生成的正緣輪廓圖片" loading="lazy" />`
-    : buildPartnerPortraitSvg(chart, profile);
+    : "";
   const caption = hasAiImage
     ? `由${state.provider || "AI 圖像模型"}生成，${source === "bazi" ? "依日主、日支、關係星、十神與干支合沖摘要製作。" : "依夫妻宮三方四正、命宮、遷移、福德、官祿、財帛與來因宮摘要製作。"}`
     : partnerImageEndpointAvailable()
       ? "按下生成後會由後端呼叫 AI 圖像模型，頁面不會顯示提示詞。"
-      : "目前是本機 file 預覽，先顯示概念圖；部署到 Cloudflare 並啟用 Workers AI 後即可生成 AI 圖片。";
+      : "目前是本機 file 預覽，不顯示 SVG 預覽；部署到 Cloudflare 並啟用 Workers AI 後即可生成 AI 圖片。";
   const generateLabel = isLoading
     ? "生成中..."
     : hasAiImage
@@ -4593,7 +4539,7 @@ function renderPartnerVisual(chart, profile, source = "ziwei") {
 
   return `
     <div class="generated-portrait-card">
-      <p class="eyebrow">${hasAiImage ? "AI Portrait" : "Preview Portrait"}</p>
+      <p class="eyebrow">${hasAiImage ? "AI Portrait" : "AI Portrait Pending"}</p>
       ${visual}
       <p class="partner-caption">${escapeHtml(caption)}</p>
       ${renderPartnerImageStatus(state)}
@@ -4895,12 +4841,6 @@ function addChatMessage(text, role = "bot") {
 function seedChat() {
   if (chatLog.children.length > 0) return;
   addChatMessage("命盤已載入。切換到八字可問日主、十神、喜用與大運；切換到紫微可問十二宮、正緣、來因宮與流年。");
-}
-
-function regeneratePartnerPortrait() {
-  if (!currentChart) return;
-  partnerRenderSalt += 1;
-  renderPartnerProfile(currentChart);
 }
 
 async function generatePartnerAiImage() {
@@ -5496,33 +5436,62 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const activeMeta = TOPIC_MAP_META[activeTopicKey] || TOPIC_MAP_META.property;
   const branches = TOPIC_TREE_BRANCHES[mode]?.[activeTopicKey] || [];
   const rootLabels = mode === "bazi" ? ["日主", "月令", "格局"] : ["命宮", "身宮", "來因宮"];
+  const treeBranchesHtml = TOPIC_ORDER.map((topicKey) => {
+    const topic = TOPIC_CONFIG[topicKey];
+    const meta = TOPIC_MAP_META[topicKey];
+    const layout = TOPIC_TREE_LAYOUT[topicKey];
+    const active = topicKey === activeTopicKey;
+    const ariaLabel = `${modeLabel}${topic.label}主題`;
+    return `
+      <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
+        <path class="tree-branch-line" d="${layout.branch}" />
+        <circle class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" r="45" />
+        <circle class="tree-leaf" cx="${layout.cx}" cy="${layout.cy}" r="34" />
+        <circle class="tree-leaf-core" cx="${layout.cx}" cy="${layout.cy}" r="18" />
+        <text class="tree-leaf-mark" x="${layout.cx}" y="${layout.cy + 5}" text-anchor="middle">${escapeHtml(meta.mark)}</text>
+        <text class="tree-leaf-label" x="${layout.cx}" y="${layout.cy + 54}" text-anchor="middle">${escapeHtml(topic.label)}</text>
+      </g>
+    `;
+  }).join("");
   return `
     <section class="topic-mindmap topic-tree-map ${mode}">
-      <div class="topic-tree-trunk">
-        <div class="topic-tree-crown">${escapeHtml(modeLabel)}</div>
-        <div class="topic-tree-stem">
-          <span>自身</span>
-          <strong>命主</strong>
-          <small>樹幹代表命盤核心，大枝代表想看的主題。</small>
+      <div class="topic-tree-visual">
+        <svg class="topic-tree-svg" viewBox="0 0 360 360" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
+          <defs>
+            <linearGradient id="tree-trunk-gradient-${escapeHtml(mode)}" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#6f4b35" />
+              <stop offset="100%" stop-color="#2c2923" />
+            </linearGradient>
+            <radialGradient id="tree-leaf-gradient-${escapeHtml(mode)}" cx="42%" cy="35%" r="70%">
+              <stop offset="0%" stop-color="#dcebd4" />
+              <stop offset="100%" stop-color="#2f765e" />
+            </radialGradient>
+          </defs>
+          <path class="tree-ground" d="M54 326 C96 303 138 304 180 322 C222 304 264 303 306 326" />
+          <path class="tree-root root-a" d="M180 305 C144 323 110 330 70 324" />
+          <path class="tree-root root-b" d="M180 305 C216 323 250 330 290 324" />
+          <path class="tree-root root-c" d="M180 306 C176 326 170 338 158 350" />
+          <path class="tree-trunk-shape" d="M153 318 C166 270 165 235 172 204 C176 184 184 184 188 204 C195 235 194 270 207 318 Z" />
+          <path class="tree-trunk-highlight" d="M178 300 C176 260 178 229 181 196" />
+          ${treeBranchesHtml}
+          <text class="tree-self-label" x="180" y="252" text-anchor="middle">命主</text>
+          <text class="tree-mode-label" x="180" y="25" text-anchor="middle">${escapeHtml(modeLabel)}</text>
+        </svg>
+        <div class="topic-tree-caption">
+          <strong>點樹枝或葉子切換主題</strong>
+          <small>樹幹是自身，枝葉是財富、事業、姻緣、子女、健康。</small>
         </div>
         <div class="topic-tree-roots">
           ${rootLabels.map((label) => `<span>${escapeHtml(label)}</span>`).join("")}
         </div>
       </div>
       <div class="topic-tree-content">
-        <div class="topic-tree-branches" aria-label="${escapeHtml(modeLabel)}主題大類">
-          ${TOPIC_ORDER.map((topicKey) => {
-            const topic = TOPIC_CONFIG[topicKey];
-            const meta = TOPIC_MAP_META[topicKey];
-            const active = topicKey === activeTopicKey;
-            return `
-              <button type="button" class="topic-tree-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" aria-pressed="${String(active)}">
-                <span>${escapeHtml(meta.mark)}</span>
-                <strong>${escapeHtml(topic.label)}</strong>
-                <small>${escapeHtml(meta.hint)}</small>
-              </button>
-            `;
-          }).join("")}
+        <div class="topic-tree-current">
+          <span>${escapeHtml(activeMeta.mark)}</span>
+          <div>
+            <b>${escapeHtml(activeTopic.label)}</b>
+            <small>${escapeHtml(activeMeta.hint)}</small>
+          </div>
         </div>
         <details class="topic-tree-submap">
           <summary>
@@ -6934,6 +6903,24 @@ chatForm.addEventListener("submit", (event) => {
   addChatMessage(buildBotAnswer(question), "bot");
 });
 
+function selectTopicMapTarget(topicMapButton) {
+  if (!topicMapButton) return false;
+  const topicKey = topicMapButton.dataset.topicKey;
+  const mode = topicMapButton.dataset.topicMap;
+  if (!TOPIC_CONFIG[topicKey]) return false;
+  if (mode === "bazi" && baziTopicSelect) {
+    baziTopicSelect.value = topicKey;
+    updateBaziReading();
+    return true;
+  }
+  if (mode === "ziwei" && topicSelect) {
+    topicSelect.value = topicKey;
+    updateReading();
+    return true;
+  }
+  return false;
+}
+
 document.addEventListener("click", (event) => {
   const removeCalibrationButton = event.target.closest("[data-remove-calibration]");
   if (removeCalibrationButton) {
@@ -6944,19 +6931,7 @@ document.addEventListener("click", (event) => {
   }
   const topicMapButton = event.target.closest("[data-topic-map]");
   if (topicMapButton) {
-    const topicKey = topicMapButton.dataset.topicKey;
-    const mode = topicMapButton.dataset.topicMap;
-    if (!TOPIC_CONFIG[topicKey]) return;
-    if (mode === "bazi" && baziTopicSelect) {
-      baziTopicSelect.value = topicKey;
-      updateBaziReading();
-      return;
-    }
-    if (mode === "ziwei" && topicSelect) {
-      topicSelect.value = topicKey;
-      updateReading();
-      return;
-    }
+    if (selectTopicMapTarget(topicMapButton)) return;
   }
   const imageTypeButton = event.target.closest("[data-ziwei-image-type]");
   if (imageTypeButton) {
@@ -6966,14 +6941,19 @@ document.addEventListener("click", (event) => {
       renderZiweiImage(currentChart.astrolabe, context);
     }
   }
-  if (event.target.matches("[data-regenerate-partner]")) {
-    regeneratePartnerPortrait();
-  }
   if (event.target.matches("[data-generate-ai-partner]")) {
     generatePartnerAiImage();
   }
   if (event.target.matches("[data-generate-bazi-partner]")) {
     generateBaziPartnerAiImage();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (!["Enter", " "].includes(event.key)) return;
+  const topicMapButton = event.target.closest("[data-topic-map]");
+  if (selectTopicMapTarget(topicMapButton)) {
+    event.preventDefault();
   }
 });
 

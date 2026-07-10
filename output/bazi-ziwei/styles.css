@@ -1434,13 +1434,169 @@ button {
 
 .topic-mindmap {
   display: grid;
-  grid-template-columns: minmax(150px, 0.28fr) minmax(0, 1fr);
+  grid-template-columns: minmax(240px, 0.36fr) minmax(0, 1fr);
   gap: 12px;
-  align-items: stretch;
+  align-items: start;
   border: 1px solid #e5ddcf;
   border-radius: 8px;
   padding: 12px;
   background: #fffdf8;
+}
+
+.topic-tree-visual {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #d9d0c1;
+  border-radius: 8px;
+  padding: 10px;
+  background:
+    linear-gradient(180deg, rgba(24, 107, 90, 0.08), rgba(176, 62, 50, 0.06)),
+    #f7f1e4;
+}
+
+.topic-tree-svg {
+  width: 100%;
+  min-height: 300px;
+  aspect-ratio: 1;
+  overflow: visible;
+}
+
+.tree-ground,
+.tree-root,
+.tree-branch-line,
+.tree-trunk-highlight {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tree-ground {
+  stroke: rgba(44, 82, 70, 0.22);
+  stroke-width: 8;
+}
+
+.tree-root {
+  stroke: rgba(111, 75, 53, 0.52);
+  stroke-width: 6;
+}
+
+.tree-trunk-shape {
+  fill: #5f4635;
+  stroke: #2c2923;
+  stroke-width: 3;
+}
+
+.tree-trunk-highlight {
+  stroke: rgba(255, 253, 247, 0.3);
+  stroke-width: 4;
+}
+
+.topic-tree-svg-branch {
+  cursor: pointer;
+  outline: none;
+}
+
+.tree-branch-line {
+  stroke: #6f4b35;
+  stroke-width: 13;
+  transition: stroke 0.16s ease, stroke-width 0.16s ease;
+}
+
+.tree-leaf-hit {
+  fill: transparent;
+}
+
+.tree-leaf {
+  fill: #8dbb82;
+  stroke: #2f765e;
+  stroke-width: 3;
+  filter: drop-shadow(0 8px 12px rgba(31, 37, 35, 0.12));
+  transition: fill 0.16s ease, stroke 0.16s ease, transform 0.16s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tree-leaf-core {
+  fill: #fffdf7;
+  stroke: rgba(47, 118, 94, 0.24);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.tree-leaf-mark,
+.tree-leaf-label,
+.tree-self-label,
+.tree-mode-label {
+  pointer-events: none;
+  font-family: inherit;
+  font-weight: 950;
+}
+
+.tree-leaf-mark {
+  fill: var(--charcoal);
+  font-size: 15px;
+}
+
+.tree-leaf-label {
+  fill: var(--charcoal);
+  font-size: 13px;
+}
+
+.tree-self-label {
+  fill: #fffdf7;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.tree-mode-label {
+  fill: var(--jade);
+  font-size: 13px;
+}
+
+.topic-tree-svg-branch:hover .tree-branch-line,
+.topic-tree-svg-branch:focus-visible .tree-branch-line {
+  stroke: var(--jade);
+  stroke-width: 16;
+}
+
+.topic-tree-svg-branch:hover .tree-leaf,
+.topic-tree-svg-branch:focus-visible .tree-leaf {
+  fill: #a9ca91;
+  stroke: var(--jade);
+  transform: scale(1.05);
+}
+
+.topic-tree-svg-branch.is-active .tree-branch-line {
+  stroke: var(--vermillion);
+  stroke-width: 17;
+}
+
+.topic-tree-svg-branch.is-active .tree-leaf {
+  fill: #f2b39a;
+  stroke: var(--vermillion);
+}
+
+.topic-tree-svg-branch.is-active .tree-leaf-core {
+  stroke: rgba(176, 62, 50, 0.44);
+}
+
+.topic-tree-caption {
+  display: grid;
+  gap: 3px;
+  border-top: 1px solid rgba(217, 208, 193, 0.9);
+  padding-top: 8px;
+}
+
+.topic-tree-caption strong {
+  color: var(--charcoal);
+  font-size: 0.86rem;
+}
+
+.topic-tree-caption small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 740;
+  line-height: 1.4;
 }
 
 .topic-tree-trunk {
@@ -1510,7 +1666,45 @@ button {
 
 .topic-tree-content {
   display: grid;
+  align-content: start;
   gap: 10px;
+}
+
+.topic-tree-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2dacb;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff7ef;
+}
+
+.topic-tree-current > span {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--vermillion);
+  color: #fffdf7;
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.topic-tree-current b {
+  display: block;
+  color: var(--charcoal);
+  font-size: 0.98rem;
+}
+
+.topic-tree-current small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 740;
 }
 
 .topic-tree-branches {
@@ -3092,6 +3286,10 @@ button {
 
   .topic-tree-branch::before {
     display: none;
+  }
+
+  .topic-tree-svg {
+    min-height: 230px;
   }
 
   .luck-cycle summary {
