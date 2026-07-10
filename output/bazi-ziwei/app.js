@@ -146,6 +146,62 @@ const TOPIC_MAP_META = {
   children: { mark: "子", hint: "子女、作品、照顧、親密表達" },
   health: { mark: "健", hint: "體質、壓力、睡眠、修復節奏" },
 };
+const TOPIC_TREE_BRANCHES = {
+  bazi: {
+    property: [
+      { label: "財富來源", leaves: ["正財", "偏財", "收入穩定度"] },
+      { label: "資產承載", leaves: ["房產緣", "現金流", "守財能力"] },
+      { label: "時間節奏", leaves: ["大運", "流年", "流月行動"] },
+    ],
+    career: [
+      { label: "職業方向", leaves: ["最可能職業", "工作型態", "可累積技能"] },
+      { label: "職場結構", leaves: ["權責", "貴人", "競爭壓力"] },
+      { label: "轉換時機", leaves: ["換工作", "升遷", "創業窗口"] },
+    ],
+    marriage: [
+      { label: "吸引模式", leaves: ["桃花", "伴侶氣質", "相處節奏"] },
+      { label: "正緣輪廓", leaves: ["外型", "職業", "生活風格"] },
+      { label: "關係時間", leaves: ["遇見時機", "結婚時機", "穩定條件"] },
+    ],
+    children: [
+      { label: "子女緣", leaves: ["緣分深淺", "互動方式", "生育節奏"] },
+      { label: "創造力", leaves: ["作品", "表達", "才藝延伸"] },
+      { label: "教養資源", leaves: ["家庭支持", "責任分配", "流年訊號"] },
+    ],
+    health: [
+      { label: "體質傾向", leaves: ["五行偏性", "壓力來源", "弱點提示"] },
+      { label: "修復方式", leaves: ["作息", "飲食", "情緒調節"] },
+      { label: "時間提醒", leaves: ["流年壓力", "流月保養", "避免過勞"] },
+    ],
+  },
+  ziwei: {
+    property: [
+      { label: "財帛路線", leaves: ["財帛宮", "生年四化", "宮干四化"] },
+      { label: "房產資產", leaves: ["田宅宮", "三方四正", "飛入飛出"] },
+      { label: "機會風險", leaves: ["偏財", "大限", "流年流月"] },
+    ],
+    career: [
+      { label: "事業定位", leaves: ["官祿宮", "命身宮", "主星結構"] },
+      { label: "職場人脈", leaves: ["遷移宮", "僕役宮", "貴人與競爭"] },
+      { label: "變動訊號", leaves: ["大限四化", "流年四化", "事件觸發"] },
+    ],
+    marriage: [
+      { label: "伴侶結構", leaves: ["夫妻宮", "對宮", "三方四正"] },
+      { label: "正緣輪廓", leaves: ["外型氣質", "可能職業", "相遇場景"] },
+      { label: "關係時間", leaves: ["桃花", "結婚窗口", "穩定條件"] },
+    ],
+    children: [
+      { label: "子女宮", leaves: ["子女緣", "親子互動", "晚輩緣"] },
+      { label: "親密表達", leaves: ["吸引模式", "互動需求", "界線感"] },
+      { label: "事件時間", leaves: ["流年", "流月", "三方四正"] },
+    ],
+    health: [
+      { label: "疾厄訊號", leaves: ["疾厄宮", "命宮", "身宮"] },
+      { label: "壓力來源", leaves: ["福德宮", "遷移宮", "忌星位置"] },
+      { label: "照護節奏", leaves: ["大限", "流年", "流月行動"] },
+    ],
+  },
+};
 const SCOPE_LABELS = {
   decadal: "大限",
   age: "小限",
@@ -4975,7 +5031,13 @@ async function generateBaziPartnerAiImage() {
 function renderPalaceOverview(astrolabe) {
   const squareTooltip = "三方四正：三方是本宮的三合宮位，四正是在三方之外再加對宮；用來判斷該宮事件的外部支援、牽動來源與真正成局條件。";
   return `
-    <section class="palace-overview">
+    <details class="palace-overview collapsible-section">
+      <summary>
+        <span>
+          <b>十二宮總覽</b>
+          <small>逐宮查看本宮、對宮與三方四正的重點</small>
+        </span>
+      </summary>
       <div class="palace-overview-head">
         <span>十二宮總覽</span>
       </div>
@@ -5006,7 +5068,7 @@ function renderPalaceOverview(astrolabe) {
         <span class="palace-overview-tip" tabindex="0" aria-label="${tooltipAttribute(squareTooltip)}" data-tooltip="${tooltipAttribute(squareTooltip)}">?</span>
         後再做整體判斷。
       </p>
-    </section>
+    </details>
   `;
 }
 
@@ -5430,61 +5492,60 @@ function ziweiTopicMapSignal(topicKey, chart, context) {
 
 function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const modeLabel = mode === "bazi" ? "八字" : "紫微斗數";
-  const modeNote = mode === "bazi"
-    ? "用日主、十神、五行與行運看人生能量。"
-    : "用十二宮、三方四正與飛星看事件落點。";
-  const signalFor = mode === "bazi"
-    ? (topicKey) => baziTopicMapSignal(topicKey, chart)
-    : (topicKey) => ziweiTopicMapSignal(topicKey, chart, contextOrPeriod);
+  const activeTopic = TOPIC_CONFIG[activeTopicKey] || TOPIC_CONFIG.property;
+  const activeMeta = TOPIC_MAP_META[activeTopicKey] || TOPIC_MAP_META.property;
+  const branches = TOPIC_TREE_BRANCHES[mode]?.[activeTopicKey] || [];
+  const rootLabels = mode === "bazi" ? ["日主", "月令", "格局"] : ["命宮", "身宮", "來因宮"];
   return `
-    <section class="topic-mindmap ${mode}">
-      <div class="topic-map-center">
-        <span>${escapeHtml(modeLabel)}</span>
-        <strong>主題地圖</strong>
-        <small>${escapeHtml(modeNote)}</small>
-      </div>
-      <div class="topic-map-nodes">
-        ${TOPIC_ORDER.map((topicKey) => {
-          const topic = TOPIC_CONFIG[topicKey];
-          const meta = TOPIC_MAP_META[topicKey];
-          const signal = signalFor(topicKey);
-          const active = topicKey === activeTopicKey;
-          return `
-            <button type="button" class="topic-map-node ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" aria-pressed="${String(active)}">
-              <span>${escapeHtml(meta.mark)}</span>
-              <strong>${escapeHtml(topic.label)}</strong>
-              <small>${escapeHtml(meta.hint)}</small>
-              <em>${escapeHtml(signal.status)} · ${escapeHtml(compactText(signal.signal, 28))}</em>
-            </button>
-          `;
-        }).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function renderCompactReadingHero({ mode, topic, tone, periodName, headline, items, tags = [] }) {
-  return `
-    <section class="compact-reading-hero ${mode}">
-      <header>
-        <span>${escapeHtml(periodName)}</span>
-        <h3>${escapeHtml(topic.label)}：${escapeHtml(tone)}</h3>
-        <p>${escapeHtml(headline)}</p>
-      </header>
-      <div class="compact-brief-grid">
-        ${items.map((item) => `
-          <article>
-            <span>${escapeHtml(item.label)}</span>
-            <strong>${escapeHtml(item.value)}</strong>
-            <p>${escapeHtml(item.text)}</p>
-          </article>
-        `).join("")}
-      </div>
-      ${tags.length ? `
-        <div class="compact-tag-row">
-          ${tags.slice(0, 8).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}
+    <section class="topic-mindmap topic-tree-map ${mode}">
+      <div class="topic-tree-trunk">
+        <div class="topic-tree-crown">${escapeHtml(modeLabel)}</div>
+        <div class="topic-tree-stem">
+          <span>自身</span>
+          <strong>命主</strong>
+          <small>樹幹代表命盤核心，大枝代表想看的主題。</small>
         </div>
-      ` : ""}
+        <div class="topic-tree-roots">
+          ${rootLabels.map((label) => `<span>${escapeHtml(label)}</span>`).join("")}
+        </div>
+      </div>
+      <div class="topic-tree-content">
+        <div class="topic-tree-branches" aria-label="${escapeHtml(modeLabel)}主題大類">
+          ${TOPIC_ORDER.map((topicKey) => {
+            const topic = TOPIC_CONFIG[topicKey];
+            const meta = TOPIC_MAP_META[topicKey];
+            const active = topicKey === activeTopicKey;
+            return `
+              <button type="button" class="topic-tree-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" aria-pressed="${String(active)}">
+                <span>${escapeHtml(meta.mark)}</span>
+                <strong>${escapeHtml(topic.label)}</strong>
+                <small>${escapeHtml(meta.hint)}</small>
+              </button>
+            `;
+          }).join("")}
+        </div>
+        <details class="topic-tree-submap">
+          <summary>
+            <span>
+              <b>${escapeHtml(activeTopic.label)}細分枝</b>
+              <small>${escapeHtml(activeMeta.hint)}，展開後再看細細項。</small>
+            </span>
+          </summary>
+          <div class="topic-tree-subbranches">
+            ${branches.map((branch, index) => `
+              <details class="topic-tree-subbranch">
+                <summary>
+                  <span>${index + 1}</span>
+                  <b>${escapeHtml(branch.label)}</b>
+                </summary>
+                <div class="topic-tree-leaves">
+                  ${branch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
+                </div>
+              </details>
+            `).join("")}
+          </div>
+        </details>
+      </div>
     </section>
   `;
 }
@@ -5503,6 +5564,22 @@ function renderReadingDetailPanel(title, subtitle, content, options = {}) {
       </div>
     </details>
   `;
+}
+
+function renderReadingSubDetail(title, content) {
+  return `
+    <details class="reading-subdetail-panel">
+      <summary>${escapeHtml(title)}</summary>
+      <div class="reading-subdetail-body">
+        ${content}
+      </div>
+    </details>
+  `;
+}
+
+function renderDrilldownGroup(title, subtitle, items) {
+  const content = items.map((item) => renderReadingSubDetail(item.title, item.content)).join("");
+  return renderReadingDetailPanel(title, subtitle, content);
 }
 
 function buildBaziReading(chart) {
@@ -5546,101 +5623,66 @@ function buildBaziReading(chart) {
     ...groups.filter((group) => group.count).map((group) => `${group.label}${group.count}`),
     period.periodName,
   ];
-  const topicGods = {
-    property: ["正財", "偏財", "食神", "傷官"],
-    career: ["正官", "七殺", "正印", "偏印"],
-    marriage: ["正官", "七殺", "正財", "偏財"],
-    children: ["食神", "傷官", "正印", "偏印"],
-    health: ["正印", "偏印", "食神", "傷官", "正官", "七殺"],
-  }[topicKey] || [];
-  const hero = renderCompactReadingHero({
-    mode: "bazi",
-    topic,
-    tone,
-    periodName: period.periodName,
-    headline: `${TOPIC_MAP_META[topicKey]?.hint || topic.prompt}。想深入哪一塊，點上方主題節點或展開下方細節。`,
-    items: [
-      {
-        label: "命盤底色",
-        value: `${profile.dayStem}${profile.dayElement}日主`,
-        text: `${profile.strength}，用神${usefulGod.primary || "流通"}，調候重${usefulGod.regulating}。`,
-      },
-      {
-        label: "主題訊號",
-        value: godCountText(counts, topicGods),
-        text: compactText(analysis.text, 78),
-      },
-      {
-        label: "探索方向",
-        value: period.periodName,
-        text: compactTopicAction(topicKey),
-      },
-    ],
-    tags,
-  });
-
   return `
     <div class="reading-main reading-main-compact bazi-reading-main">
       <div class="reading-copy">
         ${renderTopicMindMap("bazi", topicKey, chart, period)}
-        ${hero}
-        ${renderReadingDetailPanel("八字結構", "日主、月令、格局、喜用與調候", `
-          <section class="reading-block">
-            <h4>原局骨架</h4>
-            <p>${escapeHtml(profile.text)}</p>
-          </section>
-          <section class="reading-block">
-            <h4>格局、喜用與調候</h4>
-            <p>${escapeHtml(`${structure.text} ${usefulGod.text}`)}</p>
-          </section>
-          <section class="reading-block">
-            <h4>核心格局分數（滿分 100）</h4>
-            ${renderBaziCoreScores(coreScores)}
-          </section>
-        `)}
-        ${renderReadingDetailPanel(`${topic.label}完整解讀`, "主題分析、延伸重點與事件觸發", `
-          <section class="reading-block">
-            <h4>${escapeHtml(topic.label)}八字解讀</h4>
-            <p>${escapeHtml(analysis.text)}</p>
-          </section>
-          <section class="reading-block">
-            <h4>${escapeHtml(topic.label)}延伸重點</h4>
-            <p>${escapeHtml(supplement)}</p>
-          </section>
-          <section class="reading-block">
-            <h4>事件觸發規則</h4>
-            ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
-          </section>
-        `)}
-        ${renderReadingDetailPanel("時間與行動", `${period.periodName}、流月建議與決策節奏`, `
-          <section class="reading-block">
-            <h4>${escapeHtml(period.periodName)}交互作用</h4>
-            <p>${escapeHtml(periodText)}</p>
-          </section>
-          ${monthlyGuide ? `
-            <section class="reading-block">
-              <h4>流月五主題行動建議</h4>
-              ${renderMonthlyActionGuide(monthlyGuide, "bazi")}
-            </section>
-          ` : ""}
-          <section class="reading-block">
-            <h4>人生節奏與決策時機</h4>
-            ${renderBaziDecisionTiming(timingProfile)}
-          </section>
-        `)}
-        ${renderReadingDetailPanel("判讀依據", "權重面板、十神行動與完整理由", `
-          ${renderProfessionalAudit(audit)}
-          <section class="reading-block">
-            <h4>十神怎麼用在行動上</h4>
-            <p>${escapeHtml(baziTenGodInterpretation(chart))}</p>
-          </section>
-          <section class="reading-block">
-            <h4>八字為何這樣判</h4>
-            <ul class="why-list">
-              ${why.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-            </ul>
-          </section>
-        `)}
+        ${renderDrilldownGroup("八字結構", "日主、月令、格局、喜用", [
+          {
+            title: "原局骨架",
+            content: `<section class="reading-block"><h4>原局骨架</h4><p>${escapeHtml(profile.text)}</p></section>`,
+          },
+          {
+            title: "格局、喜用與調候",
+            content: `<section class="reading-block"><h4>格局、喜用與調候</h4><p>${escapeHtml(`${structure.text} ${usefulGod.text}`)}</p></section>`,
+          },
+          {
+            title: "核心格局分數",
+            content: `<section class="reading-block"><h4>核心格局分數（滿分 100）</h4>${renderBaziCoreScores(coreScores)}</section>`,
+          },
+        ])}
+        ${renderDrilldownGroup(`${topic.label}主題`, "主題分析、延伸、事件觸發", [
+          {
+            title: `${topic.label}八字解讀`,
+            content: `<section class="reading-block"><h4>${escapeHtml(topic.label)}八字解讀</h4><p>${escapeHtml(analysis.text)}</p></section>`,
+          },
+          {
+            title: `${topic.label}延伸重點`,
+            content: `<section class="reading-block"><h4>${escapeHtml(topic.label)}延伸重點</h4><p>${escapeHtml(supplement)}</p></section>`,
+          },
+          {
+            title: "事件觸發規則",
+            content: `<section class="reading-block"><h4>事件觸發規則</h4>${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}</section>`,
+          },
+        ])}
+        ${renderDrilldownGroup("時間與行動", `${period.periodName}、流月、決策`, [
+          {
+            title: `${period.periodName}交互作用`,
+            content: `<section class="reading-block"><h4>${escapeHtml(period.periodName)}交互作用</h4><p>${escapeHtml(periodText)}</p></section>`,
+          },
+          monthlyGuide ? {
+            title: "流月五主題行動",
+            content: `<section class="reading-block"><h4>流月五主題行動建議</h4>${renderMonthlyActionGuide(monthlyGuide, "bazi")}</section>`,
+          } : null,
+          {
+            title: "人生節奏與決策時機",
+            content: `<section class="reading-block"><h4>人生節奏與決策時機</h4>${renderBaziDecisionTiming(timingProfile)}</section>`,
+          },
+        ].filter(Boolean))}
+        ${renderDrilldownGroup("判讀依據", "權重、十神、完整理由", [
+          {
+            title: "權重判斷面板",
+            content: renderProfessionalAudit(audit),
+          },
+          {
+            title: "十神行動方式",
+            content: `<section class="reading-block"><h4>十神怎麼用在行動上</h4><p>${escapeHtml(baziTenGodInterpretation(chart))}</p></section>`,
+          },
+          {
+            title: "完整判讀理由",
+            content: `<section class="reading-block"><h4>八字為何這樣判</h4><ul class="why-list">${why.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>`,
+          },
+        ])}
       </div>
     </div>
   `;
@@ -5888,80 +5930,54 @@ function buildReading(chart) {
     ...flying.tags,
     ...(peach?.tags || []),
   ].filter(Boolean);
-  const hero = renderCompactReadingHero({
-    mode: "ziwei",
-    topic,
-    tone,
-    periodName: context.periodName,
-    headline: `${TOPIC_MAP_META[topicKey]?.hint || topic.prompt}。先看主題地圖，點選方向後再展開宮位、飛星或時間線。`,
-    items: [
-      {
-        label: "主宮",
-        value: compactText(topicPalacesText, 26),
-        text: primary ? compactText(describePalaceEvaluation(primary), 78) : "主宮資料不足，先用三方四正與流運補看。",
-      },
-      {
-        label: "四化",
-        value: flying.tags.slice(0, 2).join("、") || "待觀察",
-        text: compactText(flying.conclusion || flying.summary, 78),
-      },
-      {
-        label: "探索方向",
-        value: context.periodName,
-        text: context.periodPalace
-          ? `當期焦點在${palaceLabel(context.periodPalace)}，${compactTopicAction(topicKey)}`
-          : compactTopicAction(topicKey),
-      },
-    ],
-    tags,
-  });
-
   return `
     <div class="reading-main reading-main-compact">
       <div class="reading-copy">
         ${renderTopicMindMap("ziwei", topicKey, chart, context)}
-        ${hero}
-        ${renderReadingDetailPanel("宮位與三方四正", "主宮、對宮、三方四正與星曜故事", `
-          <section class="reading-block">
-            <h4>紫微斗數</h4>
-            <p>${escapeHtml(ziweiText)}</p>
-          </section>
-          ${peach ? `
-            <section class="reading-block">
-              <h4>命主桃花分析</h4>
-              <p>${escapeHtml(peach.text)}</p>
-            </section>
-          ` : ""}
-        `)}
-        ${renderReadingDetailPanel("飛星四化", "先看結論，需要時再展開完整飛法", `
-          <section class="reading-block">
-            <h4>飛星四化</h4>
-            <p>${escapeHtml(flying.conclusion || flying.summary)}</p>
-            ${renderFlyingStructure(flying, { collapsible: true })}
-          </section>
-        `)}
-        ${renderReadingDetailPanel("事件與時間", "事件觸發、時間線與流月行動", `
-          <section class="reading-block">
-            <h4>事件觸發規則</h4>
-            ${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}
-          </section>
-          ${monthlyGuide ? `
-            <section class="reading-block">
-              <h4>流月五主題行動建議</h4>
-              ${renderMonthlyActionGuide(monthlyGuide, "ziwei")}
-            </section>
-          ` : ""}
-          ${renderTopicTimeline(topicKey, chart)}
-        `)}
-        ${renderReadingDetailPanel("判讀依據", "權重面板與完整理由", `
-          ${renderProfessionalAudit(audit)}
-          <section class="reading-block">
-            <h4>為何如此解盤</h4>
-            <ul class="why-list">
-              ${why.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-            </ul>
-          </section>
-        `)}
+        ${renderDrilldownGroup("宮位網絡", "主宮、三方四正、桃花", [
+          {
+            title: "主宮與三方四正",
+            content: `<section class="reading-block"><h4>紫微斗數</h4><p>${escapeHtml(ziweiText)}</p></section>`,
+          },
+          peach ? {
+            title: "命主桃花分析",
+            content: `<section class="reading-block"><h4>命主桃花分析</h4><p>${escapeHtml(peach.text)}</p></section>`,
+          } : null,
+        ].filter(Boolean))}
+        ${renderDrilldownGroup("飛星四化", "結論、完整飛法", [
+          {
+            title: "飛星結論",
+            content: `<section class="reading-block"><h4>飛星四化</h4><p>${escapeHtml(flying.conclusion || flying.summary)}</p></section>`,
+          },
+          {
+            title: "完整飛星流程",
+            content: `<section class="reading-block"><h4>完整飛星流程</h4>${renderFlyingStructure(flying, { collapsible: false })}</section>`,
+          },
+        ])}
+        ${renderDrilldownGroup("事件與時間", "事件、流月、時間線", [
+          {
+            title: "事件觸發規則",
+            content: `<section class="reading-block"><h4>事件觸發規則</h4>${renderEventRulePanel(`${topic.label}事件觸發規則`, eventRules)}</section>`,
+          },
+          monthlyGuide ? {
+            title: "流月五主題行動",
+            content: `<section class="reading-block"><h4>流月五主題行動建議</h4>${renderMonthlyActionGuide(monthlyGuide, "ziwei")}</section>`,
+          } : null,
+          {
+            title: "時間線",
+            content: renderTopicTimeline(topicKey, chart),
+          },
+        ].filter(Boolean))}
+        ${renderDrilldownGroup("判讀依據", "權重、理由", [
+          {
+            title: "權重判斷面板",
+            content: renderProfessionalAudit(audit),
+          },
+          {
+            title: "完整判讀理由",
+            content: `<section class="reading-block"><h4>為何如此解盤</h4><ul class="why-list">${why.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>`,
+          },
+        ])}
       </div>
     </div>
   `;
@@ -6025,7 +6041,7 @@ function renderSummary(astrolabe, lunar, formValues, timeIndex) {
     },
   ];
 
-  summaryStrip.innerHTML = summary
+  const summaryItems = summary
     .map(({ label, value, tooltip }) => `
       <div class="summary-item ${tooltip ? "has-tooltip" : ""}"${tooltipProps(tooltip)}>
         ${renderCoreLabel(label, tooltip)}
@@ -6033,6 +6049,16 @@ function renderSummary(astrolabe, lunar, formValues, timeIndex) {
       </div>
     `)
     .join("");
+
+  summaryStrip.innerHTML = `
+    <summary>
+      <span>
+        <b>命盤基本資料</b>
+        <small>出生校正、農曆、命宮、身宮、來因宮與五行局</small>
+      </span>
+    </summary>
+    <div class="summary-strip-grid">${summaryItems}</div>
+  `;
 }
 
 function renderPillars(chart) {

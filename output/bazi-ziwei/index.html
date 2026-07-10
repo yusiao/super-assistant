@@ -86,7 +86,7 @@
         <section class="result-panel" aria-live="polite">
           <div id="error-message" class="error-message" hidden></div>
 
-          <section class="summary-strip" id="summary-strip"></section>
+          <details class="summary-strip collapsible-section" id="summary-strip"></details>
 
           <nav class="method-switch" aria-label="選擇論盤方法" role="tablist">
             <button class="method-tab is-active" type="button" role="tab" aria-selected="true" data-reading-method="bazi">
@@ -100,7 +100,13 @@
           </nav>
 
           <section class="method-view" data-method-view="bazi">
-            <section class="bazi-section">
+            <details class="bazi-section collapsible-section">
+              <summary>
+                <span>
+                  <b>八字四柱</b>
+                  <small>四柱、十神、五行、納音與結構總覽</small>
+                </span>
+              </summary>
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">BaZi</p>
@@ -120,7 +126,7 @@
                 </div>
               </div>
               <div id="bazi-insight-output" class="bazi-insight-output"></div>
-            </section>
+            </details>
 
             <details class="bazi-luck-section collapsible-section">
               <summary>
@@ -140,6 +146,13 @@
                 </div>
                 <span class="section-note">五行、十神、干支關係與當期運勢分開判讀</span>
               </div>
+              <details class="reading-filter-panel collapsible-section">
+                <summary>
+                  <span>
+                    <b>八字運勢條件</b>
+                    <small>大運、流年、流月與主題設定</small>
+                  </span>
+                </summary>
               <div class="reading-controls bazi-reading-controls">
                 <label class="select-field">
                   <span class="field-label-with-help">
@@ -176,6 +189,7 @@
                   </select>
                 </label>
               </div>
+              </details>
               <div id="bazi-reading-output" class="reading-output"></div>
             </section>
 
@@ -211,7 +225,13 @@
               <div id="bazi-calibration-output" class="bazi-calibration-output"></div>
             </details>
 
-            <section class="partner-section bazi-partner-section">
+            <details class="partner-section bazi-partner-section collapsible-section">
+              <summary>
+                <span>
+                  <b>八字正緣輪廓</b>
+                  <small>依八字結構推估對象氣質與外型</small>
+                </span>
+              </summary>
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">BaZi Partner</p>
@@ -220,7 +240,7 @@
                 <span class="section-note">以日支、關係星、十神與干支合沖推估對象特質</span>
               </div>
               <div id="bazi-partner-output" class="partner-output"></div>
-            </section>
+            </details>
           </section>
 
           <section class="method-view" data-method-view="ziwei" hidden>
@@ -235,6 +255,13 @@
 
               <div id="palace-overview-output"></div>
 
+              <details class="reading-filter-panel collapsible-section">
+                <summary>
+                  <span>
+                    <b>紫微運勢條件</b>
+                    <small>大限、流年、流月與主題設定</small>
+                  </span>
+                </summary>
               <div class="reading-controls">
                 <label class="select-field">
                   <span class="field-label-with-help">
@@ -283,11 +310,18 @@
                   </select>
                 </label>
               </div>
+              </details>
 
               <div id="reading-output" class="reading-output"></div>
             </section>
 
-            <section class="partner-section">
+            <details class="partner-section collapsible-section">
+              <summary>
+                <span>
+                  <b>紫微正緣輪廓</b>
+                  <small>依夫妻宮、福德宮、三方四正與飛星推估</small>
+                </span>
+              </summary>
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">Partner</p>
@@ -295,9 +329,9 @@
                 </div>
               </div>
               <div id="partner-output" class="partner-output"></div>
-            </section>
+            </details>
 
-            <details class="ziwei-section collapsible-section" open>
+            <details class="ziwei-section collapsible-section">
               <summary>
                 <span>
                   <b>紫微十二宮</b>
@@ -321,7 +355,13 @@
       </footer>
     </main>
 
-    <aside class="chat-widget" aria-label="解盤機器人">
+    <details class="chat-widget" aria-label="解盤機器人">
+      <summary class="chat-summary">
+        <span>
+          <b>解盤機器人</b>
+          <small>有問題再展開詢問</small>
+        </span>
+      </summary>
       <header class="chat-header">
         <div>
           <p class="eyebrow">Bot</p>
@@ -334,7 +374,7 @@
         <input id="chat-input" type="text" autocomplete="off" placeholder="問財富、事業、姻緣、子女、親密表達、健康..." />
         <button type="submit">送出</button>
       </form>
-    </aside>
+    </details>
 
     <script src="./vendor/lunar.js"></script>
     <script src="./vendor/iztro.min.js"></script>
