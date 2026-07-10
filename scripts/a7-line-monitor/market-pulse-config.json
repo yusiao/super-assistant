@@ -13,7 +13,7 @@
     },
     {
       "name": "Google News－樂居",
-      "url": "https://news.google.com/rss/search?q=樂居+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=樂居+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－永慶房屋",
@@ -21,7 +21,7 @@
     },
     {
       "name": "Google News－591新建案",
-      "url": "https://news.google.com/rss/search?q=591+新建案+雙北+桃園+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=591+新建案+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－住展",
@@ -33,31 +33,31 @@
     },
     {
       "name": "Google News－信義房屋",
-      "url": "https://news.google.com/rss/search?q=信義房屋+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=信義房屋+雙北+桃園+房價+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－東森房屋",
       "url": "https://news.google.com/rss/search?q=東森房屋+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
-      "name": "Google News－財經媒體房市",
-      "url": "https://news.google.com/rss/search?q=工商時報+經濟日報+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "name": "Google News－房市政策與貸款",
+      "url": "https://news.google.com/rss/search?q=房貸+限貸+房市+雙北+桃園+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－待開案與讓利",
-      "url": "https://news.google.com/rss/search?q=雙北+桃園+預售屋+待開案+讓利+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=預售屋+待開案+讓利+雙北+桃園+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     }
   ],
   "districts": [
     "中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區",
     "北投區", "內湖區", "南港區", "文山區", "板橋區", "三重區", "中和區", "永和區",
-    "新莊區", "新店區", "土城區", "蘆洲區", "汐止區", "樹林區", "淡水區", "三峽區",
-    "林口區", "五股區", "泰山區", "八里區", "桃園區", "中壢區", "平鎮區", "八德區",
-    "楊梅區", "蘆竹區", "大溪區", "龜山區", "龍潭區", "大園區", "觀音區", "新屋區",
+    "新莊區", "新店區", "土城區", "蘆洲區", "汐止區", "樹林區", "林口區", "淡水區",
+    "桃園區", "中壢區", "平鎮區", "八德區", "龜山區", "蘆竹區", "大園區", "楊梅區",
     "青埔", "A7", "小檜溪", "藝文特區"
   ],
   "keywords": [
-    "預售", "新案", "開案", "待開案", "房價", "交易", "實價", "重劃區", "捷運", "低價",
-    "讓利", "去化", "餘屋", "房貸", "限貸", "交屋", "完銷", "建商", "代銷"
+    "預售", "預售屋", "新案", "開案", "待開案", "房價", "交易", "實價", "重劃區",
+    "捷運", "低價", "讓利", "去化", "餘屋", "房貸", "限貸", "交屋", "完銷",
+    "建商", "代銷", "買氣", "議價", "供給", "庫存"
   ]
 }

@@ -2127,6 +2127,118 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
     return lines
 
 
+def format_market_pulse_line(item: dict[str, Any]) -> list[str]:
+    keywords = item.get("keywords", [])[:5]
+    sources = item.get("sources", [])[:3]
+    keyword_text = f"；關鍵詞：{'、'.join(keywords)}" if keywords else ""
+    source_text = f"；來源：{'、'.join(sources)}" if sources else ""
+    return [
+        f"- {item.get('district')}：近一週被提到 {item.get('mention_count', 0)} 次{keyword_text}{source_text}"
+    ]
+
+
+def explain_market_topic(topic: str) -> tuple[str, str]:
+    if topic in {"房貸", "限貸"}:
+        return "資金面偏緊", "貸款條件與核貸速度會影響買方出手，投資型產品要更重視自備款與轉手流動性。"
+    if topic in {"讓利", "低價", "議價"}:
+        return "價格競爭升高", "若讓利或議價反覆出現，代表部分建案可能開始用價格換成交，適合回頭比同區新案開價。"
+    if topic in {"去化", "餘屋", "庫存", "完銷"}:
+        return "供需與庫存變化", "去化慢或餘屋增加時，要留意區域供給壓力；完銷頻繁則表示需求仍能承接。"
+    if topic in {"開案", "待開案", "新案", "預售", "預售屋", "供給"}:
+        return "新增供給變多", "新案與待開案增加會影響附近預售行情，尤其要觀察開價是否高於既有案或用低價搶客。"
+    if topic in {"房價", "實價", "交易", "買氣"}:
+        return "量價訊號", "房價與交易新聞變多，代表市場正在重新定價；要搭配實登看是有量上漲還是開價喊高。"
+    if topic in {"捷運", "重劃區"}:
+        return "建設題材發酵", "交通與重劃區題材會拉高關注度，但投資上要分辨是長線建設價值還是短線話題溢價。"
+    if topic in {"交屋"}:
+        return "交屋壓力", "交屋潮可能帶來轉售或出租供給，若同區新成屋大量釋出，預售開價會受比較壓力。"
+    if topic in {"建商", "代銷"}:
+        return "推案策略變化", "建商與代銷動作變多時，通常代表推案節奏或銷售策略正在調整，可留意是否出現低首付、讓利或封盤。"
+    return "市場關注升溫", "相關題材近期被反覆提及，代表市場注意力集中，後續要看是否轉化成成交與開價變化。"
+
+
+def summarize_market_titles(entries: list[dict[str, str]], limit: int = 3) -> list[str]:
+    titles: list[str] = []
+    seen: set[str] = set()
+    for entry in entries:
+        title = str(entry.get("title", "")).strip()
+        if not title or title in seen:
+            continue
+        seen.add(title)
+        titles.append(title[:58])
+        if len(titles) >= limit:
+            break
+    return titles
+
+
+def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = False) -> list[str]:
+    items = market_pulse.get("items", []) if market_pulse else []
+    if not items:
+        return ["- 本週沒有抓到足夠可判讀的雙北、桃園房市訊號；先不要把零星新聞當成趨勢。"]
+
+    top_items = items[:3]
+    aggregate_keyword_counts: dict[str, int] = {}
+    evidence_entries: list[dict[str, str]] = []
+    for item in top_items:
+        for keyword, count in item.get("keyword_counts", {}).items():
+            aggregate_keyword_counts[keyword] = aggregate_keyword_counts.get(keyword, 0) + int(count)
+        evidence_entries.extend(item.get("example_entries", []))
+
+    focus_parts = [
+        f"{item.get('district')}（{item.get('mention_count', 0)}次）"
+        for item in top_items
+        if item.get("district")
+    ]
+    key_topics = sorted(
+        aggregate_keyword_counts,
+        key=aggregate_keyword_counts.get,
+        reverse=True,
+    )[:5]
+
+    signal_groups: dict[str, dict[str, Any]] = {}
+    for topic in key_topics:
+        signal, explanation = explain_market_topic(topic)
+        group = signal_groups.setdefault(
+            signal,
+            {"topics": [], "count": 0, "explanation": explanation},
+        )
+        group["topics"].append(topic)
+        group["count"] += aggregate_keyword_counts.get(topic, 0)
+
+    lines: list[str] = []
+    if focus_parts:
+        lines.append(f"- 本週焦點：{'、'.join(focus_parts)}。")
+
+    for signal, group in sorted(
+        signal_groups.items(),
+        key=lambda row: row[1]["count"],
+        reverse=True,
+    )[:3]:
+        topics = "、".join(group["topics"])
+        lines.append(
+            f"- 有用訊號：{signal}。反覆出現的題材是「{topics}」，{group['explanation']}"
+        )
+
+    top_districts = {str(item.get("district", "")).strip() for item in top_items}
+    if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
+        lines.append("- 對你有用的判讀：桃園與A7相關題材若同時升溫，代表資金仍在看外溢與重劃區，但更要盯預售供給量與開價是否越墊越高。")
+    if {"板橋區", "新莊區", "新店區", "中和區", "三重區", "林口區", "淡水區"} & top_districts:
+        lines.append("- 對你有用的判讀：新北熱門區若新聞量增加，會影響桃園買盤比較基準；桃園若要有吸引力，價差必須足夠明顯。")
+    if {"中山區", "大安區", "信義區", "松山區", "內湖區", "南港區", "士林區", "北投區"} & top_districts:
+        lines.append("- 對你有用的判讀：台北市題材偏向高總價與稀缺性，可作為景氣溫度計，但不宜直接拿來類比A7預售價。")
+
+    title_summaries = summarize_market_titles(evidence_entries, limit=2 if line_mode else 3)
+    if title_summaries:
+        lines.append("- 資訊整理：")
+        for title in title_summaries:
+            lines.append(f"  - {title}")
+
+    source_count = market_pulse.get("source_count", 0)
+    if source_count:
+        lines.append(f"- 判讀基礎：彙整近{market_pulse.get('days_back', 7)}天、{source_count}筆可讀資訊；重點看方向，不把單篇新聞當結論。")
+    return lines
+
+
 def get_rising_price_watch(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
     watch: list[dict[str, Any]] = []
     for area in areas:
