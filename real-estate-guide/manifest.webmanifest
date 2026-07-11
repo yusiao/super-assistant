@@ -1,9 +1,0 @@
-{
-  "name": "買房口袋課",
-  "short_name": "買房口袋課",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f4f2ea",
-  "theme_color": "#f4f2ea",
-  "lang": "zh-Hant-TW"
-}
