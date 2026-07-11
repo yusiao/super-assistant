@@ -5513,7 +5513,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
         <path class="tree-branch-line" d="${layout.branch}" />
         <ellipse class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" rx="82" ry="58" />
-        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0})">
+        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(1.16)">
           <path class="tree-clump-base" d="M-76 -7 C-70 -39 -37 -55 -6 -43 C21 -63 63 -47 72 -17 C98 -2 82 38 48 43 C26 64 -15 57 -31 42 C-62 50 -91 26 -76 -7Z" />
           <path class="tree-clump-dark" d="M-68 18 C-40 4 -10 8 14 4 C43 -1 61 9 75 24 C48 43 12 40 -16 34 C-39 30 -55 30 -68 18Z" />
           <path class="tree-clump-light" d="M-58 -24 C-24 -44 13 -43 44 -27 C20 -13 -20 -10 -58 -24Z" />
@@ -5522,7 +5522,8 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
           <path class="tree-brush-stroke dark" d="M-50 28 C-14 20 22 23 58 32" />
           <circle class="tree-clump-badge" cx="0" cy="5" r="20" />
           <text class="tree-leaf-mark" x="0" y="11" text-anchor="middle">${escapeHtml(meta.mark)}</text>
-          <text class="tree-leaf-label" x="0" y="76" text-anchor="middle">${escapeHtml(topic.label)}</text>
+          <rect class="tree-leaf-label-bg" x="-34" y="53" width="68" height="25" rx="12" />
+          <text class="tree-leaf-label" x="0" y="71" text-anchor="middle">${escapeHtml(topic.label)}</text>
         </g>
       </g>
     `;
