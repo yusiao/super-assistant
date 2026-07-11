@@ -1,0 +1,11 @@
+{
+  "name": "權值｜權證即時履約淨值",
+  "short_name": "權值",
+  "description": "輸入台灣權證代號，查看標的現價、權證報價與履約淨值。",
+  "lang": "zh-Hant-TW",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f0e8",
+  "theme_color": "#171a15",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

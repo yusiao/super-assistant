@@ -1,0 +1,11 @@
+{
+  "name": "Jarvis Wardrobe — AI 智慧衣櫃",
+  "short_name": "Jarvis 衣櫃",
+  "description": "用手機拍下衣物，生成適合場合與天氣的穿搭。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf8f2",
+  "theme_color": "#173b33",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

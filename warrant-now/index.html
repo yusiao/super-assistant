@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171a15">
+  <meta name="description" content="輸入台灣權證代號，即時查看標的股價、權證報價與履約淨值。">
+  <title>權值｜權證即時履約淨值</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="權值首頁">
+        <span class="brand-mark" aria-hidden="true">W</span>
+        <span>權值</span>
+      </a>
+      <button class="live-pill" id="live-pill" type="button" aria-label="資料更新狀態">
+        <i></i><span>等待查詢</span>
+      </button>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">WARRANT VALUE / TAIWAN</p>
+      <h1 id="hero-title">這張權證，<br><em>現在值多少？</em></h1>
+      <p class="hero-note">一個代號，對齊標的現價、權證報價與履約淨值。</p>
+    </section>
+
+    <section class="search-panel" aria-label="權證查詢">
+      <form id="warrant-form" novalidate>
+        <label for="warrant-code">權證或股票代號</label>
+        <div class="code-row">
+          <input id="warrant-code" name="code" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="6" placeholder="052935 或 2317" aria-describedby="code-hint" required>
+          <button id="search-button" type="submit">
+            <span>查詢</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M14 7l5 5-5 5"/></svg>
+          </button>
+        </div>
+        <p id="code-hint">輸入權證看淨值；輸入 4 碼股票看同標的權證排行。</p>
+        <div class="recent" id="recent" hidden>
+          <span>最近查過</span>
+          <div id="recent-list"></div>
+        </div>
+        <p class="form-message" id="form-message" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="result" id="result" aria-live="polite" hidden>
+      <div class="result-head">
+        <div>
+          <div class="tag-row">
+            <span class="market-tag" id="market-tag">上市</span>
+            <span class="kind-tag" id="kind-tag">認購</span>
+          </div>
+          <h2><span id="warrant-name">—</span><small id="warrant-code-label">—</small></h2>
+        </div>
+        <button class="refresh-button" id="refresh-button" type="button" aria-label="立即更新">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 8.2A7 7 0 0 1 18.7 7M17.9 15.8A7 7 0 0 1 5.3 17"/></svg>
+        </button>
+      </div>
+
+      <article class="underlying-card">
+        <div>
+          <span class="card-label">標的現價</span>
+          <h3><span id="underlying-name">—</span><small id="underlying-code">—</small></h3>
+        </div>
+        <div class="quote-value">
+          <strong id="underlying-price">—</strong>
+          <span id="underlying-change">—</span>
+        </div>
+      </article>
+
+      <div class="metric-grid">
+        <article class="metric-card dark-card">
+          <div class="metric-top">
+            <span>權證成交</span>
+            <i id="trade-status">最新</i>
+          </div>
+          <strong id="warrant-last">—</strong>
+          <div class="bid-ask"><span>買 <b id="warrant-bid">—</b></span><span>賣 <b id="warrant-ask">—</b></span></div>
+        </article>
+        <article class="metric-card value-card">
+          <div class="metric-top">
+            <span>履約淨值</span>
+            <button class="info-button" id="value-info" type="button" aria-label="什麼是履約淨值">?</button>
+          </div>
+          <strong id="intrinsic-value">—</strong>
+          <span class="value-state" id="value-state">等待計算</span>
+        </article>
+      </div>
+
+      <section class="recommendation-card" aria-labelledby="recommendation-title">
+        <div class="recommendation-top">
+          <div>
+            <p class="eyebrow">CONDITION SCORE</p>
+            <h3 id="recommendation-title">參考推薦度</h3>
+          </div>
+          <div class="recommendation-score">
+            <strong id="recommendation-score">—</strong>
+            <span>/100</span>
+          </div>
+        </div>
+        <div class="recommendation-body">
+          <span class="recommendation-label" id="recommendation-label">—</span>
+          <p id="recommendation-summary">依流動性、損益兩平、價內外程度與到期天數評估。</p>
+        </div>
+        <ul class="recommendation-reasons" id="recommendation-reasons"></ul>
+        <p class="recommendation-note">這是條件分數，不是獲利保證，也不是個人化買賣建議。</p>
+        <button class="rank-button" id="rank-button" type="button">找同標的較佳權證</button>
+      </section>
+
+      <section class="detail-sheet" aria-labelledby="detail-title">
+        <div class="sheet-title">
+          <div>
+            <p class="eyebrow">CONTRACT SNAPSHOT</p>
+            <h3 id="detail-title">合約快照</h3>
+          </div>
+          <span id="quote-time">—</span>
+        </div>
+        <dl>
+          <div><dt>履約價</dt><dd id="strike">—</dd></div>
+          <div><dt>行使比例</dt><dd id="ratio">—</dd></div>
+          <div><dt>價內／外</dt><dd id="moneyness">—</dd></div>
+          <div><dt>到期日</dt><dd id="expiry">—</dd></div>
+          <div><dt>時間價值</dt><dd id="time-value">—</dd></div>
+          <div><dt>損益兩平</dt><dd id="break-even">—</dd></div>
+        </dl>
+      </section>
+
+      <p class="data-note" id="data-note">資料每 5 秒更新。履約淨值不等於權證理論價格，也不含交易與履約成本。</p>
+    </section>
+
+    <section class="ranking-result" id="ranking-result" aria-live="polite" hidden>
+      <div class="ranking-head">
+        <div>
+          <p class="eyebrow">SAME UNDERLYING</p>
+          <h2>同標的權證排行</h2>
+          <p><span id="ranking-stock-name">—</span> <b id="ranking-stock-code">—</b></p>
+        </div>
+        <div class="ranking-price">
+          <span>標的價</span>
+          <strong id="ranking-stock-price">—</strong>
+        </div>
+      </div>
+      <p class="ranking-summary" id="ranking-summary">依條件分數排序；不是個人化買賣建議。</p>
+      <div class="ranking-grid">
+        <article>
+          <h3>認購 Top 5</h3>
+          <div class="ranking-list" id="ranking-call-list"></div>
+        </article>
+        <article>
+          <h3>認售 Top 5</h3>
+          <div class="ranking-list" id="ranking-put-list"></div>
+        </article>
+      </div>
+      <p class="recommendation-note">排行會優先看買賣價差、損益兩平距離、價內外程度與剩餘天數；請再搭配你對標的方向的判斷。</p>
+    </section>
+
+    <section class="empty-state" id="empty-state">
+      <div class="formula-art" aria-hidden="true">
+        <span>S</span><i>−</i><span>K</span><i>×</i><span>R</span>
+      </div>
+      <p>輸入權證代號後，這裡會把複雜參數收斂成你真正要看的數字。</p>
+    </section>
+
+    <footer>
+      <span>個人查詢工具 · 資料來源 TWSE / TPEx / MIS</span>
+      <span>非投資建議</span>
+    </footer>
+  </main>
+
+  <dialog id="info-dialog">
+    <button id="dialog-close" type="button" aria-label="關閉">×</button>
+    <p class="eyebrow">INTRINSIC VALUE</p>
+    <h2>履約淨值是什麼？</h2>
+    <p>它是用目前標的價格估算「如果現在只看履約差額，每一單位權證值多少」。</p>
+    <code>認購：max(標的價 − 履約價, 0) × 行使比例<br>認售：max(履約價 − 標的價, 0) × 行使比例</code>
+    <p>權證市價通常還包含時間價值與波動率，因此不會等於履約淨值。</p>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

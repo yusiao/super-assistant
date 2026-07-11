@@ -1,0 +1,19 @@
+{
+  "name": "速行｜台灣最快大眾運輸",
+  "short_name": "速行",
+  "description": "在手機上查詢台灣大眾運輸最快搭乘方式。",
+  "lang": "zh-Hant-TW",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f1e8",
+  "theme_color": "#13271f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

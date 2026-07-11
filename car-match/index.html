@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f1e8">
+  <meta name="description" content="Jarvis Drive 依照預算、車型、動力與生活需求，推薦台灣買得到的汽車。">
+  <title>Jarvis Drive — 找到適合你的下一台車</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Jarvis Drive 首頁">
+      <span class="brand-mark">J</span>
+      <span>JARVIS <b>/ DRIVE</b></span>
+    </a>
+    <div class="topbar-meta" id="dataStatus">
+      <span class="status-dot"></span>
+      台灣新車資料・每週更新
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="kicker"><span>01</span> YOUR NEXT DRIVE</div>
+        <h1>找到那台<br><em>會讓你想出門</em>的車。</h1>
+        <p>不用看完五十支評測。告訴我們預算與生活方式，Jarvis 會從台灣在售車款中，整理出真正適合你的選擇。</p>
+        <a class="hero-cta" href="#matcher">開始選車 <span>↘</span></a>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="sun-disc"></div>
+        <div class="hero-tag tag-a"><b id="catalogCount">—</b><span>台灣在售車系</span></div>
+        <div class="hero-tag tag-b"><b>6</b><span>個生活維度</span></div>
+        <div class="road-line road-line-a"></div>
+        <div class="road-line road-line-b"></div>
+        <div class="hero-car car-art" data-style="suv" style="--car-color:#f36b45">
+          <svg viewBox="0 0 720 330" role="img" aria-label="橘紅色休旅車插畫">
+            <path class="car-shadow" d="M100 278c40 25 459 25 520 0-84-18-438-19-520 0Z"/>
+            <path class="car-body" d="M93 212c15-31 47-47 101-54l69-76c13-14 30-22 50-22h148c23 0 45 10 60 28l61 72c36 7 65 17 83 32 15 13 24 33 24 53v14H78v-18c0-18 5-34 15-49Z"/>
+            <path class="car-glass" d="m283 90-57 68h131V86h-48c-11 0-20 1-26 4Zm101-4v72h150l-52-61c-7-7-16-11-27-11h-71Z"/>
+            <path class="car-line" d="M357 86v72M217 170h330M96 214h53M579 201h59"/>
+            <path class="car-light" d="M593 179c25 6 40 12 51 22l-53 3c-13 1-20-4-23-15l-2-16 27 6Z"/>
+            <path class="car-light rear" d="M104 190c15-13 33-21 54-24l-3 30c-1 9-8 14-19 14h-42l10-20Z"/>
+            <g class="wheel wheel-left"><circle cx="195" cy="258" r="53"/><circle cx="195" cy="258" r="25"/></g>
+            <g class="wheel wheel-right"><circle cx="543" cy="258" r="53"/><circle cx="543" cy="258" r="25"/></g>
+          </svg>
+        </div>
+        <span class="visual-caption">THE RIGHT CAR<br>CHANGES THE ROUTE.</span>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="服務特色">
+      <span>依生活需求排序</span><i></i><span>台灣市場在售</span><i></i><span>不收集個人資料</span><i></i><span>約 60 秒完成</span>
+    </section>
+
+    <section class="matcher" id="matcher">
+      <aside class="matcher-intro">
+        <div class="kicker"><span>02</span> BUILD YOUR PROFILE</div>
+        <h2>先聊聊你<br>怎麼用車。</h2>
+        <p>沒有標準答案。預算是硬條件，其他選擇會幫我們判斷哪一台更像你。</p>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>選車輪廓</span><strong id="progressText">0%</strong></div>
+          <div class="progress-track"><span id="progressBar"></span></div>
+        </div>
+      </aside>
+
+      <form class="questionnaire" id="carForm">
+        <fieldset class="question-card" data-question="budget">
+          <legend><span>01</span><b>你的購車預算？</b><small>以新車建議售價估算</small></legend>
+          <div class="choice-grid budget-grid">
+            <label><input type="radio" name="budget" value="under80"><span><b>80 萬內</b><small>輕巧入門</small></span></label>
+            <label><input type="radio" name="budget" value="80to100"><span><b>80–100 萬</b><small>主流甜蜜點</small></span></label>
+            <label><input type="radio" name="budget" value="100to130"><span><b>100–130 萬</b><small>配備與空間升級</small></span></label>
+            <label><input type="radio" name="budget" value="130to180"><span><b>130–180 萬</b><small>進階質感</small></span></label>
+            <label><input type="radio" name="budget" value="180to250"><span><b>180–250 萬</b><small>豪華入門與純電</small></span></label>
+            <label><input type="radio" name="budget" value="250to400"><span><b>250–400 萬</b><small>進階豪華</small></span></label>
+            <label><input type="radio" name="budget" value="400to800"><span><b>400–800 萬</b><small>旗艦與性能</small></span></label>
+            <label><input type="radio" name="budget" value="over800"><span><b>800 萬以上</b><small>超豪華與超跑</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="body">
+          <legend><span>02</span><b>偏好的車身類型？</b><small>不知道也可以交給我們</small></legend>
+          <div class="choice-grid icon-grid">
+            <label><input type="radio" name="body" value="any" checked><span><i>✦</i><b>都可以</b></span></label>
+            <label><input type="radio" name="body" value="suv"><span><i>▰</i><b>休旅 SUV</b></span></label>
+            <label><input type="radio" name="body" value="sedan"><span><i>▱</i><b>房車 Sedan</b></span></label>
+            <label><input type="radio" name="body" value="hatch"><span><i>⌁</i><b>掀背 Hatch</b></span></label>
+            <label><input type="radio" name="body" value="mpv"><span><i>▣</i><b>多人座 MPV</b></span></label>
+            <label><input type="radio" name="body" value="sports"><span><i>⌁</i><b>跑車 / 敞篷</b></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="origin">
+          <legend><span>03</span><b>偏好的車系來源？</b><small>可選不限，或指定品牌血統</small></legend>
+          <div class="choice-grid origin-grid">
+            <label><input type="radio" name="origin" value="any" checked><span><b>不限</b><small>台灣買得到都納入</small></span></label>
+            <label><input type="radio" name="origin" value="europe"><span><b>歐系</b><small>德、英、法、義、瑞典等</small></span></label>
+            <label><input type="radio" name="origin" value="america"><span><b>美系</b><small>美國品牌與純電代表</small></span></label>
+            <label><input type="radio" name="origin" value="japan"><span><b>日系</b><small>可靠、省心、保值取向</small></span></label>
+            <label><input type="radio" name="origin" value="korea"><span><b>韓系</b><small>配備、設計與科技感</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="power">
+          <legend><span>04</span><b>想要哪一種動力？</b><small>考量充電條件與日常里程</small></legend>
+          <div class="choice-grid power-grid">
+            <label><input type="radio" name="power" value="any" checked><span><b>不限</b><small>適合最重要</small></span></label>
+            <label><input type="radio" name="power" value="gas"><span><b>汽油</b><small>補給方便</small></span></label>
+            <label><input type="radio" name="power" value="hybrid"><span><b>油電 / PHEV</b><small>省油無焦慮</small></span></label>
+            <label><input type="radio" name="power" value="electric"><span><b>純電</b><small>安靜、科技感</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="seats">
+          <legend><span>05</span><b>通常會坐幾個人？</b><small>偶爾載滿也算進去</small></legend>
+          <div class="choice-grid seat-grid">
+            <label><input type="radio" name="seats" value="2"><span><b>1–2 人</b><small>自己或兩人世界</small></span></label>
+            <label><input type="radio" name="seats" value="5"><span><b>3–5 人</b><small>朋友與小家庭</small></span></label>
+            <label><input type="radio" name="seats" value="7"><span><b>6–7 人</b><small>大家庭需求</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="priorities">
+          <legend><span>06</span><b>最在意的三件事？</b><small id="priorityCounter">可選 3 項</small></legend>
+          <div class="choice-grid priority-grid">
+            <label><input type="checkbox" name="priorities" value="any" checked><span># 不限</span></label>
+            <label><input type="checkbox" name="priorities" value="city"><span># 市區好停</span></label>
+            <label><input type="checkbox" name="priorities" value="economy"><span># 省油省電</span></label>
+            <label><input type="checkbox" name="priorities" value="space"><span># 空間機能</span></label>
+            <label><input type="checkbox" name="priorities" value="comfort"><span># 舒適安靜</span></label>
+            <label><input type="checkbox" name="priorities" value="driving"><span># 駕駛樂趣</span></label>
+            <label><input type="checkbox" name="priorities" value="tech"><span># 科技配備</span></label>
+            <label><input type="checkbox" name="priorities" value="design"><span># 外型設計</span></label>
+            <label><input type="checkbox" name="priorities" value="value"><span># 高 CP 值</span></label>
+            <label><input type="checkbox" name="priorities" value="safety"><span># 主動安全</span></label>
+            <label><input type="checkbox" name="priorities" value="family"><span># 家庭友善</span></label>
+            <label><input type="checkbox" name="priorities" value="cargo"><span># 載物露營</span></label>
+            <label><input type="checkbox" name="priorities" value="charging"><span># 充電便利</span></label>
+            <label><input type="checkbox" name="priorities" value="resale"><span># 保值好養</span></label>
+            <label><input type="checkbox" name="priorities" value="luxury"><span># 豪華質感</span></label>
+            <label><input type="checkbox" name="priorities" value="offroad"><span># 戶外越野</span></label>
+            <label><input type="checkbox" name="priorities" value="performance"><span># 加速性能</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="question-card" data-question="color">
+          <legend><span>07</span><b>想像中的車色？</b><small>可選不限，不影響推薦</small></legend>
+          <div class="color-row">
+            <label class="color-choice color-any"><input type="radio" name="color" value="any" checked><span>不限</span><b>不限</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="white"><span style="--swatch:#eeeae1"></span><b>珍珠白</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="black"><span style="--swatch:#191b1b"></span><b>曜石黑</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="gray"><span style="--swatch:#7d817e"></span><b>質感灰</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="blue"><span style="--swatch:#315f78"></span><b>深海藍</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="red"><span style="--swatch:#b94436"></span><b>個性紅</b></label>
+            <label class="color-choice"><input type="radio" name="color" value="green"><span style="--swatch:#526b5c"></span><b>戶外綠</b></label>
+          </div>
+        </fieldset>
+
+        <div class="submit-zone">
+          <div><span>JARVIS MATCH ENGINE</span><small>依符合程度排序，不接受車商付費置入</small></div>
+          <button type="submit" id="matchButton">看看哪台車適合我 <span>→</span></button>
+          <p class="form-error" id="formError" role="alert"></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="results hidden" id="results" aria-live="polite">
+      <div class="result-heading">
+        <div class="kicker light"><span>03</span> YOUR BEST MATCH</div>
+        <h2>你的下一台車，<br>我們選這台。</h2>
+        <p id="resultSummary"></p>
+      </div>
+
+      <article class="winner-card" id="winnerCard"></article>
+
+      <article class="brand-story" id="brandStory"></article>
+
+      <div class="alternatives-wrap">
+        <div class="alternatives-head"><h3>還有兩台，也很接近。</h3><span>ALTERNATIVE PICKS</span></div>
+        <div class="alternatives" id="alternatives"></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="secondary-button" type="button" id="restartButton">重新選一次</button>
+        <button class="primary-button" type="button" id="copyButton">複製我的選車結果</button>
+      </div>
+      <p class="disclaimer">建議售價與車色依原廠最新公告為準；實際成交價、交期、配備及政府補助可能調整。建議預約試乘後再決定。</p>
+    </section>
+
+    <section class="data-note">
+      <div><span class="kicker"><span>04</span> DATA, NOT HYPE</span><h2>推薦有根據，<br>決定權還是你的。</h2></div>
+      <div class="data-copy">
+        <p>本工具以台灣原廠公開車系、建議售價與產品定位建立候選清單，預算為最優先條件，再依車型、乘坐、動力與你在意的特質加權。</p>
+        <div class="source-links">
+          <a href="https://www.toyota.com.tw/showroom/" target="_blank" rel="noopener">Toyota Taiwan ↗</a>
+          <a href="https://www.honda-taiwan.com.tw/Auto" target="_blank" rel="noopener">Honda Taiwan ↗</a>
+          <a href="https://www.hyundai-motor.com.tw/" target="_blank" rel="noopener">Hyundai Taiwan ↗</a>
+          <a href="https://www.mazda.com.tw/" target="_blank" rel="noopener">Mazda Taiwan ↗</a>
+          <a href="https://www.tesla.com/zh_tw/" target="_blank" rel="noopener">Tesla Taiwan ↗</a>
+          <a href="https://am.u-car.com.tw/newcar" target="_blank" rel="noopener">U-CAR 台灣新車目錄 ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog-section" id="catalog">
+      <div class="catalog-heading">
+        <div><span class="kicker"><span>05</span> FULL MARKET GARAGE</span><h2>台灣買得到的，<br>都在候選名單裡。</h2></div>
+        <div class="catalog-summary"><strong id="brandCount">—</strong><span>個品牌</span><strong id="modelCount">—</strong><span>個車系</span></div>
+      </div>
+      <div class="catalog-toolbar"><label for="catalogSearch">搜尋品牌或車系</label><input id="catalogSearch" type="search" placeholder="例如：Jaguar、七人座、Model 3"></div>
+      <div class="catalog-grid" id="catalogGrid"></div>
+      <p class="catalog-disclaimer" id="catalogDisclaimer">收錄範圍：台灣總代理或原廠授權通路公開販售／接單的新乘用車與輕型商用車車系；不含中古車、平行輸入及僅剩歷史網頁的停售車。車款與價格每週自動比對台灣新車目錄。</p>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="#top"><span class="brand-mark">J</span><span>JARVIS <b>/ DRIVE</b></span></a>
+    <p>選車不該只是規格比較，還要適合你真正的日常。</p>
+    <span>© 2026 JARVIS</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status">已複製選車結果</div>
+  <nav class="mobile-dock" aria-label="手機快速操作">
+    <a href="#matcher"><i>01</i><span>選車</span></a>
+    <button type="button" id="mobileMatchButton"><small id="mobileDockProgress">完成 0%</small><strong>產生推薦</strong></button>
+    <a href="#catalog"><i>02</i><span>完整車庫</span></a>
+  </nav>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

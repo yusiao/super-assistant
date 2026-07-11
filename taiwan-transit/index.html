@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#13271f">
+  <meta name="description" content="速行：以手機查詢台灣大眾運輸最快搭乘方案。">
+  <title>速行｜台灣最快大眾運輸</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="速行首頁">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        <span>速行</span>
+      </a>
+      <button class="data-status" id="data-status" type="button" aria-label="正在檢查交通資料服務">
+        <span></span> 檢查資料
+      </button>
+    </header>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">TAIWAN / DOOR TO DO</p>
+        <h1 id="hero-title">下一班，<br><em>現在算。</em></h1>
+        <p class="hero-note">公車、捷運、台鐵與步行，一次排出最快到達方式。</p>
+      </div>
+      <div class="map-art" aria-hidden="true">
+        <svg viewBox="0 0 390 330" role="img">
+          <path class="street street-a" d="M-15 80C54 55 99 91 152 78s76-61 130-43 73 72 128 61"/>
+          <path class="street street-b" d="M-20 220c78-36 105-15 158-37s87-66 153-43 59 60 127 45"/>
+          <path class="street street-c" d="M55-25c-5 69 27 92 16 148s-43 80-24 132 79 55 89 102"/>
+          <path class="street street-d" d="M275-15c-30 65-4 92-19 135s-59 71-52 123 35 60 35 105"/>
+          <path class="route-line" d="M62 239c25-40 61-45 89-70 31-28 42-68 79-79 36-11 65 10 102-4"/>
+          <circle class="pulse-ring" cx="62" cy="239" r="18"/>
+          <circle class="origin-dot" cx="62" cy="239" r="7"/>
+          <g class="destination-pin" transform="translate(332 86)">
+            <path d="M0-17c-10 0-18 8-18 18 0 14 18 32 18 32S18 15 18 1C18-9 10-17 0-17Z"/>
+            <circle cx="0" cy="1" r="6"/>
+          </g>
+        </svg>
+        <div class="map-label label-origin"><span></span> 三重</div>
+        <div class="map-label label-destination"><span></span> 林口</div>
+      </div>
+      <div class="clock-card" aria-label="目前時間">
+        <span>現在</span>
+        <strong id="hero-clock">--:--</strong>
+      </div>
+    </section>
+
+    <section class="planner" aria-label="路線查詢">
+      <form id="journey-form" novalidate>
+        <div class="route-fields">
+          <div class="route-rail" aria-hidden="true"><i></i><span></span><b></b></div>
+          <div class="field-stack">
+            <label class="place-field">
+              <span>從哪裡出發</span>
+              <input id="origin" name="origin" list="place-options" autocomplete="off" placeholder="目前位置、地址或地標" required>
+            </label>
+            <div class="field-divider"></div>
+            <label class="place-field">
+              <span>要去哪裡</span>
+              <input id="destination" name="destination" list="place-options" autocomplete="off" placeholder="輸入目的地" required>
+            </label>
+          </div>
+          <div class="field-actions">
+            <button class="icon-button" id="locate-button" type="button" aria-label="使用目前位置" title="使用目前位置">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            </button>
+            <button class="icon-button swap-button" id="swap-button" type="button" aria-label="交換起點與終點" title="交換起點與終點">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6 3-3 3 3M11 3v13M16 18l-3 3-3-3M13 21V8"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <datalist id="place-options">
+          <option value="三重國小站"></option>
+          <option value="捷運三重站"></option>
+          <option value="新北市三重區重新路一段"></option>
+          <option value="機場捷運 A9 林口站"></option>
+          <option value="林口長庚紀念醫院"></option>
+          <option value="MITSUI OUTLET PARK 林口"></option>
+        </datalist>
+
+        <button class="demo-preset" id="demo-preset" type="button">
+          <span>試跑</span> 三重國小站 → 林口長庚
+        </button>
+
+        <fieldset class="time-section">
+          <legend>時間</legend>
+          <div class="time-tabs" role="group" aria-label="時間選擇方式">
+            <button class="time-tab active" type="button" data-mode="now" aria-pressed="true">現在出發</button>
+            <button class="time-tab" type="button" data-mode="depart" aria-pressed="false">指定出發</button>
+            <button class="time-tab" type="button" data-mode="arrive" aria-pressed="false">指定抵達</button>
+          </div>
+          <div class="datetime-row" id="datetime-row" hidden>
+            <label>
+              <span id="datetime-label">出發日期與時間</span>
+              <input id="datetime-input" type="datetime-local">
+            </label>
+          </div>
+        </fieldset>
+
+        <button class="search-button" id="search-button" type="submit">
+          <span>找最快路線</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M14 7l5 5-5 5"/></svg>
+        </button>
+        <p class="form-message" id="form-message" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="results" id="results" aria-live="polite" hidden>
+      <div class="results-header">
+        <div>
+          <p class="eyebrow">ROUTE OPTIONS</p>
+          <h2>最快這樣走</h2>
+        </div>
+        <button class="close-results" id="close-results" type="button" aria-label="關閉查詢結果">×</button>
+      </div>
+      <div class="result-context" id="result-context"></div>
+      <div class="route-results" id="route-results"></div>
+      <p class="demo-disclaimer" id="data-disclaimer">門牌定位 Geocoding by Esri；地標搜尋 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>；路線資料由交通部 TDX MaaS 旅運規劃服務提供，實際到站時間仍可能受路況與營運異動影響。</p>
+    </section>
+
+    <nav class="bottom-nav" aria-label="主要功能">
+      <a class="active" href="#journey-form" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V8l8-4 8 4v11M8 21v-8h8v8"/></svg>
+        <span>查路線</span>
+      </a>
+      <button type="button" id="saved-button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4Z"/></svg>
+        <span>常用</span>
+      </button>
+      <button type="button" id="install-button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>
+        <span>安裝</span>
+      </button>
+    </nav>
+  </main>
+
+  <template id="route-card-template">
+    <article class="route-card">
+      <div class="route-card-top">
+        <div class="route-time"><strong></strong><span>分鐘</span></div>
+        <div class="arrival-time"></div>
+        <span class="route-badge"></span>
+      </div>
+      <div class="mode-summary"></div>
+      <div class="journey-line"></div>
+      <div class="route-meta"></div>
+      <button class="route-detail-button" type="button">查看完整步驟 <span>＋</span></button>
+      <div class="route-details" hidden></div>
+    </article>
+  </template>
+
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

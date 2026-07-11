@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#13231f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jarvis Hair">
+  <meta name="description" content="Jarvis 髮型顧問，依頭型與偏好生成髮型與髮色提案。">
+  <title>Jarvis Hair Studio</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-bar">
+    <a class="brand" href="#" aria-label="Jarvis Hair Studio">
+      <span class="brand-mark">J</span>
+      <span>
+        <strong>Jarvis</strong>
+        <small>Hair Studio</small>
+      </span>
+    </a>
+    <div class="status-pill" id="providerStatus">連線檢查中</div>
+  </header>
+
+  <main class="app-shell">
+    <section class="studio-grid">
+      <div class="photo-panel">
+        <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="user" hidden>
+        <label class="photo-drop" id="photoDrop" for="photoInput">
+          <span class="scan-frame" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <img id="previewImage" alt="使用者頭像預覽" hidden>
+          <span class="photo-copy" id="photoCopy">
+            <strong>上傳正面頭像</strong>
+            <small>自然光、露出髮際線與臉型</small>
+          </span>
+        </label>
+        <div class="photo-actions">
+          <button class="icon-action" id="changePhoto" type="button" title="更換照片" aria-label="更換照片">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <button class="icon-action" id="clearPhoto" type="button" title="清除照片" aria-label="清除照片">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M9 7V5h6v2m-7 3v9m4-9v9m4-9v9M8 7l1 14h6l1-14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <form class="control-panel" id="styleForm">
+        <div class="panel-heading">
+          <p>髮型生成</p>
+          <h1>找出最襯頭型的髮型與髮色</h1>
+        </div>
+
+        <fieldset>
+          <legend>風格</legend>
+          <div class="segmented">
+            <label><input type="radio" name="vibe" value="clean" checked><span>乾淨俐落</span></label>
+            <label><input type="radio" name="vibe" value="soft"><span>柔和自然</span></label>
+            <label><input type="radio" name="vibe" value="editorial"><span>高級感</span></label>
+            <label><input type="radio" name="vibe" value="bold"><span>明顯改造</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field-grid">
+          <label>
+            長度
+            <select id="lengthPreference">
+              <option value="open">都可嘗試</option>
+              <option value="short">偏短髮</option>
+              <option value="medium">中長度</option>
+              <option value="long">保留長度</option>
+            </select>
+          </label>
+          <label>
+            髮質
+            <select id="texture">
+              <option value="unknown">由照片判斷</option>
+              <option value="straight">直髮</option>
+              <option value="wavy">自然捲/微捲</option>
+              <option value="curly">捲髮</option>
+              <option value="fine">細軟髮</option>
+              <option value="thick">粗硬髮</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="range-row">
+          <span>維護成本</span>
+          <input id="maintenance" type="range" min="1" max="5" value="3">
+          <output id="maintenanceOutput">中等</output>
+        </label>
+
+        <label class="range-row">
+          <span>髮色膽量</span>
+          <input id="colorBoldness" type="range" min="1" max="5" value="3">
+          <output id="colorOutput">自然提亮</output>
+        </label>
+
+        <label class="notes-field">
+          避開或想保留
+          <textarea id="notes" rows="3" placeholder="例如：不要太短、想遮高額頭、可以染深棕"></textarea>
+        </label>
+
+        <label class="toggle-row">
+          <input id="generateImage" type="checkbox" checked>
+          <span>同步生成示意圖</span>
+        </label>
+
+        <button class="primary-button" id="submitButton" type="submit">
+          <span class="button-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.3L19 10l-5.2 1.7L12 17l-1.8-5.3L5 10l5.2-1.7z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></svg>
+          </span>
+          <span class="button-label">生成髮型提案</span>
+        </button>
+      </form>
+    </section>
+
+    <section class="results" id="results" hidden aria-live="polite">
+      <div class="results-head">
+        <div>
+          <p>分析結果</p>
+          <h2 id="resultTitle">你的髮型方向</h2>
+        </div>
+        <button class="ghost-button" id="shareButton" type="button" hidden>分享</button>
+      </div>
+
+      <div class="result-layout">
+        <div class="compare-strip">
+          <figure>
+            <img id="beforeImage" alt="原始頭像">
+            <figcaption>Before</figcaption>
+          </figure>
+          <figure class="generated-frame" id="generatedFrame">
+            <div class="image-placeholder" id="imagePlaceholder">等待生成</div>
+            <img id="afterImage" alt="AI 生成髮型示意圖" hidden>
+            <figcaption id="afterCaption">After</figcaption>
+          </figure>
+        </div>
+
+        <div class="insight-panel">
+          <div class="shape-readout">
+            <span id="shapeLabel">頭型判斷中</span>
+            <strong id="confidenceLabel">--</strong>
+          </div>
+          <p id="summaryText"></p>
+          <div class="cue-list" id="cueList"></div>
+        </div>
+      </div>
+
+      <div class="recommendations" id="recommendations"></div>
+    </section>
+  </main>
+
+  <div class="bottom-bar" id="bottomBar">
+    <button type="button" id="bottomUpload">上傳照片</button>
+    <button type="submit" form="styleForm">生成</button>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
