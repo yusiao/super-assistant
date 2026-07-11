@@ -203,11 +203,11 @@ const TOPIC_TREE_BRANCHES = {
   },
 };
 const TOPIC_TREE_LAYOUT = {
-  property: { branch: "M180 210 C130 205 104 176 78 145", cx: 74, cy: 138, fruits: [[38, 98], [34, 142], [48, 184]] },
-  career: { branch: "M180 190 C132 160 126 106 112 64", cx: 112, cy: 58, fruits: [[74, 42], [110, 18], [146, 42]] },
-  marriage: { branch: "M180 178 C180 130 180 92 180 42", cx: 180, cy: 42, fruits: [[138, 54], [180, 8], [222, 54]] },
-  children: { branch: "M180 190 C228 160 234 106 248 64", cx: 248, cy: 58, fruits: [[214, 42], [250, 18], [286, 42]] },
-  health: { branch: "M180 210 C230 204 256 176 282 145", cx: 286, cy: 138, fruits: [[322, 98], [326, 142], [312, 184]] },
+  property: { branch: "M250 266 C192 262 154 235 116 210", cx: 110, cy: 214, rotate: -5, fruits: [[62, 176], [54, 222], [82, 264]] },
+  career: { branch: "M250 245 C198 206 176 154 148 105", cx: 142, cy: 96, rotate: -8, fruits: [[88, 72], [134, 44], [184, 82]] },
+  marriage: { branch: "M250 232 C250 192 250 166 250 132", cx: 250, cy: 130, rotate: 2, fruits: [[198, 112], [250, 76], [302, 112]] },
+  children: { branch: "M250 245 C302 206 324 154 352 105", cx: 358, cy: 96, rotate: 8, fruits: [[316, 82], [366, 44], [412, 72]] },
+  health: { branch: "M250 266 C308 262 346 235 384 210", cx: 390, cy: 214, rotate: 5, fruits: [[418, 176], [446, 222], [418, 264]] },
 };
 const SCOPE_LABELS = {
   decadal: "大限",
@@ -5512,11 +5512,18 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     return `
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
         <path class="tree-branch-line" d="${layout.branch}" />
-        <circle class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" r="45" />
-        <circle class="tree-leaf" cx="${layout.cx}" cy="${layout.cy}" r="34" />
-        <circle class="tree-leaf-core" cx="${layout.cx}" cy="${layout.cy}" r="18" />
-        <text class="tree-leaf-mark" x="${layout.cx}" y="${layout.cy + 5}" text-anchor="middle">${escapeHtml(meta.mark)}</text>
-        <text class="tree-leaf-label" x="${layout.cx}" y="${layout.cy + 54}" text-anchor="middle">${escapeHtml(topic.label)}</text>
+        <ellipse class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" rx="82" ry="58" />
+        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0})">
+          <path class="tree-clump-base" d="M-76 -7 C-70 -39 -37 -55 -6 -43 C21 -63 63 -47 72 -17 C98 -2 82 38 48 43 C26 64 -15 57 -31 42 C-62 50 -91 26 -76 -7Z" />
+          <path class="tree-clump-dark" d="M-68 18 C-40 4 -10 8 14 4 C43 -1 61 9 75 24 C48 43 12 40 -16 34 C-39 30 -55 30 -68 18Z" />
+          <path class="tree-clump-light" d="M-58 -24 C-24 -44 13 -43 44 -27 C20 -13 -20 -10 -58 -24Z" />
+          <path class="tree-brush-stroke light" d="M-60 -14 C-31 -28 0 -33 38 -22" />
+          <path class="tree-brush-stroke mid" d="M-70 4 C-30 -7 18 -3 65 9" />
+          <path class="tree-brush-stroke dark" d="M-50 28 C-14 20 22 23 58 32" />
+          <circle class="tree-clump-badge" cx="0" cy="5" r="20" />
+          <text class="tree-leaf-mark" x="0" y="11" text-anchor="middle">${escapeHtml(meta.mark)}</text>
+          <text class="tree-leaf-label" x="0" y="76" text-anchor="middle">${escapeHtml(topic.label)}</text>
+        </g>
       </g>
     `;
   }).join("");
@@ -5534,7 +5541,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   return `
     <section class="topic-mindmap topic-tree-map ${mode}">
       <div class="topic-tree-visual">
-        <svg class="topic-tree-svg" viewBox="0 0 360 360" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
+        <svg class="topic-tree-svg" viewBox="0 0 500 430" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
           <defs>
             <linearGradient id="tree-trunk-gradient-${escapeHtml(mode)}" x1="0" x2="1" y1="0" y2="1">
               <stop offset="0%" stop-color="#6f4b35" />
@@ -5546,25 +5553,25 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
             </radialGradient>
           </defs>
           <g class="tree-canopy" aria-hidden="true">
-            <circle cx="106" cy="124" r="64" />
-            <circle cx="155" cy="74" r="70" />
-            <circle cx="210" cy="72" r="68" />
-            <circle cx="260" cy="126" r="62" />
-            <circle cx="180" cy="142" r="84" />
+            <circle cx="118" cy="208" r="82" />
+            <circle cx="142" cy="96" r="82" />
+            <circle cx="250" cy="130" r="96" />
+            <circle cx="358" cy="96" r="82" />
+            <circle cx="390" cy="208" r="82" />
           </g>
-          <path class="tree-ground" d="M54 326 C96 303 138 304 180 322 C222 304 264 303 306 326" />
-          <path class="tree-root root-a" d="M180 305 C144 323 110 330 70 324" />
-          <path class="tree-root root-b" d="M180 305 C216 323 250 330 290 324" />
-          <path class="tree-root root-c" d="M180 306 C176 326 170 338 158 350" />
+          <path class="tree-ground" d="M72 390 C132 360 194 360 250 384 C306 360 368 360 428 390" />
+          <path class="tree-root root-a" d="M250 364 C194 390 142 399 82 390" />
+          <path class="tree-root root-b" d="M250 364 C306 390 358 399 418 390" />
+          <path class="tree-root root-c" d="M250 365 C244 392 236 408 220 424" />
           <g class="topic-tree-self ${selfSelected ? "is-active" : ""}" data-topic-self="${escapeHtml(mode)}" tabindex="0" role="button" aria-label="${escapeHtml(modeLabel)}命主人格" aria-pressed="${String(selfSelected)}">
-            <path class="tree-self-hit" d="M148 318 C162 267 163 232 171 198 C176 177 185 176 190 198 C198 232 198 267 212 318 Z" />
-            <path class="tree-trunk-shape" d="M153 318 C166 270 165 235 172 204 C176 184 184 184 188 204 C195 235 194 270 207 318 Z" />
-            <path class="tree-trunk-highlight" d="M178 300 C176 260 178 229 181 196" />
-            <text class="tree-self-label" x="180" y="252" text-anchor="middle">命主</text>
+            <path class="tree-self-hit" d="M210 380 C230 318 232 278 241 232 C247 208 260 207 266 232 C276 278 274 318 294 380 Z" />
+            <path class="tree-trunk-shape" d="M216 380 C235 318 235 278 243 238 C249 214 259 214 264 238 C273 278 272 318 291 380 Z" />
+            <path class="tree-trunk-highlight" d="M248 358 C245 314 247 274 252 230" />
+            <text class="tree-self-label" x="250" y="304" text-anchor="middle">命主</text>
           </g>
           ${treeBranchesHtml}
           ${fruitHtml}
-          <text class="tree-mode-label" x="180" y="25" text-anchor="middle">${escapeHtml(modeLabel)}</text>
+          <text class="tree-mode-label" x="250" y="28" text-anchor="middle">${escapeHtml(modeLabel)}</text>
         </svg>
         <div class="topic-tree-caption">
           <strong>點樹幹看命主人格，點樹葉切換主題</strong>

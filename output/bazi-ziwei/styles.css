@@ -1434,7 +1434,7 @@ button {
 
 .topic-mindmap {
   display: grid;
-  grid-template-columns: minmax(240px, 0.36fr) minmax(0, 1fr);
+  grid-template-columns: minmax(430px, 0.58fr) minmax(280px, 0.42fr);
   gap: 12px;
   align-items: start;
   border: 1px solid #e5ddcf;
@@ -1448,7 +1448,7 @@ button {
   gap: 10px;
   border: 1px solid #d9d0c1;
   border-radius: 8px;
-  padding: 10px;
+  padding: 14px;
   background:
     linear-gradient(180deg, rgba(24, 107, 90, 0.08), rgba(176, 62, 50, 0.06)),
     #f7f1e4;
@@ -1456,8 +1456,8 @@ button {
 
 .topic-tree-svg {
   width: 100%;
-  min-height: 300px;
-  aspect-ratio: 1;
+  min-height: 430px;
+  aspect-ratio: 500 / 430;
   overflow: visible;
 }
 
@@ -1472,8 +1472,8 @@ button {
 }
 
 .tree-canopy circle {
-  fill: #b8d7a3;
-  opacity: 0.26;
+  fill: #bfd7a0;
+  opacity: 0.16;
 }
 
 .tree-ground {
@@ -1536,21 +1536,54 @@ button {
   fill: transparent;
 }
 
-.tree-leaf {
-  fill: #8dbb82;
-  stroke: #2f765e;
-  stroke-width: 3;
-  filter: drop-shadow(0 8px 12px rgba(31, 37, 35, 0.12));
-  transition: fill 0.16s ease, stroke 0.16s ease, transform 0.16s ease;
+.tree-category-clump {
+  filter: drop-shadow(0 12px 18px rgba(31, 37, 35, 0.14));
+  transition: transform 0.16s ease, filter 0.16s ease;
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.tree-leaf-core {
+.tree-clump-base {
+  fill: #8fbc80;
+  stroke: rgba(47, 118, 94, 0.9);
+  stroke-width: 3;
+}
+
+.tree-clump-dark {
+  fill: #2f765e;
+  opacity: 0.88;
+}
+
+.tree-clump-light {
+  fill: #d7e889;
+  opacity: 0.9;
+}
+
+.tree-brush-stroke {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tree-brush-stroke.light {
+  stroke: rgba(230, 240, 142, 0.88);
+  stroke-width: 9;
+}
+
+.tree-brush-stroke.mid {
+  stroke: rgba(139, 185, 105, 0.76);
+  stroke-width: 10;
+}
+
+.tree-brush-stroke.dark {
+  stroke: rgba(31, 91, 63, 0.74);
+  stroke-width: 10;
+}
+
+.tree-clump-badge {
   fill: #fffdf7;
-  stroke: rgba(47, 118, 94, 0.24);
+  stroke: rgba(47, 118, 94, 0.34);
   stroke-width: 2;
-  pointer-events: none;
 }
 
 .tree-leaf-mark,
@@ -1632,11 +1665,10 @@ button {
   stroke-width: 16;
 }
 
-.topic-tree-svg-branch:hover .tree-leaf,
-.topic-tree-svg-branch:focus-visible .tree-leaf {
-  fill: #a9ca91;
-  stroke: var(--jade);
-  transform: scale(1.05);
+.topic-tree-svg-branch:hover .tree-category-clump,
+.topic-tree-svg-branch:focus-visible .tree-category-clump {
+  filter: drop-shadow(0 16px 22px rgba(31, 37, 35, 0.22));
+  transform: scale(1.04);
 }
 
 .topic-tree-svg-branch.is-active .tree-branch-line {
@@ -1644,12 +1676,20 @@ button {
   stroke-width: 17;
 }
 
-.topic-tree-svg-branch.is-active .tree-leaf {
-  fill: #f2b39a;
+.topic-tree-svg-branch.is-active .tree-clump-base {
+  fill: #eaa47b;
   stroke: var(--vermillion);
 }
 
-.topic-tree-svg-branch.is-active .tree-leaf-core {
+.topic-tree-svg-branch.is-active .tree-clump-dark {
+  fill: #8c4638;
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-light {
+  fill: #f6d48c;
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-badge {
   stroke: rgba(176, 62, 50, 0.44);
 }
 
@@ -3372,7 +3412,7 @@ button {
   }
 
   .topic-tree-svg {
-    min-height: 230px;
+    min-height: 320px;
   }
 
   .luck-cycle summary {
