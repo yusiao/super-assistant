@@ -1455,9 +1455,10 @@ button {
 }
 
 .topic-tree-svg {
+  display: block;
   width: 100%;
-  min-height: 520px;
-  aspect-ratio: 500 / 430;
+  min-height: 0;
+  aspect-ratio: 468 / 404;
   overflow: visible;
 }
 
@@ -1640,15 +1641,22 @@ button {
 .tree-fruit-number {
   fill: #fffdf7;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 950;
+  pointer-events: none;
+}
+
+.tree-fruit-label-bg {
+  fill: rgba(255, 253, 247, 0.96);
+  stroke: rgba(143, 51, 41, 0.28);
+  stroke-width: 1.4;
   pointer-events: none;
 }
 
 .tree-fruit-label {
   fill: var(--charcoal);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 950;
   pointer-events: none;
 }
@@ -1658,6 +1666,11 @@ button {
   fill: #b23a2e;
   stroke: var(--charcoal);
   transform: scale(1.08);
+}
+
+.topic-tree-fruit:hover .tree-fruit-label-bg,
+.topic-tree-fruit:focus-visible .tree-fruit-label-bg {
+  stroke: rgba(31, 37, 35, 0.45);
 }
 
 .tree-self-label {
@@ -3426,13 +3439,26 @@ button {
     display: none;
   }
 
+  .topic-mindmap {
+    padding: 6px;
+  }
+
   .topic-tree-visual {
-    min-height: min(88svh, 760px);
-    align-content: center;
+    min-height: 0;
+    padding: 6px;
+    align-content: start;
   }
 
   .topic-tree-svg {
-    min-height: min(78svh, 680px);
+    min-height: 0;
+  }
+
+  .tree-fruit-number {
+    font-size: 18px;
+  }
+
+  .tree-fruit-label {
+    font-size: 17px;
   }
 
   .topic-tree-caption strong {

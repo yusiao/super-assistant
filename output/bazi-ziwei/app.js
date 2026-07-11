@@ -5513,7 +5513,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
         <path class="tree-branch-line" d="${layout.branch}" />
         <ellipse class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" rx="82" ry="58" />
-        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(1.16)">
+        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(1.22)">
           <path class="tree-clump-base" d="M-76 -7 C-70 -39 -37 -55 -6 -43 C21 -63 63 -47 72 -17 C98 -2 82 38 48 43 C26 64 -15 57 -31 42 C-62 50 -91 26 -76 -7Z" />
           <path class="tree-clump-dark" d="M-68 18 C-40 4 -10 8 14 4 C43 -1 61 9 75 24 C48 43 12 40 -16 34 C-39 30 -55 30 -68 18Z" />
           <path class="tree-clump-light" d="M-58 -24 C-24 -44 13 -43 44 -27 C20 -13 -20 -10 -58 -24Z" />
@@ -5530,19 +5530,30 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   }).join("");
   const fruitHtml = selfSelected ? "" : activeBranches.map((branch, index) => {
     const [x, y] = fruitLayout[index] || [180 + (index - 1) * 34, 92];
+    const labelChars = [...branch.label];
+    const labelLines = labelChars.length > 3
+      ? [labelChars.slice(0, 2).join(""), labelChars.slice(2).join("")]
+      : [branch.label];
+    const labelMaxLength = Math.max(...labelLines.map((line) => [...line].length));
+    const labelWidth = Math.max(58, labelMaxLength * 18 + 20);
+    const labelHeight = labelLines.length > 1 ? 42 : 27;
+    const labelY = y + 29;
     return `
       <g class="topic-tree-fruit" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="false">
         <path class="tree-fruit-stem" d="M${x} ${y - 18} C${x - 4} ${y - 26} ${x + 4} ${y - 30} ${x + 2} ${y - 38}" />
-        <circle class="tree-fruit-body" cx="${x}" cy="${y}" r="17" />
-        <text class="tree-fruit-number" x="${x}" y="${y + 5}" text-anchor="middle">${index + 1}</text>
-        <text class="tree-fruit-label" x="${x}" y="${y + 32}" text-anchor="middle">${escapeHtml(branch.label)}</text>
+        <circle class="tree-fruit-body" cx="${x}" cy="${y}" r="21" />
+        <text class="tree-fruit-number" x="${x}" y="${y + 6}" text-anchor="middle">${index + 1}</text>
+        <rect class="tree-fruit-label-bg" x="${x - labelWidth / 2}" y="${labelY}" width="${labelWidth}" height="${labelHeight}" rx="12" />
+        <text class="tree-fruit-label" x="${x}" y="${labelY + 17}" text-anchor="middle">
+          ${labelLines.map((line, lineIndex) => `<tspan x="${x}" dy="${lineIndex ? 17 : 0}">${escapeHtml(line)}</tspan>`).join("")}
+        </text>
       </g>
     `;
   }).join("");
   return `
     <section class="topic-mindmap topic-tree-map ${mode}">
       <div class="topic-tree-visual">
-        <svg class="topic-tree-svg" viewBox="0 0 500 430" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
+        <svg class="topic-tree-svg" viewBox="16 24 468 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
           <defs>
             <linearGradient id="tree-trunk-gradient-${escapeHtml(mode)}" x1="0" x2="1" y1="0" y2="1">
               <stop offset="0%" stop-color="#6f4b35" />
