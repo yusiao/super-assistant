@@ -3498,6 +3498,45 @@ button {
     min-height: 0;
   }
 
+  .topic-tree-content {
+    gap: 6px;
+  }
+
+  .topic-tree-current {
+    padding: 8px;
+  }
+
+  .topic-tree-current > span {
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+  }
+
+  .topic-tree-current b {
+    font-size: 0.92rem;
+  }
+
+  .topic-tree-current small {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  .topic-tree-current-leaves {
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .topic-tree-current-leaves span {
+    padding: 3px 7px;
+    font-size: 0.68rem;
+  }
+
+  .topic-tree-current-text {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
   .tree-fruit-number {
     font-size: 18px;
   }

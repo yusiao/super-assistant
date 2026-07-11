@@ -203,11 +203,11 @@ const TOPIC_TREE_BRANCHES = {
   },
 };
 const TOPIC_TREE_LAYOUT = {
-  property: { branch: "M250 266 C192 262 154 235 116 210", cx: 110, cy: 214, rotate: -5, fruits: [[118, 142], [84, 204], [118, 266]] },
+  property: { branch: "M250 266 C198 262 164 235 128 210", cx: 128, cy: 214, rotate: -5, fruits: [[132, 142], [100, 204], [132, 266]] },
   career: { branch: "M250 245 C198 206 176 154 148 105", cx: 142, cy: 96, rotate: -8, fruits: [[88, 72], [134, 44], [184, 82]] },
   marriage: { branch: "M250 232 C250 192 250 166 250 132", cx: 250, cy: 130, rotate: 2, fruits: [[198, 112], [250, 76], [302, 112]] },
   children: { branch: "M250 245 C302 206 324 154 352 105", cx: 358, cy: 96, rotate: 8, fruits: [[316, 82], [366, 44], [412, 72]] },
-  health: { branch: "M250 266 C308 262 346 235 384 210", cx: 390, cy: 214, rotate: 5, fruits: [[382, 142], [416, 204], [382, 266]] },
+  health: { branch: "M250 266 C302 262 336 235 372 210", cx: 372, cy: 214, rotate: 5, fruits: [[368, 142], [400, 204], [368, 266]] },
 };
 const SCOPE_LABELS = {
   decadal: "大限",
