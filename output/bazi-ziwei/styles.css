@@ -1668,9 +1668,20 @@ button {
   transform: scale(1.08);
 }
 
+.topic-tree-fruit.is-active .tree-fruit-body {
+  fill: var(--vermillion);
+  stroke: var(--charcoal);
+  transform: scale(1.12);
+}
+
 .topic-tree-fruit:hover .tree-fruit-label-bg,
 .topic-tree-fruit:focus-visible .tree-fruit-label-bg {
   stroke: rgba(31, 37, 35, 0.45);
+}
+
+.topic-tree-fruit.is-active .tree-fruit-label-bg {
+  fill: #fff7ef;
+  stroke: rgba(176, 62, 50, 0.62);
 }
 
 .tree-self-label {
@@ -1722,7 +1733,7 @@ button {
 }
 
 .topic-tree-caption {
-  display: grid;
+  display: none;
   gap: 3px;
   border-top: 1px solid rgba(217, 208, 193, 0.9);
   padding-top: 8px;
@@ -1791,7 +1802,7 @@ button {
 }
 
 .topic-tree-roots {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 5px;
 }
@@ -1821,6 +1832,12 @@ button {
   background: #fff7ef;
 }
 
+.topic-tree-current.has-fruit {
+  align-items: flex-start;
+  border-color: rgba(176, 62, 50, 0.32);
+  background: #fffdf7;
+}
+
 .topic-tree-current > span {
   display: inline-grid;
   place-items: center;
@@ -1846,6 +1863,30 @@ button {
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 740;
+}
+
+.topic-tree-current-leaves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.topic-tree-current-leaves span {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #efeadf;
+  color: var(--charcoal);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.topic-tree-current-text {
+  margin: 8px 0 0;
+  color: var(--charcoal);
+  font-size: 0.78rem;
+  font-weight: 760;
+  line-height: 1.45;
 }
 
 .topic-tree-branches {
@@ -1926,6 +1967,10 @@ button {
   border-radius: 8px;
   background: #fffdf7;
   overflow: hidden;
+}
+
+.topic-tree-submap {
+  display: none;
 }
 
 .topic-tree-submap > summary,

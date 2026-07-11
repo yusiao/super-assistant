@@ -203,11 +203,11 @@ const TOPIC_TREE_BRANCHES = {
   },
 };
 const TOPIC_TREE_LAYOUT = {
-  property: { branch: "M250 266 C192 262 154 235 116 210", cx: 110, cy: 214, rotate: -5, fruits: [[62, 176], [54, 222], [82, 264]] },
+  property: { branch: "M250 266 C192 262 154 235 116 210", cx: 110, cy: 214, rotate: -5, fruits: [[118, 142], [84, 204], [118, 266]] },
   career: { branch: "M250 245 C198 206 176 154 148 105", cx: 142, cy: 96, rotate: -8, fruits: [[88, 72], [134, 44], [184, 82]] },
   marriage: { branch: "M250 232 C250 192 250 166 250 132", cx: 250, cy: 130, rotate: 2, fruits: [[198, 112], [250, 76], [302, 112]] },
   children: { branch: "M250 245 C302 206 324 154 352 105", cx: 358, cy: 96, rotate: 8, fruits: [[316, 82], [366, 44], [412, 72]] },
-  health: { branch: "M250 266 C308 262 346 235 384 210", cx: 390, cy: 214, rotate: 5, fruits: [[418, 176], [446, 222], [418, 264]] },
+  health: { branch: "M250 266 C308 262 346 235 384 210", cx: 390, cy: 214, rotate: 5, fruits: [[382, 142], [416, 204], [382, 266]] },
 };
 const SCOPE_LABELS = {
   decadal: "大限",
@@ -646,6 +646,10 @@ let activeReadingMethod = "bazi";
 let topicTreeFocus = {
   bazi: "topic",
   ziwei: "topic",
+};
+let topicFruitFocus = {
+  bazi: { topicKey: null, index: null },
+  ziwei: { topicKey: null, index: null },
 };
 let baziCalibrationEvents = [];
 let calibrationChartSignature = "";
@@ -5499,21 +5503,37 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const selfProfile = buildTopicTreeSelfProfile(mode, chart);
   const selfSelected = topicTreeFocus[mode] === "self";
   const activeBranches = selfSelected ? selfProfile.branches : branches;
-  const currentMark = selfSelected ? selfProfile.mark : activeMeta.mark;
-  const currentLabel = selfSelected ? selfProfile.label : activeTopic.label;
-  const currentHint = selfSelected ? selfProfile.hint : activeMeta.hint;
+  const fruitFocus = topicFruitFocus[mode] || {};
+  const selectedFruitIndex = !selfSelected && fruitFocus.topicKey === activeTopicKey
+    ? Number(fruitFocus.index)
+    : null;
+  const selectedBranch = Number.isInteger(selectedFruitIndex) && activeBranches[selectedFruitIndex]
+    ? activeBranches[selectedFruitIndex]
+    : null;
+  const currentMark = selectedBranch ? String(selectedFruitIndex + 1) : selfSelected ? selfProfile.mark : activeMeta.mark;
+  const currentLabel = selectedBranch
+    ? `${activeTopic.label} · ${selectedBranch.label}`
+    : selfSelected ? selfProfile.label : activeTopic.label;
+  const currentHint = selectedBranch
+    ? selectedBranch.leaves.join("、")
+    : selfSelected ? selfProfile.hint : activeMeta.hint;
   const fruitLayout = TOPIC_TREE_LAYOUT[activeTopicKey]?.fruits || [];
-  const treeBranchesHtml = TOPIC_ORDER.map((topicKey) => {
+  const treeBranchOrder = [
+    ...TOPIC_ORDER.filter((topicKey) => topicKey !== activeTopicKey),
+    activeTopicKey,
+  ];
+  const treeBranchesHtml = treeBranchOrder.map((topicKey) => {
     const topic = TOPIC_CONFIG[topicKey];
     const meta = TOPIC_MAP_META[topicKey];
     const layout = TOPIC_TREE_LAYOUT[topicKey];
     const active = !selfSelected && topicKey === activeTopicKey;
+    const clumpScale = active ? 1.42 : 1.12;
     const ariaLabel = `${modeLabel}${topic.label}主題`;
     return `
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
         <path class="tree-branch-line" d="${layout.branch}" />
         <ellipse class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" rx="82" ry="58" />
-        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(1.22)">
+        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(${clumpScale})">
           <path class="tree-clump-base" d="M-76 -7 C-70 -39 -37 -55 -6 -43 C21 -63 63 -47 72 -17 C98 -2 82 38 48 43 C26 64 -15 57 -31 42 C-62 50 -91 26 -76 -7Z" />
           <path class="tree-clump-dark" d="M-68 18 C-40 4 -10 8 14 4 C43 -1 61 9 75 24 C48 43 12 40 -16 34 C-39 30 -55 30 -68 18Z" />
           <path class="tree-clump-light" d="M-58 -24 C-24 -44 13 -43 44 -27 C20 -13 -20 -10 -58 -24Z" />
@@ -5530,6 +5550,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   }).join("");
   const fruitHtml = selfSelected ? "" : activeBranches.map((branch, index) => {
     const [x, y] = fruitLayout[index] || [180 + (index - 1) * 34, 92];
+    const fruitSelected = selectedFruitIndex === index;
     const labelChars = [...branch.label];
     const labelLines = labelChars.length > 3
       ? [labelChars.slice(0, 2).join(""), labelChars.slice(2).join("")]
@@ -5539,7 +5560,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     const labelHeight = labelLines.length > 1 ? 42 : 27;
     const labelY = y + 29;
     return `
-      <g class="topic-tree-fruit" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="false">
+      <g class="topic-tree-fruit ${fruitSelected ? "is-active" : ""}" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="${String(fruitSelected)}">
         <path class="tree-fruit-stem" d="M${x} ${y - 18} C${x - 4} ${y - 26} ${x + 4} ${y - 30} ${x + 2} ${y - 38}" />
         <circle class="tree-fruit-body" cx="${x}" cy="${y}" r="21" />
         <text class="tree-fruit-number" x="${x}" y="${y + 6}" text-anchor="middle">${index + 1}</text>
@@ -5551,7 +5572,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     `;
   }).join("");
   return `
-    <section class="topic-mindmap topic-tree-map ${mode}">
+    <section class="topic-mindmap topic-tree-map ${mode}" data-topic-tree-mode="${escapeHtml(mode)}" data-topic-tree-key="${escapeHtml(activeTopicKey)}">
       <div class="topic-tree-visual">
         <svg class="topic-tree-svg" viewBox="16 24 468 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
           <defs>
@@ -5594,11 +5615,17 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
         </div>
       </div>
       <div class="topic-tree-content">
-        <div class="topic-tree-current">
+        <div class="topic-tree-current ${selectedBranch ? "has-fruit" : ""}">
           <span>${escapeHtml(currentMark)}</span>
           <div>
             <b>${escapeHtml(currentLabel)}</b>
             <small>${escapeHtml(currentHint)}</small>
+            ${selectedBranch ? `
+              <div class="topic-tree-current-leaves">
+                ${selectedBranch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
+              </div>
+              ${selectedBranch.text ? `<p class="topic-tree-current-text">${escapeHtml(selectedBranch.text)}</p>` : ""}
+            ` : ""}
           </div>
         </div>
         <details class="topic-tree-submap">
@@ -7018,6 +7045,7 @@ function selectTopicMapTarget(topicMapButton) {
   const mode = topicMapButton.dataset.topicMap;
   if (!TOPIC_CONFIG[topicKey]) return false;
   topicTreeFocus[mode] = "topic";
+  topicFruitFocus[mode] = { topicKey, index: null };
   if (mode === "bazi" && baziTopicSelect) {
     baziTopicSelect.value = topicKey;
     updateBaziReading();
@@ -7035,6 +7063,7 @@ function selectTopicSelfTarget(selfButton) {
   const mode = selfButton?.dataset.topicSelf;
   if (!mode || !topicTreeFocus[mode]) return false;
   topicTreeFocus[mode] = "self";
+  topicFruitFocus[mode] = { topicKey: null, index: null };
   if (mode === "bazi") {
     updateBaziReading();
     return true;
@@ -7047,14 +7076,21 @@ function selectTopicSelfTarget(selfButton) {
 }
 
 function toggleTopicFruitTarget(fruitButton) {
-  const index = fruitButton?.dataset.topicFruit;
+  const index = Number(fruitButton?.dataset.topicFruit);
   const tree = fruitButton?.closest(".topic-tree-map");
-  const panel = tree?.querySelector(`[data-topic-fruit-panel="${index}"]`);
-  const submap = tree?.querySelector(".topic-tree-submap");
-  if (!panel || !submap) return false;
-  submap.open = true;
-  panel.open = !panel.open;
-  fruitButton.setAttribute("aria-pressed", String(panel.open));
+  const mode = tree?.dataset.topicTreeMode;
+  const topicKey = tree?.dataset.topicTreeKey;
+  if (!mode || !TOPIC_CONFIG[topicKey] || !Number.isInteger(index)) return false;
+  topicTreeFocus[mode] = "topic";
+  topicFruitFocus[mode] = { topicKey, index };
+  if (mode === "bazi") {
+    updateBaziReading();
+    return true;
+  }
+  if (mode === "ziwei") {
+    updateReading();
+    return true;
+  }
   return true;
 }
 
