@@ -203,11 +203,11 @@ const TOPIC_TREE_BRANCHES = {
   },
 };
 const TOPIC_TREE_LAYOUT = {
-  property: { branch: "M180 210 C130 205 104 176 78 145", cx: 74, cy: 138, anchor: "end" },
-  career: { branch: "M180 190 C132 160 126 106 112 64", cx: 112, cy: 58, anchor: "middle" },
-  marriage: { branch: "M180 178 C180 130 180 92 180 42", cx: 180, cy: 42, anchor: "middle" },
-  children: { branch: "M180 190 C228 160 234 106 248 64", cx: 248, cy: 58, anchor: "middle" },
-  health: { branch: "M180 210 C230 204 256 176 282 145", cx: 286, cy: 138, anchor: "start" },
+  property: { branch: "M180 210 C130 205 104 176 78 145", cx: 74, cy: 138, fruits: [[38, 98], [34, 142], [48, 184]] },
+  career: { branch: "M180 190 C132 160 126 106 112 64", cx: 112, cy: 58, fruits: [[74, 42], [110, 18], [146, 42]] },
+  marriage: { branch: "M180 178 C180 130 180 92 180 42", cx: 180, cy: 42, fruits: [[138, 54], [180, 8], [222, 54]] },
+  children: { branch: "M180 190 C228 160 234 106 248 64", cx: 248, cy: 58, fruits: [[214, 42], [250, 18], [286, 42]] },
+  health: { branch: "M180 210 C230 204 256 176 282 145", cx: 286, cy: 138, fruits: [[322, 98], [326, 142], [312, 184]] },
 };
 const SCOPE_LABELS = {
   decadal: "大限",
@@ -643,6 +643,10 @@ const methodViews = [...document.querySelectorAll("[data-method-view]")];
 let currentChart = null;
 let ziweiImageType = "sanhe";
 let activeReadingMethod = "bazi";
+let topicTreeFocus = {
+  bazi: "topic",
+  ziwei: "topic",
+};
 let baziCalibrationEvents = [];
 let calibrationChartSignature = "";
 let partnerImageState = {
@@ -5430,17 +5434,80 @@ function ziweiTopicMapSignal(topicKey, chart, context) {
   };
 }
 
+function buildTopicTreeSelfProfile(mode, chart) {
+  if (mode === "bazi") {
+    const profile = baziDayMasterProfile(chart);
+    const structure = baziStructureProfile(chart);
+    const usefulGod = baziUsefulGodProfile(chart);
+    const groups = baziTenGodGroupSummary(chart).filter((group) => group.count).slice(0, 3);
+    return {
+      mark: "命",
+      label: "命主人格",
+      hint: "以日主、月令、格局、十神看自身性格與行動慣性。",
+      branches: [
+        {
+          label: "人格主軸",
+          leaves: [`${profile.dayStem}${profile.dayElement}日主`, profile.strength, structure.name],
+          text: profile.text,
+        },
+        {
+          label: "行動慣性",
+          leaves: [profile.monthBranch, usefulGod.primary ? `喜${usefulGod.primary}` : "喜用待判", usefulGod.regulating],
+          text: `${structure.text} ${usefulGod.text}`,
+        },
+        {
+          label: "人際氣場",
+          leaves: groups.length ? groups.map((group) => group.label) : ["十神分布", "互動模式", "表達方式"],
+          text: baziTenGodInterpretation(chart),
+        },
+      ],
+    };
+  }
+
+  const astrolabe = chart.astrolabe;
+  const palaceBranch = (palace, fallback) => {
+    const reading = palaceOverviewReading(palace, astrolabe);
+    return {
+      label: fallback,
+      leaves: [
+        palace ? palaceLabel(palace) : "未取得",
+        summarizeStarNames(allPalaceStars(palace), "星曜待補"),
+        palace?.earthlyBranch ? toTraditional(palace.earthlyBranch) : "地支待補",
+      ],
+      text: reading.text,
+    };
+  };
+
+  return {
+    mark: "命",
+    label: "命主人格",
+    hint: "以命宮、身宮、來因宮看人格底色、行動方式與事件入口。",
+    branches: [
+      palaceBranch(getLifePalace(astrolabe), "人格底色"),
+      palaceBranch(getBodyPalace(astrolabe), "行動方式"),
+      palaceBranch(getCausePalace(astrolabe), "事件入口"),
+    ],
+  };
+}
+
 function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const modeLabel = mode === "bazi" ? "八字" : "紫微斗數";
   const activeTopic = TOPIC_CONFIG[activeTopicKey] || TOPIC_CONFIG.property;
   const activeMeta = TOPIC_MAP_META[activeTopicKey] || TOPIC_MAP_META.property;
   const branches = TOPIC_TREE_BRANCHES[mode]?.[activeTopicKey] || [];
   const rootLabels = mode === "bazi" ? ["日主", "月令", "格局"] : ["命宮", "身宮", "來因宮"];
+  const selfProfile = buildTopicTreeSelfProfile(mode, chart);
+  const selfSelected = topicTreeFocus[mode] === "self";
+  const activeBranches = selfSelected ? selfProfile.branches : branches;
+  const currentMark = selfSelected ? selfProfile.mark : activeMeta.mark;
+  const currentLabel = selfSelected ? selfProfile.label : activeTopic.label;
+  const currentHint = selfSelected ? selfProfile.hint : activeMeta.hint;
+  const fruitLayout = TOPIC_TREE_LAYOUT[activeTopicKey]?.fruits || [];
   const treeBranchesHtml = TOPIC_ORDER.map((topicKey) => {
     const topic = TOPIC_CONFIG[topicKey];
     const meta = TOPIC_MAP_META[topicKey];
     const layout = TOPIC_TREE_LAYOUT[topicKey];
-    const active = topicKey === activeTopicKey;
+    const active = !selfSelected && topicKey === activeTopicKey;
     const ariaLabel = `${modeLabel}${topic.label}主題`;
     return `
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
@@ -5450,6 +5517,17 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
         <circle class="tree-leaf-core" cx="${layout.cx}" cy="${layout.cy}" r="18" />
         <text class="tree-leaf-mark" x="${layout.cx}" y="${layout.cy + 5}" text-anchor="middle">${escapeHtml(meta.mark)}</text>
         <text class="tree-leaf-label" x="${layout.cx}" y="${layout.cy + 54}" text-anchor="middle">${escapeHtml(topic.label)}</text>
+      </g>
+    `;
+  }).join("");
+  const fruitHtml = selfSelected ? "" : activeBranches.map((branch, index) => {
+    const [x, y] = fruitLayout[index] || [180 + (index - 1) * 34, 92];
+    return `
+      <g class="topic-tree-fruit" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="false">
+        <path class="tree-fruit-stem" d="M${x} ${y - 18} C${x - 4} ${y - 26} ${x + 4} ${y - 30} ${x + 2} ${y - 38}" />
+        <circle class="tree-fruit-body" cx="${x}" cy="${y}" r="17" />
+        <text class="tree-fruit-number" x="${x}" y="${y + 5}" text-anchor="middle">${index + 1}</text>
+        <text class="tree-fruit-label" x="${x}" y="${y + 32}" text-anchor="middle">${escapeHtml(branch.label)}</text>
       </g>
     `;
   }).join("");
@@ -5467,19 +5545,30 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
               <stop offset="100%" stop-color="#2f765e" />
             </radialGradient>
           </defs>
+          <g class="tree-canopy" aria-hidden="true">
+            <circle cx="106" cy="124" r="64" />
+            <circle cx="155" cy="74" r="70" />
+            <circle cx="210" cy="72" r="68" />
+            <circle cx="260" cy="126" r="62" />
+            <circle cx="180" cy="142" r="84" />
+          </g>
           <path class="tree-ground" d="M54 326 C96 303 138 304 180 322 C222 304 264 303 306 326" />
           <path class="tree-root root-a" d="M180 305 C144 323 110 330 70 324" />
           <path class="tree-root root-b" d="M180 305 C216 323 250 330 290 324" />
           <path class="tree-root root-c" d="M180 306 C176 326 170 338 158 350" />
-          <path class="tree-trunk-shape" d="M153 318 C166 270 165 235 172 204 C176 184 184 184 188 204 C195 235 194 270 207 318 Z" />
-          <path class="tree-trunk-highlight" d="M178 300 C176 260 178 229 181 196" />
+          <g class="topic-tree-self ${selfSelected ? "is-active" : ""}" data-topic-self="${escapeHtml(mode)}" tabindex="0" role="button" aria-label="${escapeHtml(modeLabel)}命主人格" aria-pressed="${String(selfSelected)}">
+            <path class="tree-self-hit" d="M148 318 C162 267 163 232 171 198 C176 177 185 176 190 198 C198 232 198 267 212 318 Z" />
+            <path class="tree-trunk-shape" d="M153 318 C166 270 165 235 172 204 C176 184 184 184 188 204 C195 235 194 270 207 318 Z" />
+            <path class="tree-trunk-highlight" d="M178 300 C176 260 178 229 181 196" />
+            <text class="tree-self-label" x="180" y="252" text-anchor="middle">命主</text>
+          </g>
           ${treeBranchesHtml}
-          <text class="tree-self-label" x="180" y="252" text-anchor="middle">命主</text>
+          ${fruitHtml}
           <text class="tree-mode-label" x="180" y="25" text-anchor="middle">${escapeHtml(modeLabel)}</text>
         </svg>
         <div class="topic-tree-caption">
-          <strong>點樹枝或葉子切換主題</strong>
-          <small>樹幹是自身，枝葉是財富、事業、姻緣、子女、健康。</small>
+          <strong>點樹幹看命主人格，點樹葉切換主題</strong>
+          <small>葉子是五大類，選中葉子後會長出果實，果實代表細分支。</small>
         </div>
         <div class="topic-tree-roots">
           ${rootLabels.map((label) => `<span>${escapeHtml(label)}</span>`).join("")}
@@ -5487,29 +5576,30 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
       </div>
       <div class="topic-tree-content">
         <div class="topic-tree-current">
-          <span>${escapeHtml(activeMeta.mark)}</span>
+          <span>${escapeHtml(currentMark)}</span>
           <div>
-            <b>${escapeHtml(activeTopic.label)}</b>
-            <small>${escapeHtml(activeMeta.hint)}</small>
+            <b>${escapeHtml(currentLabel)}</b>
+            <small>${escapeHtml(currentHint)}</small>
           </div>
         </div>
         <details class="topic-tree-submap">
           <summary>
             <span>
-              <b>${escapeHtml(activeTopic.label)}細分枝</b>
-              <small>${escapeHtml(activeMeta.hint)}，展開後再看細細項。</small>
+              <b>${escapeHtml(currentLabel)}${selfSelected ? "人格分支" : "果實分支"}</b>
+              <small>${escapeHtml(currentHint)}，點果實或展開後再看細項。</small>
             </span>
           </summary>
           <div class="topic-tree-subbranches">
-            ${branches.map((branch, index) => `
-              <details class="topic-tree-subbranch">
+            ${activeBranches.map((branch, index) => `
+              <details class="topic-tree-subbranch" data-topic-fruit-panel="${index}">
                 <summary>
-                  <span>${index + 1}</span>
+                  <span class="topic-tree-fruit-index">${index + 1}</span>
                   <b>${escapeHtml(branch.label)}</b>
                 </summary>
                 <div class="topic-tree-leaves">
                   ${branch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
                 </div>
+                ${branch.text ? `<p class="topic-tree-branch-text">${escapeHtml(branch.text)}</p>` : ""}
               </details>
             `).join("")}
           </div>
@@ -6908,6 +6998,7 @@ function selectTopicMapTarget(topicMapButton) {
   const topicKey = topicMapButton.dataset.topicKey;
   const mode = topicMapButton.dataset.topicMap;
   if (!TOPIC_CONFIG[topicKey]) return false;
+  topicTreeFocus[mode] = "topic";
   if (mode === "bazi" && baziTopicSelect) {
     baziTopicSelect.value = topicKey;
     updateBaziReading();
@@ -6921,6 +7012,33 @@ function selectTopicMapTarget(topicMapButton) {
   return false;
 }
 
+function selectTopicSelfTarget(selfButton) {
+  const mode = selfButton?.dataset.topicSelf;
+  if (!mode || !topicTreeFocus[mode]) return false;
+  topicTreeFocus[mode] = "self";
+  if (mode === "bazi") {
+    updateBaziReading();
+    return true;
+  }
+  if (mode === "ziwei") {
+    updateReading();
+    return true;
+  }
+  return false;
+}
+
+function toggleTopicFruitTarget(fruitButton) {
+  const index = fruitButton?.dataset.topicFruit;
+  const tree = fruitButton?.closest(".topic-tree-map");
+  const panel = tree?.querySelector(`[data-topic-fruit-panel="${index}"]`);
+  const submap = tree?.querySelector(".topic-tree-submap");
+  if (!panel || !submap) return false;
+  submap.open = true;
+  panel.open = !panel.open;
+  fruitButton.setAttribute("aria-pressed", String(panel.open));
+  return true;
+}
+
 document.addEventListener("click", (event) => {
   const removeCalibrationButton = event.target.closest("[data-remove-calibration]");
   if (removeCalibrationButton) {
@@ -6928,6 +7046,14 @@ document.addEventListener("click", (event) => {
     baziCalibrationEvents = baziCalibrationEvents.filter((item) => String(item.id) !== String(id));
     renderBaziCalibration();
     return;
+  }
+  const fruitButton = event.target.closest("[data-topic-fruit]");
+  if (fruitButton) {
+    if (toggleTopicFruitTarget(fruitButton)) return;
+  }
+  const selfButton = event.target.closest("[data-topic-self]");
+  if (selfButton) {
+    if (selectTopicSelfTarget(selfButton)) return;
   }
   const topicMapButton = event.target.closest("[data-topic-map]");
   if (topicMapButton) {
@@ -6951,6 +7077,16 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (!["Enter", " "].includes(event.key)) return;
+  const fruitButton = event.target.closest("[data-topic-fruit]");
+  if (toggleTopicFruitTarget(fruitButton)) {
+    event.preventDefault();
+    return;
+  }
+  const selfButton = event.target.closest("[data-topic-self]");
+  if (selectTopicSelfTarget(selfButton)) {
+    event.preventDefault();
+    return;
+  }
   const topicMapButton = event.target.closest("[data-topic-map]");
   if (selectTopicMapTarget(topicMapButton)) {
     event.preventDefault();

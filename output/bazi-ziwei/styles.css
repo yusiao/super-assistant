@@ -1464,10 +1464,16 @@ button {
 .tree-ground,
 .tree-root,
 .tree-branch-line,
-.tree-trunk-highlight {
+.tree-trunk-highlight,
+.tree-fruit-stem {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.tree-canopy circle {
+  fill: #b8d7a3;
+  opacity: 0.26;
 }
 
 .tree-ground {
@@ -1484,11 +1490,35 @@ button {
   fill: #5f4635;
   stroke: #2c2923;
   stroke-width: 3;
+  transition: fill 0.16s ease, stroke 0.16s ease, filter 0.16s ease;
+}
+
+.tree-self-hit {
+  fill: transparent;
+  cursor: pointer;
 }
 
 .tree-trunk-highlight {
   stroke: rgba(255, 253, 247, 0.3);
   stroke-width: 4;
+}
+
+.topic-tree-self {
+  cursor: pointer;
+  outline: none;
+}
+
+.topic-tree-self:hover .tree-trunk-shape,
+.topic-tree-self:focus-visible .tree-trunk-shape {
+  fill: #704d36;
+  stroke: var(--jade);
+  filter: drop-shadow(0 8px 12px rgba(31, 37, 35, 0.16));
+}
+
+.topic-tree-self.is-active .tree-trunk-shape {
+  fill: #784235;
+  stroke: var(--vermillion);
+  stroke-width: 5;
 }
 
 .topic-tree-svg-branch {
@@ -1540,6 +1570,49 @@ button {
 .tree-leaf-label {
   fill: var(--charcoal);
   font-size: 13px;
+}
+
+.topic-tree-fruit {
+  cursor: pointer;
+  outline: none;
+}
+
+.tree-fruit-stem {
+  stroke: rgba(111, 75, 53, 0.72);
+  stroke-width: 4;
+}
+
+.tree-fruit-body {
+  fill: #d85f45;
+  stroke: #8f3329;
+  stroke-width: 3;
+  filter: drop-shadow(0 7px 11px rgba(31, 37, 35, 0.16));
+  transition: fill 0.16s ease, stroke 0.16s ease, transform 0.16s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tree-fruit-number {
+  fill: #fffdf7;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 950;
+  pointer-events: none;
+}
+
+.tree-fruit-label {
+  fill: var(--charcoal);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.topic-tree-fruit:hover .tree-fruit-body,
+.topic-tree-fruit:focus-visible .tree-fruit-body {
+  fill: #b23a2e;
+  stroke: var(--charcoal);
+  transform: scale(1.08);
 }
 
 .tree-self-label {
@@ -1879,6 +1952,16 @@ button {
   color: var(--jade);
   font-size: 0.74rem;
   font-weight: 850;
+}
+
+.topic-tree-branch-text {
+  margin: 0;
+  border-top: 1px solid #ece5d8;
+  padding: 9px 10px 10px;
+  color: #4c5651;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.6;
 }
 
 .reading-detail-panel {
