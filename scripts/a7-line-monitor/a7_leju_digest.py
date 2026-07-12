@@ -1116,6 +1116,10 @@ def is_weekly_report_day(local_now: datetime, weekly_day: int) -> bool:
     return local_now.isoweekday() == weekly_day
 
 
+def is_weekly_report_due(local_now: datetime, weekly_day: int, weekly_hour: int) -> bool:
+    return is_weekly_report_day(local_now, weekly_day) and local_now.hour >= weekly_hour
+
+
 def format_lifecycle_trend(start_text: str, current_text: str) -> str:
     if not start_text and not current_text:
         return "資料累積中"
@@ -3171,7 +3175,7 @@ def main() -> int:
     bargain_watch = get_bargain_watch_results(load_bargain_watch_config(bargain_config_path))
     urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
     urgent_bargain_items = get_new_bargain_watch_items(bargain_watch, state)
-    weekly_due = is_weekly_report_day(local_now, weekly_report_day) and local_now.hour == weekly_report_hour
+    weekly_due = is_weekly_report_due(local_now, weekly_report_day, weekly_report_hour)
     should_send_line = (
         args.force
         or line_schedule == "daily"
