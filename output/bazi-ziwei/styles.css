@@ -1458,7 +1458,7 @@ button {
   display: block;
   width: 100%;
   min-height: 0;
-  aspect-ratio: 468 / 404;
+  aspect-ratio: 468 / 428;
   overflow: visible;
 }
 
@@ -1473,24 +1473,24 @@ button {
 }
 
 .tree-canopy circle {
-  fill: #bfd7a0;
-  opacity: 0.16;
+  fill: #d7e8bf;
+  opacity: 0.11;
 }
 
 .tree-ground {
-  stroke: rgba(44, 82, 70, 0.22);
-  stroke-width: 8;
+  stroke: rgba(44, 82, 70, 0.18);
+  stroke-width: 7;
 }
 
 .tree-root {
-  stroke: rgba(111, 75, 53, 0.52);
-  stroke-width: 6;
+  stroke: rgba(111, 75, 53, 0.44);
+  stroke-width: 5;
 }
 
 .tree-trunk-shape {
-  fill: #5f4635;
-  stroke: #2c2923;
-  stroke-width: 3;
+  fill: #684734;
+  stroke: #3b2a22;
+  stroke-width: 2.4;
   transition: fill 0.16s ease, stroke 0.16s ease, filter 0.16s ease;
 }
 
@@ -1528,13 +1528,14 @@ button {
 }
 
 .tree-branch-line {
-  stroke: #6f4b35;
-  stroke-width: 13;
+  stroke: #76513a;
+  stroke-width: 9;
   transition: stroke 0.16s ease, stroke-width 0.16s ease;
 }
 
 .tree-leaf-hit {
   fill: transparent;
+  pointer-events: all;
 }
 
 .tree-category-clump {
@@ -1544,26 +1545,66 @@ button {
   transform-origin: center;
 }
 
+.tree-category-clump * {
+  pointer-events: none;
+}
+
+.topic-tree-svg-branch.is-active .tree-leaf-hit,
+.topic-tree-svg-branch.is-active .tree-branch-line,
+.topic-tree-svg-branch.is-active .tree-category-clump {
+  pointer-events: none;
+}
+
+.tree-clump-shadow {
+  fill: rgba(31, 37, 35, 0.13);
+}
+
 .tree-clump-base,
 .tree-clump-dark,
-.tree-clump-light {
+.tree-clump-light,
+.tree-clump-puff {
   vector-effect: non-scaling-stroke;
 }
 
+.tree-clump-puff {
+  fill: #95bf82;
+  stroke: rgba(47, 118, 94, 0.38);
+  stroke-width: 1.4;
+}
+
+.tree-clump-puff.puff-a,
+.tree-clump-puff.puff-d {
+  fill: #79a972;
+}
+
+.tree-clump-puff.puff-b {
+  fill: #c2d989;
+}
+
+.tree-clump-puff.puff-c {
+  fill: #a7c978;
+}
+
+.tree-clump-puff.puff-e {
+  fill: #679b69;
+  opacity: 0.92;
+}
+
 .tree-clump-base {
-  fill: #8fbc80;
+  fill: #7fb274;
+  opacity: 0.58;
   stroke: rgba(47, 118, 94, 0.9);
-  stroke-width: 3;
+  stroke-width: 2.2;
 }
 
 .tree-clump-dark {
   fill: #2f765e;
-  opacity: 0.88;
+  opacity: 0.62;
 }
 
 .tree-clump-light {
   fill: #d7e889;
-  opacity: 0.9;
+  opacity: 0.82;
 }
 
 .tree-brush-stroke {
@@ -1574,17 +1615,17 @@ button {
 
 .tree-brush-stroke.light {
   stroke: rgba(230, 240, 142, 0.88);
-  stroke-width: 9;
+  stroke-width: 7;
 }
 
 .tree-brush-stroke.mid {
   stroke: rgba(139, 185, 105, 0.76);
-  stroke-width: 10;
+  stroke-width: 8;
 }
 
 .tree-brush-stroke.dark {
   stroke: rgba(31, 91, 63, 0.74);
-  stroke-width: 10;
+  stroke-width: 8;
 }
 
 .tree-clump-badge {
@@ -1698,7 +1739,7 @@ button {
 .topic-tree-svg-branch:hover .tree-branch-line,
 .topic-tree-svg-branch:focus-visible .tree-branch-line {
   stroke: var(--jade);
-  stroke-width: 16;
+  stroke-width: 12;
 }
 
 .topic-tree-svg-branch:hover .tree-category-clump,
@@ -1708,12 +1749,31 @@ button {
 
 .topic-tree-svg-branch.is-active .tree-branch-line {
   stroke: var(--vermillion);
-  stroke-width: 17;
+  stroke-width: 13;
 }
 
 .topic-tree-svg-branch.is-active .tree-clump-base {
   fill: #eaa47b;
   stroke: var(--vermillion);
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-puff {
+  fill: #f0bd85;
+  stroke: rgba(176, 62, 50, 0.38);
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-puff.puff-a,
+.topic-tree-svg-branch.is-active .tree-clump-puff.puff-d {
+  fill: #d98267;
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-puff.puff-b,
+.topic-tree-svg-branch.is-active .tree-clump-puff.puff-c {
+  fill: #f6d48c;
+}
+
+.topic-tree-svg-branch.is-active .tree-clump-puff.puff-e {
+  fill: #ba6550;
 }
 
 .topic-tree-svg-branch.is-active .tree-clump-dark {
@@ -1887,6 +1947,26 @@ button {
   font-size: 0.78rem;
   font-weight: 760;
   line-height: 1.45;
+}
+
+.topic-tree-self-details {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.topic-tree-self-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #ece5d8;
+  border-radius: 8px;
+  padding: 9px;
+  background: #fffdf7;
+}
+
+.topic-tree-self-card > b {
+  color: var(--charcoal);
+  font-size: 0.82rem;
 }
 
 .topic-tree-branches {
@@ -3495,6 +3575,8 @@ button {
   }
 
   .topic-tree-svg {
+    width: 118%;
+    margin-left: -9%;
     min-height: 0;
   }
 
@@ -3537,11 +3619,33 @@ button {
     line-height: 1.4;
   }
 
+  .topic-tree-self-details {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .topic-tree-self-card {
+    gap: 5px;
+    padding: 7px;
+  }
+
+  .topic-tree-self-card > b {
+    font-size: 0.78rem;
+  }
+
   .tree-fruit-number {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .tree-fruit-label {
+    font-size: 21px;
+  }
+
+  .tree-leaf-mark {
+    font-size: 20px;
+  }
+
+  .tree-leaf-label {
     font-size: 17px;
   }
 

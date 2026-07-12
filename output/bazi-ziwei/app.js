@@ -5464,11 +5464,32 @@ function buildTopicTreeSelfProfile(mode, chart) {
           leaves: groups.length ? groups.map((group) => group.label) : ["十神分布", "互動模式", "表達方式"],
           text: baziTenGodInterpretation(chart),
         },
+        {
+          label: "優勢資源",
+          leaves: [
+            profile.favorable.length ? `喜${profile.favorable.join("、")}` : "喜用待判",
+            groups[0]?.label || "十神主軸",
+            `生扶${Math.round(profile.supportRatio * 100)}%`,
+          ],
+          text: `命主做事最順的地方，是讓${profile.favorable.join("、") || "有利五行"}先形成流通；當環境能補到這些資源時，個性優點會比較容易被看見，判斷也會更穩。`,
+        },
+        {
+          label: "盲點提醒",
+          leaves: [
+            profile.caution.length ? `慎${profile.caution.join("、")}` : "忌神不重",
+            structure.status,
+            usefulGod.secondary ? `次用${usefulGod.secondary}` : "次用待判",
+          ],
+          text: `命主需要留意的不是單一缺點，而是能量失衡時的反應：${profile.caution.length ? `${profile.caution.join("、")}過度時，容易讓節奏變急、資源被耗或決策壓力變大。` : "目前忌神壓力不算集中，重點是穩住作息與決策節奏。"}${usefulGod.text}`,
+        },
       ],
     };
   }
 
   const astrolabe = chart.astrolabe;
+  const lifePalace = getLifePalace(astrolabe);
+  const bodyPalace = getBodyPalace(astrolabe);
+  const causePalace = getCausePalace(astrolabe);
   const palaceBranch = (palace, fallback) => {
     const reading = palaceOverviewReading(palace, astrolabe);
     return {
@@ -5487,9 +5508,27 @@ function buildTopicTreeSelfProfile(mode, chart) {
     label: "命主人格",
     hint: "以命宮、身宮、來因宮看人格底色、行動方式與事件入口。",
     branches: [
-      palaceBranch(getLifePalace(astrolabe), "人格底色"),
-      palaceBranch(getBodyPalace(astrolabe), "行動方式"),
-      palaceBranch(getCausePalace(astrolabe), "事件入口"),
+      palaceBranch(lifePalace, "人格底色"),
+      palaceBranch(bodyPalace, "行動方式"),
+      palaceBranch(causePalace, "事件入口"),
+      {
+        label: "命身連動",
+        leaves: [
+          lifePalace ? palaceLabel(lifePalace) : "命宮未定",
+          bodyPalace ? palaceLabel(bodyPalace) : "身宮未定",
+          summarizeStarNames([...allPalaceStars(lifePalace), ...allPalaceStars(bodyPalace)], "星曜待補"),
+        ],
+        text: `命宮看命主給人的第一印象與人生主軸，身宮看實際投入與後天行動慣性；若兩者星曜氣質一致，命主外在與實際選擇較同步，若差異大，常會出現「想法是一套、真正用力又是另一套」的生命節奏。`,
+      },
+      {
+        label: "課題入口",
+        leaves: [
+          causePalace ? palaceLabel(causePalace) : "來因未定",
+          summarizeStarNames(allPalaceStars(causePalace), "來因星曜待補"),
+          causePalace?.earthlyBranch ? toTraditional(causePalace.earthlyBranch) : "地支待補",
+        ],
+        text: `來因宮是原局事件被觸發的入口，不代表單一吉凶；它會說明命主在哪一類人事物上最容易被牽動，也最容易反覆遇到需要修正的課題。`,
+      },
     ],
   };
 }
@@ -5517,7 +5556,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const currentHint = selectedBranch
     ? selectedBranch.leaves.join("、")
     : selfSelected ? selfProfile.hint : activeMeta.hint;
-  const fruitLayout = TOPIC_TREE_LAYOUT[activeTopicKey]?.fruits || [];
+  const fruitLayout = [[150, 92], [250, 92], [350, 92]];
   const treeBranchOrder = [
     ...TOPIC_ORDER.filter((topicKey) => topicKey !== activeTopicKey),
     activeTopicKey,
@@ -5527,13 +5566,22 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     const meta = TOPIC_MAP_META[topicKey];
     const layout = TOPIC_TREE_LAYOUT[topicKey];
     const active = !selfSelected && topicKey === activeTopicKey;
-    const clumpScale = active ? 1.42 : 1.12;
+    const displayCx = active ? 250 : layout.cx;
+    const displayCy = active ? 208 : layout.cy;
+    const branchPath = active ? "M250 338 C250 292 250 246 250 210" : layout.branch;
+    const clumpScale = active ? 1.5 : 1.08;
     const ariaLabel = `${modeLabel}${topic.label}主題`;
     return `
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
-        <path class="tree-branch-line" d="${layout.branch}" />
-        <ellipse class="tree-leaf-hit" cx="${layout.cx}" cy="${layout.cy}" rx="82" ry="58" />
-        <g class="tree-category-clump" transform="translate(${layout.cx} ${layout.cy}) rotate(${layout.rotate || 0}) scale(${clumpScale})">
+        <path class="tree-branch-line" d="${branchPath}" />
+        <ellipse class="tree-leaf-hit" cx="${displayCx}" cy="${displayCy}" rx="${active ? 116 : 82}" ry="${active ? 86 : 58}" />
+        <g class="tree-category-clump" transform="translate(${displayCx} ${displayCy}) rotate(${active ? 0 : (layout.rotate || 0)}) scale(${clumpScale})">
+          <ellipse class="tree-clump-shadow" cx="2" cy="22" rx="74" ry="28" />
+          <circle class="tree-clump-puff puff-a" cx="-48" cy="-5" r="38" />
+          <circle class="tree-clump-puff puff-b" cx="-16" cy="-31" r="43" />
+          <circle class="tree-clump-puff puff-c" cx="28" cy="-28" r="42" />
+          <circle class="tree-clump-puff puff-d" cx="58" cy="6" r="36" />
+          <circle class="tree-clump-puff puff-e" cx="-6" cy="18" r="50" />
           <path class="tree-clump-base" d="M-76 -7 C-70 -39 -37 -55 -6 -43 C21 -63 63 -47 72 -17 C98 -2 82 38 48 43 C26 64 -15 57 -31 42 C-62 50 -91 26 -76 -7Z" />
           <path class="tree-clump-dark" d="M-68 18 C-40 4 -10 8 14 4 C43 -1 61 9 75 24 C48 43 12 40 -16 34 C-39 30 -55 30 -68 18Z" />
           <path class="tree-clump-light" d="M-58 -24 C-24 -44 13 -43 44 -27 C20 -13 -20 -10 -58 -24Z" />
@@ -5558,10 +5606,10 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     const labelMaxLength = Math.max(...labelLines.map((line) => [...line].length));
     const labelWidth = Math.max(58, labelMaxLength * 18 + 20);
     const labelHeight = labelLines.length > 1 ? 42 : 27;
-    const labelY = y + 29;
+    const labelY = y - labelHeight - 34;
     return `
       <g class="topic-tree-fruit ${fruitSelected ? "is-active" : ""}" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="${String(fruitSelected)}">
-        <path class="tree-fruit-stem" d="M${x} ${y - 18} C${x - 4} ${y - 26} ${x + 4} ${y - 30} ${x + 2} ${y - 38}" />
+        <path class="tree-fruit-stem" d="M${x} ${y + 20} C${x - 6} ${y + 36} ${x + 7} ${y + 44} ${x + 2} ${y + 55}" />
         <circle class="tree-fruit-body" cx="${x}" cy="${y}" r="21" />
         <text class="tree-fruit-number" x="${x}" y="${y + 6}" text-anchor="middle">${index + 1}</text>
         <rect class="tree-fruit-label-bg" x="${x - labelWidth / 2}" y="${labelY}" width="${labelWidth}" height="${labelHeight}" rx="12" />
@@ -5571,10 +5619,23 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
       </g>
     `;
   }).join("");
+  const selfDetailHtml = selfSelected ? `
+    <div class="topic-tree-self-details">
+      ${selfProfile.branches.map((branch) => `
+        <article class="topic-tree-self-card">
+          <b>${escapeHtml(branch.label)}</b>
+          <div class="topic-tree-current-leaves">
+            ${branch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
+          </div>
+          ${branch.text ? `<p class="topic-tree-current-text">${escapeHtml(branch.text)}</p>` : ""}
+        </article>
+      `).join("")}
+    </div>
+  ` : "";
   return `
     <section class="topic-mindmap topic-tree-map ${mode}" data-topic-tree-mode="${escapeHtml(mode)}" data-topic-tree-key="${escapeHtml(activeTopicKey)}">
       <div class="topic-tree-visual">
-        <svg class="topic-tree-svg" viewBox="16 24 468 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
+        <svg class="topic-tree-svg" viewBox="16 0 468 428" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHtml(modeLabel)}命主主題樹">
           <defs>
             <linearGradient id="tree-trunk-gradient-${escapeHtml(mode)}" x1="0" x2="1" y1="0" y2="1">
               <stop offset="0%" stop-color="#6f4b35" />
@@ -5620,6 +5681,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
           <div>
             <b>${escapeHtml(currentLabel)}</b>
             <small>${escapeHtml(currentHint)}</small>
+            ${selfDetailHtml}
             ${selectedBranch ? `
               <div class="topic-tree-current-leaves">
                 ${selectedBranch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
