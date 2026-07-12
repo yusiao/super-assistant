@@ -1977,6 +1977,9 @@ def clean_article_text(text: str) -> str:
 
 
 def extract_article_body(content: str) -> str:
+    if is_google_news_landing_page(content):
+        return ""
+
     stripped = re.sub(r"<script\b[^>]*>.*?</script>", " ", content, flags=re.S | re.I)
     stripped = re.sub(r"<style\b[^>]*>.*?</style>", " ", stripped, flags=re.S | re.I)
     stripped = re.sub(r"<noscript\b[^>]*>.*?</noscript>", " ", stripped, flags=re.S | re.I)
@@ -2012,6 +2015,100 @@ def extract_article_body(content: str) -> str:
     return max(candidates, key=len, default="")[:5000]
 
 
+def is_google_news_landing_page(content: str) -> bool:
+    text = html_to_text(content)
+    return (
+        "Google 新聞" in text
+        and "匯集了世界各地的新聞來源" in text
+        and len(text) < 1000
+    )
+
+
+def is_google_news_article_url(url: str) -> bool:
+    parsed = urllib.parse.urlsplit(url)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    return parsed.netloc == "news.google.com" and len(path_parts) >= 2 and path_parts[-2] in {"articles", "read"}
+
+
+def get_google_news_article_id(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if len(path_parts) >= 2 and path_parts[-2] in {"articles", "read"}:
+        return path_parts[-1]
+    return ""
+
+
+def extract_google_news_decode_params(content: str) -> tuple[str, str]:
+    signature_match = re.search(r'data-n-a-sg=["\']([^"\']+)["\']', content)
+    timestamp_match = re.search(r'data-n-a-ts=["\']([^"\']+)["\']', content)
+    if not signature_match or not timestamp_match:
+        return "", ""
+    return unescape(signature_match.group(1)), unescape(timestamp_match.group(1))
+
+
+def post_form_text(url: str, data: dict[str, str], timeout: int = 12) -> str:
+    body = urllib.parse.urlencode(data).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=body,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        raw = response.read()
+    return raw.decode("utf-8", errors="ignore")
+
+
+def decode_google_news_article_url(url: str) -> str:
+    article_id = get_google_news_article_id(url)
+    if not article_id:
+        return url
+
+    signature = ""
+    timestamp = ""
+    for candidate_url in (
+        f"https://news.google.com/articles/{article_id}",
+        f"https://news.google.com/rss/articles/{article_id}",
+    ):
+        try:
+            content = fetch_text(candidate_url)
+            signature, timestamp = extract_google_news_decode_params(content)
+            if signature and timestamp:
+                break
+        except Exception:
+            continue
+    if not signature or not timestamp:
+        return url
+
+    payload = [
+        "Fbv4je",
+        (
+            '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],'
+            f'"X","X",1,[1,1,1],1,1,null,0,0,null,0],"{article_id}",{timestamp},"{signature}"]'
+        ),
+    ]
+    response_text = post_form_text(
+        "https://news.google.com/_/DotsSplashUi/data/batchexecute",
+        {"f.req": json.dumps([[payload]])},
+    )
+    json_text = response_text.split("\n\n", 1)[1] if "\n\n" in response_text else response_text
+    parsed = json.loads(json_text)[:-2]
+    decoded_url = json.loads(parsed[0][2])[1]
+    return decoded_url if isinstance(decoded_url, str) and decoded_url.startswith(("http://", "https://")) else url
+
+
+def resolve_news_article_url(url: str) -> str:
+    if is_google_news_article_url(url):
+        try:
+            return decode_google_news_article_url(url)
+        except Exception:
+            return url
+    return url
+
+
 def normalize_market_fingerprint(text: str) -> str:
     text = re.sub(r"https?://\S+", "", text)
     text = re.sub(r"\d+", "0", text)
@@ -2033,21 +2130,24 @@ def enrich_market_entries_with_article_body(
 
     def fetch_article(entry: dict[str, str]) -> tuple[str, str, str]:
         url = entry.get("url", "")
-        content = fetch_text(encode_iri_url(url))
+        resolved_url = resolve_news_article_url(url)
+        content = fetch_text(encode_iri_url(resolved_url))
         if is_cloudflare_challenge(content):
             raise RuntimeError("Cloudflare challenge")
         article_text = extract_article_body(content)
-        return url, article_text, ""
+        return url, article_text, resolved_url
 
     article_text_by_url: dict[str, str] = {}
+    resolved_url_by_url: dict[str, str] = {}
     if fetch_candidates:
         with ThreadPoolExecutor(max_workers=4) as executor:
             futures = {executor.submit(fetch_article, entry): entry for entry in fetch_candidates}
             for future in as_completed(futures):
                 entry = futures[future]
                 try:
-                    url, article_text, _ = future.result()
+                    url, article_text, resolved_url = future.result()
                     article_text_by_url[url] = article_text
+                    resolved_url_by_url[url] = resolved_url
                 except Exception as exc:
                     title = entry.get("title", "")[:40] or entry.get("url", "")[:60]
                     errors.append(f"{title}: {exc}")
@@ -2067,21 +2167,45 @@ def enrich_market_entries_with_article_body(
         row["summary_text"] = summarize_article_text(merged_text)
         row["text_source"] = text_source
         row["article_chars"] = str(len(article_text))
+        if resolved_url_by_url.get(entry.get("url", "")):
+            row["resolved_url"] = resolved_url_by_url[entry.get("url", "")]
         enriched.append(row)
     return enriched, errors
 
 
 def summarize_article_text(text: str, max_sentences: int = 2) -> str:
+    text = re.sub(r"https?://\S+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
     sentences = split_sentences(text)
-    useful: list[str] = []
-    for sentence in sentences:
-        if any(keyword in sentence for keyword in ("預售", "房價", "交易", "實價", "讓利", "房貸", "限貸", "去化", "餘屋", "開案", "建商", "代銷")):
-            useful.append(sentence[:90])
-        if len(useful) >= max_sentences:
+    signal_groups = [
+        ("供給", ("預售", "預售屋", "新案", "開案", "待開案", "推案", "餘屋", "庫存", "交屋")),
+        ("價格", ("房價", "實價", "單價", "總價", "讓利", "低價", "議價", "漲", "跌")),
+        ("買氣", ("交易", "成交", "買氣", "來人", "看屋", "去化", "銷售率", "完銷")),
+        ("資金", ("房貸", "限貸", "信用管制", "核貸", "利率", "自備款")),
+        ("區域", ("重劃區", "青埔", "A7", "桃園", "雙北", "台北", "新北", "捷運", "建設")),
+        ("業者", ("建商", "代銷", "房仲", "永慶", "住展", "好房", "專家")),
+    ]
+    picked: list[str] = []
+    used_fingerprints: set[str] = set()
+    for label, keywords in signal_groups:
+        best_sentence = ""
+        best_score = 0
+        for sentence in sentences:
+            score = sum(sentence.count(keyword) for keyword in keywords)
+            if score > best_score:
+                best_score = score
+                best_sentence = sentence
+        if best_sentence and best_score > 0:
+            compact = re.sub(r"https?://\S+", "", best_sentence[:86]).strip()
+            fingerprint = normalize_market_fingerprint(compact)
+            if fingerprint and fingerprint not in used_fingerprints:
+                used_fingerprints.add(fingerprint)
+                picked.append(f"{label}: {compact}")
+        if len(picked) >= max_sentences:
             break
-    if not useful:
-        useful = [sentence[:90] for sentence in sentences[:max_sentences]]
-    return "；".join(useful)
+    if not picked:
+        picked = [sentence[:90] for sentence in sentences[:max_sentences]]
+    return "；".join(picked)
 
 
 def fetch_market_entries_from_sources(
@@ -2255,6 +2379,7 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
         keyword_counts: dict[str, int] = {}
         examples: list[str] = []
         example_entries: list[dict[str, str]] = []
+        candidate_entries: list[dict[str, str]] = []
         sources: set[str] = set()
         for source in source_hits:
             for entry in source.get("entries", []):
@@ -2268,11 +2393,15 @@ def get_market_pulse(config: dict[str, Any], local_now: datetime) -> dict[str, A
                     key_count = text.count(keyword)
                     if key_count:
                         keyword_counts[keyword] = keyword_counts.get(keyword, 0) + key_count
-                if len(example_entries) < 3:
-                    key = entry.get("url", "") or entry.get("title", "")
-                    if key and all((row.get("url", "") or row.get("title", "")) != key for row in example_entries):
-                        example_entries.append(entry)
-                        examples.append((entry.get("summary_text") or entry.get("title", text[:90]))[:100])
+                candidate_entries.append(entry)
+
+        for entry in sorted(candidate_entries, key=lambda row: 0 if row.get("text_source") == "article" else 1):
+            if len(example_entries) >= 3:
+                break
+            key = entry.get("resolved_url", "") or entry.get("url", "") or entry.get("title", "")
+            if key and all((row.get("resolved_url", "") or row.get("url", "") or row.get("title", "")) != key for row in example_entries):
+                example_entries.append(entry)
+                examples.append((entry.get("summary_text") or entry.get("title", entry.get("text", "")[:90]))[:100])
 
         if mention_count:
             district_items.append(
@@ -2517,10 +2646,12 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
 def summarize_market_article_points(entries: list[dict[str, str]], limit: int = 3) -> list[str]:
     points: list[str] = []
     seen: set[str] = set()
-    for entry in entries:
+    sorted_entries = sorted(entries, key=lambda entry: 0 if entry.get("text_source") == "article" else 1)
+    for entry in sorted_entries:
         point = str(entry.get("summary_text") or "").strip()
         if not point:
             point = summarize_article_text(str(entry.get("text", "")))
+        point = re.sub(r"https?://\S+", "", point)
         point = re.sub(r"\s+", " ", point).strip()
         if not point:
             continue
@@ -2588,9 +2719,14 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
     article_count = market_pulse.get("article_count", 0)
     article_body_count = market_pulse.get("article_body_count", 0)
     if article_count:
-        lines.append(
-            f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天共整理{article_count}則資訊，其中{article_body_count}則成功讀到新聞內文；其餘才用RSS摘要補足。"
-        )
+        if article_body_count:
+            lines.append(
+                f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天共整理{article_count}則資訊，其中{article_body_count}則成功讀到新聞內文；其餘才用RSS摘要補足。"
+            )
+        else:
+            lines.append(
+                f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天共整理{article_count}則資訊；本次新聞來源多為 Google News 中轉頁，未能直接讀到原文，先以RSS摘要判讀。"
+            )
     elif source_count:
         lines.append(f"- 判讀基礎：近{market_pulse.get('days_back', 7)}天、{source_count}個來源；本次主要依可讀摘要判斷。")
     return lines

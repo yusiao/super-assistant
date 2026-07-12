@@ -2,7 +2,7 @@
   "enabled": true,
   "days_back": 7,
   "max_districts": 8,
-  "max_article_fetches": 28,
+  "max_article_fetches": 36,
   "min_article_chars": 180,
   "source_urls": [
     {
@@ -11,23 +11,31 @@
     },
     {
       "name": "Google News－好房網",
-      "url": "https://news.google.com/rss/search?q=好房網+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=好房網+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
-      "name": "Google News－樂居",
-      "url": "https://news.google.com/rss/search?q=樂居+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "name": "Google News－自由地產",
+      "url": "https://news.google.com/rss/search?q=自由地產+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
-      "name": "Google News－永慶房屋",
-      "url": "https://news.google.com/rss/search?q=永慶房屋+雙北+桃園+房市+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "name": "Google News－經濟日報",
+      "url": "https://news.google.com/rss/search?q=經濟日報+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
-      "name": "Google News－591新建案",
-      "url": "https://news.google.com/rss/search?q=591+新建案+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "name": "Google News－鉅亨",
+      "url": "https://news.google.com/rss/search?q=cnyes+台灣+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News－ETtoday房產雲",
+      "url": "https://news.google.com/rss/search?q=ETtoday+房產雲+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－住展",
-      "url": "https://news.google.com/rss/search?q=住展+雙北+桃園+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+      "url": "https://news.google.com/rss/search?q=住展+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+    },
+    {
+      "name": "Google News－工商時報",
+      "url": "https://news.google.com/rss/search?q=工商時報+房市+預售屋+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
     },
     {
       "name": "Google News－房市政策與貸款",
