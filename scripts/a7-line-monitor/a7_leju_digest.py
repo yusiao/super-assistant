@@ -2258,12 +2258,62 @@ def summarize_infrastructure_sentence(text: str, city: str, keywords: list[str])
     return summarize_article_text(text, max_sentences=1)[:120]
 
 
+def classify_infrastructure_action(text: str) -> tuple[str, int]:
+    action_groups = [
+        ("動工/開工", 100, ("動工", "開工", "施工", "開挖", "興建")),
+        ("通車/啟用", 95, ("通車", "啟用", "完工", "試營運", "營運")),
+        ("招商/設廠", 90, ("招商", "設廠", "進駐", "擴建", "投資", "簽約")),
+        ("核定/通過", 85, ("核定", "通過", "審議通過", "拍板", "定案", "定讞", "決議")),
+        ("宣布/發布", 80, ("宣布", "發布", "提出", "啟動", "爭取")),
+        ("規劃/送審", 60, ("規劃", "評估", "送審", "可行性", "研議", "納入")),
+    ]
+    for label, priority, words in action_groups:
+        if any(word in text for word in words):
+            return label, priority
+    return "新聞提及", 40
+
+
+def classify_infrastructure_category(text: str) -> str:
+    categories = [
+        ("交通", ("捷運", "輕軌", "鐵路", "高鐵", "車站", "交流道", "快速道路", "道路", "橋", "轉運站")),
+        ("產業/就業", ("產業園區", "科學園區", "科技園區", "AI園區", "物流園區", "設廠", "招商", "擴建", "投資")),
+        ("公共服務", ("醫院", "大學", "學校", "社會住宅", "公共建設", "行政中心")),
+        ("商業/人流", ("商場", "百貨", "購物中心", "影城", "商辦", "旅館")),
+        ("都市開發", ("都市更新", "重劃區", "開發案", "區段徵收", "市地重劃")),
+    ]
+    for category, words in categories:
+        if any(word in text for word in words):
+            return category
+    return "重大建設"
+
+
+def explain_infrastructure_property_signal(category: str, action: str) -> str:
+    if category == "交通":
+        base = "交通題材會先反映在站點與通勤圈想像"
+    elif category == "產業/就業":
+        base = "產業題材重點是就業人口、租屋需求與商圈消費"
+    elif category == "公共服務":
+        base = "公共服務會提高生活機能，但房價支撐通常較慢"
+    elif category == "商業/人流":
+        base = "商業設施帶人流與消費題材，但要看實際招商與開幕"
+    elif category == "都市開發":
+        base = "都市開發會拉高土地與預售想像，但也要防開價先行"
+    else:
+        base = "重大建設會先影響區域想像，後續要驗證執行進度"
+
+    if action in ("動工/開工", "通車/啟用", "招商/設廠"):
+        return f"{base}；這類進度比單純規劃更實質。"
+    if action in ("核定/通過", "宣布/發布"):
+        return f"{base}；目前屬題材啟動期，適合追蹤周邊開價是否先反應。"
+    return f"{base}；目前仍偏早期，先列入觀察，不宜直接當成房價支撐。"
+
+
 def get_infrastructure_watch(
     infra_config: dict[str, Any],
     cutoff: datetime,
     max_fetches: int,
     min_article_chars: int,
-) -> tuple[list[dict[str, str]], list[str]]:
+) -> tuple[list[dict[str, Any]], list[str]]:
     if not infra_config.get("enabled", True):
         return [], []
 
@@ -2291,6 +2341,9 @@ def get_infrastructure_watch(
         for city in matched_cities[:2]:
             summary = summarize_infrastructure_sentence(text, city, matched_keywords)
             project_name = extract_infrastructure_name(summary or text, city, matched_keywords)
+            action, priority = classify_infrastructure_action(summary or text)
+            category = classify_infrastructure_category(f"{project_name} {summary}")
+            property_signal = explain_infrastructure_property_signal(category, action)
             key = f"{city}:{project_name}"
             if key in seen:
                 continue
@@ -2302,8 +2355,13 @@ def get_infrastructure_watch(
                     "summary": summary,
                     "keywords": "、".join(matched_keywords[:4]),
                     "source_quality": "已讀內文" if entry.get("text_source") == "article" else "RSS摘要",
+                    "action": action,
+                    "category": category,
+                    "property_signal": property_signal,
+                    "priority": priority,
                 }
             )
+            items.sort(key=lambda item: int(item.get("priority", 0)), reverse=True)
             if len(items) >= max_items:
                 return items, errors
     return items, errors
@@ -2810,6 +2868,17 @@ def format_price_rise_text(previous_status: str, current_status: str) -> str:
     return f"{previous_status or '未標示'} -> {current_status or '未標示'}"
 
 
+def format_infrastructure_watch_line(item: dict[str, Any]) -> str:
+    city = item.get("city", "未標示縣市")
+    action = item.get("action", "新聞提及")
+    category = item.get("category", "重大建設")
+    project = item.get("project", "未擷取到建設名稱")
+    summary = str(item.get("summary", ""))[:72]
+    source_quality = item.get("source_quality", "資料摘要")
+    property_signal = item.get("property_signal", "")
+    return f"  - {city}｜{action}｜{category}｜{project}｜重點：{summary}｜房市判讀：{property_signal}（{source_quality}）"
+
+
 def build_macro_summary(
     areas: list[dict[str, Any]],
     rising_watch: list[dict[str, Any]],
@@ -2824,12 +2893,9 @@ def build_macro_summary(
         lines.append("- 目前可用 A7 區域資料不足，今天先不下 A7 區域結論。")
         infrastructure_items = market_pulse.get("infrastructure_items", []) if market_pulse else []
         if infrastructure_items:
-            lines.append("- 全台重大建設觀察：")
+            lines.append("- 全台重大設施/重大建設宣布：")
             for item in infrastructure_items[:8]:
-                lines.append(
-                    f"  - {item.get('city', '未標示縣市')}｜{item.get('project', '未擷取到建設名稱')}｜"
-                    f"{item.get('summary', '')[:90]}（{item.get('source_quality', '資料摘要')}）"
-                )
+                lines.append(format_infrastructure_watch_line(item))
         return lines
 
     presale_focus_area = max(analysis_areas, key=lambda area: len(area.get("active_presale_projects", [])))
@@ -2905,14 +2971,11 @@ def build_macro_summary(
 
     infrastructure_items = market_pulse.get("infrastructure_items", []) if market_pulse else []
     if infrastructure_items:
-        lines.append("- 全台重大建設觀察：")
+        lines.append("- 全台重大設施/重大建設宣布：")
         for item in infrastructure_items[:8]:
-            lines.append(
-                f"  - {item.get('city', '未標示縣市')}｜{item.get('project', '未擷取到建設名稱')}｜"
-                f"{item.get('summary', '')[:90]}（{item.get('source_quality', '資料摘要')}）"
-            )
+            lines.append(format_infrastructure_watch_line(item))
         lines.append(
-            "- 建設題材判讀：重大建設通常會先影響市場想像與土地/預售開價，但真正支撐房價仍要看動工、通車/完工時程、就業人口與生活機能是否跟上。"
+            "- 建設題材判讀：宣布、核定、動工、招商、通車要分開看；宣布/核定是題材啟動，動工/招商/通車才比較接近實質支撐。若周邊預售開價已先漲，反而要檢查是否題材超前反映。"
         )
 
     if stale_count > 0:

@@ -69,13 +69,13 @@
     "keywords": [
       "重大建設", "公共建設", "交通建設", "捷運", "輕軌", "鐵路", "高鐵", "車站", "交流道",
       "快速道路", "產業園區", "科學園區", "科技園區", "AI園區", "物流園區", "醫院", "大學",
-      "商場", "百貨", "轉運站", "社會住宅", "都市更新", "重劃區", "開發案", "動工", "核定",
-      "通車", "招商", "設廠", "擴建"
+      "商場", "百貨", "轉運站", "社會住宅", "都市更新", "重劃區", "開發案", "宣布", "拍板",
+      "定案", "通過", "規劃", "送審", "動工", "核定", "通車", "招商", "設廠", "擴建"
     ],
     "source_urls": [
       {
         "name": "Google News－全台重大建設",
-        "url": "https://news.google.com/rss/search?q=台灣+重大建設+動工+核定+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+        "url": "https://news.google.com/rss/search?q=台灣+重大建設+宣布+核定+動工+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
       },
       {
         "name": "Google News－交通建設",
@@ -87,7 +87,7 @@
       },
       {
         "name": "Google News－地方建設",
-        "url": "https://news.google.com/rss/search?q=縣市+重大建設+開發案+動工+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
+        "url": "https://news.google.com/rss/search?q=縣市+宣布+重大建設+開發案+規劃+動工+when:7d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
       }
     ]
   }
