@@ -1969,6 +1969,92 @@ button {
   font-size: 0.82rem;
 }
 
+.adult-section {
+  margin-top: 14px;
+}
+
+.adult-output {
+  display: grid;
+  gap: 12px;
+}
+
+.adult-warning {
+  border: 1px solid rgba(176, 62, 50, 0.28);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff7ef;
+}
+
+.adult-warning b {
+  display: block;
+  color: var(--vermillion);
+  font-size: 0.92rem;
+}
+
+.adult-warning p {
+  margin: 5px 0 0;
+  color: var(--charcoal);
+  font-size: 0.8rem;
+  font-weight: 760;
+  line-height: 1.55;
+}
+
+.adult-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.adult-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid #e5ddcf;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf7;
+}
+
+.adult-card header {
+  display: grid;
+  gap: 3px;
+}
+
+.adult-card b {
+  color: var(--charcoal);
+  font-size: 0.94rem;
+}
+
+.adult-card small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.adult-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.adult-chip-list span {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #efeadf;
+  color: var(--charcoal);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.adult-card p {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 0.8rem;
+  font-weight: 740;
+  line-height: 1.55;
+}
+
 .topic-tree-branches {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -3556,7 +3642,8 @@ button {
   .calibration-controls,
   .luck-year-grid,
   .luck-month-grid,
-  .combined-check-grid {
+  .combined-check-grid,
+  .adult-grid {
     grid-template-columns: 1fr;
   }
 

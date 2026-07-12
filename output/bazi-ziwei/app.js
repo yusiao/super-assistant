@@ -634,6 +634,7 @@ const palaceOverviewOutput = document.querySelector("#palace-overview-output");
 const readingOutput = document.querySelector("#reading-output");
 const partnerOutput = document.querySelector("#partner-output");
 const combinedCheckOutput = document.querySelector("#combined-check-output");
+const adultOutput = document.querySelector("#adult-output");
 const chatLog = document.querySelector("#chat-log");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
@@ -1568,6 +1569,134 @@ function baziIntimacyExpressionText(chart) {
     ? "伴侶星也有訊號，代表親密偏好會被正式關係、承諾感或對象特質修正。"
     : "伴侶星不集中時，親密偏好更受日支、合沖與行運場景影響。";
   return `親密表達：八字以食傷看慾望表達、玩心、身體愉悅與創造出口，以印星看安全感與防衛，以伴侶星看關係對象與承諾投射。本盤食傷${output}、印星${print}、伴侶星${relation}。${outputTone}${printTone}${relationTone}${intimacyOrientationNotice()}`;
+}
+
+function chartAge(chart) {
+  const values = chart?.formValues || {};
+  const birth = new Date(Number(values.year), Number(values.month) - 1, Number(values.day));
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const beforeBirthday = now.getMonth() < birth.getMonth()
+    || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate());
+  if (beforeBirthday) age -= 1;
+  return Number.isFinite(age) ? age : 0;
+}
+
+function adultChipList(items) {
+  return `<div class="adult-chip-list">${uniqueItems(items.filter(Boolean)).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>`;
+}
+
+function adultCard(title, subtitle, chips, text) {
+  return `
+    <article class="adult-card">
+      <header>
+        <b>${escapeHtml(title)}</b>
+        <small>${escapeHtml(subtitle)}</small>
+      </header>
+      ${adultChipList(chips)}
+      <p>${escapeHtml(text)}</p>
+    </article>
+  `;
+}
+
+function baziAdultProfile(chart) {
+  const counts = tenGodCounts(chart);
+  const output = (counts["食神"] || 0) + (counts["傷官"] || 0);
+  const print = (counts["正印"] || 0) + (counts["偏印"] || 0);
+  const pressure = (counts["正官"] || 0) + (counts["七殺"] || 0);
+  const wealth = (counts["正財"] || 0) + (counts["偏財"] || 0);
+  const peer = (counts["比肩"] || 0) + (counts["劫財"] || 0);
+  const profile = baziDayMasterProfile(chart);
+  const peach = baziPeachBlossomSignals(chart);
+  const preferences = [];
+  if (output >= 2) preferences.push("玩心與新鮮感", "語言調情", "身體愉悅回饋");
+  if (print >= 2) preferences.push("慢熱安全感", "照顧與被照顧", "熟悉後才打開");
+  if (pressure >= 2) preferences.push("張力與規則感", "被引導或主導感", "高標準挑戰");
+  if (wealth >= 2) preferences.push("感官氛圍", "質感與儀式感", "外在吸引力");
+  if (peer >= 2) preferences.push("平等互撩", "朋友式挑戰", "自主空間");
+  if (!preferences.length) preferences.push("慢慢探索", "先看信任", "依行運觸發");
+  const orientation = peach.length || output >= 2
+    ? "吸引模式較容易被互動感、好奇心與被欣賞感打開；若命主本身就有多元性向或探索意識，這類配置會讓探索感更明顯。"
+    : "吸引模式較慢熱，通常要先有安全、熟悉與穩定相處，才會逐步確認自己真正被什麼人或互動方式吸引。";
+  const text = `八字不能直接判定同性戀、雙性戀或異性戀，但可看親密啟動方式。食傷${output}看慾望表達與玩心，印星${print}看安全感，官殺${pressure}看刺激與規則張力，財星${wealth}看感官與吸引力，比劫${peer}看自主與平等感。${orientation}日主${profile.strength}時，越需要用舒服且可承接的節奏表達偏好。`;
+  return {
+    title: "八字成人訊號",
+    subtitle: "食傷、印星、官殺、財星與桃花",
+    chips: [`食傷${output}`, `印星${print}`, `官殺${pressure}`, `財星${wealth}`, `桃花${peach.length}`],
+    preferences,
+    text,
+  };
+}
+
+function ziweiAdultProfile(chart) {
+  const childPalace = findPalaceByName(chart.astrolabe, "子女宮");
+  const fortunePalace = findPalaceByName(chart.astrolabe, "福德宮");
+  const spousePalace = findPalaceByName(chart.astrolabe, "夫妻宮");
+  const illnessPalace = findPalaceByName(chart.astrolabe, "疾厄宮");
+  const stars = cleanReadingStarNames([
+    ...overviewStarsForPalace(childPalace),
+    ...overviewStarsForPalace(fortunePalace),
+    ...overviewStarsForPalace(spousePalace),
+    ...overviewStarsForPalace(illnessPalace, { includeMajor: false }),
+  ], 18);
+  const has = (names) => stars.some((star) => names.some((name) => star.includes(name)));
+  const preferences = [];
+  if (has(["貪狼", "天姚", "咸池", "紅鸞", "天喜"])) preferences.push("桃花感與調情", "性感氛圍", "被欣賞需求");
+  if (has(["天機", "巨門", "文昌", "文曲"])) preferences.push("腦性吸引", "語言互動", "曖昧拉扯");
+  if (has(["七殺", "破軍", "擎羊", "火星", "鈴星"])) preferences.push("刺激感", "冒險感", "強烈節奏");
+  if (has(["太陰", "天同", "天府", "天梁"])) preferences.push("照顧感", "舒適安全", "慢熱親密");
+  if (has(["廉貞", "化忌", "地空", "地劫"])) preferences.push("禁忌感", "界線拉扯", "需要說清楚");
+  if (!preferences.length) preferences.push("偏好訊號分散", "需看實際互動", "行運觸發較重要");
+  const empty = [
+    spousePalace && !(spousePalace.majorStars || []).length ? "夫妻宮空宮" : "",
+    fortunePalace && !(fortunePalace.majorStars || []).length ? "福德宮空宮" : "",
+  ].filter(Boolean);
+  const text = `紫微成人探索以子女宮看親密表達與身體愉悅，福德宮看享受感與私密想像，夫妻宮看關係投射，疾厄宮看身體感受與壓力反應。${empty.length ? `${empty.join("、")}時要借對宮與三方四正，不可直接斷性向。` : "本盤可先用本宮星曜定調，再合三方四正修正。"}重點星曜為${stars.slice(0, 8).join("、") || "不集中"}。`;
+  return {
+    title: "紫微成人訊號",
+    subtitle: "子女、福德、夫妻、疾厄合看",
+    chips: [
+      childPalace ? `子女：${palaceLabel(childPalace)}` : "子女未定",
+      fortunePalace ? `福德：${palaceLabel(fortunePalace)}` : "福德未定",
+      spousePalace ? `夫妻：${palaceLabel(spousePalace)}` : "夫妻未定",
+      illnessPalace ? `疾厄：${palaceLabel(illnessPalace)}` : "疾厄未定",
+    ],
+    preferences,
+    text,
+  };
+}
+
+function renderAdultSection(chart) {
+  if (!adultOutput) return;
+  const age = chartAge(chart);
+  if (age < 18) {
+    adultOutput.innerHTML = `
+      <div class="adult-warning">
+        <b>未滿 18 歲不提供成人專區分析</b>
+        <p>此區只供成年使用者進行親密關係、自我探索與界線溝通參考。</p>
+      </div>
+    `;
+    return;
+  }
+  const bazi = baziAdultProfile(chart);
+  const ziwei = ziweiAdultProfile(chart);
+  const combinedChips = uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8);
+  adultOutput.innerHTML = `
+    <div class="adult-warning">
+      <b>18+ 提醒</b>
+      <p>命盤不能替任何人判定性向、性別認同或性癖身分；這裡只把八字與紫微轉成親密偏好、吸引模式、界線與安全感的象徵式參考。所有親密互動都應以成年、合意、安全、尊重與隱私為前提。</p>
+    </div>
+    <div class="adult-grid">
+      ${adultCard(bazi.title, bazi.subtitle, [...bazi.chips, ...bazi.preferences.slice(0, 3)], bazi.text)}
+      ${adultCard(ziwei.title, ziwei.subtitle, [...ziwei.chips, ...ziwei.preferences.slice(0, 3)], ziwei.text)}
+      ${adultCard(
+        "綜合辛辣提醒",
+        "性向探索、性癖傾向、界線安全",
+        combinedChips,
+        `若八字與紫微都指向「玩心、新鮮、刺激」，成人偏好可能較重視互動張力與探索感；若同時指向「安全、照顧、慢熱」，則需要信任與穩定框架才會打開。若出現禁忌感、界線拉扯或壓力星，辛辣不代表越界，反而更需要事前溝通、明確同意、安全詞、隱私保護與事後照顧。`
+      )}
+    </div>
+  `;
 }
 
 function baziTopicSupplement(topicKey, chart) {
@@ -4760,6 +4889,19 @@ function chatBaziPartnerAnswer() {
   ].filter(Boolean).join(" ");
 }
 
+function chatAdultAnswer() {
+  if (chartAge(currentChart) < 18) return "未滿 18 歲不提供成人專區分析。";
+  const bazi = baziAdultProfile(currentChart);
+  const ziwei = ziweiAdultProfile(currentChart);
+  return [
+    "成人專區我會用命盤做親密模式與偏好探索，但不能替你判定同性戀、雙性戀、異性戀、性別認同或任何私密身分。",
+    `八字看法：${bazi.text}`,
+    `紫微看法：${ziwei.text}`,
+    `較明顯的偏好方向可先看：${uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8).join("、")}。`,
+    "辛辣可以探索，但前提一定是成年、合意、安全、尊重、隱私與清楚界線。",
+  ].join(" ");
+}
+
 function chatPalaceAnswer(question) {
   const palaceNames = ["命宮", "兄弟宮", "夫妻宮", "子女宮", "財帛宮", "疾厄宮", "遷移宮", "僕役宮", "官祿宮", "田宅宮", "福德宮", "父母宮"];
   const matched = palaceNames.find((name) => question.includes(name.replace("宮", "")) || question.includes(name));
@@ -4775,14 +4917,11 @@ function buildBotAnswer(question) {
   const context = buildPeriodContext(currentChart);
 
   if (isSexualOrientationQuestion(q)) {
-    const detail = activeReadingMethod === "bazi"
-      ? baziIntimacyExpressionText(currentChart)
-      : ziweiIntimacyExpressionText(currentChart, evaluateTopicNetwork("children", currentChart, context));
-    return `我不能用命盤判定一個人是同性戀、雙性戀或異性戀，這類身分應以當事人的自我認同為準。命盤可以看的，是親密需求、關係投射、愉悅感、界線與安全感如何運作。${detail}`;
+    return chatAdultAnswer();
   }
 
   if (isIntimacyQuestion(q)) {
-    return chatTopicAnswer("children");
+    return chatAdultAnswer();
   }
 
   if (/正緣|另一半|伴侶|對象|長相|身材|職業/.test(q)) {
@@ -5903,6 +6042,7 @@ function updateBaziReading() {
   renderBaziLuckTable(currentChart);
   renderBaziPartnerProfile(currentChart);
   renderBaziCalibration();
+  renderAdultSection(currentChart);
   renderCombinedCheck(currentChart);
 }
 
