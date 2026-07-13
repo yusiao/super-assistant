@@ -6117,11 +6117,288 @@ function buildTopicTreeSelfProfile(mode, chart) {
   };
 }
 
+function ratioChip(label, ratio) {
+  return `${label}${percentText(ratio || 0)}`;
+}
+
+function baziTenGodSourceText(chart, gods, fallback = "原局未見明顯落點") {
+  const records = baziTenGodPower(chart).records
+    .filter((record) => gods.includes(record.god))
+    .map((record) => `${record.pillar}${record.source}${record.stem}${record.god}`);
+  return uniqueItems(records).slice(0, 5).join("、") || fallback;
+}
+
+function baziCoreScoreByKey(chart, key) {
+  return baziCoreScores(chart).find((item) => item.key === key) || null;
+}
+
+function baziTopTenGodChips(chart, gods, limit = 3) {
+  const tenGod = baziTenGodPower(chart);
+  return gods
+    .map((god) => ratioChip(god, tenGod.ratios[god]))
+    .sort((first, second) => {
+      const firstValue = Number(first.match(/(\d+)%/)?.[1] || 0);
+      const secondValue = Number(second.match(/(\d+)%/)?.[1] || 0);
+      return secondValue - firstValue;
+    })
+    .slice(0, limit);
+}
+
+function baziTreeBranchDetails(topicKey, chart, period = null) {
+  const base = TOPIC_TREE_BRANCHES.bazi?.[topicKey] || [];
+  const profile = baziDayMasterProfile(chart);
+  const tenGod = baziTenGodPower(chart);
+  const counts = tenGodCounts(chart);
+  const relations = baziRelationAnalysis(chart.pillars || []);
+  const element = elementInsight(chart.elementCounts, TOPIC_CONFIG[topicKey] || TOPIC_CONFIG.property);
+  const timing = baziDecisionTimingProfile(chart);
+  const careerRoles = baziCareerRecommendations(chart, 5);
+  const relationship = baziRelationshipSignal(chart);
+  const peach = baziPeachBlossomSignals(chart);
+  const wealthScore = baziCoreScoreByKey(chart, "wealth");
+  const careerScore = baziCoreScoreByKey(chart, "career");
+  const loveScore = baziCoreScoreByKey(chart, "love");
+  const stabilityScore = baziCoreScoreByKey(chart, "stability");
+  const learningScore = baziCoreScoreByKey(chart, "learning");
+  const outputRatio = (tenGod.ratios["食神"] || 0) + (tenGod.ratios["傷官"] || 0);
+  const wealthRatio = (tenGod.ratios["正財"] || 0) + (tenGod.ratios["偏財"] || 0);
+  const officerRatio = (tenGod.ratios["正官"] || 0) + (tenGod.ratios["七殺"] || 0);
+  const printRatio = (tenGod.ratios["正印"] || 0) + (tenGod.ratios["偏印"] || 0);
+  const peerRatio = (tenGod.ratios["比肩"] || 0) + (tenGod.ratios["劫財"] || 0);
+  const currentPeriod = period || buildBaziPeriodContext(chart);
+  const monthlyGuide = baziMonthlyActionForTopic(topicKey, chart, currentPeriod, profile, tenGod);
+  const details = {
+    property: [
+      {
+        leaves: [
+          ratioChip("正財", tenGod.ratios["正財"]),
+          ratioChip("偏財", tenGod.ratios["偏財"]),
+          ratioChip("食傷", outputRatio),
+          wealthScore ? `承載${wealthScore.score}/100` : "",
+        ],
+        text: `原命局財富來源不是只看「正財、偏財」字樣，而是看財星是否有根、是否被食傷啟動、日主能否承接。本盤財星占比${percentText(wealthRatio)}，其中正財${percentText(tenGod.ratios["正財"])}、偏財${percentText(tenGod.ratios["偏財"])}；落點在${baziTenGodSourceText(chart, ["正財", "偏財"])}。食傷占比${percentText(outputRatio)}，代表能否靠技能、表達、作品、業務或資訊差生財。日主${profile.strength}，${profile.strength === "偏弱" ? "財來時要先看體力、現金流與風險承接，不宜只衝機會。" : "較能主動承接資源，但仍要防比劫分財與過度承諾。"}`
+      },
+      {
+        leaves: [
+          `土${chart.elementCounts?.["土"] || 0}`,
+          ratioChip("財星", wealthRatio),
+          ratioChip("比劫", peerRatio),
+          relations.tensions.length ? `張力${relations.tensions.length}` : "張力低",
+        ],
+        text: `資產承載看財星、土氣、比劫與原局合沖。土在本盤有${chart.elementCounts?.["土"] || 0}點，偏向房產、信用、承載與長期資產底盤；財星占比${percentText(wealthRatio)}，比劫占比${percentText(peerRatio)}。${relations.tensions.length ? `原局見${relations.tensions.slice(0, 3).join("、")}，資產、合約或共同金錢要寫清楚。` : "原局沖刑害破不重，資產規劃較能用穩定紀律累積。"}`
+      },
+      {
+        leaves: [
+          currentPeriod.periodName,
+          monthlyGuide ? `本期${monthlyGuide.score}/100` : "",
+          timing.years?.[0] ? `${timing.years[0].year}${timing.years[0].pillar}` : "",
+        ],
+        text: `時間節奏以原命局為底，再看大運、流年、流月是否引動財星或食傷。${timing.text}${monthlyGuide ? ` 目前${currentPeriod.periodName}對財富主題評分約${monthlyGuide.score}/100，適合做的事是：${monthlyGuide.action}。${monthlyGuide.reason}` : ""}`
+      },
+    ],
+    career: [
+      {
+        leaves: [
+          careerScore ? `事業${careerScore.score}/100` : "",
+          ratioChip("官殺", officerRatio),
+          ratioChip("印星", printRatio),
+          careerRoles[0] || "職業待定",
+        ],
+        text: `職業方向以官殺看責任位置，印星看學歷證照與專業底盤，食傷看作品輸出，財星看變現能力。本盤官殺${percentText(officerRatio)}、印星${percentText(printRatio)}、食傷${percentText(outputRatio)}；最有機會的職業方向是${careerRoles.join("、")}。`
+      },
+      {
+        leaves: [
+          ratioChip("官殺", officerRatio),
+          ratioChip("印星", printRatio),
+          ratioChip("比劫", peerRatio),
+          baziTenGodSourceText(chart, ["正官", "七殺"], "官殺落點不集中"),
+        ],
+        text: `職場結構看權責、貴人、競爭與制度。本盤官殺落點為${baziTenGodSourceText(chart, ["正官", "七殺"])}；印星落點為${baziTenGodSourceText(chart, ["正印", "偏印"])}。${peerRatio >= 0.22 ? "比劫偏有力，合作與競爭都明顯，團隊權責要先切清楚。" : "比劫不算過重，較適合用專業位置與制度資源推進。"}`
+      },
+      {
+        leaves: [
+          currentPeriod.periodName,
+          monthlyGuide ? `本期${monthlyGuide.score}/100` : "",
+          timing.years?.find((year) => year.labels.includes("職位責任"))?.year ? `${timing.years.find((year) => year.labels.includes("職位責任")).year}有職責訊號` : "近年慢累積",
+        ],
+        text: `轉換時機不能只看想不想換，而要看行運是否引動官殺、印星、食傷。${timing.text}${monthlyGuide ? ` 目前${currentPeriod.periodName}對事業主題評分約${monthlyGuide.score}/100，行動建議：${monthlyGuide.action}。` : ""}`
+      },
+    ],
+    marriage: [
+      {
+        leaves: [
+          loveScore ? `吸引${loveScore.score}/100` : "",
+          ratioChip("伴侶星", officerRatio + wealthRatio),
+          peach.length ? `桃花${peach.length}` : "桃花慢熱",
+        ],
+        text: `吸引模式看伴侶星、桃花、日支與食傷表達。本盤${relationship.relationshipText}${peach.length ? `桃花訊號：${peach.join("；")}。` : "四柱桃花未明顯入柱，緣分較需要靠社交場景與主動互動。"}食傷${percentText(outputRatio)}代表相處中的表達、曖昧與玩心。`
+      },
+      {
+        leaves: [
+          `日支${relationship.dayBranch}`,
+          `關係五行${relationship.partnerElement}`,
+          relationship.leadingGods.length ? relationship.leadingGods.join("、") : "關係星分散",
+        ],
+        text: `正緣輪廓以日支、關係星與關係五行定底色。本盤日支為${relationship.dayBranch}，關係五行偏${relationship.partnerElement}；${relationship.leadingGods.length ? `主要關係星是${relationship.leadingGods.map((god) => `${god}${relationship.counts[god]}`).join("、")}。` : "關係星不集中，所以對象特質更要看日支、桃花與行運觸發。"}`
+      },
+      {
+        leaves: [
+          stabilityScore ? `穩定${stabilityScore.score}/100` : "",
+          currentPeriod.periodName,
+          monthlyGuide ? `本期${monthlyGuide.score}/100` : "",
+        ],
+        text: `關係時間看原局吸引與穩定分數，再看行運是否引動伴侶星與日支。本盤${loveScore ? `戀愛吸引${loveScore.score}/100，` : ""}${stabilityScore ? `長期穩定${stabilityScore.score}/100。` : ""}${monthlyGuide ? `${currentPeriod.periodName}姻緣行動分數約${monthlyGuide.score}/100，重點是${monthlyGuide.action}。` : ""}`
+      },
+    ],
+    children: [
+      {
+        leaves: [
+          ratioChip("食神", tenGod.ratios["食神"]),
+          ratioChip("傷官", tenGod.ratios["傷官"]),
+          ratioChip("印星", printRatio),
+        ],
+        text: `子女緣與親子互動看食神、傷官，也看印星是否能提供照顧與教育資源。本盤食神${percentText(tenGod.ratios["食神"])}、傷官${percentText(tenGod.ratios["傷官"])}、印星${percentText(printRatio)}；食傷落點在${baziTenGodSourceText(chart, ["食神", "傷官"])}。`
+      },
+      {
+        leaves: [
+          ratioChip("食傷", outputRatio),
+          learningScore ? `學習${learningScore.score}/100` : "",
+          element.dominant ? `五行強${element.dominant}` : "",
+        ],
+        text: `創造力看食傷輸出與五行流通。本盤食傷總占比${percentText(outputRatio)}，代表作品、表達、才藝、親密互動與子女議題的外放程度；${element.text}`
+      },
+      {
+        leaves: [
+          ratioChip("印星", printRatio),
+          ratioChip("財星", wealthRatio),
+          currentPeriod.periodName,
+        ],
+        text: `教養資源看印星、財星與家庭承載。印星${percentText(printRatio)}代表照護、學習與修復資源；財星${percentText(wealthRatio)}代表現實支出與資源安排。${monthlyGuide ? `${currentPeriod.periodName}子女／作品行動分數約${monthlyGuide.score}/100，適合：${monthlyGuide.action}。` : ""}`
+      },
+    ],
+    health: [
+      {
+        leaves: [
+          `強${element.dominant}`,
+          `弱${element.weak.join("、")}`,
+          `日主${profile.strength}`,
+        ],
+        text: `體質傾向以五行偏盛偏枯、日主強弱、官殺壓力與印星修復來看。本盤五行較強為${element.dominant}，偏弱為${element.weak.join("、")}，日主${profile.strength}；這是保養提醒，不是疾病診斷。`
+      },
+      {
+        leaves: [
+          ratioChip("印星", printRatio),
+          ratioChip("官殺", officerRatio),
+          ratioChip("食傷", outputRatio),
+        ],
+        text: `修復方式看印星能不能補身，官殺壓力會不會緊繃，食傷是否過度輸出。本盤印星${percentText(printRatio)}、官殺${percentText(officerRatio)}、食傷${percentText(outputRatio)}；${printRatio >= 0.22 ? "修復資源較有跡可循，適合建立固定休息、學習與照護節奏。" : "印星不算集中，恢復力需要靠後天作息、睡眠與支持系統補上。"}`
+      },
+      {
+        leaves: [
+          currentPeriod.periodName,
+          monthlyGuide ? `本期${monthlyGuide.score}/100` : "",
+          relations.tensions.length ? `沖刑${relations.tensions.length}` : "結構穩",
+        ],
+        text: `時間提醒看行運是否引動官殺、食傷、沖刑害破。${monthlyGuide ? `${currentPeriod.periodName}健康保養分數約${monthlyGuide.score}/100，建議：${monthlyGuide.action}。${monthlyGuide.caution}` : timing.text}${relations.tensions.length ? ` 原局張力：${relations.tensions.slice(0, 3).join("、")}。` : ""}`
+      },
+    ],
+  };
+  return base.map((branch, index) => ({ ...branch, ...(details[topicKey]?.[index] || {}) }));
+}
+
+function palaceBranchText(chart, palaceName) {
+  const palace = findPalaceByName(chart.astrolabe, palaceName);
+  if (!palace) return `${palaceName}未取得`;
+  const reading = palaceOverviewReading(palace, chart.astrolabe);
+  return {
+    label: palaceLabel(palace),
+    stars: reading.stars,
+    text: `${palaceLabel(palace)}：${reading.text}${reading.note ? ` ${reading.note}。` : ""}`,
+    palace,
+  };
+}
+
+function ziweiTopicBranchDetails(topicKey, chart, context = null) {
+  const base = TOPIC_TREE_BRANCHES.ziwei?.[topicKey] || [];
+  const network = evaluateTopicNetwork(topicKey, chart, context || buildPeriodContext(chart));
+  const flying = ziweiFlyingAnalysis(topicKey, chart, context || buildPeriodContext(chart), network);
+  const primary = network.baseEvaluations?.[0] || network.evaluations?.[0];
+  const monthText = context?.periodName || "原局";
+  const details = {
+    property: [
+      (() => {
+        const wealth = palaceBranchText(chart, "財帛宮");
+        return {
+          leaves: [wealth.label, `主星：${wealth.stars}`, network.supportStars.length ? `助力${network.supportStars.slice(0, 2).join("、")}` : "助力星不集中"],
+          text: `財帛路線不是只看財帛宮名稱，而是看本宮星曜、三方四正與四化。${wealth.text}${network.pressureStars.length ? `壓力星見${network.pressureStars.slice(0, 4).join("、")}，收入與投資要先控風險。` : "壓力星不算集中，較適合用紀律把收入留住。"}`
+        };
+      })(),
+      (() => {
+        const property = palaceBranchText(chart, "田宅宮");
+        return {
+          leaves: [property.label, `主星：${property.stars}`, flying.tags?.[0] || "飛星待展開"],
+          text: `房產與資產要看田宅宮，不只看財富大類。${property.text}${flying.conclusion ? `飛星結論：${flying.conclusion}` : ""}`
+        };
+      })(),
+      {
+        leaves: [monthText, `分數${Math.round(network.score + flying.score)}`, flying.tags?.slice(0, 2).join("、") || "四化不集中"],
+        text: `機會風險以原局財帛、田宅、官祿為底，再疊${monthText}與四化。${ziweiTopicAnalysis(topicKey, chart, context || buildPeriodContext(chart), network)}`
+      },
+    ],
+    career: [
+      (() => {
+        const career = palaceBranchText(chart, "官祿宮");
+        return { leaves: [career.label, `主星：${career.stars}`, primary ? `評分${Math.round(primary.score)}` : ""], text: `事業定位以官祿宮為主。${career.text}` };
+      })(),
+      (() => {
+        const travel = palaceBranchText(chart, "遷移宮");
+        const friends = palaceBranchText(chart, "僕役宮");
+        return { leaves: [travel.label, friends.label, network.supportStars.slice(0, 2).join("、") || "助力不集中"], text: `職場人脈看遷移宮與僕役宮。${travel.text}${friends.text}` };
+      })(),
+      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "變動未強", `分數${Math.round(network.score + flying.score)}`], text: `變動訊號看大限、流年、流月四化是否打到官祿、命身與遷移。${flying.summary || flying.why || "目前飛星訊號不集中，宜看主宮與流運宮位。"}` },
+    ],
+    marriage: [
+      (() => {
+        const spouse = palaceBranchText(chart, "夫妻宮");
+        return { leaves: [spouse.label, `主星：${spouse.stars}`, network.flowerStars.length ? `桃花${network.flowerStars.join("、")}` : "桃花不集中"], text: `伴侶結構以夫妻宮為主，再看對宮與三方四正。${spouse.text}` };
+      })(),
+      { leaves: [network.flowerStars.slice(0, 3).join("、") || "桃花慢熱", network.supportStars.slice(0, 2).join("、") || "助力不集中", network.pressureStars.slice(0, 2).join("、") || "壓力低"], text: `${nativePeachBlossomAnalysis(chart, network, { includeBazi: false }).text}` },
+      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`], text: `關係時間看夫妻宮、命宮、遷移宮與流運四化是否交會。${flying.conclusion || flying.summary || "目前沒有強烈四化交會，關係更看實際社交與相處節奏。"}` },
+    ],
+    children: [
+      (() => {
+        const child = palaceBranchText(chart, "子女宮");
+        return { leaves: [child.label, `主星：${child.stars}`, network.supportStars.slice(0, 2).join("、") || "助力不集中"], text: `子女宮看子女緣、晚輩、作品與親密表達。${child.text}` };
+      })(),
+      { leaves: [network.flowerStars.slice(0, 3).join("、") || "吸引慢熱", network.pressureStars.slice(0, 2).join("、") || "界線壓力低", "不判定性向"], text: `${ziweiIntimacyExpressionText(chart, network)}` },
+      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "事件未強", `分數${Math.round(network.score + flying.score)}`], text: `事件時間看流年、流月是否打到子女宮、福德宮、夫妻宮與田宅宮。${flying.conclusion || "目前事件觸發不算集中，適合先看家庭資源與生活節奏是否準備好。"}` },
+    ],
+    health: [
+      (() => {
+        const illness = palaceBranchText(chart, "疾厄宮");
+        return { leaves: [illness.label, `主星：${illness.stars}`, network.pressureStars.slice(0, 2).join("、") || "壓力不集中"], text: `疾厄訊號以疾厄宮為主，再看命宮、身宮。${illness.text}` };
+      })(),
+      (() => {
+        const fortune = palaceBranchText(chart, "福德宮");
+        return { leaves: [fortune.label, network.pressureStars.slice(0, 3).join("、") || "壓力星少", network.supportStars.slice(0, 2).join("、") || "修復星少"], text: `壓力來源看福德宮、遷移宮與忌星位置。${fortune.text}${network.pressureStars.length ? `壓力星見${network.pressureStars.slice(0, 4).join("、")}。` : ""}` };
+      })(),
+      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`], text: `照護節奏看大限、流年、流月是否引動疾厄、命宮、福德。${flying.conclusion || "目前流運壓力不算集中，適合建立固定作息、檢查與修復節奏。"}` },
+    ],
+  };
+  return base.map((branch, index) => ({ ...branch, ...(details[topicKey]?.[index] || {}) }));
+}
+
+function buildTopicTreeBranches(mode, topicKey, chart, contextOrPeriod) {
+  if (!chart) return TOPIC_TREE_BRANCHES[mode]?.[topicKey] || [];
+  if (mode === "bazi") return baziTreeBranchDetails(topicKey, chart, contextOrPeriod);
+  return ziweiTopicBranchDetails(topicKey, chart, contextOrPeriod);
+}
+
 function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const modeLabel = mode === "bazi" ? "八字" : "紫微斗數";
   const activeTopic = TOPIC_CONFIG[activeTopicKey] || TOPIC_CONFIG.property;
   const activeMeta = TOPIC_MAP_META[activeTopicKey] || TOPIC_MAP_META.property;
-  const branches = TOPIC_TREE_BRANCHES[mode]?.[activeTopicKey] || [];
+  const branches = buildTopicTreeBranches(mode, activeTopicKey, chart, contextOrPeriod);
   const rootLabels = mode === "bazi" ? ["日主", "月令", "格局"] : ["命宮", "身宮", "來因宮"];
   const selfProfile = buildTopicTreeSelfProfile(mode, chart);
   const treeFocus = topicTreeFocus[mode] || "overview";
