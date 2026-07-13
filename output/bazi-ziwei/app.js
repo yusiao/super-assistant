@@ -635,6 +635,13 @@ const readingOutput = document.querySelector("#reading-output");
 const partnerOutput = document.querySelector("#partner-output");
 const combinedCheckOutput = document.querySelector("#combined-check-output");
 const adultOutput = document.querySelector("#adult-output");
+const synastryForm = document.querySelector("#synastry-form");
+const partnerNameInput = document.querySelector("#partner-name");
+const partnerBirthYearSelect = document.querySelector("#partner-birth-year");
+const partnerBirthMonthSelect = document.querySelector("#partner-birth-month");
+const partnerBirthDaySelect = document.querySelector("#partner-birth-day");
+const partnerBirthTimeInput = document.querySelector("#partner-birth-time");
+const synastryOutput = document.querySelector("#synastry-output");
 const chatLog = document.querySelector("#chat-log");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
@@ -732,6 +739,37 @@ function getFormValues() {
   };
 }
 
+function getPartnerFormValues() {
+  const year = Number(partnerBirthYearSelect?.value);
+  const month = Number(partnerBirthMonthSelect?.value);
+  const day = Number(partnerBirthDaySelect?.value);
+  const birthTime = partnerBirthTimeInput?.value;
+  const gender = synastryForm?.querySelector('input[name="partnerGender"]:checked')?.value || "女";
+  if (!year || !month || !day || !birthTime) {
+    throw new Error("請填入對方完整出生日期與時間。");
+  }
+  const [hour, minute] = birthTime.split(":").map(Number);
+  const birthDate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  return {
+    birthDate,
+    birthTime,
+    inputBirthDate: birthDate,
+    inputBirthTime: birthTime,
+    gender,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    timezoneOffset: Number(timezoneOffsetInput?.value ?? 8),
+    longitude: Number(birthLongitudeInput?.value ?? 121.5654),
+    placeName: partnerNameInput?.value.trim() || "對方",
+    useTrueSolarTime: Boolean(trueSolarTimeInput?.checked),
+    daylightSaving: Boolean(daylightSavingInput?.checked),
+    dayBoundaryRule: dayBoundaryRuleSelect?.value === "midnight" ? "midnight" : "zi",
+  };
+}
+
 function dayOfYear(year, month, day) {
   const start = Date.UTC(year, 0, 1);
   const current = Date.UTC(year, month - 1, day);
@@ -795,46 +833,66 @@ function setSelectOptions(select, values, selectedValue, formatLabel) {
   }));
 }
 
-function updateBirthDayOptions() {
-  const year = Number(birthYearSelect.value);
-  const month = Number(birthMonthSelect.value);
+function updateDateSelectDays(yearSelect, monthSelect, daySelect) {
+  const year = Number(yearSelect?.value);
+  const month = Number(monthSelect?.value);
   if (!year || !month) return;
 
   const lastDay = new Date(year, month, 0).getDate();
-  const selectedDay = Math.min(Number(birthDaySelect.value) || 1, lastDay);
+  const selectedDay = Math.min(Number(daySelect.value) || 1, lastDay);
   setSelectOptions(
-    birthDaySelect,
+    daySelect,
     Array.from({ length: lastDay }, (_, index) => index + 1),
     selectedDay,
     (day) => `${day} 日`,
   );
 }
 
-function initializeBirthDateTime() {
+function initializeDateTimeSelectors(yearSelect, monthSelect, daySelect, timeField, defaults = {}) {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-
+  const year = defaults.year || now.getFullYear();
+  const month = defaults.month || now.getMonth() + 1;
+  const day = defaults.day || now.getDate();
   setSelectOptions(
-    birthYearSelect,
+    yearSelect,
     Array.from({ length: 201 }, (_, index) => 1900 + index),
     year,
     (value) => `${value} 年`,
   );
   setSelectOptions(
-    birthMonthSelect,
+    monthSelect,
     Array.from({ length: 12 }, (_, index) => index + 1),
     month,
     (value) => `${value} 月`,
   );
   setSelectOptions(
-    birthDaySelect,
+    daySelect,
     Array.from({ length: new Date(year, month, 0).getDate() }, (_, index) => index + 1),
     day,
     (value) => `${value} 日`,
   );
-  timeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  if (timeField) {
+    const hour = defaults.hour ?? now.getHours();
+    const minute = defaults.minute ?? now.getMinutes();
+    timeField.value = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  }
+}
+
+function updateBirthDayOptions() {
+  updateDateSelectDays(birthYearSelect, birthMonthSelect, birthDaySelect);
+}
+
+function updatePartnerBirthDayOptions() {
+  updateDateSelectDays(partnerBirthYearSelect, partnerBirthMonthSelect, partnerBirthDaySelect);
+}
+
+function initializeBirthDateTime() {
+  initializeDateTimeSelectors(birthYearSelect, birthMonthSelect, birthDaySelect, timeInput);
+}
+
+function initializePartnerBirthDateTime() {
+  if (!partnerBirthYearSelect) return;
+  initializeDateTimeSelectors(partnerBirthYearSelect, partnerBirthMonthSelect, partnerBirthDaySelect, partnerBirthTimeInput);
 }
 
 function getTimeIndex(hour) {
@@ -1754,6 +1812,334 @@ function renderAdultSection(chart) {
       )}
     </div>
   `;
+}
+
+function pairRuleHit(rules, first, second) {
+  return (rules || []).find((rule) => {
+    if (rule.length < 2) return false;
+    return (rule[0] === first && rule[1] === second) || (rule[0] === second && rule[1] === first);
+  }) || null;
+}
+
+function sameBranchGroup(rules, first, second) {
+  return (rules || []).find((rule) => rule.includes(first) && rule.includes(second)) || null;
+}
+
+function synastryElementScore(firstElement, secondElement) {
+  if (!firstElement || !secondElement) return { score: 0, text: "五行互動不明" };
+  if (firstElement === secondElement) return { score: 7, text: `${firstElement}${secondElement}同氣，容易有熟悉感` };
+  if (ELEMENT_GENERATES[firstElement] === secondElement) return { score: 9, text: `${firstElement}生${secondElement}，命主較容易把能量給到對方` };
+  if (ELEMENT_GENERATES[secondElement] === firstElement) return { score: 9, text: `${secondElement}生${firstElement}，對方較容易滋養命主` };
+  if (ELEMENT_CONTROLS[firstElement] === secondElement) return { score: 2, text: `${firstElement}剋${secondElement}，有現實拉力也有壓迫感` };
+  if (ELEMENT_CONTROLS[secondElement] === firstElement) return { score: 2, text: `${secondElement}剋${firstElement}，容易互相要求或牽制` };
+  return { score: 4, text: "五行互動中性，需靠相處習慣累積默契" };
+}
+
+function synastryBranchSignals(firstBranch, secondBranch) {
+  const supports = [];
+  const tensions = [];
+  let score = 0;
+  if (!firstBranch || !secondBranch) return { supports, tensions, score };
+  if (firstBranch === secondBranch) {
+    supports.push(`日支同為${firstBranch}，生活節奏容易互相看懂`);
+    score += 6;
+  }
+  const combine = pairRuleHit(BRANCH_COMBINATION_RULES, firstBranch, secondBranch);
+  if (combine) {
+    supports.push(`${firstBranch}${secondBranch}六合${combine[2] || ""}，有自然靠近與互補感`);
+    score += 13;
+  }
+  const triad = firstBranch !== secondBranch ? sameBranchGroup(BRANCH_TRIAD_RULES, firstBranch, secondBranch) : null;
+  if (triad) {
+    supports.push(`${firstBranch}${secondBranch}在三合${triad[3]}局內，目標感與情緒流動較容易接上`);
+    score += 9;
+  }
+  const meeting = firstBranch !== secondBranch ? sameBranchGroup(BRANCH_MEETING_RULES, firstBranch, secondBranch) : null;
+  if (meeting) {
+    supports.push(`${firstBranch}${secondBranch}有三會${meeting[3]}勢，生活環境與人際場域容易互相牽動`);
+    score += 7;
+  }
+  const clash = pairRuleHit(BRANCH_CLASH_RULES, firstBranch, secondBranch);
+  if (clash) {
+    tensions.push(`${firstBranch}${secondBranch}沖，吸引與摩擦都會變強，容易一邊靠近一邊拉扯`);
+    score -= 13;
+  }
+  const harm = pairRuleHit(BRANCH_HARM_RULES, firstBranch, secondBranch);
+  if (harm) {
+    tensions.push(`${firstBranch}${secondBranch}害，容易有沒說出口的委屈或誤會`);
+    score -= 7;
+  }
+  const breakRule = pairRuleHit(BRANCH_BREAK_RULES, firstBranch, secondBranch);
+  if (breakRule) {
+    tensions.push(`${firstBranch}${secondBranch}破，承諾、金錢或生活安排要講清楚`);
+    score -= 6;
+  }
+  return { supports, tensions, score };
+}
+
+function synastryBaziPairSignals(firstChart, secondChart) {
+  const firstDay = splitPillar(firstChart.pillars?.[2]);
+  const secondDay = splitPillar(secondChart.pillars?.[2]);
+  const stemCombine = pairRuleHit(STEM_COMBINATION_RULES, firstDay.stem, secondDay.stem);
+  const stemClash = pairRuleHit(STEM_CLASH_RULES, firstDay.stem, secondDay.stem);
+  const branch = synastryBranchSignals(firstDay.branch, secondDay.branch);
+  const element = synastryElementScore(GAN_ELEMENT[firstDay.stem], GAN_ELEMENT[secondDay.stem]);
+  const supports = [...branch.supports];
+  const tensions = [...branch.tensions];
+  let score = 50 + branch.score + element.score;
+  if (stemCombine) {
+    supports.push(`${firstDay.stem}${secondDay.stem}天干合${stemCombine[2]}，互相容易被對方的性格表層吸引`);
+    score += 7;
+  }
+  if (stemClash) {
+    tensions.push(`${firstDay.stem}${secondDay.stem}天干沖，想法、表達或決策節奏容易互相刺激`);
+    score -= 7;
+  }
+  supports.push(element.text);
+  return {
+    score: clampScore(score),
+    supports: uniqueItems(supports),
+    tensions: uniqueItems(tensions),
+    firstDay,
+    secondDay,
+  };
+}
+
+function synastryStarsFor(chart, palaceNames) {
+  return uniqueItems((palaceNames || [])
+    .map((name) => findPalaceByName(chart.astrolabe, name))
+    .flatMap((palace) => allPalaceStars(palace))
+    .map(starPlainName)
+    .filter(Boolean));
+}
+
+function synastryKeywordHits(stars, keywords) {
+  return uniqueItems((stars || []).filter((star) => (keywords || []).some((keyword) => star.includes(keyword))));
+}
+
+function synastryPalaceBranchBonus(sourceChart, targetChart, palaceNames) {
+  const targetBranches = uniqueItems([
+    getLifePalace(targetChart.astrolabe)?.earthlyBranch,
+    getBodyPalace(targetChart.astrolabe)?.earthlyBranch,
+  ].filter(Boolean));
+  const sourceBranches = (palaceNames || [])
+    .map((name) => findPalaceByName(sourceChart.astrolabe, name)?.earthlyBranch)
+    .filter(Boolean);
+  let score = 0;
+  const reasons = [];
+  sourceBranches.forEach((branch) => {
+    targetBranches.forEach((targetBranch) => {
+      const signal = synastryBranchSignals(branch, targetBranch);
+      if (signal.supports.length) {
+        score += 4;
+        reasons.push(`對方命身落點與你的${branch}宮位有合會感`);
+      }
+      if (signal.tensions.length) score -= 3;
+    });
+  });
+  return { score, reasons: uniqueItems(reasons) };
+}
+
+function synastryFacetInvestment(chart, otherChart, facet) {
+  const counts = tenGodCounts(chart);
+  const dayStem = splitPillar(chart.pillars?.[2]).stem;
+  const otherDayStem = splitPillar(otherChart.pillars?.[2]).stem;
+  const relationGod = getTenGod(dayStem, otherDayStem);
+  const peach = baziPeachBlossomSignals(chart).length;
+  const output = (counts["食神"] || 0) + (counts["傷官"] || 0);
+  const wealth = (counts["正財"] || 0) + (counts["偏財"] || 0);
+  const officer = (counts["正官"] || 0) + (counts["七殺"] || 0);
+  const print = (counts["正印"] || 0) + (counts["偏印"] || 0);
+  const peer = (counts["比肩"] || 0) + (counts["劫財"] || 0);
+  const map = {
+    love: 36 + (["正官", "七殺", "正財", "偏財"].includes(relationGod) ? 16 : 0) + peach * 7 + officer * 3 + wealth * 3 + print * 2,
+    lust: 34 + output * 7 + peach * 8 + (["食神", "傷官", "偏財", "七殺"].includes(relationGod) ? 12 : 0),
+    moneyCareer: 35 + wealth * 6 + officer * 5 + output * 3 + (["正財", "偏財", "正官", "七殺"].includes(relationGod) ? 10 : 0),
+    socialFamily: 35 + print * 6 + peer * 4 + officer * 3 + (["正印", "偏印", "比肩", "劫財"].includes(relationGod) ? 10 : 0),
+  };
+  return clampScore(map[facet] || 50);
+}
+
+function synastryZiweiInvestment(chart, otherChart, facetConfig) {
+  const stars = synastryStarsFor(chart, facetConfig.palaces);
+  const hits = synastryKeywordHits(stars, facetConfig.keywords);
+  const branchBonus = synastryPalaceBranchBonus(chart, otherChart, facetConfig.palaces);
+  return clampScore(38 + hits.length * 7 + branchBonus.score);
+}
+
+function synastryInvestmentLabel(firstValue, secondValue, firstName, secondName) {
+  const diff = firstValue - secondValue;
+  const total = Math.max(1, firstValue + secondValue);
+  const firstPercent = Math.round((firstValue / total) * 100);
+  const secondPercent = 100 - firstPercent;
+  const leader = Math.abs(diff) < 7
+    ? "雙方投入接近"
+    : diff > 0 ? `${firstName}較投入` : `${secondName}較投入`;
+  return { leader, firstPercent, secondPercent };
+}
+
+function synastryAspectTone(score) {
+  if (score >= 82) return "high";
+  if (score >= 66) return "medium";
+  if (score >= 50) return "mixed";
+  return "caution";
+}
+
+function synastryAspectText(key, score, leader, supportText, tensionText) {
+  const opening = {
+    love: "感情面看心動、承諾與日常情緒能否接住。",
+    lust: "肉慾面看身體吸引、曖昧張力與親密節奏。",
+    moneyCareer: "財務事業看兩人能否一起承接責任、資源與職涯野心。",
+    socialFamily: "人際家庭看朋友圈、家人、生活規則與長期磨合。",
+  }[key] || "此面向看雙方互動節奏。";
+  const scoreText = score >= 75
+    ? "此面向默契強，可以主動經營。"
+    : score >= 58
+      ? "此面向有吸引也有磨合，需要把規則講清楚。"
+      : "此面向摩擦較明顯，適合慢慢驗證，不宜靠熱度硬推。";
+  return `${opening}${scoreText}${leader}。${supportText}${tensionText}`;
+}
+
+function buildSynastryAnalysis(firstChart, secondChart, secondName = "對方") {
+  const firstName = "命主";
+  const baziPair = synastryBaziPairSignals(firstChart, secondChart);
+  const facets = [
+    {
+      key: "love",
+      label: "感情",
+      palaces: ["夫妻宮", "福德宮", "命宮"],
+      keywords: ["紅鸞", "天喜", "天姚", "咸池", "貪狼", "太陰", "天同", "天梁", "文昌", "文曲"],
+      base: 52,
+    },
+    {
+      key: "lust",
+      label: "肉慾",
+      palaces: ["子女宮", "福德宮", "夫妻宮", "疾厄宮"],
+      keywords: ["貪狼", "廉貞", "天姚", "咸池", "紅鸞", "火星", "鈴星", "七殺", "破軍", "文曲"],
+      base: 50,
+    },
+    {
+      key: "moneyCareer",
+      label: "財務事業",
+      palaces: ["財帛宮", "官祿宮", "田宅宮", "遷移宮"],
+      keywords: ["武曲", "天府", "紫微", "天相", "祿存", "化祿", "左輔", "右弼", "文昌", "文曲"],
+      base: 51,
+    },
+    {
+      key: "socialFamily",
+      label: "人際家庭",
+      palaces: ["父母宮", "兄弟宮", "僕役宮", "田宅宮", "福德宮"],
+      keywords: ["天同", "天梁", "天府", "太陰", "左輔", "右弼", "天魁", "天鉞", "天相"],
+      base: 50,
+    },
+  ];
+  const aspects = facets.map((facet) => {
+    const firstBaziInvest = synastryFacetInvestment(firstChart, secondChart, facet.key);
+    const secondBaziInvest = synastryFacetInvestment(secondChart, firstChart, facet.key);
+    const firstZiweiInvest = synastryZiweiInvestment(firstChart, secondChart, facet);
+    const secondZiweiInvest = synastryZiweiInvestment(secondChart, firstChart, facet);
+    const firstInvest = clampScore(firstBaziInvest * 0.56 + firstZiweiInvest * 0.44);
+    const secondInvest = clampScore(secondBaziInvest * 0.56 + secondZiweiInvest * 0.44);
+    const investment = synastryInvestmentLabel(firstInvest, secondInvest, firstName, secondName);
+    const firstStars = synastryKeywordHits(synastryStarsFor(firstChart, facet.palaces), facet.keywords);
+    const secondStars = synastryKeywordHits(synastryStarsFor(secondChart, facet.palaces), facet.keywords);
+    const sharedStars = uniqueItems(firstStars.filter((star) => secondStars.some((other) => other === star || other.includes(star) || star.includes(other))));
+    const investmentBalance = 16 - Math.min(16, Math.abs(firstInvest - secondInvest) * 0.45);
+    const starScore = Math.min(16, (firstStars.length + secondStars.length) * 2.2 + sharedStars.length * 3);
+    const score = clampScore(facet.base + (baziPair.score - 50) * 0.42 + starScore + investmentBalance - Math.max(0, baziPair.tensions.length - 1) * 3);
+    const supports = uniqueItems([
+      ...baziPair.supports.slice(0, 2),
+      firstStars.length ? `${firstName}${facet.label}星曜：${firstStars.slice(0, 4).join("、")}` : "",
+      secondStars.length ? `${secondName}${facet.label}星曜：${secondStars.slice(0, 4).join("、")}` : "",
+      sharedStars.length ? `共同訊號：${sharedStars.slice(0, 3).join("、")}` : "",
+    ].filter(Boolean));
+    const tensions = uniqueItems(baziPair.tensions.slice(0, 3));
+    const supportText = supports.length ? `加分點：${supports.join("；")}。` : "";
+    const tensionText = tensions.length ? `注意：${tensions.join("；")}。` : "";
+    return {
+      ...facet,
+      score,
+      tone: synastryAspectTone(score),
+      firstInvest,
+      secondInvest,
+      investment,
+      supports,
+      tensions,
+      text: synastryAspectText(facet.key, score, investment.leader, supportText, tensionText),
+    };
+  });
+  const overall = clampScore(aspects.reduce((sum, item) => sum + item.score, 0) / aspects.length);
+  return {
+    firstName,
+    secondName,
+    overall,
+    baziPair,
+    aspects,
+    summary: overall >= 78
+      ? "整體合盤分數高，兩人有明顯互相牽動與可經營性。"
+      : overall >= 62
+        ? "整體合盤中上，有吸引力也有磨合點，適合用清楚承諾與生活規則把關係做穩。"
+        : overall >= 48
+          ? "整體合盤偏混合，短期吸引可能存在，但長期要看溝通、金錢與家人界線能否落地。"
+          : "整體合盤壓力偏高，不代表不能相處，但需要更慢、更清楚、更尊重差異。",
+  };
+}
+
+function renderSynastryAspectCard(aspect, firstName, secondName) {
+  return `
+    <article class="synastry-aspect-card" data-tone="${escapeHtml(aspect.tone)}">
+      <div class="synastry-aspect-head">
+        <div class="score-ring" style="--score: ${aspect.score}">
+          <strong>${aspect.score}</strong>
+          <span>/100</span>
+        </div>
+        <div>
+          <b>${escapeHtml(aspect.label)}</b>
+          <small>${escapeHtml(aspect.investment.leader)}</small>
+        </div>
+      </div>
+      <div class="synastry-investment">
+        <div class="synastry-investment-row">
+          <span>${escapeHtml(firstName)}</span>
+          <div><i style="width:${aspect.investment.firstPercent}%"></i></div>
+          <b>${aspect.investment.firstPercent}%</b>
+        </div>
+        <div class="synastry-investment-row">
+          <span>${escapeHtml(secondName)}</span>
+          <div><i style="width:${aspect.investment.secondPercent}%"></i></div>
+          <b>${aspect.investment.secondPercent}%</b>
+        </div>
+      </div>
+      <p>${escapeHtml(aspect.text)}</p>
+    </article>
+  `;
+}
+
+function renderSynastryResult(result) {
+  if (!synastryOutput) return;
+  synastryOutput.dataset.hasResult = "true";
+  synastryOutput.innerHTML = `
+    <div class="synastry-hero" data-tone="${escapeHtml(synastryAspectTone(result.overall))}">
+      <div class="score-ring" style="--score: ${result.overall}">
+        <strong>${result.overall}</strong>
+        <span>/100</span>
+      </div>
+      <div>
+        <b>整體合盤分數</b>
+        <p>${escapeHtml(result.summary)} 八字日柱基礎分為 ${result.baziPair.score}；四大面向會再加入紫微宮位與雙方投入度。</p>
+      </div>
+    </div>
+    <div class="synastry-aspect-grid">
+      ${result.aspects.map((aspect) => renderSynastryAspectCard(aspect, result.firstName, result.secondName)).join("")}
+    </div>
+    <p class="synastry-note">合盤是關係傾向分析，不是命定結果；分數越高代表互相牽動與可經營性越高，分數較低則代表需要更清楚的界線、溝通與時間驗證。</p>
+  `;
+}
+
+function renderSynastryError(message) {
+  if (!synastryOutput) return;
+  synastryOutput.dataset.hasResult = "";
+  synastryOutput.innerHTML = `<p class="synastry-empty">${escapeHtml(message)}</p>`;
 }
 
 function baziTopicSupplement(topicKey, chart) {
@@ -5869,7 +6255,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
           </g>
           ${treeBranchesHtml}
           ${fruitHtml}
-          <text class="tree-mode-label" x="250" y="28" text-anchor="middle">${escapeHtml(modeLabel)}</text>
+          <text class="tree-mode-label ${topicSelected || selfSelected ? "is-hidden" : ""}" x="250" y="28" text-anchor="middle">${escapeHtml(modeLabel)}</text>
         </svg>
         <div class="topic-tree-caption">
           <strong>點樹幹看命主人格，點樹葉切換主題</strong>
@@ -7137,19 +7523,12 @@ function clearError() {
   errorMessage.textContent = "";
 }
 
-function calculate() {
-  clearError();
-
+function buildChartFromValues(values) {
   if (!window.Solar || !window.iztro?.astro) {
     throw new Error("排盤函式庫尚未載入。");
   }
 
-  const formValues = normalizeBirthMoment(getFormValues());
-  const nextCalibrationSignature = `${formValues.inputBirthDate}|${formValues.inputBirthTime}|${formValues.birthDate}|${formValues.birthTime}|${formValues.dayBoundaryRule}`;
-  if (calibrationChartSignature && calibrationChartSignature !== nextCalibrationSignature) {
-    baziCalibrationEvents = [];
-  }
-  calibrationChartSignature = nextCalibrationSignature;
+  const formValues = normalizeBirthMoment(values);
   const solar = Solar.fromYmdHms(
     formValues.year,
     formValues.month,
@@ -7176,7 +7555,7 @@ function calculate() {
   const naYin = [eightChar.getYearNaYin(), eightChar.getMonthNaYin(), eightChar.getDayNaYin(), eightChar.getTimeNaYin()];
   const elementCounts = countElements(pillars);
 
-  currentChart = {
+  return {
     astrolabe,
     elementCounts,
     formValues,
@@ -7186,6 +7565,18 @@ function calculate() {
     pillars,
     timeIndex,
   };
+}
+
+function calculate() {
+  clearError();
+
+  currentChart = buildChartFromValues(getFormValues());
+  const { astrolabe, elementCounts, formValues, lunar, naYin, timeIndex } = currentChart;
+  const nextCalibrationSignature = `${formValues.inputBirthDate}|${formValues.inputBirthTime}|${formValues.birthDate}|${formValues.birthTime}|${formValues.dayBoundaryRule}`;
+  if (calibrationChartSignature && calibrationChartSignature !== nextCalibrationSignature) {
+    baziCalibrationEvents = [];
+  }
+  calibrationChartSignature = nextCalibrationSignature;
   partnerImageState = {
     status: "idle",
     imageUrl: "",
@@ -7222,6 +7613,9 @@ function calculate() {
   renderDecadalOptions(astrolabe, formValues);
   setActiveReadingMethod(activeReadingMethod);
   updateReading();
+  if (synastryOutput?.dataset.hasResult === "true") {
+    renderSynastryError("命主命盤已更新，請重新按「開始合盤」取得新的合盤結果。");
+  }
 }
 
 form.addEventListener("submit", (event) => {
@@ -7246,6 +7640,25 @@ form.querySelectorAll('input[name="gender"]').forEach((input) => {
 
 [birthYearSelect, birthMonthSelect].forEach((select) => {
   select.addEventListener("change", updateBirthDayOptions);
+});
+
+[partnerBirthYearSelect, partnerBirthMonthSelect].filter(Boolean).forEach((select) => {
+  select.addEventListener("change", updatePartnerBirthDayOptions);
+});
+
+synastryForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  try {
+    if (!currentChart) {
+      renderSynastryError("請先完成命主排盤，再輸入對方資料合盤。");
+      return;
+    }
+    const partnerChart = buildChartFromValues(getPartnerFormValues());
+    const result = buildSynastryAnalysis(currentChart, partnerChart, partnerNameInput?.value.trim() || "對方");
+    renderSynastryResult(result);
+  } catch (error) {
+    renderSynastryError(error.message || "合盤時發生錯誤。");
+  }
 });
 [
   scopeSelect,
@@ -7421,4 +7834,5 @@ document.addEventListener("keydown", (event) => {
 });
 
 initializeBirthDateTime();
+initializePartnerBirthDateTime();
 seedChat();

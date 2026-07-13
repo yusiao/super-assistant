@@ -1739,6 +1739,10 @@ button {
   font-size: 15px;
 }
 
+.tree-mode-label.is-hidden {
+  opacity: 0;
+}
+
 .topic-tree-svg-branch:hover .tree-branch-line,
 .topic-tree-svg-branch:focus-visible .tree-branch-line {
   stroke: var(--jade);
@@ -1970,6 +1974,170 @@ button {
 .topic-tree-self-card > b {
   color: var(--charcoal);
   font-size: 0.82rem;
+}
+
+.synastry-section {
+  margin-top: 14px;
+}
+
+.synastry-form {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) minmax(220px, 1.4fr) minmax(120px, 0.8fr) minmax(150px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid #e5ddcf;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf7;
+}
+
+.synastry-form .select-field {
+  min-width: 0;
+}
+
+.synastry-gender-field {
+  margin: 0;
+  min-height: 43px;
+}
+
+.synastry-output {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.synastry-empty,
+.synastry-note {
+  margin: 0;
+  border: 1px dashed #d9d0c1;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf7;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 760;
+  line-height: 1.6;
+}
+
+.synastry-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(24, 107, 90, 0.2);
+  border-radius: 8px;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(24, 107, 90, 0.1), rgba(205, 163, 83, 0.12)), #fffdf7;
+}
+
+.synastry-hero b {
+  display: block;
+  color: var(--charcoal);
+  font-size: 1rem;
+}
+
+.synastry-hero p {
+  margin: 5px 0 0;
+  color: #44504a;
+  font-size: 0.82rem;
+  font-weight: 760;
+  line-height: 1.6;
+}
+
+.synastry-aspect-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.synastry-aspect-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid #e5ddcf;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf7;
+}
+
+.synastry-aspect-card[data-tone="high"] {
+  border-color: rgba(24, 107, 90, 0.36);
+}
+
+.synastry-aspect-card[data-tone="caution"] {
+  border-color: rgba(176, 62, 50, 0.36);
+  background: #fff7ef;
+}
+
+.synastry-aspect-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.synastry-aspect-head b {
+  display: block;
+  color: var(--charcoal);
+  font-size: 0.96rem;
+}
+
+.synastry-aspect-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--vermillion);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.synastry-investment {
+  display: grid;
+  gap: 6px;
+}
+
+.synastry-investment-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 36px;
+  gap: 7px;
+  align-items: center;
+}
+
+.synastry-investment-row span,
+.synastry-investment-row b {
+  color: var(--charcoal);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.synastry-investment-row b {
+  color: var(--muted);
+  text-align: right;
+}
+
+.synastry-investment-row div {
+  height: 8px;
+  border-radius: 999px;
+  background: #eee8dc;
+  overflow: hidden;
+}
+
+.synastry-investment-row i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--jade);
+}
+
+.synastry-investment-row + .synastry-investment-row i {
+  background: var(--vermillion);
+}
+
+.synastry-aspect-card p {
+  margin: 0;
+  color: #44504a;
+  font-size: 0.8rem;
+  font-weight: 740;
+  line-height: 1.6;
 }
 
 .adult-section {
@@ -3646,6 +3814,8 @@ button {
   .luck-year-grid,
   .luck-month-grid,
   .combined-check-grid,
+  .synastry-form,
+  .synastry-aspect-grid,
   .adult-grid {
     grid-template-columns: 1fr;
   }

@@ -343,6 +343,55 @@
             </details>
           </section>
 
+          <details class="synastry-section collapsible-section">
+            <summary>
+              <span>
+                <b>雙人合盤</b>
+                <small>滿分 100 分，感情、肉慾、財務事業、人際家庭四面向比較</small>
+              </span>
+            </summary>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Synastry</p>
+                <h2>雙人合盤</h2>
+              </div>
+              <span class="section-note">先排命主，再輸入對方資料；合盤會顯示四大面向與誰比較投入</span>
+            </div>
+            <form id="synastry-form" class="synastry-form">
+              <label class="select-field">
+                <span>對方稱呼</span>
+                <input id="partner-name" type="text" maxlength="20" value="對方" />
+              </label>
+              <label class="select-field">
+                <span>對方出生日期</span>
+                <div class="birth-date-selects" role="group" aria-label="對方出生日期">
+                  <select id="partner-birth-year" aria-label="對方出生年份" required></select>
+                  <select id="partner-birth-month" aria-label="對方出生月份" required></select>
+                  <select id="partner-birth-day" aria-label="對方出生日期" required></select>
+                </div>
+              </label>
+              <label class="select-field">
+                <span>對方出生時間</span>
+                <input id="partner-birth-time" type="time" step="60" required />
+              </label>
+              <fieldset class="segmented-field synastry-gender-field">
+                <legend>對方性別</legend>
+                <label>
+                  <input type="radio" name="partnerGender" value="女" checked />
+                  <span>女</span>
+                </label>
+                <label>
+                  <input type="radio" name="partnerGender" value="男" />
+                  <span>男</span>
+                </label>
+              </fieldset>
+              <button class="primary-button" type="submit">開始合盤</button>
+            </form>
+            <div id="synastry-output" class="synastry-output">
+              <p class="synastry-empty">輸入對方資料後，會用八字與紫微斗數綜合比較兩人的吸引力、肉慾張力、財務事業合作、人際家庭磨合。</p>
+            </div>
+          </details>
+
           <details class="adult-section collapsible-section">
             <summary>
               <span>
