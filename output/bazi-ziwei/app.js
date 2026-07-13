@@ -645,8 +645,8 @@ let currentChart = null;
 let ziweiImageType = "sanhe";
 let activeReadingMethod = "bazi";
 let topicTreeFocus = {
-  bazi: "topic",
-  ziwei: "topic",
+  bazi: "overview",
+  ziwei: "overview",
 };
 let topicFruitFocus = {
   bazi: { topicKey: null, index: null },
@@ -1615,15 +1615,36 @@ function baziAdultProfile(chart) {
   if (wealth >= 2) preferences.push("感官氛圍", "質感與儀式感", "外在吸引力");
   if (peer >= 2) preferences.push("平等互撩", "朋友式挑戰", "自主空間");
   if (!preferences.length) preferences.push("慢慢探索", "先看信任", "依行運觸發");
-  const orientation = peach.length || output >= 2
-    ? "吸引模式較容易被互動感、好奇心與被欣賞感打開；若命主本身就有多元性向或探索意識，這類配置會讓探索感更明顯。"
-    : "吸引模式較慢熱，通常要先有安全、熟悉與穩定相處，才會逐步確認自己真正被什麼人或互動方式吸引。";
-  const text = `八字不能直接判定同性戀、雙性戀或異性戀，但可看親密啟動方式。食傷${output}看慾望表達與玩心，印星${print}看安全感，官殺${pressure}看刺激與規則張力，財星${wealth}看感官與吸引力，比劫${peer}看自主與平等感。${orientation}日主${profile.strength}時，越需要用舒服且可承接的節奏表達偏好。`;
+  const flexibleAttraction = peach.length || output >= 2 || peer >= 2;
+  const orientation = flexibleAttraction
+    ? "性向吸引：不適合直接貼同性、雙性或異性標籤；命盤呈現的是對氣氛、聰明互動、被欣賞感與曖昧張力很敏感，若本人本來就有多元探索傾向，會更容易被不同性別氣質的人吸引。"
+    : "性向吸引：偏向慢熱與安全型，不是看到外型就立刻啟動；通常要先有信任、熟悉感與穩定互動，才會確認自己是否真的被對方吸引。";
+  const kink = [
+    output >= 2 ? "性癖偏好：喜歡有玩心、語言挑逗、情境感、曖昧拉扯，親密時需要有回饋感與互動感。" : "",
+    pressure >= 2 ? "性癖偏好：容易被規則、角色感、主導與被主導、禁忌邊界帶來刺激，但必須先講清楚界線。" : "",
+    wealth >= 2 ? "性癖偏好：感官派，容易被氣味、光線、衣料、身體線條、質感場景點燃。" : "",
+    print >= 2 ? "性癖偏好：需要被安撫、被照顧、慢慢升溫，事後照顧與安全感比刺激本身更重要。" : "",
+  ].filter(Boolean).join(" ");
+  const bodyShape = chart.formValues.gender === "男"
+    ? pressure + wealth >= 3
+      ? "性器官輪廓：男性器象徵偏厚實、有存在感，興奮反應受自信與掌控感影響；身體線條較適合結實、肩背或骨架感明顯的描述。"
+      : output + peer >= 3
+        ? "性器官輪廓：男性器象徵偏纖長、反應快，親密時對語言、節奏與互動回饋敏感；身形較偏俐落、有少年感或運動感。"
+        : "性器官輪廓：男性器象徵偏中等、重視舒適與穩定發揮；身體魅力不走誇張路線，靠乾淨感、氣味與熟悉感加分。"
+    : wealth + print >= 3
+      ? "性器官輪廓：女性私密處象徵偏柔潤、包覆感與敏感度較明顯；胸臀與腰胯線條較容易成為身體魅力焦點。"
+      : output + pressure >= 3
+        ? "性器官輪廓：女性私密處象徵偏緊緻、敏感點集中，興奮反應受語言、張力與節奏牽動；身形較偏俐落、有曲線但不厚重。"
+        : "性器官輪廓：女性私密處象徵偏自然、耐受度與安全感連動；身體魅力偏乾淨、親近、越熟越有吸引力。";
+  const text = `${orientation} ${kink || "性癖偏好：訊號較分散，會隨伴侶、情境與當期運勢被引動。"} ${bodyShape} 日主${profile.strength}，越需要用自己承接得住的節奏表達慾望。`;
   return {
-    title: "八字成人訊號",
-    subtitle: "食傷、印星、官殺、財星與桃花",
+    title: "八字成人輪廓",
+    subtitle: "吸引、性癖、身體感受",
     chips: [`食傷${output}`, `印星${print}`, `官殺${pressure}`, `財星${wealth}`, `桃花${peach.length}`],
     preferences,
+    orientation,
+    kink: kink || "性癖偏好：訊號較分散，會隨伴侶、情境與當期運勢被引動。",
+    bodyShape,
     text,
   };
 }
@@ -1651,10 +1672,32 @@ function ziweiAdultProfile(chart) {
     spousePalace && !(spousePalace.majorStars || []).length ? "夫妻宮空宮" : "",
     fortunePalace && !(fortunePalace.majorStars || []).length ? "福德宮空宮" : "",
   ].filter(Boolean);
-  const text = `紫微成人探索以子女宮看親密表達與身體愉悅，福德宮看享受感與私密想像，夫妻宮看關係投射，疾厄宮看身體感受與壓力反應。${empty.length ? `${empty.join("、")}時要借對宮與三方四正，不可直接斷性向。` : "本盤可先用本宮星曜定調，再合三方四正修正。"}重點星曜為${stars.slice(0, 8).join("、") || "不集中"}。`;
+  const orientation = has(["貪狼", "天姚", "咸池", "紅鸞", "天喜", "文昌", "文曲"])
+    ? `性向吸引：容易被有魅力、有美感、有話題感的人吸住，重點不一定是對方性別，而是對方能否帶來心動、想像與互動火花。${empty.length ? "空宮訊號讓吸引對象更不能用單一標籤硬切。" : ""}`
+    : has(["太陰", "天同", "天府", "天梁"])
+      ? "性向吸引：偏向溫柔、安全、能照顧情緒的人；比起強烈刺激，更容易被穩定陪伴、身體舒適度與被理解感打開。"
+      : "性向吸引：外在標籤不是重點，真正被啟動的是對方的氣場、互動節奏與是否能讓你放下防備。";
+  const kink = [
+    has(["天機", "巨門", "文昌", "文曲"]) ? "性癖偏好：腦性吸引很強，容易被文字、聲音、挑逗對話、曖昧攻防點燃。" : "",
+    has(["七殺", "破軍", "擎羊", "火星", "鈴星"]) ? "性癖偏好：刺激感、冒險感、速度感較明顯，容易喜歡有張力或略帶危險感的情境。" : "",
+    has(["貪狼", "廉貞", "天姚", "咸池"]) ? "性癖偏好：性感氛圍、身體展示、被看見、被渴望會放大慾望。" : "",
+    has(["太陰", "天同", "天府"]) ? "性癖偏好：觸覺、依偎、香氣、柔軟材質與慢慢升溫很重要。" : "",
+  ].filter(Boolean).join(" ");
+  const bodyShape = chart.formValues.gender === "男"
+    ? has(["七殺", "破軍", "火星", "鈴星", "擎羊"])
+      ? "性器官輪廓：男性器象徵偏硬挺、反應快、受刺激與挑戰感牽動；身形較適合精實、肌肉線條或骨架明顯。"
+      : has(["太陰", "天同", "天府", "天梁"])
+        ? "性器官輪廓：男性器象徵偏穩定、耐性與舒適感強；身形不一定誇張，但有溫度、厚度與可依靠感。"
+        : "性器官輪廓：男性器象徵偏中等至纖長，魅力來自節奏、語言與氣場，而不是單純尺寸。"
+    : has(["貪狼", "廉貞", "天姚", "咸池", "紅鸞"])
+      ? "性器官輪廓：女性私密處象徵偏敏感、濕潤度與反應感較明顯；胸臀曲線、腰線、皮膚觸感容易成為性感焦點。"
+      : has(["太陰", "天同", "天府", "天梁"])
+        ? "性器官輪廓：女性私密處象徵偏柔軟、包覆感與舒適度強；身形較容易呈現柔和、圓潤或溫柔的性感。"
+        : "性器官輪廓：女性私密處象徵偏緊緻、反應受情緒與安全感影響；身形魅力偏乾淨、俐落、越互動越有味道。";
+  const text = `${orientation} ${kink || "性癖偏好：訊號較內斂，重點會落在實際伴侶是否能引出放心與興奮。"} ${bodyShape} 重點星曜為${stars.slice(0, 8).join("、") || "不集中"}。`;
   return {
-    title: "紫微成人訊號",
-    subtitle: "子女、福德、夫妻、疾厄合看",
+    title: "紫微成人輪廓",
+    subtitle: "吸引、性癖、身體氣場",
     chips: [
       childPalace ? `子女：${palaceLabel(childPalace)}` : "子女未定",
       fortunePalace ? `福德：${palaceLabel(fortunePalace)}` : "福德未定",
@@ -1662,6 +1705,9 @@ function ziweiAdultProfile(chart) {
       illnessPalace ? `疾厄：${palaceLabel(illnessPalace)}` : "疾厄未定",
     ],
     preferences,
+    orientation,
+    kink: kink || "性癖偏好：訊號較內斂，重點會落在實際伴侶是否能引出放心與興奮。",
+    bodyShape,
     text,
   };
 }
@@ -1684,16 +1730,27 @@ function renderAdultSection(chart) {
   adultOutput.innerHTML = `
     <div class="adult-warning">
       <b>18+ 提醒</b>
-      <p>命盤不能替任何人判定性向、性別認同或性癖身分；這裡只把八字與紫微轉成親密偏好、吸引模式、界線與安全感的象徵式參考。所有親密互動都應以成年、合意、安全、尊重與隱私為前提。</p>
+      <p>以下只做成年使用者的私密偏好探索，不替任何人判定性向、性別認同或生理條件。所有親密互動都必須成年、合意、安全、尊重隱私。</p>
     </div>
     <div class="adult-grid">
-      ${adultCard(bazi.title, bazi.subtitle, [...bazi.chips, ...bazi.preferences.slice(0, 3)], bazi.text)}
-      ${adultCard(ziwei.title, ziwei.subtitle, [...ziwei.chips, ...ziwei.preferences.slice(0, 3)], ziwei.text)}
+      ${adultCard("性向與吸引對象", "吸引類型與可能探索方向", ["吸引模式", ...combinedChips.slice(0, 4)], `${bazi.orientation} ${ziwei.orientation}`)}
       ${adultCard(
-        "綜合辛辣提醒",
-        "性向探索、性癖傾向、界線安全",
+        "性癖與親密偏好",
+        "辛辣互動、刺激來源、情境偏好",
         combinedChips,
-        `若八字與紫微都指向「玩心、新鮮、刺激」，成人偏好可能較重視互動張力與探索感；若同時指向「安全、照顧、慢熱」，則需要信任與穩定框架才會打開。若出現禁忌感、界線拉扯或壓力星，辛辣不代表越界，反而更需要事前溝通、明確同意、安全詞、隱私保護與事後照顧。`
+        `${bazi.kink} ${ziwei.kink}`
+      )}
+      ${adultCard(
+        "性器官與身體輪廓",
+        "形狀感、敏感度、身體魅力",
+        [chart.formValues.gender === "男" ? "男性器輪廓" : "女性私密輪廓", "敏感度", "身體線條", "性感焦點"],
+        `${bazi.bodyShape} ${ziwei.bodyShape}`
+      )}
+      ${adultCard(
+        "界線與安全",
+        "成人合意、隱私、事後照顧",
+        ["成年", "合意", "安全詞", "隱私"],
+        "如果偏好裡出現禁忌、支配、被支配、展示、刺激或高張力，不代表可以越界；真正適合的是先講清楚可接受與不可接受的事，保留停止權，並重視事後照顧。"
       )}
     </div>
   `;
@@ -4893,12 +4950,14 @@ function chatAdultAnswer() {
   if (chartAge(currentChart) < 18) return "未滿 18 歲不提供成人專區分析。";
   const bazi = baziAdultProfile(currentChart);
   const ziwei = ziweiAdultProfile(currentChart);
+  const combinedChips = uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8).join("、");
   return [
-    "成人專區我會用命盤做親密模式與偏好探索，但不能替你判定同性戀、雙性戀、異性戀、性別認同或任何私密身分。",
-    `八字看法：${bazi.text}`,
-    `紫微看法：${ziwei.text}`,
-    `較明顯的偏好方向可先看：${uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8).join("、")}。`,
-    "辛辣可以探索，但前提一定是成年、合意、安全、尊重、隱私與清楚界線。",
+    "成人專區可以講得辛辣一點，但不能替你判定同性戀、雙性戀、異性戀、性別認同或生理條件。",
+    `性向與吸引：${bazi.orientation} ${ziwei.orientation}`,
+    `性癖偏好：${bazi.kink} ${ziwei.kink}`,
+    `性器官與身體輪廓：${bazi.bodyShape} ${ziwei.bodyShape}`,
+    `最明顯的偏好關鍵字：${combinedChips || "需要看實際伴侶與當期運勢觸發"}。`,
+    "所有成人互動都要成年、合意、安全、有停止權，也要保護隱私。",
   ].join(" ");
 }
 
@@ -5679,41 +5738,47 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const branches = TOPIC_TREE_BRANCHES[mode]?.[activeTopicKey] || [];
   const rootLabels = mode === "bazi" ? ["日主", "月令", "格局"] : ["命宮", "身宮", "來因宮"];
   const selfProfile = buildTopicTreeSelfProfile(mode, chart);
-  const selfSelected = topicTreeFocus[mode] === "self";
-  const activeBranches = selfSelected ? selfProfile.branches : branches;
+  const treeFocus = topicTreeFocus[mode] || "overview";
+  const selfSelected = treeFocus === "self";
+  const topicSelected = treeFocus === "topic";
+  const activeBranches = selfSelected ? selfProfile.branches : topicSelected ? branches : [];
   const fruitFocus = topicFruitFocus[mode] || {};
-  const selectedFruitIndex = !selfSelected && fruitFocus.topicKey === activeTopicKey
+  const selectedFruitIndex = topicSelected && !selfSelected && fruitFocus.topicKey === activeTopicKey
     ? Number(fruitFocus.index)
     : null;
   const selectedBranch = Number.isInteger(selectedFruitIndex) && activeBranches[selectedFruitIndex]
     ? activeBranches[selectedFruitIndex]
     : null;
-  const currentMark = selectedBranch ? String(selectedFruitIndex + 1) : selfSelected ? selfProfile.mark : activeMeta.mark;
+  const currentMark = selectedBranch
+    ? String(selectedFruitIndex + 1)
+    : selfSelected ? selfProfile.mark : topicSelected ? activeMeta.mark : "樹";
   const currentLabel = selectedBranch
     ? `${activeTopic.label} · ${selectedBranch.label}`
-    : selfSelected ? selfProfile.label : activeTopic.label;
+    : selfSelected ? selfProfile.label : topicSelected ? activeTopic.label : "主題樹";
   const currentHint = selectedBranch
     ? selectedBranch.leaves.join("、")
-    : selfSelected ? selfProfile.hint : activeMeta.hint;
+    : selfSelected ? selfProfile.hint : topicSelected ? activeMeta.hint : "點一團樹冠展開大類；再點同一團可收回。";
   const fruitLayout = [[150, 92], [250, 92], [350, 92]];
-  const treeBranchOrder = [
-    ...TOPIC_ORDER.filter((topicKey) => topicKey !== activeTopicKey),
-    activeTopicKey,
-  ];
+  const treeBranchOrder = topicSelected
+    ? [
+      ...TOPIC_ORDER.filter((topicKey) => topicKey !== activeTopicKey),
+      activeTopicKey,
+    ]
+    : TOPIC_ORDER;
   const treeBranchesHtml = treeBranchOrder.map((topicKey) => {
     const topic = TOPIC_CONFIG[topicKey];
     const meta = TOPIC_MAP_META[topicKey];
     const layout = TOPIC_TREE_LAYOUT[topicKey];
-    const active = !selfSelected && topicKey === activeTopicKey;
+    const active = topicSelected && !selfSelected && topicKey === activeTopicKey;
     const displayCx = active ? 250 : layout.cx;
     const displayCy = active ? 208 : layout.cy;
     const branchPath = active ? "M250 338 C250 292 250 246 250 210" : layout.branch;
-    const clumpScale = active ? 1.5 : 1.08;
+    const clumpScale = active ? 1.5 : 0.82;
     const ariaLabel = `${modeLabel}${topic.label}主題`;
     return `
       <g class="topic-tree-svg-branch ${active ? "is-active" : ""}" data-topic-map="${escapeHtml(mode)}" data-topic-key="${escapeHtml(topicKey)}" tabindex="0" role="button" aria-label="${escapeHtml(ariaLabel)}" aria-pressed="${String(active)}">
         <path class="tree-branch-line" d="${branchPath}" />
-        <ellipse class="tree-leaf-hit" cx="${displayCx}" cy="${displayCy}" rx="${active ? 116 : 82}" ry="${active ? 86 : 58}" />
+        <ellipse class="tree-leaf-hit" cx="${displayCx}" cy="${displayCy}" rx="${active ? 116 : 58}" ry="${active ? 86 : 44}" />
         <g class="tree-category-clump" transform="translate(${displayCx} ${displayCy}) rotate(${active ? 0 : (layout.rotate || 0)}) scale(${clumpScale})">
           <ellipse class="tree-clump-shadow" cx="2" cy="22" rx="74" ry="28" />
           <circle class="tree-clump-puff puff-a" cx="-48" cy="-5" r="38" />
@@ -5735,7 +5800,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
       </g>
     `;
   }).join("");
-  const fruitHtml = selfSelected ? "" : activeBranches.map((branch, index) => {
+  const fruitHtml = topicSelected && !selfSelected ? activeBranches.map((branch, index) => {
     const [x, y] = fruitLayout[index] || [180 + (index - 1) * 34, 92];
     const fruitSelected = selectedFruitIndex === index;
     const labelChars = [...branch.label];
@@ -5757,7 +5822,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
         </text>
       </g>
     `;
-  }).join("");
+  }).join("") : "";
   const selfDetailHtml = selfSelected ? `
     <div class="topic-tree-self-details">
       ${selfProfile.branches.map((branch) => `
@@ -5837,7 +5902,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
             </span>
           </summary>
           <div class="topic-tree-subbranches">
-            ${activeBranches.map((branch, index) => `
+            ${activeBranches.length ? activeBranches.map((branch, index) => `
               <details class="topic-tree-subbranch" data-topic-fruit-panel="${index}">
                 <summary>
                   <span class="topic-tree-fruit-index">${index + 1}</span>
@@ -5848,7 +5913,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
                 </div>
                 ${branch.text ? `<p class="topic-tree-branch-text">${escapeHtml(branch.text)}</p>` : ""}
               </details>
-            `).join("")}
+            `).join("") : `<p class="topic-tree-branch-text">先點樹幹看命主人格，或點任一團樹冠展開主題果實。</p>`}
           </div>
         </details>
       </div>
@@ -7246,8 +7311,9 @@ function selectTopicMapTarget(topicMapButton) {
   const topicKey = topicMapButton.dataset.topicKey;
   const mode = topicMapButton.dataset.topicMap;
   if (!TOPIC_CONFIG[topicKey]) return false;
-  topicTreeFocus[mode] = "topic";
-  topicFruitFocus[mode] = { topicKey, index: null };
+  const alreadyOpen = topicTreeFocus[mode] === "topic" && topicFruitFocus[mode]?.topicKey === topicKey;
+  topicTreeFocus[mode] = alreadyOpen ? "overview" : "topic";
+  topicFruitFocus[mode] = alreadyOpen ? { topicKey: null, index: null } : { topicKey, index: null };
   if (mode === "bazi" && baziTopicSelect) {
     baziTopicSelect.value = topicKey;
     updateBaziReading();
@@ -7263,8 +7329,9 @@ function selectTopicMapTarget(topicMapButton) {
 
 function selectTopicSelfTarget(selfButton) {
   const mode = selfButton?.dataset.topicSelf;
-  if (!mode || !topicTreeFocus[mode]) return false;
-  topicTreeFocus[mode] = "self";
+  if (!mode || !(mode in topicTreeFocus)) return false;
+  const alreadyOpen = topicTreeFocus[mode] === "self";
+  topicTreeFocus[mode] = alreadyOpen ? "overview" : "self";
   topicFruitFocus[mode] = { topicKey: null, index: null };
   if (mode === "bazi") {
     updateBaziReading();
@@ -7283,8 +7350,11 @@ function toggleTopicFruitTarget(fruitButton) {
   const mode = tree?.dataset.topicTreeMode;
   const topicKey = tree?.dataset.topicTreeKey;
   if (!mode || !TOPIC_CONFIG[topicKey] || !Number.isInteger(index)) return false;
+  const alreadyOpen = topicTreeFocus[mode] === "topic"
+    && topicFruitFocus[mode]?.topicKey === topicKey
+    && Number(topicFruitFocus[mode]?.index) === index;
   topicTreeFocus[mode] = "topic";
-  topicFruitFocus[mode] = { topicKey, index };
+  topicFruitFocus[mode] = { topicKey, index: alreadyOpen ? null : index };
   if (mode === "bazi") {
     updateBaziReading();
     return true;

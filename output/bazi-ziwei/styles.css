@@ -1549,10 +1549,13 @@ button {
   pointer-events: none;
 }
 
-.topic-tree-svg-branch.is-active .tree-leaf-hit,
 .topic-tree-svg-branch.is-active .tree-branch-line,
 .topic-tree-svg-branch.is-active .tree-category-clump {
   pointer-events: none;
+}
+
+.topic-tree-svg-branch.is-active .tree-leaf-hit {
+  pointer-events: all;
 }
 
 .tree-clump-shadow {
