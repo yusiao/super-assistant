@@ -1924,6 +1924,72 @@ button {
   font-size: 0.98rem;
 }
 
+.topic-tree-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.topic-tree-title-row b {
+  display: inline;
+}
+
+.topic-tree-method-hint {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  z-index: 8;
+}
+
+.topic-tree-method-hint summary {
+  display: inline-grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  background: var(--charcoal);
+  color: #fffdf7;
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+  box-shadow: 0 6px 14px rgba(29, 28, 24, 0.18);
+}
+
+.topic-tree-method-hint summary::-webkit-details-marker {
+  display: none;
+}
+
+.topic-tree-method-hint p {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(310px, 74vw);
+  margin: 0;
+  border-radius: 8px;
+  padding: 10px 11px;
+  background: #1f201c;
+  color: #fffdf7;
+  font-size: 0.76rem;
+  font-weight: 760;
+  line-height: 1.55;
+  box-shadow: 0 16px 34px rgba(21, 20, 18, 0.28);
+}
+
+.topic-tree-subbranch > .topic-tree-method-hint {
+  display: grid;
+  justify-items: start;
+  margin: 0 10px 10px;
+}
+
+.topic-tree-subbranch > .topic-tree-method-hint p {
+  position: static;
+  width: auto;
+  margin-top: 8px;
+}
+
 .topic-tree-current small {
   display: block;
   margin-top: 2px;
@@ -3161,6 +3227,142 @@ button {
   line-height: 1.55;
 }
 
+.partner-output {
+  min-width: 0;
+}
+
+.partner-main {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.82fr) minmax(0, 1.18fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.partner-visual,
+.partner-copy,
+.generated-portrait-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.generated-portrait-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf7;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.partner-ai-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(72vh, 620px);
+  border-radius: 8px;
+  object-fit: contain;
+  background: #efe8db;
+}
+
+.partner-caption,
+.ai-image-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.ai-image-status.error {
+  color: var(--vermillion);
+}
+
+.ai-image-status.ready {
+  color: var(--jade);
+}
+
+.portrait-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.portrait-actions button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--charcoal);
+  color: #fffdf7;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.portrait-actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.partner-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.partner-copy h3 {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.partner-cell {
+  min-width: 0;
+  border: 1px solid #ece5d8;
+  border-radius: 8px;
+  padding: 9px;
+  background: #fff;
+}
+
+.partner-cell span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.partner-cell strong {
+  display: block;
+  color: var(--charcoal);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.partner-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.partner-list li {
+  color: #44504a;
+  font-size: 0.78rem;
+  line-height: 1.58;
+}
+
 .reading-side {
   display: grid;
   align-content: start;
@@ -3816,8 +4018,18 @@ button {
   .combined-check-grid,
   .synastry-form,
   .synastry-aspect-grid,
+  .partner-main,
+  .partner-grid,
   .adult-grid {
     grid-template-columns: 1fr;
+  }
+
+  .partner-ai-image {
+    max-height: min(68vh, 520px);
+  }
+
+  .generated-portrait-card {
+    padding: 10px;
   }
 
   .topic-tree-branch::before {
@@ -3856,6 +4068,18 @@ button {
 
   .topic-tree-current b {
     font-size: 0.92rem;
+  }
+
+  .topic-tree-method-hint p {
+    position: fixed;
+    right: 12px;
+    bottom: 14px;
+    left: 12px;
+    top: auto;
+    width: auto;
+    max-height: 38vh;
+    overflow: auto;
+    font-size: 0.74rem;
   }
 
   .topic-tree-current small {

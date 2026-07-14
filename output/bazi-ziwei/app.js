@@ -6318,71 +6318,169 @@ function palaceBranchText(chart, palaceName) {
   };
 }
 
+function ziweiCompactStars(branch, fallback = "未見明顯主星") {
+  return branch?.stars || fallback;
+}
+
+function ziweiSignalSummary(network, flying, options = {}) {
+  const support = network.supportStars.length
+    ? `助力在${network.supportStars.slice(0, options.supportLimit || 2).join("、")}`
+    : "助力星不集中";
+  const pressure = network.pressureStars.length
+    ? `壓力在${network.pressureStars.slice(0, options.pressureLimit || 2).join("、")}`
+    : "壓力星不集中";
+  const flyingTags = flying.tags?.length
+    ? `四化標籤：${flying.tags.slice(0, options.tagLimit || 2).join("、")}`
+    : "四化訊號中等";
+  return `${support}，${pressure}，${flyingTags}`;
+}
+
+function ziweiScoreAction(score, topicKey) {
+  const actionMap = {
+    property: ["可主動整理收入、投資與資產配置", "先保現金流，房產或投資勿衝動"],
+    career: ["適合爭取曝光、調整職務或談新機會", "先穩住現職結構，避免情緒性轉職"],
+    marriage: ["適合增加社交、確認關係節奏", "先處理溝通與界線，感情別急著定案"],
+    children: ["適合安排備孕、作品、晚輩或親密議題", "先補生活秩序與支持系統"],
+    health: ["適合建立檢查、運動與修復節奏", "先降壓、規律作息，避免過度消耗"],
+  };
+  const [positive, cautious] = actionMap[topicKey] || ["可小步推進", "先觀察再決策"];
+  return score >= 1 ? positive : cautious;
+}
+
+function ziweiFlyingMethodHint(topicKey, chart, context, network, flying, focusNames = []) {
+  const topic = TOPIC_CONFIG[topicKey] || TOPIC_CONFIG.property;
+  const causePalace = getCausePalace(chart.astrolabe);
+  const bodyPalace = getBodyPalace(chart.astrolabe);
+  const focusText = focusNames.length ? focusNames.join("、") : palaceListText(network.basePalaces, 5);
+  const tagText = flying.tags?.length
+    ? `此盤目前較明顯的是${flying.tags.slice(0, 5).join("、")}。`
+    : "此盤主題四化交會不算集中。";
+  return [
+    `怎麼飛：先取${topic.label}主宮${focusText}，再看對宮與三方四正。`,
+    "接著依序看生年四化、宮干四化、飛入、飛出、自化、互飛、閉環。",
+    `最後疊${context?.periodName || "大限、流年、流月"}命宮、流月三方四正與祿權科忌交會，才落到事件結論。`,
+    `來因宮${causePalace ? palaceLabel(causePalace) : "未取得"}看事件入口，身宮${bodyPalace ? palaceLabel(bodyPalace) : "未取得"}看承擔位置。${tagText}`,
+  ].join("");
+}
+
 function ziweiTopicBranchDetails(topicKey, chart, context = null) {
   const base = TOPIC_TREE_BRANCHES.ziwei?.[topicKey] || [];
   const network = evaluateTopicNetwork(topicKey, chart, context || buildPeriodContext(chart));
   const flying = ziweiFlyingAnalysis(topicKey, chart, context || buildPeriodContext(chart), network);
   const primary = network.baseEvaluations?.[0] || network.evaluations?.[0];
   const monthText = context?.periodName || "原局";
+  const finalScore = network.score + flying.score;
+  const methodHint = (focusNames = []) => ziweiFlyingMethodHint(topicKey, chart, context || buildPeriodContext(chart), network, flying, focusNames);
   const details = {
     property: [
       (() => {
         const wealth = palaceBranchText(chart, "財帛宮");
         return {
           leaves: [wealth.label, `主星：${wealth.stars}`, network.supportStars.length ? `助力${network.supportStars.slice(0, 2).join("、")}` : "助力星不集中"],
-          text: `財帛路線不是只看財帛宮名稱，而是看本宮星曜、三方四正與四化。${wealth.text}${network.pressureStars.length ? `壓力星見${network.pressureStars.slice(0, 4).join("、")}，收入與投資要先控風險。` : "壓力星不算集中，較適合用紀律把收入留住。"}`
+          text: `結論：${wealth.label}主星為${ziweiCompactStars(wealth)}，財路重點是穩定收入與現金流；${ziweiSignalSummary(network, flying)}。`,
+          methodHint: methodHint(["財帛宮", "官祿宮", "田宅宮"]),
         };
       })(),
       (() => {
         const property = palaceBranchText(chart, "田宅宮");
         return {
           leaves: [property.label, `主星：${property.stars}`, flying.tags?.[0] || "飛星待展開"],
-          text: `房產與資產要看田宅宮，不只看財富大類。${property.text}${flying.conclusion ? `飛星結論：${flying.conclusion}` : ""}`
+          text: `結論：${property.label}主星為${ziweiCompactStars(property)}，房產緣看長期承載與家庭資源；${flying.tags?.[0] || "目前未見強烈單點觸發"}。`,
+          methodHint: methodHint(["田宅宮", "財帛宮", "福德宮"]),
         };
       })(),
       {
         leaves: [monthText, `分數${Math.round(network.score + flying.score)}`, flying.tags?.slice(0, 2).join("、") || "四化不集中"],
-        text: `機會風險以原局財帛、田宅、官祿為底，再疊${monthText}與四化。${ziweiTopicAnalysis(topicKey, chart, context || buildPeriodContext(chart), network)}`
+        text: `結論：${monthText}財富分數約${Math.round(finalScore)}，${ziweiScoreAction(finalScore, topicKey)}。`,
+        methodHint: methodHint(["財帛宮", "田宅宮", "官祿宮", "流月命宮"]),
       },
     ],
     career: [
       (() => {
         const career = palaceBranchText(chart, "官祿宮");
-        return { leaves: [career.label, `主星：${career.stars}`, primary ? `評分${Math.round(primary.score)}` : ""], text: `事業定位以官祿宮為主。${career.text}` };
+        return {
+          leaves: [career.label, `主星：${career.stars}`, primary ? `評分${Math.round(primary.score)}` : ""],
+          text: `結論：${career.label}主星為${ziweiCompactStars(career)}，事業定位先看專業角色、責任感與可累積的舞台。`,
+          methodHint: methodHint(["官祿宮", "命宮", "身宮"]),
+        };
       })(),
       (() => {
         const travel = palaceBranchText(chart, "遷移宮");
         const friends = palaceBranchText(chart, "僕役宮");
-        return { leaves: [travel.label, friends.label, network.supportStars.slice(0, 2).join("、") || "助力不集中"], text: `職場人脈看遷移宮與僕役宮。${travel.text}${friends.text}` };
+        return {
+          leaves: [travel.label, friends.label, network.supportStars.slice(0, 2).join("、") || "助力不集中"],
+          text: `結論：外部機會看${travel.label}，合作資源看${friends.label}；${ziweiSignalSummary(network, flying)}。`,
+          methodHint: methodHint(["遷移宮", "僕役宮", "官祿宮"]),
+        };
       })(),
-      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "變動未強", `分數${Math.round(network.score + flying.score)}`], text: `變動訊號看大限、流年、流月四化是否打到官祿、命身與遷移。${flying.summary || flying.why || "目前飛星訊號不集中，宜看主宮與流運宮位。"}` },
+      {
+        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "變動未強", `分數${Math.round(network.score + flying.score)}`],
+        text: `結論：${monthText}若四化打到官祿、命身或遷移，才會有明顯換工作、升遷或轉型訊號；${ziweiScoreAction(finalScore, topicKey)}。`,
+        methodHint: methodHint(["官祿宮", "命宮", "身宮", "遷移宮"]),
+      },
     ],
     marriage: [
       (() => {
         const spouse = palaceBranchText(chart, "夫妻宮");
-        return { leaves: [spouse.label, `主星：${spouse.stars}`, network.flowerStars.length ? `桃花${network.flowerStars.join("、")}` : "桃花不集中"], text: `伴侶結構以夫妻宮為主，再看對宮與三方四正。${spouse.text}` };
+        return {
+          leaves: [spouse.label, `主星：${spouse.stars}`, network.flowerStars.length ? `桃花${network.flowerStars.join("、")}` : "桃花不集中"],
+          text: `結論：${spouse.label}主星為${ziweiCompactStars(spouse)}，伴侶輪廓先看互動模式、溝通感與關係承諾。`,
+          methodHint: methodHint(["夫妻宮", "福德宮", "遷移宮"]),
+        };
       })(),
-      { leaves: [network.flowerStars.slice(0, 3).join("、") || "桃花慢熱", network.supportStars.slice(0, 2).join("、") || "助力不集中", network.pressureStars.slice(0, 2).join("、") || "壓力低"], text: `${nativePeachBlossomAnalysis(chart, network, { includeBazi: false }).text}` },
-      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`], text: `關係時間看夫妻宮、命宮、遷移宮與流運四化是否交會。${flying.conclusion || flying.summary || "目前沒有強烈四化交會，關係更看實際社交與相處節奏。"}` },
+      {
+        leaves: [network.flowerStars.slice(0, 3).join("、") || "桃花慢熱", network.supportStars.slice(0, 2).join("、") || "助力不集中", network.pressureStars.slice(0, 2).join("、") || "壓力低"],
+        text: `結論：桃花看紅鸞、天喜、咸池等吸引訊號；${network.flowerStars.length ? `此盤桃花點在${network.flowerStars.slice(0, 3).join("、")}` : "此盤桃花不是一眼爆發型"}。`,
+        methodHint: methodHint(["夫妻宮", "子女宮", "福德宮"]),
+      },
+      {
+        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`],
+        text: `結論：${monthText}關係推進看夫妻宮、命宮、遷移宮與流運四化交會；${ziweiScoreAction(finalScore, topicKey)}。`,
+        methodHint: methodHint(["夫妻宮", "命宮", "遷移宮", "流月命宮"]),
+      },
     ],
     children: [
       (() => {
         const child = palaceBranchText(chart, "子女宮");
-        return { leaves: [child.label, `主星：${child.stars}`, network.supportStars.slice(0, 2).join("、") || "助力不集中"], text: `子女宮看子女緣、晚輩、作品與親密表達。${child.text}` };
+        return {
+          leaves: [child.label, `主星：${child.stars}`, network.supportStars.slice(0, 2).join("、") || "助力不集中"],
+          text: `結論：${child.label}主星為${ziweiCompactStars(child)}，子女緣也反映作品、晚輩與親密表達的成熟度。`,
+          methodHint: methodHint(["子女宮", "田宅宮", "福德宮"]),
+        };
       })(),
-      { leaves: [network.flowerStars.slice(0, 3).join("、") || "吸引慢熱", network.pressureStars.slice(0, 2).join("、") || "界線壓力低", "不判定性向"], text: `${ziweiIntimacyExpressionText(chart, network)}` },
-      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "事件未強", `分數${Math.round(network.score + flying.score)}`], text: `事件時間看流年、流月是否打到子女宮、福德宮、夫妻宮與田宅宮。${flying.conclusion || "目前事件觸發不算集中，適合先看家庭資源與生活節奏是否準備好。"}` },
+      {
+        leaves: [network.flowerStars.slice(0, 3).join("、") || "吸引慢熱", network.pressureStars.slice(0, 2).join("、") || "界線壓力低", "不判定性向"],
+        text: `結論：親密表達看子女宮、夫妻宮與福德宮；命盤只能看表達模式與需求張力，不能直接判定性向。`,
+        methodHint: methodHint(["子女宮", "夫妻宮", "福德宮"]),
+      },
+      {
+        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "事件未強", `分數${Math.round(network.score + flying.score)}`],
+        text: `結論：${monthText}子女或作品事件看子女宮、田宅宮與流月四化；${ziweiScoreAction(finalScore, topicKey)}。`,
+        methodHint: methodHint(["子女宮", "田宅宮", "流月命宮"]),
+      },
     ],
     health: [
       (() => {
         const illness = palaceBranchText(chart, "疾厄宮");
-        return { leaves: [illness.label, `主星：${illness.stars}`, network.pressureStars.slice(0, 2).join("、") || "壓力不集中"], text: `疾厄訊號以疾厄宮為主，再看命宮、身宮。${illness.text}` };
+        return {
+          leaves: [illness.label, `主星：${illness.stars}`, network.pressureStars.slice(0, 2).join("、") || "壓力不集中"],
+          text: `結論：${illness.label}主星為${ziweiCompactStars(illness)}，健康先看壓力來源、消耗型態與身心修復能力。`,
+          methodHint: methodHint(["疾厄宮", "命宮", "身宮"]),
+        };
       })(),
       (() => {
         const fortune = palaceBranchText(chart, "福德宮");
-        return { leaves: [fortune.label, network.pressureStars.slice(0, 3).join("、") || "壓力星少", network.supportStars.slice(0, 2).join("、") || "修復星少"], text: `壓力來源看福德宮、遷移宮與忌星位置。${fortune.text}${network.pressureStars.length ? `壓力星見${network.pressureStars.slice(0, 4).join("、")}。` : ""}` };
+        return {
+          leaves: [fortune.label, network.pressureStars.slice(0, 3).join("、") || "壓力星少", network.supportStars.slice(0, 2).join("、") || "修復星少"],
+          text: `結論：${fortune.label}看精神壓力與恢復力；${ziweiSignalSummary(network, flying)}。`,
+          methodHint: methodHint(["福德宮", "疾厄宮", "遷移宮"]),
+        };
       })(),
-      { leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`], text: `照護節奏看大限、流年、流月是否引動疾厄、命宮、福德。${flying.conclusion || "目前流運壓力不算集中，適合建立固定作息、檢查與修復節奏。"}` },
+      {
+        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`],
+        text: `結論：${monthText}健康重點看疾厄、福德與命身是否被四化引動；${ziweiScoreAction(finalScore, topicKey)}。`,
+        methodHint: methodHint(["疾厄宮", "福德宮", "命宮", "流月命宮"]),
+      },
     ],
   };
   return base.map((branch, index) => ({ ...branch, ...(details[topicKey]?.[index] || {}) }));
@@ -6392,6 +6490,16 @@ function buildTopicTreeBranches(mode, topicKey, chart, contextOrPeriod) {
   if (!chart) return TOPIC_TREE_BRANCHES[mode]?.[topicKey] || [];
   if (mode === "bazi") return baziTreeBranchDetails(topicKey, chart, contextOrPeriod);
   return ziweiTopicBranchDetails(topicKey, chart, contextOrPeriod);
+}
+
+function renderTopicTreeMethodHint(hint) {
+  if (!hint) return "";
+  return `
+    <details class="topic-tree-method-hint">
+      <summary aria-label="查看判讀方式" title="查看判讀方式">?</summary>
+      <p>${escapeHtml(hint)}</p>
+    </details>
+  `;
 }
 
 function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
@@ -6546,7 +6654,10 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
         <div class="topic-tree-current ${selectedBranch ? "has-fruit" : ""}">
           <span>${escapeHtml(currentMark)}</span>
           <div>
-            <b>${escapeHtml(currentLabel)}</b>
+            <div class="topic-tree-title-row">
+              <b>${escapeHtml(currentLabel)}</b>
+              ${selectedBranch?.methodHint ? renderTopicTreeMethodHint(selectedBranch.methodHint) : ""}
+            </div>
             <small>${escapeHtml(currentHint)}</small>
             ${selfDetailHtml}
             ${selectedBranch ? `
@@ -6575,6 +6686,7 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
                   ${branch.leaves.map((leaf) => `<span>${escapeHtml(leaf)}</span>`).join("")}
                 </div>
                 ${branch.text ? `<p class="topic-tree-branch-text">${escapeHtml(branch.text)}</p>` : ""}
+                ${branch.methodHint ? renderTopicTreeMethodHint(branch.methodHint) : ""}
               </details>
             `).join("") : `<p class="topic-tree-branch-text">先點樹幹看命主人格，或點任一團樹冠展開主題果實。</p>`}
           </div>
