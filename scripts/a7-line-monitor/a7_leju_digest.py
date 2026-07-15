@@ -2724,6 +2724,60 @@ def summarize_market_article_points(entries: list[dict[str, str]], limit: int = 
     return points
 
 
+def collect_teaching_signal_counts(
+    keyword_counts: dict[str, int],
+    evidence_entries: list[dict[str, str]],
+) -> dict[str, int]:
+    framework_keywords = {
+        "政令/資金": ("房貸", "限貸", "央行", "政策", "利率", "貸款", "信用管制", "選舉", "稅"),
+        "空地/重劃區/供給": ("重劃區", "供給", "庫存", "餘屋", "新案", "待開案", "開案", "預售", "預售屋"),
+        "重大工程": ("重大建設", "公共建設", "交通建設", "捷運", "高鐵", "科學園區", "產業園區", "商場", "百貨", "醫院", "大學"),
+        "預售銷售週期": ("潛銷", "公開", "強銷", "完銷", "早鳥", "訂金", "賞屋", "案場", "來客", "封盤"),
+        "代銷去化/高低點": ("代銷", "去化", "買氣", "交易", "實價", "成交", "讓利", "議價", "低價"),
+        "流動性/持有成本": ("租金", "出租", "投報", "轉手", "流動性", "總價", "自備款", "首付", "管理費", "持有成本"),
+    }
+    combined_text = " ".join(
+        str(entry.get("text", "")) + " " + str(entry.get("summary_text", "")) + " " + str(entry.get("title", ""))
+        for entry in evidence_entries
+    )
+    counts: dict[str, int] = {}
+    for framework, words in framework_keywords.items():
+        count = 0
+        for word in words:
+            count += int(keyword_counts.get(word, 0))
+            count += combined_text.count(word)
+        if count:
+            counts[framework] = count
+    return counts
+
+
+def build_teaching_framework_insights(
+    framework_counts: dict[str, int],
+    top_districts: set[str],
+    line_mode: bool = False,
+) -> list[str]:
+    if not framework_counts:
+        return []
+
+    explanations = {
+        "政令/資金": "講義把政令列為地段上漲三大主因之一；若新聞焦點在限貸、房貸或政策，代表買方槓桿與成交速度會先被影響，預售投資要優先檢查自備款與交屋貸款風險。",
+        "空地/重劃區/供給": "講義把空地與重劃區視為漲幅來源，但供給太多也會壓去化；所以看到新案、待開案或餘屋增加時，要同時判斷是成長題材還是供給壓力。",
+        "重大工程": "講義把重大工程列為地段上漲核心，且政府大型交通建設通常優先於民間商業題材；但宣布、核定、動工、通車的含金量不同，不能混在一起看。",
+        "預售銷售週期": "講義的預售週期重點是潛銷期、公開期、強銷期、完銷期；若出現早鳥、潛銷或案場試水溫，代表價格還在抓抗性，比單純看公開牌價更有用。",
+        "代銷去化/高低點": "講義判斷高低點看供需與代銷去化速度；若新聞反覆提到買氣、去化、讓利或成交，重點不是聲量，而是案場是否需要用價格換速度。",
+        "流動性/持有成本": "講義提醒投資要看保值性、流動性與持有成本；若總價、租金或轉手訊號出現，要回到能不能出租、能不能轉手、每月要倒貼多少來判斷。",
+    }
+    sorted_frameworks = sorted(framework_counts, key=framework_counts.get, reverse=True)
+    limit = 2 if line_mode else 3
+    lines = ["- 教學框架判讀：本段不是看標題熱度，而是用講義的「政令、空地、重大工程、去化、流動性」去篩真正有用訊號。"]
+    for framework in sorted_frameworks[:limit]:
+        lines.append(f"  - {framework}：{explanations[framework]}")
+
+    if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
+        lines.append("  - 對A7的用法：A7要特別把重大工程題材、待開案供給、預售去化速度放在同一張表看；如果題材很熱但去化變慢或讓利增加，就是風險訊號。")
+    return lines
+
+
 def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = False) -> list[str]:
     items = market_pulse.get("items", []) if market_pulse else []
     if not items:
@@ -2760,6 +2814,9 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
         lines.append(f"- 有用訊號：{signal}。正文反覆提到「{topics}」，{group['explanation']}")
 
     top_districts = {str(item.get("district", "")).strip() for item in top_items}
+    framework_counts = collect_teaching_signal_counts(aggregate_keyword_counts, evidence_entries)
+    lines.extend(build_teaching_framework_insights(framework_counts, top_districts, line_mode=line_mode))
+
     if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
         lines.append("- 對你有用的判讀：桃園與A7相關正文訊號若升溫，要同步看預售供給、待開案開價與建商是否用低價或讓利搶客。")
     if {"板橋區", "新莊區", "新店區", "中和區", "三重區", "林口區", "淡水區"} & top_districts:
