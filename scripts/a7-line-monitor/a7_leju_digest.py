@@ -1120,6 +1120,40 @@ def is_weekly_report_due(local_now: datetime, weekly_day: int, weekly_hour: int)
     return is_weekly_report_day(local_now, weekly_day) and local_now.hour >= weekly_hour
 
 
+def get_latest_weekly_schedule(local_now: datetime, weekly_day: int, weekly_hour: int) -> datetime:
+    days_since = (local_now.isoweekday() - weekly_day) % 7
+    scheduled = local_now.replace(hour=weekly_hour, minute=0, second=0, microsecond=0) - timedelta(days=days_since)
+    if scheduled > local_now:
+        scheduled -= timedelta(days=7)
+    return scheduled
+
+
+def get_weekly_report_key(scheduled_at: datetime) -> str:
+    return scheduled_at.strftime("%Y-%m-%dT%H:%M")
+
+
+def test_weekly_report_already_sent(ledger_file: dict[str, Any], task_id: str, weekly_report_key: str) -> bool:
+    return any(
+        entry.get("task_id") == task_id and entry.get("weekly_report_key") == weekly_report_key
+        for entry in ledger_file.get("ledger", [])
+    )
+
+
+def should_send_weekly_report(
+    local_now: datetime,
+    latest_weekly_schedule: datetime,
+    ledger_file: dict[str, Any],
+    task_id: str,
+    weekly_report_key: str,
+    catch_up_hours: int,
+) -> bool:
+    if local_now < latest_weekly_schedule:
+        return False
+    if local_now - latest_weekly_schedule > timedelta(hours=catch_up_hours):
+        return False
+    return not test_weekly_report_already_sent(ledger_file, task_id, weekly_report_key)
+
+
 def format_lifecycle_trend(start_text: str, current_text: str) -> str:
     if not start_text and not current_text:
         return "資料累積中"
@@ -1245,7 +1279,17 @@ def test_ledger_already_ran(ledger_file: dict[str, Any], task_id: str, date_stri
     return any(entry.get("task_id") == task_id and entry.get("date") == date_string for entry in ledger_file.get("ledger", []))
 
 
-def update_ledger(path: Path, ledger_file: dict[str, Any], task_id: str, output_path: Path, local_now: datetime) -> None:
+def update_ledger(
+    path: Path,
+    ledger_file: dict[str, Any],
+    task_id: str,
+    output_path: Path,
+    local_now: datetime,
+    *,
+    line_sent: bool = False,
+    report_kind: str = "",
+    weekly_report_key: str = "",
+) -> None:
     entry = {
         "task_id": task_id,
         "platform": "codex-windows",
@@ -1253,7 +1297,11 @@ def update_ledger(path: Path, ledger_file: dict[str, Any], task_id: str, output_
         "date": local_now.strftime("%Y-%m-%d"),
         "week": f"{local_now.year}-W{local_now.isocalendar().week:02d}",
         "output_path": str(output_path),
+        "line_sent": line_sent,
+        "report_kind": report_kind,
     }
+    if weekly_report_key:
+        entry["weekly_report_key"] = weekly_report_key
     cutoff = local_now - timedelta(days=60)
     kept = []
     for existing in ledger_file.get("ledger", []):
@@ -1955,6 +2003,35 @@ def parse_market_source_entries(
     return entries
 
 
+def parse_market_entry_datetime(entry: dict[str, str]) -> datetime | None:
+    published = str(entry.get("published", "")).strip()
+    if not published:
+        return None
+    try:
+        return parsedate_to_datetime(published)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def is_market_entry_on_or_after(entry: dict[str, str], cutoff: datetime) -> bool:
+    published_at = parse_market_entry_datetime(entry)
+    if published_at is None:
+        return False
+    comparable_cutoff = cutoff
+    if published_at.tzinfo is not None and comparable_cutoff.tzinfo is None:
+        comparable_cutoff = comparable_cutoff.replace(tzinfo=published_at.tzinfo)
+    elif published_at.tzinfo is None and comparable_cutoff.tzinfo is not None:
+        published_at = published_at.replace(tzinfo=comparable_cutoff.tzinfo)
+    return published_at >= comparable_cutoff
+
+
+def get_market_entry_timestamp(entry: dict[str, str]) -> float:
+    published_at = parse_market_entry_datetime(entry)
+    if published_at is None:
+        return 0.0
+    return published_at.timestamp()
+
+
 def get_meta_content(content: str, key: str) -> str:
     patterns = [
         rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
@@ -2333,6 +2410,8 @@ def get_infrastructure_watch(
     items: list[dict[str, str]] = []
     seen: set[str] = set()
     for entry in enriched_entries:
+        if not is_market_entry_on_or_after(entry, cutoff):
+            continue
         text = entry.get("text", "")
         matched_cities = [city for city in cities if city in text]
         matched_keywords = [keyword for keyword in keywords if keyword in text]
@@ -2359,9 +2438,16 @@ def get_infrastructure_watch(
                     "category": category,
                     "property_signal": property_signal,
                     "priority": priority,
+                    "published": entry.get("published", ""),
                 }
             )
-            items.sort(key=lambda item: int(item.get("priority", 0)), reverse=True)
+            items.sort(
+                key=lambda item: (
+                    get_market_entry_timestamp(item),
+                    int(item.get("priority", 0)),
+                ),
+                reverse=True,
+            )
             if len(items) >= max_items:
                 return items, errors
     return items, errors
@@ -2760,21 +2846,21 @@ def build_teaching_framework_insights(
         return []
 
     explanations = {
-        "政令/資金": "講義把政令列為地段上漲三大主因之一；若新聞焦點在限貸、房貸或政策，代表買方槓桿與成交速度會先被影響，預售投資要優先檢查自備款與交屋貸款風險。",
-        "空地/重劃區/供給": "講義把空地與重劃區視為漲幅來源，但供給太多也會壓去化；所以看到新案、待開案或餘屋增加時，要同時判斷是成長題材還是供給壓力。",
-        "重大工程": "講義把重大工程列為地段上漲核心，且政府大型交通建設通常優先於民間商業題材；但宣布、核定、動工、通車的含金量不同，不能混在一起看。",
-        "預售銷售週期": "講義的預售週期重點是潛銷期、公開期、強銷期、完銷期；若出現早鳥、潛銷或案場試水溫，代表價格還在抓抗性，比單純看公開牌價更有用。",
-        "代銷去化/高低點": "講義判斷高低點看供需與代銷去化速度；若新聞反覆提到買氣、去化、讓利或成交，重點不是聲量，而是案場是否需要用價格換速度。",
-        "流動性/持有成本": "講義提醒投資要看保值性、流動性與持有成本；若總價、租金或轉手訊號出現，要回到能不能出租、能不能轉手、每月要倒貼多少來判斷。",
+        "政令/資金": "重點是買方槓桿與交屋貸款風險，不是單純房價新聞。",
+        "空地/重劃區/供給": "重點是待開案與餘屋會不會壓去化，不是區域很熱就一定安全。",
+        "重大工程": "重點是宣布、核定、動工、通車的進度差異，不是有建設題材就照單全收。",
+        "預售銷售週期": "重點是潛銷/早鳥/公開期的試價訊號，不是只看公開牌價。",
+        "代銷去化/高低點": "重點是案場是否用讓利換成交，不是新聞聲量高低。",
+        "流動性/持有成本": "重點是出租、轉手與每月現金流，不是帳面漲幅想像。",
     }
     sorted_frameworks = sorted(framework_counts, key=framework_counts.get, reverse=True)
     limit = 2 if line_mode else 3
-    lines = ["- 教學框架判讀：本段不是看標題熱度，而是用講義的「政令、空地、重大工程、去化、流動性」去篩真正有用訊號。"]
+    lines = ["- 口袋教學判讀：本週只看會影響投資決策的訊號，不把新聞聲量當重點。"]
     for framework in sorted_frameworks[:limit]:
         lines.append(f"  - {framework}：{explanations[framework]}")
 
     if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
-        lines.append("  - 對A7的用法：A7要特別把重大工程題材、待開案供給、預售去化速度放在同一張表看；如果題材很熱但去化變慢或讓利增加，就是風險訊號。")
+        lines.append("  - A7判讀：把重大工程、待開案供給、預售去化放一起看；題材熱但去化慢或讓利增加，就是風險。")
     return lines
 
 
@@ -2783,7 +2869,7 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
     if not items:
         return ["- 本週沒有抓到足夠可判讀的雙北、桃園房市正文訊號；先不要把零星標題當成趨勢。"]
 
-    top_items = items[:3]
+    top_items = items[:5]
     aggregate_keyword_counts: dict[str, int] = {}
     evidence_entries: list[dict[str, str]] = []
     for item in top_items:
@@ -2791,9 +2877,29 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
             aggregate_keyword_counts[keyword] = aggregate_keyword_counts.get(keyword, 0) + int(count)
         evidence_entries.extend(item.get("example_entries", []))
 
+    top_districts = {str(item.get("district", "")).strip() for item in top_items}
+    framework_counts = collect_teaching_signal_counts(aggregate_keyword_counts, evidence_entries)
+    primary_framework = max(framework_counts, key=framework_counts.get) if framework_counts else ""
+    primary_conclusions = {
+        "政令/資金": "本週真正重點是資金面，會先影響成交速度、核貸與交屋風險。",
+        "空地/重劃區/供給": "本週真正重點是供給面，待開案、預售案與餘屋會決定後續開價抗性。",
+        "重大工程": "本週真正重點是地段題材，但要看建設進度，不是看到重大建設就追價。",
+        "預售銷售週期": "本週真正重點是預售銷售週期，潛銷與早鳥訊號比公開牌價更有參考價值。",
+        "代銷去化/高低點": "本週真正重點是去化速度，若讓利或議價變多，代表市場在用價格換成交。",
+        "流動性/持有成本": "本週真正重點是流動性與持有成本，投資出租要回到總價、租金、轉手與現金流。",
+    }
+    action_checks = {
+        "政令/資金": "先檢查自備款、寬限期、交屋貸款與銀行估價，不要只看建案單價。",
+        "空地/重劃區/供給": "先追同區待開案數量、銷售中預售數量與是否出現低開搶客。",
+        "重大工程": "先分辨宣布、核定、動工、招商、通車；越接近動工/通車越有實質支撐。",
+        "預售銷售週期": "先追潛銷價、早鳥成交、開價是否逐批墊高，以及產品是否快速去化。",
+        "代銷去化/高低點": "先追案場來客、成交戶數、讓利幅度與代銷是否改口風。",
+        "流動性/持有成本": "先追租金帶、總價帶、可轉手客群與交屋後每月可能倒貼金額。",
+    }
+
     focus_parts = [
         f"{item.get('district')}（{item.get('mention_count', 0)}次）"
-        for item in top_items
+        for item in top_items[:3]
         if item.get("district")
     ]
     key_topics = sorted(aggregate_keyword_counts, key=aggregate_keyword_counts.get, reverse=True)[:5]
@@ -2806,23 +2912,24 @@ def build_market_pulse_insights(market_pulse: dict[str, Any], line_mode: bool = 
         group["count"] += aggregate_keyword_counts.get(topic, 0)
 
     lines: list[str] = []
+    if primary_framework:
+        lines.append(f"- 本週結論：{primary_conclusions[primary_framework]}")
+        lines.append(f"- 你要追的重點：{action_checks[primary_framework]}")
     if focus_parts:
         lines.append(f"- 本週正文焦點：{'、'.join(focus_parts)}。")
 
-    for signal, group in sorted(signal_groups.items(), key=lambda row: row[1]["count"], reverse=True)[:3]:
+    for signal, group in sorted(signal_groups.items(), key=lambda row: row[1]["count"], reverse=True)[:2]:
         topics = "、".join(group["topics"])
-        lines.append(f"- 有用訊號：{signal}。正文反覆提到「{topics}」，{group['explanation']}")
+        lines.append(f"- 證據訊號：{signal}。正文反覆提到「{topics}」，{group['explanation']}")
 
-    top_districts = {str(item.get("district", "")).strip() for item in top_items}
-    framework_counts = collect_teaching_signal_counts(aggregate_keyword_counts, evidence_entries)
     lines.extend(build_teaching_framework_insights(framework_counts, top_districts, line_mode=line_mode))
 
     if {"A7", "青埔", "龜山區", "桃園區", "中壢區", "大園區", "小檜溪", "藝文特區"} & top_districts:
-        lines.append("- 對你有用的判讀：桃園與A7相關正文訊號若升溫，要同步看預售供給、待開案開價與建商是否用低價或讓利搶客。")
+        lines.append("- A7應用：桃園與A7正文訊號升溫時，不是直接看多；要同步看預售供給、待開案開價、去化與建商是否讓利。")
     if {"板橋區", "新莊區", "新店區", "中和區", "三重區", "林口區", "淡水區"} & top_districts:
-        lines.append("- 對你有用的判讀：新北熱門區若正文提到買氣或價格，會影響桃園買盤的比價基準；桃園價差不夠大時吸引力會下降。")
+        lines.append("- 雙北外溢判讀：新北熱門區若買氣或價格變化，會改變桃園買盤的比價基準；桃園價差不夠大時吸引力會下降。")
     if {"中山區", "大安區", "信義區", "松山區", "內湖區", "南港區", "士林區", "北投區"} & top_districts:
-        lines.append("- 對你有用的判讀：台北市訊號可當景氣溫度計，但不適合直接類比A7；要看它是否造成外溢買盤往桃園移動。")
+        lines.append("- 台北溫度計：台北市訊號可看景氣，但不適合直接類比A7；重點是是否把外溢買盤推往桃園。")
 
     article_points = summarize_market_article_points(evidence_entries, limit=2 if line_mode else 3)
     if article_points:
@@ -3373,6 +3480,7 @@ def main() -> int:
     line_schedule = get_config_value(file_config, "LINE_SCHEDULE", "weekly").strip().lower()
     weekly_report_day = int(get_config_value(file_config, "WEEKLY_REPORT_DAY", "6"))
     weekly_report_hour = int(get_config_value(file_config, "WEEKLY_REPORT_HOUR", "20"))
+    weekly_catch_up_hours = int(get_config_value(file_config, "WEEKLY_CATCH_UP_HOURS", "144"))
     intraday_alerts = get_config_value(file_config, "INTRADAY_ALERTS", "false").strip().lower() in {
         "1",
         "true",
@@ -3431,7 +3539,16 @@ def main() -> int:
     bargain_watch = get_bargain_watch_results(load_bargain_watch_config(bargain_config_path))
     urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
     urgent_bargain_items = get_new_bargain_watch_items(bargain_watch, state)
-    weekly_due = is_weekly_report_due(local_now, weekly_report_day, weekly_report_hour)
+    latest_weekly_schedule = get_latest_weekly_schedule(local_now, weekly_report_day, weekly_report_hour)
+    weekly_report_key = get_weekly_report_key(latest_weekly_schedule)
+    weekly_due = should_send_weekly_report(
+        local_now,
+        latest_weekly_schedule,
+        ledger_file,
+        task_id,
+        weekly_report_key,
+        weekly_catch_up_hours,
+    )
     should_send_line = (
         args.force
         or line_schedule == "daily"
@@ -3477,14 +3594,16 @@ def main() -> int:
     )
     report_path.write_text(report_content + "\n", encoding="utf-8")
     save_state_file(state_path, state, snapshots, local_now, bargain_watch)
-    update_ledger(ledger_path, ledger_file, task_id, report_path, local_now)
 
     if args.dry_run:
         print("Dry run complete.")
+        if weekly_due:
+            print(f"Weekly report due for schedule {weekly_report_key}.")
         print(line_message)
         print(f"Report path: {report_path}")
         return 0
 
+    line_sent = False
     if not args.skip_line and should_send_line:
         if not line_token:
             print("WARNING: LINE token is missing. Report was generated locally, but no LINE message was sent.")
@@ -3493,12 +3612,25 @@ def main() -> int:
                 print("WARNING: LINE_TO is missing for push mode. Report was generated locally, but no LINE message was sent.")
             else:
                 send_line_push(line_token, line_to, line_message)
+                line_sent = True
                 print("LINE push sent successfully.")
         else:
             send_line_broadcast(line_token, line_message)
+            line_sent = True
             print("LINE broadcast sent successfully.")
     elif not args.skip_line:
         print("LINE send skipped: no weekly report, new pending presale, or new 20%-below-market project was detected.")
+
+    update_ledger(
+        ledger_path,
+        ledger_file,
+        task_id,
+        report_path,
+        local_now,
+        line_sent=line_sent,
+        report_kind=report_kind,
+        weekly_report_key=weekly_report_key if weekly_due and line_sent else "",
+    )
 
     print(f"Report written to {report_path}")
     return 0
