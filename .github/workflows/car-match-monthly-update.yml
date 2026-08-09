@@ -1,0 +1,63 @@
+name: Car Match Monthly Vehicle Update
+
+on:
+  schedule:
+    # Day 1 00:30 UTC = day 1 08:30 Asia/Taipei
+    - cron: "30 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: car-match-monthly-update
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      CAR_MATCH_PRUNE: "true"
+      CAR_MATCH_MIN_FETCHED_CARS: "120"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Update Taiwan vehicle catalog
+        run: node scripts/car-match/update-car-data.mjs --prune
+
+      - name: Validate generated JavaScript
+        run: |
+          node --check car-match/app.js
+          node --check car-match/data.js
+
+      - name: Detect catalog changes
+        id: changes
+        run: |
+          if git diff --quiet -- car-match/data.js; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit updated catalog
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "jarvis-drive-bot"
+          git config user.email "jarvis-drive-bot@users.noreply.github.com"
+          git add car-match/data.js
+          git commit -m "chore: monthly update car catalog"
+          git push
+
+      - name: Deploy car matcher to Cloudflare Pages
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 pages deploy car-match --project-name jarvis-drive --branch main --commit-dirty=true
+

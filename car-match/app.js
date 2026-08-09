@@ -296,6 +296,47 @@ function displayColorLabel(chosenColor, preferredColor) {
   return `${labels.color[chosenColor] || "車色"}示意`;
 }
 
+function escapeAttribute(value = "") {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function getCarImageUrl(car) {
+  return car.imageUrl || car.photoUrl || car.image || "";
+}
+
+function normalizeSearchText(value = "") {
+  return String(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u2018\u2019']/g, "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+}
+
+const brandSearchAliases = {
+  "Alfa Romeo": ["alfa", "alpha", "romeo", "alfaromeo", "愛快", "愛快羅密歐", "阿爾法", "阿爾法羅密歐", "阿法羅密歐"]
+};
+
+function getSearchTextForCar(car) {
+  const brand = getBrandName(car);
+  return normalizeSearchText([
+    brand,
+    ...(brandSearchAliases[brand] || []),
+    car.name,
+    car.variant,
+    labels.body[car.body],
+    labels.power[car.power],
+    `${car.seats}人座`
+  ].filter(Boolean).join(" "));
+}
+
 function getCarPrioritySet(car) {
   const brand = getBrandName(car);
   const name = car.name.toLowerCase();
@@ -360,11 +401,11 @@ function renderDataFreshness() {
   const disclaimer = document.querySelector("#catalogDisclaimer");
   if (status && label) {
     status.innerHTML = `<span class="status-dot"></span>`;
-    status.append(`台灣新車資料・每週更新・${label}`);
+    status.append(`台灣新車資料・每月更新・${label}`);
   }
   if (disclaimer) {
     const source = dataMeta.sourceName || "台灣新車目錄";
-    disclaimer.textContent = `收錄範圍：台灣總代理或原廠授權通路公開販售／接單的新乘用車與輕型商用車車系；不含中古車、平行輸入及僅剩歷史網頁的停售車。車款與價格每週自動比對${source}${label ? `，最後更新 ${label}` : ""}。`;
+    disclaimer.textContent = `收錄範圍：台灣總代理或原廠授權通路公開販售／接單的新乘用車與輕型商用車車系；不含中古車、平行輸入及僅剩歷史網頁的停售車。車款與價格每月自動比對${source}${label ? `，最後更新 ${label}` : ""}。`;
   }
 }
 
@@ -526,6 +567,19 @@ function carSvg(car, color, className = "", colorLabel = "車色") {
   </div>`;
 }
 
+function carVisual(car, color, className = "", colorLabel = "車色") {
+  const imageUrl = getCarImageUrl(car);
+  if (!imageUrl) return carSvg(car, color, className, colorLabel);
+
+  const safeUrl = escapeAttribute(imageUrl);
+  const alt = escapeAttribute(`${car.name} 真實車款照片`);
+  return `<figure class="car-photo-frame ${className}">
+    <img src="${safeUrl}" alt="${alt}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.car-photo-frame').classList.add('photo-failed')">
+    ${carSvg(car, color, "photo-fallback", colorLabel)}
+    <figcaption>真實車款圖片來源：車款資料來源頁</figcaption>
+  </figure>`;
+}
+
 function renderWinner(car, profile) {
   const chosenColor = chooseColor(car, profile.color);
   const colorLabel = displayColorLabel(chosenColor, profile.color);
@@ -534,7 +588,7 @@ function renderWinner(car, profile) {
   document.querySelector("#winnerCard").innerHTML = `
     <div class="winner-visual" style="--winner-bg:${accentColors[0]}">
       <div class="match-badge"><b>${car.match}%</b><small>MATCH</small></div>
-      ${carSvg(car, colorHex[chosenColor], "winner-car", colorLabel)}
+      ${carVisual(car, colorHex[chosenColor], "winner-car", colorLabel)}
     </div>
     <div class="winner-info">
       <span class="winner-rank">NO. 01 / BEST MATCH</span>
@@ -554,14 +608,18 @@ function getBrandProfile(car) {
 }
 
 function renderCatalog(query = "") {
-  const needle = query.trim().toLowerCase();
+  const needle = normalizeSearchText(query);
   const grouped = cars.reduce((map, car) => {
     const brand = car.brand || Object.keys(brandProfiles).find(name => car.name.startsWith(name)) || car.name.split(" ")[0];
     if (!map[brand]) map[brand] = [];
     map[brand].push(car);
     return map;
   }, {});
-  const visibleGroups = Object.entries(grouped).filter(([brand, models]) => !needle || brand.toLowerCase().includes(needle) || models.some(car => `${car.name} ${labels.body[car.body]} ${labels.power[car.power]} ${car.seats}人座`.toLowerCase().includes(needle)));
+  const visibleGroups = Object.entries(grouped).filter(([brand, models]) => {
+    if (!needle) return true;
+    const brandText = normalizeSearchText([brand, ...(brandSearchAliases[brand] || [])].join(" "));
+    return brandText.includes(needle) || models.some(car => getSearchTextForCar(car).includes(needle));
+  });
   document.querySelector("#catalogGrid").innerHTML = visibleGroups.sort(([a], [b]) => a.localeCompare(b, "en")).map(([brand, models]) => `
     <details class="catalog-brand" ${needle ? "open" : ""}>
       <summary><b>${brand}</b><span>${models.length} 車系 ＋</span></summary>
@@ -601,12 +659,13 @@ function renderAlternatives(carsToRender, profile) {
   document.querySelector("#alternatives").innerHTML = carsToRender.map((car, index) => {
     const chosenColor = chooseColor(car, profile.color);
     const colorLabel = displayColorLabel(chosenColor, profile.color);
+    const infoLink = getCarInfoLink(car);
     return `<article class="alternative-card">
       <div class="alt-visual" style="--alt-bg:${accentColors[index + 1]}">
         <span class="alt-score">${car.match}% MATCH</span>
-        ${carSvg(car, colorHex[chosenColor], "alt-car", colorLabel)}
+        ${carVisual(car, colorHex[chosenColor], "alt-car", colorLabel)}
       </div>
-      <div class="alt-info"><small>NO. 0${index + 2}</small><h4>${car.name}</h4><span>${car.priceLabel} · ${labels.power[car.power]}</span><p>${car.note}</p></div>
+      <div class="alt-info"><small>NO. 0${index + 2}</small><h4>${car.name}</h4><span>${car.priceLabel} · ${labels.power[car.power]}</span><p>${car.note}</p><a class="alt-official-link" href="${infoLink.url}" target="_blank" rel="noopener">${infoLink.isBrandEntry ? "前往官網確認是否仍販售 ↗" : infoLink.label}</a></div>
     </article>`;
   }).join("");
 }
