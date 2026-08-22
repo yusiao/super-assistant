@@ -12,6 +12,9 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write
+
 jobs:
   run-digest:
     runs-on: [self-hosted, windows, a7-runner]
@@ -30,6 +33,11 @@ jobs:
       WEEKLY_CATCH_UP_HOURS: "144"
       INTRADAY_ALERTS: "false"
       URGENT_PENDING_PRESALE_ALERT: "false"
+      PDF_DELIVERY_ENABLED: "true"
+      REPORT_GITHUB_TOKEN: ${{ github.token }}
+      PDF_RELEASE_TAG: a7-market-reports
+      PDF_LATEST_ASSET_NAME: a7-market-report-latest.pdf
+      PDF_KEEP_DATED_ARCHIVE: "true"
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
       LINE_TO: ${{ secrets.LINE_TO }}
@@ -56,7 +64,7 @@ jobs:
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           python --version
-          python -m pip install --disable-pip-version-check --quiet curl-cffi tzdata
+          python -m pip install --disable-pip-version-check --quiet curl-cffi tzdata reportlab
 
       - name: Run A7 digest
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
