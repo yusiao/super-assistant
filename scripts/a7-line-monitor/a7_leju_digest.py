@@ -4111,6 +4111,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bargain-watch-config-path", default="")
     parser.add_argument("--market-pulse-config-path", default="")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--force-generate", action="store_true")
     parser.add_argument("--skip-line", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--send-prepared-line", default="")
@@ -4204,7 +4205,12 @@ def main() -> int:
     prepared_line_path = report_root / "a7-line-prepared.json"
 
     ledger_file = get_ledger_file(ledger_path)
-    if not args.force and not intraday_alerts and test_ledger_already_ran(ledger_file, task_id, date_string):
+    if (
+        not args.force
+        and not args.force_generate
+        and not intraday_alerts
+        and test_ledger_already_ran(ledger_file, task_id, date_string)
+    ):
         print(f"Task '{task_id}' already ran on {date_string}. Use --force to run again.")
         return 0
 
