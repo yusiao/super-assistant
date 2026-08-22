@@ -5,11 +5,15 @@ Jarvis Price Watch 是通用的商品 / 機票價格追蹤器。它會定時抓�
 ## 支援來源
 
 - 商品頁 HTML：適合你已經知道商品網址的情境。
-- SerpApi Google Shopping：用商品名稱 / 型號搜尋多個賣場，找目前最低價。
-- SerpApi Google Flights：私人版以代表日期抽樣搜尋，並每日輪替追蹤日期。
+- SerpApi Google Shopping：用商品名稱 / 型號搜尋多個賣場；搜尋頁與背景 LINE 監測都會排除月付／分期價、回收／折抵價、二手／整新品、配件與明顯不同型號，再從可比總價找最低價。
+- SerpApi Google Flights：私人版以代表日期抽樣搜尋，頁內顯示航班詳情，並比較經濟艙、豪華經濟艙與商務艙。
 - Skyscanner Indicative Prices：僅在已有商業合作金鑰時啟用，作為完整彈性日期來源。
 - SerpApi Google Flights：保留給固定日期即時搜尋與候選日期複查。
 - 手機網頁：部署後可從 `/price-watch/` 搜尋商品與機票，並加入追蹤。
+- 機場欄位：輸入 `T`、`TP`、`TPE` 這類英文字母時，使用全球 IATA 前綴索引搜尋所有符合機場；輸入繁體中文地名時使用地點搜尋。下拉顯示縮寫、繁體機場名、英文名與國家，結果很多時先顯示前 50 筆並提示繼續輸入縮寫。
+- 機票篩選：可選全部、廉價航空或傳統航空，以及全部、直達或轉乘。搜尋期間顯示分階段進度條與已等待秒數。
+- 購票連結：航班卡保留完整頁內資訊，另提供航空公司官網、Skyscanner、Trip.com 與追蹤按鈕；第三方網址會帶入出發地、目的地及日期。
+- 查詢容錯：篩選後沒有航班時顯示「請放寬篩選或調整日期」，不再誤報為系統失敗；來源逾時與 SerpApi 額度不足會顯示不同訊息。過去的最早出發日會自動調整為今天。
 
 ## 主要檔案
 
@@ -109,7 +113,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/price-watch/Invoke-P
 & C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe -m unittest scripts/price-watch/test_price_watch.py
 ```
 
-跑手機版商品 / 機票 / 追蹤流程與 390px 版面檢查：
+跑手機版商品 / 機票 / 追蹤流程與 390px、320px 版面檢查：
 
 ```powershell
 $env:CHROME_PATH='C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -159,7 +163,9 @@ Worker 需要設定：
 - `SERPAPI_API_KEY`
 - `SKYSCANNER_API_KEY`
 - `PRICE_WATCH_ACCESS_TOKEN`
-- `PRICE_WATCH_PUBLIC_SEARCH=false`
+- `PRICE_WATCH_PUBLIC_SEARCH=true`：商品 / 機票搜尋可直接在手機使用；追蹤清單仍需 `PRICE_WATCH_ACCESS_TOKEN`
+- `PRICE_WATCH_PUBLIC_SEARCH_PER_MINUTE=4`
+- `PRICE_WATCH_PUBLIC_SEARCH_PER_DAY=30`
 
 GitHub Actions 部署 Worker 需要另外設定：
 
@@ -176,17 +182,17 @@ GitHub Actions 部署 Worker 需要另外設定：
 https://super-assistant.你的-workers-subdomain.workers.dev
 ```
 
-後端尚未連線時，搜尋頁會退回 Google Shopping / Google Flights 外部搜尋連結，因此靜態頁仍可在手機上使用；即時價格整理、歷史價格與 LINE 到價通知則需要 Worker API。
+商品搜尋在後端尚未連線時會保留 Google Shopping 外部搜尋連結。機票搜尋則不再跳轉 Google Flights：Worker 成功回傳時直接在頁內顯示票價與航班詳情；查價失敗時提示稍後重試。歷史價格與 LINE 到價通知需要 Worker API。
 
 手機是主要使用介面：頁面支援 iPhone / Android 安全區、至少 44px 觸控目標、避免 iOS 表單自動縮放，並提供 Web App Manifest 與離線外殼，可從瀏覽器加入主畫面後以獨立 App 模式開啟。離線時只能開啟既有介面，搜尋即時價格仍需要網路。
 
 ### 機票模式
 
-`全年最低`：
+`全年低價探索`：
 
 - 只需要出發地、目的地與旅行天數；可輸入「台北」「東京」並從建議選單選城市，不必背 IATA 代碼。
 - 搜尋從今天起未來 365 天。
-- 回傳該範圍目前可取得的最低探索價；首次找到會通知，之後出現更低價再通知。
+- 私人版每次比較 4 個代表出發日與 3 種艙等，回傳本次抽樣最低候選；首次找到會通知，之後每日輪替抽樣出現更低價再通知。
 
 `日期區間`：
 
@@ -194,14 +200,16 @@ https://super-assistant.你的-workers-subdomain.workers.dev
 - 例如 `2026-09-01`、旅行 `5` 天、往後 `30` 天，會篩選 9/1–9/30 出發且行程為 5 天的報價。
 - 有目標價時，到價即通知；沒有目標價時，先建立價格基準，之後創監控新低再通知。
 
-私人版使用 SerpApi 標準 Google Flights。手機每次搜尋最多抽查 4 個代表出發日；加入追蹤後，每個航段每天輪替查 1 個日期，避免快速耗盡免費方案每月 250 次額度。畫面會標示「抽樣價」，購買前仍須開啟 Google Flights 確認。
+私人版使用 SerpApi 標準 Google Flights。手機每次搜尋最多抽查 4 個代表出發日，並對經濟艙、豪華經濟艙、商務艙分別查價，最多使用 12 次 SerpApi 查詢。頁面直接顯示最低價、航空公司、日期、起降時間、機場、飛行時間及轉機次數。加入追蹤後，每個航段每天輪替查 1 個日期及指定艙等，避免持續監控快速耗盡免費方案每月 250 次額度。
+
+全球 IATA 前綴索引使用 Wikidata 的 IATA 代碼 `P238`，並要求同時具有 ICAO 代碼 `P239` 以排除鐵路站點。每個英文字母前綴在 Cloudflare KV 快取 30 天；第一次查詢可能需要數秒，後續直接讀快取且不消耗 SerpApi 額度。
 
 若日後取得 Skyscanner 商業合作金鑰，Worker 會自動優先使用 Indicative Prices，該探索快取價可能最多落後 4 天。
 
-機票搜尋結果會顯示「該年平均」與「去年平均」：
+機票搜尋結果會顯示「該年抽樣均價」與「去年累積觀測均價」：
 
-- 該年平均：本次搜尋中，該曆年所有可取得出發日探索價的平均。
-- 去年平均：系統已累積的同航段、相同行程天數之去年每日探索樣本平均。
+- 該年抽樣均價：本次搜尋中，該曆年已抽到的經濟艙代表出發日平均，並顯示抽樣最低到最高價。
+- 去年累積觀測均價：系統啟用後已累積的同航段、相同行程天數之去年每日探索樣本平均；並非航空公司完整年度成交資料。
 - 來源不提供完整去年歷史均價；尚未累積到去年資料時，畫面會明確顯示「尚無去年資料」。
 - 為節省 Cloudflare KV 額度，同航段與行程天數每天最多寫入一次年度平均樣本。
 
@@ -340,4 +348,4 @@ https://你的網域/api/price-watch/watches
 - 官方文件：[Flights Indicative Prices](https://developers.skyscanner.net/docs/flights-indicative-prices/overview)、[Flights Autosuggest](https://developers.skyscanner.net/docs/autosuggest/flights)。
 - 商品頁如果自動抓不到價格，優先補 `price_regex`，穩定度會高很多。
 - 歷史價格從啟用後開始累積；若來源 API 本身提供歷史價格，之後可以再把 provider 擴充成回填歷史。
-- 年度平均是 Jarvis 實際取得的探索價樣本平均，不代表航空公司全部成交票價。
+- 年度均價是系統實際取得的探索價樣本平均，不代表航空公司全部成交票價。

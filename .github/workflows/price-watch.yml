@@ -1,0 +1,61 @@
+name: Price Watch
+
+on:
+  schedule:
+    - cron: "15 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_send:
+        description: "Force rerun and send LINE even if alert cooldown is active"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-price-watch:
+    runs-on: [self-hosted, windows, a7-runner]
+    env:
+      TASK_ID: price-watch-cloud
+      TIME_ZONE: Asia/Taipei
+      PRICE_WATCH_CONFIG_PATH: scripts/price-watch/price-watch-config.json
+      PRICE_WATCH_DB_PATH: vault/2-actions/scheduled-reports/price-watch/price-history.sqlite
+      REPORT_ROOT: vault/2-actions/scheduled-reports/price-watch
+      PRICE_WATCH_REMOTE_URL: ${{ secrets.PRICE_WATCH_REMOTE_URL }}
+      PRICE_WATCH_ACCESS_TOKEN: ${{ secrets.PRICE_WATCH_ACCESS_TOKEN }}
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      LINE_MODE: ${{ secrets.LINE_MODE }}
+      LINE_TO: ${{ secrets.LINE_TO }}
+      SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+      SKYSCANNER_API_KEY: ${{ secrets.SKYSCANNER_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore price state
+        uses: actions/cache@v4
+        with:
+          path: vault/2-actions/scheduled-reports/price-watch/price-history.sqlite
+          key: price-watch-state-${{ github.run_id }}
+          restore-keys: |
+            price-watch-state-
+
+      - name: Run price watch
+        shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
+            python scripts/price-watch/price_watch.py --force
+          } else {
+            python scripts/price-watch/price_watch.py
+          }
+
+      - name: Upload price watch reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-watch-reports
+          path: vault/2-actions/scheduled-reports/price-watch/

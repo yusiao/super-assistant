@@ -1,0 +1,93 @@
+{
+  "watches": [
+    {
+      "enabled": false,
+      "id": "sample-product",
+      "type": "product",
+      "name": "範例商品：請改成你想追蹤的商品",
+      "currency": "TWD",
+      "target_price": 18000,
+      "alert_on_new_low": true,
+      "alert_cooldown_days": 7,
+      "sources": [
+        {
+          "type": "html",
+          "id": "official-store",
+          "name": "官方商城",
+          "url": "https://example.com/product",
+          "price_regex": "NT\\$\\s*([\\d,]+)"
+        },
+        {
+          "type": "serpapi_google_shopping",
+          "id": "google-shopping",
+          "name": "Google Shopping",
+          "query": "請輸入商品型號",
+          "gl": "tw",
+          "hl": "zh-tw",
+          "currency": "TWD",
+          "limit": 8
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "id": "sample-flight-tpe-tyo",
+      "type": "flight",
+      "name": "範例機票：台北到東京未來一年最低",
+      "currency": "TWD",
+      "target_price": null,
+      "alert_on_new_low": true,
+      "alert_on_first_seen": true,
+      "alert_strategy": "annual_floor",
+      "alert_cooldown_days": 3,
+      "sources": [
+        {
+          "type": "skyscanner_indicative_flights",
+          "id": "skyscanner-indicative",
+          "name": "Skyscanner Indicative",
+          "mode": "annual_low",
+          "departure_id": "TPE",
+          "arrival_id": "TYO",
+          "start_date": "",
+          "horizon_days": 365,
+          "lookahead_days": 30,
+          "trip_days": 5,
+          "currency": "TWD",
+          "market": "TW",
+          "locale": "zh-TW",
+          "check_interval_hours": 12
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "id": "sample-flight-date-window",
+      "type": "flight",
+      "name": "範例機票：指定日期後 30 天",
+      "currency": "TWD",
+      "target_price": 8000,
+      "alert_on_new_low": true,
+      "alert_on_first_seen": false,
+      "alert_strategy": "target_or_new_low",
+      "alert_cooldown_days": 3,
+      "sources": [
+        {
+          "type": "skyscanner_indicative_flights",
+          "id": "skyscanner-indicative",
+          "name": "Skyscanner Indicative",
+          "mode": "date_window",
+          "departure_id": "TPE",
+          "arrival_id": "TYO",
+          "start_date": "2026-09-01",
+          "horizon_days": 30,
+          "lookahead_days": 30,
+          "trip_days": 5,
+          "currency": "TWD",
+          "market": "TW",
+          "locale": "zh-TW",
+          "check_interval_hours": 12
+        }
+      ]
+    }
+  ]
+}
