@@ -26,7 +26,7 @@ jobs:
       PRICE_WATCH_CONFIG_PATH: scripts/price-watch/price-watch-config.json
       PRICE_WATCH_DB_PATH: vault/2-actions/scheduled-reports/price-watch/price-history.sqlite
       REPORT_ROOT: vault/2-actions/scheduled-reports/price-watch
-      PRICE_WATCH_REMOTE_URL: ${{ secrets.PRICE_WATCH_REMOTE_URL }}
+      PRICE_WATCH_REMOTE_URL: https://super-assistant.jarvis-price-watch-tw.workers.dev/api/price-watch/watches
       PRICE_WATCH_ACCESS_TOKEN: ${{ secrets.PRICE_WATCH_ACCESS_TOKEN }}
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
@@ -54,7 +54,6 @@ jobs:
         shell: powershell
         run: |
           $required = @(
-            "PRICE_WATCH_REMOTE_URL",
             "PRICE_WATCH_ACCESS_TOKEN",
             "SERPAPI_API_KEY",
             "LINE_CHANNEL_ACCESS_TOKEN"
