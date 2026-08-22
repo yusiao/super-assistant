@@ -8,7 +8,54 @@ const JSON_HEADERS = {
   ...CORS_HEADERS,
 };
 const PRICE_WATCH_KV_KEY = "price-watch:watches";
+const PRICE_WATCH_RATE_PREFIX = "price-watch:rate-limit";
 const FLIGHT_YEAR_HISTORY_PREFIX = "price-watch:flight-year-history";
+const AIRPORT_PREFIX_CACHE = "price-watch:airport-prefix:v2";
+const FLIGHT_CABINS = [
+  { code: "1", key: "economy", label: "經濟艙" },
+  { code: "2", key: "premium_economy", label: "豪華經濟艙" },
+  { code: "3", key: "business", label: "商務艙" },
+];
+const LOW_COST_AIRLINE_CODES = new Set([
+  "3K", "5J", "6E", "7C", "AK", "B6", "BL", "BX", "D7", "D8", "DE", "DY", "EW", "F9", "FD", "FR",
+  "FY", "FZ", "G4", "G9", "GK", "HB", "HV", "IT", "IX", "J9", "JQ", "LJ", "LS", "MM", "NK", "OD",
+  "PC", "QH", "QZ", "SG", "SL", "TO", "TR", "TW", "U2", "UO", "VJ", "VY", "VZ", "W4", "WN", "XQ", "Z2", "ZE",
+]);
+const LOW_COST_AIRLINE_NAMES = [
+  "airasia", "cebu pacific", "easyjet", "frontier", "jetblue", "jetstar", "peach", "ryanair", "scoot", "southwest",
+  "spirit", "vietjet", "wizz", "亞洲航空", "宿霧太平洋", "德威", "捷星", "易斯達", "春秋航空",
+  "樂桃", "濟州航空", "獅航", "真航空", "虎航", "酷航", "香港快運", "釜山航空",
+];
+const AIRLINE_OFFICIAL_SITES = {
+  "3K": "https://www.jetstar.com/tw/zh/home",
+  "5J": "https://www.cebupacificair.com/",
+  "7C": "https://www.jejuair.net/zh-tw/main/base/index.do",
+  BR: "https://www.evaair.com/zh-tw/index.html",
+  CI: "https://www.china-airlines.com/tw/zh",
+  CX: "https://www.cathaypacific.com/cx/zh_TW.html",
+  D7: "https://www.airasia.com/",
+  FD: "https://www.airasia.com/",
+  GK: "https://www.jetstar.com/tw/zh/home",
+  IT: "https://www.tigerairtw.com/zh-tw/",
+  JL: "https://www.jal.co.jp/tw/zhtw/",
+  JQ: "https://www.jetstar.com/tw/zh/home",
+  JX: "https://www.starlux-airlines.com/zh-TW",
+  KE: "https://www.koreanair.com/",
+  LJ: "https://www.jinair.com/",
+  MM: "https://www.flypeach.com/tw",
+  NH: "https://www.ana.co.jp/zh/tw/",
+  OZ: "https://flyasiana.com/C/TW/CH/index",
+  QH: "https://www.bambooairways.com/",
+  SL: "https://www.lionairthai.com/",
+  SQ: "https://www.singaporeair.com/zh_TW/tw/home",
+  TG: "https://www.thaiairways.com/zh-tw/",
+  TR: "https://www.flyscoot.com/zhtw",
+  TW: "https://www.twayair.com/",
+  UO: "https://www.hkexpress.com/zh-tw/",
+  VJ: "https://www.vietjetair.com/zh-TW",
+  VN: "https://www.vietnamairlines.com/tw/zh-tw/home",
+  Z2: "https://www.airasia.com/",
+};
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
@@ -51,23 +98,85 @@ function safeId(text, fallback = "watch") {
   return slug || `${fallback}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function hasPriceWatchAccess(request, env, allowPublicSearch = false) {
-  if (allowPublicSearch && envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true") {
-    return true;
-  }
-  const expected = envValue(env, "PRICE_WATCH_ACCESS_TOKEN");
-  if (!expected) return false;
+function isPublicPriceWatchSearch(env) {
+  return envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true";
+}
+
+async function timingSafeStringEqual(provided, expected) {
+  const encoder = new TextEncoder();
+  const [providedHash, expectedHash] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(provided)),
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+  ]);
+  return crypto.subtle.timingSafeEqual(providedHash, expectedHash);
+}
+
+async function hasValidPriceWatchToken(request, env) {
+  const expectedTokens = [
+    envValue(env, "PRICE_WATCH_ACCESS_TOKEN"),
+    envValue(env, "PRICE_WATCH_AUTOMATION_TOKEN"),
+  ].filter(Boolean);
+  if (!expectedTokens.length) return false;
   const authorization = request.headers.get("Authorization") || "";
   const bearer = authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
   const headerToken = request.headers.get("X-Price-Watch-Token") || "";
-  return bearer === expected || headerToken === expected;
+  const providedTokens = [bearer, headerToken].filter(Boolean);
+  if (!providedTokens.length) return false;
+  const matches = await Promise.all(
+    expectedTokens.flatMap((expected) => providedTokens.map((provided) => timingSafeStringEqual(provided, expected))),
+  );
+  return matches.some(Boolean);
+}
+
+async function hasPriceWatchAccess(request, env, allowPublicSearch = false) {
+  if (await hasValidPriceWatchToken(request, env)) return true;
+  return allowPublicSearch && isPublicPriceWatchSearch(env);
 }
 
 function priceWatchAuthError(env) {
-  if (!envValue(env, "PRICE_WATCH_ACCESS_TOKEN")) {
-    return json(503, { error: "PRICE_WATCH_ACCESS_TOKEN is not set." });
+  if (!envValue(env, "PRICE_WATCH_ACCESS_TOKEN") && !envValue(env, "PRICE_WATCH_AUTOMATION_TOKEN")) {
+    return json(503, { error: "Price watch access tokens are not set." });
   }
   return json(401, { error: "Invalid or missing price watch access token." });
+}
+
+function rateLimitNumber(env, key, fallback) {
+  const value = Number(envValue(env, key, fallback));
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;
+}
+
+async function incrementRateBucket(env, key, ttlSeconds, limit) {
+  if (!env.PRICE_WATCH_KV || typeof env.PRICE_WATCH_KV.get !== "function" || typeof env.PRICE_WATCH_KV.put !== "function") {
+    return { allowed: true, count: 0, remaining: limit };
+  }
+  const current = await env.PRICE_WATCH_KV.get(key, "json").catch(() => null);
+  const count = Number(current?.count || 0);
+  if (count >= limit) return { allowed: false, count, remaining: 0 };
+  const nextCount = count + 1;
+  await env.PRICE_WATCH_KV.put(key, JSON.stringify({ count: nextCount }), { expirationTtl: ttlSeconds });
+  return { allowed: true, count: nextCount, remaining: Math.max(0, limit - nextCount) };
+}
+
+async function publicSearchRateLimit(request, env, scope) {
+  if (!isPublicPriceWatchSearch(env) || await hasValidPriceWatchToken(request, env)) return null;
+  const client = safeId(
+    request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For")?.split(",")[0] || "unknown",
+    "client",
+  );
+  const minuteLimit = rateLimitNumber(env, "PRICE_WATCH_PUBLIC_SEARCH_PER_MINUTE", 4);
+  const dayLimit = rateLimitNumber(env, "PRICE_WATCH_PUBLIC_SEARCH_PER_DAY", 30);
+  const now = new Date();
+  const minute = now.toISOString().slice(0, 16);
+  const day = now.toISOString().slice(0, 10);
+  const minuteBucket = await incrementRateBucket(env, `${PRICE_WATCH_RATE_PREFIX}:${scope}:minute:${minute}:${client}`, 120, minuteLimit);
+  if (!minuteBucket.allowed) {
+    return json(429, { code: "rate_limited", error: "公開搜尋暫時太頻繁，請稍後再試，或在設定輸入同步金鑰。" });
+  }
+  const dayBucket = await incrementRateBucket(env, `${PRICE_WATCH_RATE_PREFIX}:${scope}:day:${day}:${client}`, 172800, dayLimit);
+  if (!dayBucket.allowed) {
+    return json(429, { code: "rate_limited", error: "今日公開搜尋次數已達上限，請明天再試，或在設定輸入同步金鑰。" });
+  }
+  return null;
 }
 
 function normalizeMoney(value) {
@@ -102,6 +211,7 @@ async function serpApiSearch(params, env) {
       Accept: "application/json",
       "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
     },
+    signal: AbortSignal.timeout(25000),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -153,6 +263,16 @@ function average(values) {
   return numbers.reduce((total, value) => total + value, 0) / numbers.length;
 }
 
+function minimum(values) {
+  const numbers = values.map(Number).filter(Number.isFinite);
+  return numbers.length ? Math.min(...numbers) : null;
+}
+
+function maximum(values) {
+  const numbers = values.map(Number).filter(Number.isFinite);
+  return numbers.length ? Math.max(...numbers) : null;
+}
+
 function flightYearStats(results) {
   const grouped = new Map();
   results.forEach((result) => {
@@ -164,9 +284,52 @@ function flightYearStats(results) {
   return Object.fromEntries(
     [...grouped.entries()].map(([year, prices]) => [
       String(year),
-      { average: average(prices), sampleCount: prices.length },
+      {
+        average: average(prices),
+        minimum: Math.min(...prices),
+        maximum: Math.max(...prices),
+        sampleCount: prices.length,
+      },
     ]),
   );
+}
+
+function flightNumberAirlineCode(value) {
+  return compact(value, "", 30).toUpperCase().match(/^([A-Z0-9]{2})\s*\d/)?.[1] || "";
+}
+
+function isLowCostSegment(segment) {
+  const code = flightNumberAirlineCode(segment.flightNumber);
+  const airline = compact(segment.airline, "", 100).toLowerCase();
+  return LOW_COST_AIRLINE_CODES.has(code) || LOW_COST_AIRLINE_NAMES.some((name) => airline.includes(name));
+}
+
+function compactFlightDate(value) {
+  return isoDate(value, "").replaceAll("-", "").slice(2);
+}
+
+function flightPurchaseLinks(payload, airline, segments) {
+  const departureId = compact(payload.departureId, "", 8).toUpperCase();
+  const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+  const departureDate = isoDate(payload.outboundDate, "");
+  const returnDate = isoDate(payload.returnDate, "");
+  const airlineCode = flightNumberAirlineCode(segments[0]?.flightNumber);
+  const officialUrl = AIRLINE_OFFICIAL_SITES[airlineCode] || "";
+  const datePath = [compactFlightDate(departureDate), compactFlightDate(returnDate)].filter(Boolean).join("/");
+  const skyscannerUrl = departureId && arrivalId && datePath
+    ? `https://www.skyscanner.com.tw/transport/flights/${departureId.toLowerCase()}/${arrivalId.toLowerCase()}/${datePath}/`
+    : "https://www.skyscanner.com.tw/transport/flights/";
+  const tripUrl = new URL("https://tw.trip.com/flights/list");
+  tripUrl.searchParams.set("dcity", departureId);
+  tripUrl.searchParams.set("acity", arrivalId);
+  tripUrl.searchParams.set("ddate", departureDate);
+  if (returnDate) tripUrl.searchParams.set("rdate", returnDate);
+  tripUrl.searchParams.set("triptype", returnDate ? "rt" : "ow");
+  return [
+    officialUrl ? { kind: "official", label: `${airline} 官網`, url: officialUrl } : null,
+    { kind: "skyscanner", label: "Skyscanner", url: skyscannerUrl },
+    { kind: "trip", label: "Trip.com", url: tripUrl.toString() },
+  ].filter(Boolean);
 }
 
 function flightYearHistoryKey(departureId, arrivalId, tripDays, currency) {
@@ -185,14 +348,15 @@ async function serpApiSampledFlightSearch(payload, env) {
   const arrivalId = compact(payload.arrivalId, "", 80).toUpperCase();
   const mode = compact(payload.flightMode, "annual_low", 24);
   const today = new Date().toISOString().slice(0, 10);
-  const startDate = mode === "annual_low" ? addDays(today, 14) : isoDate(payload.startDate, today);
+  const requestedStartDate = mode === "annual_low" ? addDays(today, 14) : isoDate(payload.startDate, today);
+  const startDate = requestedStartDate < today ? today : requestedStartDate;
   const horizonDays = mode === "annual_low" ? 351 : Math.max(0, Math.min(Number(payload.lookaheadDays || 30), 365));
   const endDate = addDays(startDate, horizonDays);
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
   const currency = currencyLabel(payload.currency);
   const sampleDates = evenlySpacedDates(startDate, endDate, 4);
   const searches = await Promise.allSettled(
-    sampleDates.map(async (outboundDate) => {
+    sampleDates.flatMap((outboundDate) => FLIGHT_CABINS.map(async (cabin) => {
       const returnDate = tripDays > 0 ? addDays(outboundDate, tripDays) : "";
       const data = await serpApiSearch(
         {
@@ -206,25 +370,73 @@ async function serpApiSampledFlightSearch(payload, env) {
           gl: compact(payload.market, "TW", 8).toLowerCase(),
           hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
           sort_by: "2",
+          travel_class: cabin.code,
+          stops: payload.routeType === "nonstop" ? "1" : "0",
+          show_hidden: payload.airlineType !== "all" || payload.routeType === "connecting" ? "true" : "false",
         },
         env,
       );
       const normalized = normalizeFlightResults(
         data,
-        { ...payload, departureId, arrivalId, outboundDate, returnDate },
+        {
+          ...payload,
+          departureId,
+          arrivalId,
+          outboundDate,
+          returnDate,
+          travelClass: cabin.code,
+          cabinClass: cabin.key,
+          cabinLabel: cabin.label,
+        },
         currency,
       );
       const best = normalized.results[0];
       return best ? { ...best, source: "Google Flights 抽樣", sampled: true } : null;
-    }),
+    })),
   );
   const results = searches
     .filter((result) => result.status === "fulfilled" && result.value)
     .map((result) => result.value)
     .sort((left, right) => left.price - right.price);
-  if (!results.length) throw new Error("Google Flights returned no sampled prices.");
+  if (!results.length) {
+    const rejected = searches.filter((result) => result.status === "rejected");
+    if (rejected.length === searches.length) {
+      const messages = rejected.map((result) => compact(result.reason?.message, "", 260)).filter(Boolean);
+      const quotaError = messages.find((message) => /quota|searches|plan|credit|limit/i.test(message));
+      const timeoutError = messages.find((message) => /timeout|aborted|signal/i.test(message));
+      throw new Error(quotaError || timeoutError || messages[0] || "Flight provider returned no results.");
+    }
+    const comparisonYear = Number(startDate.slice(0, 4));
+    const airlineLabel = payload.airlineType === "low_cost" ? "廉價航空" : payload.airlineType === "full_service" ? "傳統航空" : "全部航空";
+    const routeLabel = payload.routeType === "nonstop" ? "直達" : payload.routeType === "connecting" ? "轉乘" : "全部行程";
+    return {
+      mode,
+      startDate,
+      endDate,
+      tripDays,
+      results: [],
+      insights: {
+        lowestPrice: null,
+        rangeStart: startDate,
+        rangeEnd: endDate,
+        cached: false,
+        sampleDates,
+        cabinPrices: FLIGHT_CABINS.map((cabin) => ({ ...cabin, available: false, price: null, priceText: "", departureDate: "", returnDate: "", airline: "" })),
+        samplingNotice: `目前找不到符合「${airlineLabel}・${routeLabel}」的航班，請放寬篩選或調整日期。`,
+        yearStats: {
+          year: comparisonYear,
+          average: null,
+          sampleCount: 0,
+          previousYear: comparisonYear - 1,
+          previousAverage: null,
+          previousSampleCount: 0,
+          basis: "no_matching_quotes",
+        },
+      },
+    };
+  }
   const lowestPrice = results[0].price;
-  const yearlyQuotes = flightYearStats(results);
+  const yearlyQuotes = flightYearStats(results.filter((item) => item.cabinClass === "economy"));
   const comparisonYear = Number(startDate.slice(0, 4));
   const previousYear = comparisonYear - 1;
   const historyKey = flightYearHistoryKey(departureId, arrivalId, tripDays, currency);
@@ -234,13 +446,30 @@ async function serpApiSampledFlightSearch(payload, env) {
   const yearStats = {
     year: comparisonYear,
     average: currentStats?.average ?? null,
+    minimum: currentStats?.minimum ?? null,
+    maximum: currentStats?.maximum ?? null,
     sampleCount: currentStats?.sampleCount ?? 0,
     previousYear,
     previousAverage: average(previousRecords.map((record) => record.average)),
+    previousMinimum: minimum(previousRecords.map((record) => record.minimum)),
+    previousMaximum: maximum(previousRecords.map((record) => record.maximum)),
     previousSampleCount: previousRecords.length,
     basis: "sampled_departure_quotes",
   };
   await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
+  const cabinPrices = FLIGHT_CABINS.map((cabin) => {
+    const options = results.filter((item) => item.travelClass === cabin.code);
+    const best = options[0] || null;
+    return {
+      ...cabin,
+      available: Boolean(best),
+      price: best?.price ?? null,
+      priceText: best?.priceText || "",
+      departureDate: best?.departureDate || "",
+      returnDate: best?.returnDate || "",
+      airline: best?.airline || "",
+    };
+  });
   return {
     mode,
     startDate,
@@ -253,7 +482,8 @@ async function serpApiSampledFlightSearch(payload, env) {
       rangeEnd: endDate,
       cached: false,
       sampleDates,
-      samplingNotice: `為控制免費額度，本次抽查 ${sampleDates.length} 個代表出發日。`,
+      cabinPrices,
+      samplingNotice: `本次比較 ${sampleDates.length} 個代表出發日、3 種艙等，共 ${sampleDates.length * FLIGHT_CABINS.length} 次即時查價。`,
       yearStats,
     },
   };
@@ -282,6 +512,8 @@ async function recordFlightYearHistory(env, key, records, stats, observedDate) {
       observedDate,
       travelYear: Number(year),
       average: stats[year].average,
+      minimum: stats[year].minimum,
+      maximum: stats[year].maximum,
       sampleCount: stats[year].sampleCount,
     }));
   const nextRecords = [...records, ...additions].slice(-800);
@@ -386,9 +618,13 @@ async function skyscannerIndicativeSearch(payload, env) {
   const yearStats = {
     year: comparisonYear,
     average: currentQuoteStats?.average ?? average(currentHistoryRecords.map((record) => record.average)),
+    minimum: currentQuoteStats?.minimum ?? minimum(currentHistoryRecords.map((record) => record.minimum)),
+    maximum: currentQuoteStats?.maximum ?? maximum(currentHistoryRecords.map((record) => record.maximum)),
     sampleCount: currentQuoteStats?.sampleCount ?? currentHistoryRecords.length,
     previousYear,
     previousAverage: average(previousRecords.map((record) => record.average)),
+    previousMinimum: minimum(previousRecords.map((record) => record.minimum)),
+    previousMaximum: maximum(previousRecords.map((record) => record.maximum)),
     previousSampleCount: previousRecords.length,
     basis: currentQuoteStats ? "departure_quotes" : "observed_daily_quotes",
   };
@@ -459,45 +695,242 @@ async function serpApiPlaceSearch(payload, env) {
       q: query,
       gl: compact(payload.market, "TW", 8).toLowerCase(),
       hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
+      exclude_regions: "true",
     },
     env,
   );
-  return (data.suggestions || [])
+  const normalizedQuery = query.toUpperCase();
+  const stationPattern = /\b(gare|station|railway|train)\b|車站|火車站|鐵路/i;
+  const places = (data.suggestions || [])
     .flatMap((place) =>
-      (place.airports || []).map((airport) => ({
-        name: compact(airport.name, place.name, 100),
-        subtitle: compact([airport.city, airport.distance].filter(Boolean).join(" · "), "", 120),
-        iataCode: compact(airport.id, "", 8).toUpperCase(),
-        entityId: compact(place.id, "", 80),
-        type: "airport",
-      })),
+      (place.airports || []).map((airport) => {
+        const name = compact(airport.name, place.name, 100);
+        const city = compact(airport.city || String(place.name || "").split(",")[0], "", 80);
+        const country = compact(String(place.name || "").split(",").slice(1).join(","), "", 80);
+        return {
+          name,
+          city,
+          country,
+          subtitle: compact([city, country, airport.distance].filter(Boolean).join(" · "), "", 150),
+          iataCode: compact(airport.id, "", 8).toUpperCase(),
+          entityId: compact(place.id, "", 80),
+          type: "airport",
+        };
+      }),
     )
-    .filter((place) => place.name && /^[A-Z]{3}$/.test(place.iataCode))
-    .slice(0, 8);
+    .filter((place) => place.name && /^[A-Z]{3}$/.test(place.iataCode) && !stationPattern.test(place.name));
+  return [...new Map(places.map((place) => [place.iataCode, place])).values()]
+    .sort((left, right) => {
+      const leftCodeMatch = left.iataCode.startsWith(normalizedQuery) ? 0 : 1;
+      const rightCodeMatch = right.iataCode.startsWith(normalizedQuery) ? 0 : 1;
+      return leftCodeMatch - rightCodeMatch;
+    })
+    .slice(0, 10);
 }
 
-function normalizeShoppingResults(data, currency) {
-  return (data.shopping_results || [])
+function wikidataValue(binding, key) {
+  return compact(binding?.[key]?.value, "", 180);
+}
+
+async function iataPrefixAirportSearch(prefix, env) {
+  const normalizedPrefix = compact(prefix, "", 3).toUpperCase().replace(/[^A-Z]/g, "");
+  if (!normalizedPrefix) return [];
+  const cacheKey = `${AIRPORT_PREFIX_CACHE}:${normalizedPrefix}`;
+  if (env.PRICE_WATCH_KV && typeof env.PRICE_WATCH_KV.get === "function") {
+    try {
+      const cached = await env.PRICE_WATCH_KV.get(cacheKey, { type: "json" });
+      if (Array.isArray(cached?.places) && cached.places.length) return cached.places;
+    } catch {
+      // Continue with the live directory query.
+    }
+  }
+
+  const sparql = `
+SELECT ?iata
+  (SAMPLE(?icaoValue) AS ?icao)
+  (SAMPLE(?nameZhValue) AS ?nameZh)
+  (SAMPLE(?nameEnValue) AS ?nameEn)
+  (SAMPLE(?countryZhValue) AS ?countryZh)
+  (SAMPLE(?countryEnValue) AS ?countryEn)
+WHERE {
+  ?airport wdt:P238 ?iata; wdt:P239 ?icaoValue.
+  FILTER(STRSTARTS(UCASE(STR(?iata)), "${normalizedPrefix}"))
+  OPTIONAL { ?airport rdfs:label ?nameZhValue. FILTER(LANG(?nameZhValue) IN ("zh-tw", "zh-hant", "zh-hk")) }
+  OPTIONAL { ?airport rdfs:label ?nameEnValue. FILTER(LANG(?nameEnValue) = "en") }
+  OPTIONAL {
+    ?airport wdt:P17 ?country.
+    OPTIONAL { ?country rdfs:label ?countryZhValue. FILTER(LANG(?countryZhValue) IN ("zh-tw", "zh-hant", "zh-hk")) }
+    OPTIONAL { ?country rdfs:label ?countryEnValue. FILTER(LANG(?countryEnValue) = "en") }
+  }
+}
+GROUP BY ?iata
+ORDER BY ?iata
+LIMIT 600`;
+  const url = new URL("https://query.wikidata.org/sparql");
+  url.searchParams.set("format", "json");
+  url.searchParams.set("query", sparql);
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/sparql-results+json",
+      "User-Agent": "JarvisPriceWatch/1.0 (global airport autocomplete)",
+    },
+    signal: AbortSignal.timeout(25000),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`Global airport directory failed with HTTP ${response.status}.`);
+  const places = (data?.results?.bindings || [])
+    .map((binding) => {
+      const iataCode = wikidataValue(binding, "iata").toUpperCase();
+      const nameZh = wikidataValue(binding, "nameZh");
+      const englishName = wikidataValue(binding, "nameEn");
+      const country = wikidataValue(binding, "countryZh") || wikidataValue(binding, "countryEn");
+      const name = nameZh || englishName || `${iataCode} 機場`;
+      return {
+        name,
+        englishName: englishName && englishName !== name ? englishName : "",
+        city: "",
+        country,
+        subtitle: [country, englishName && englishName !== name ? englishName : ""].filter(Boolean).join(" · "),
+        iataCode,
+        entityId: wikidataValue(binding, "icao") || iataCode,
+        type: "airport",
+      };
+    })
+    .filter((place) => /^[A-Z]{3}$/.test(place.iataCode) && place.iataCode.startsWith(normalizedPrefix));
+  if (env.PRICE_WATCH_KV && typeof env.PRICE_WATCH_KV.put === "function" && places.length) {
+    try {
+      await env.PRICE_WATCH_KV.put(cacheKey, JSON.stringify({ places }), { expirationTtl: 2592000 });
+    } catch {
+      // Directory results can still be returned if optional cache storage fails.
+    }
+  }
+  return places;
+}
+
+const PRODUCT_INSTALLMENT_PATTERN = /(?:每月|月付|月繳|月租|分期|\/\s*月|per\s+month|monthly\s+payment|installment|\/[\s]*mo\b)/i;
+const PRODUCT_TRADE_IN_PATTERN = /(?:回收|收購|估價|換購價|折抵後|舊換新|退傭|trade[-\s]?in|buyback|cashback|sell\s+your)/i;
+const PRODUCT_USED_PATTERN = /(?:二手|中古|福利品|展示品|整新品|翻新品|拆封品|極新|近全新|九成新|used|pre[-\s]?owned|refurbished|renewed|open[-\s]?box)/i;
+const PRODUCT_ACCESSORY_PATTERN = /(?:保護殼|保護套|保護貼|鍵盤|觸控筆|充電器|轉接器|支架|case|cover|keyboard|pencil|stylus|charger|adapter|screen\s*protector)/i;
+const PRODUCT_STOP_WORDS = new Set(["apple", "the", "with", "wifi", "wi-fi", "版", "吋", "英吋"]);
+
+function normalizeProductText(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/(\d+)\s*(gb|tb)\b/g, "$1$2")
+    .replace(/(\d+)\s*g\b/g, "$1gb")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function productSearchTokens(query) {
+  return normalizeProductText(query)
+    .split(" ")
+    .filter((token) => token.length >= 2 && !PRODUCT_STOP_WORDS.has(token));
+}
+
+function productGenerationTokens(value) {
+  return productSearchTokens(value).filter((token) => /^(?:m\d+|a\d{1,3}|s\d{1,3}|gen\d+|mk\d+)$/i.test(token));
+}
+
+function productStorageTokens(value) {
+  return normalizeProductText(value).match(/\b\d+(?:gb|tb)\b/g) || [];
+}
+
+function productSizeTokens(value) {
+  return productSearchTokens(value).filter((token) => /^\d{1,2}$/.test(token));
+}
+
+function analyzeShoppingResult(item, query) {
+  const title = compact(item.title, "商品", 180);
+  const context = [title, item.source, item.seller, item.price, item.condition, item.snippet, ...(Array.isArray(item.extensions) ? item.extensions : [])]
+    .filter(Boolean)
+    .join(" ");
+  const normalizedTitle = normalizeProductText(title);
+  const queryTokens = productSearchTokens(query);
+  const matchedTokens = queryTokens.filter((token) => normalizedTitle.includes(token));
+  const tokenCoverage = queryTokens.length ? matchedTokens.length / queryTokens.length : 1;
+  const queryGenerations = productGenerationTokens(query);
+  const titleGenerations = productGenerationTokens(title);
+  const generationConflict = queryGenerations.length && titleGenerations.length
+    && !queryGenerations.some((token) => titleGenerations.includes(token));
+  const queryStorage = productStorageTokens(query);
+  const titleStorage = productStorageTokens(title);
+  const storageConflict = queryStorage.length && titleStorage.length
+    && !queryStorage.some((token) => titleStorage.includes(token));
+  const querySizes = productSizeTokens(query);
+  const titleSizes = productSizeTokens(title);
+  const sizeConflict = querySizes.length && titleSizes.length
+    && !querySizes.some((token) => titleSizes.includes(token));
+  const criticalSpecMissing = [queryGenerations, queryStorage, querySizes]
+    .some((tokens) => tokens.length && !tokens.some((token) => normalizedTitle.includes(token)));
+  const installment = PRODUCT_INSTALLMENT_PATTERN.test(context);
+  const tradeIn = PRODUCT_TRADE_IN_PATTERN.test(context);
+  const used = PRODUCT_USED_PATTERN.test(context);
+  const accessory = PRODUCT_ACCESSORY_PATTERN.test(context) && !PRODUCT_ACCESSORY_PATTERN.test(query);
+  const requestedUsed = PRODUCT_USED_PATTERN.test(query);
+  const reasons = [];
+  if (installment) reasons.push("installment");
+  if (tradeIn) reasons.push("trade_in");
+  if (used && !requestedUsed) reasons.push("used");
+  if (accessory) reasons.push("accessory");
+  if (generationConflict || storageConflict || sizeConflict || criticalSpecMissing || (queryTokens.length && tokenCoverage === 0) || (queryTokens.length >= 3 && tokenCoverage <= 0.6)) reasons.push("model_mismatch");
+  return {
+    comparable: reasons.length === 0,
+    reasons,
+    matchScore: Math.round(tokenCoverage * 100),
+    priceKind: installment ? "installment" : tradeIn ? "trade_in" : "total",
+    priceKindLabel: installment ? "月付／分期" : tradeIn ? "回收／折抵價" : "標示總價",
+    condition: used ? "used" : "unspecified",
+    conditionLabel: used ? "二手／整新品" : "新品狀態未標示",
+  };
+}
+
+function normalizeShoppingResults(data, currency, query) {
+  const rawItems = Array.isArray(data.shopping_results) ? data.shopping_results : [];
+  const analyzed = rawItems
     .map((item) => {
       const price = normalizeMoney(item.extracted_price || item.price);
       if (!price) return null;
+      const quality = analyzeShoppingResult(item, query);
       return {
         id: safeId(`${item.source || item.seller || "shop"}-${item.title || ""}-${item.link || ""}`, "product"),
         type: "product",
         title: compact(item.title, "商品", 180),
         source: compact(item.source || item.seller || "Google Shopping", "Google Shopping", 80),
         price,
-        priceText: item.price || formatPrice(price, currency),
+        priceText: formatPrice(price, currency),
         currency: currencyLabel(currency),
         link: item.link || item.product_link || "",
         thumbnail: item.thumbnail || "",
         rating: item.rating || "",
         reviews: item.reviews || "",
+        ...quality,
       };
     })
-    .filter(Boolean)
-    .sort((left, right) => left.price - right.price)
+    .filter(Boolean);
+  const results = analyzed
+    .filter((item) => item.comparable)
+    .sort((left, right) => left.price - right.price || right.matchScore - left.matchScore)
     .slice(0, 20);
+  const excluded = analyzed.filter((item) => !item.comparable);
+  const exclusionCounts = excluded.reduce((counts, item) => {
+    item.reasons.forEach((reason) => { counts[reason] = (counts[reason] || 0) + 1; });
+    return counts;
+  }, {});
+  return {
+    results,
+    insights: {
+      rawResultCount: analyzed.length,
+      comparableResultCount: results.length,
+      excludedCount: excluded.length,
+      exclusionCounts,
+      notice: excluded.length
+        ? `已排除 ${excluded.length} 筆月付價、回收價、二手品、配件或明顯不同型號。`
+        : "結果依型號符合度與標示總價排序。",
+    },
+  };
 }
 
 function normalizeFlightResults(data, payload, currency) {
@@ -510,6 +943,21 @@ function normalizeFlightResults(data, payload, currency) {
       const firstFlight = Array.isArray(item.flights) ? item.flights[0] || {} : {};
       const lastFlight = Array.isArray(item.flights) ? item.flights[item.flights.length - 1] || {} : {};
       const airline = compact(firstFlight.airline || item.airline || "Flight", "Flight", 80);
+      const segments = (Array.isArray(item.flights) ? item.flights : []).map((flight) => ({
+        airline: compact(flight.airline, "", 80),
+        flightNumber: compact(flight.flight_number, "", 30),
+        departureAirport: compact(flight.departure_airport?.id, "", 12),
+        departureTime: compact(flight.departure_airport?.time, "", 30),
+        arrivalAirport: compact(flight.arrival_airport?.id, "", 12),
+        arrivalTime: compact(flight.arrival_airport?.time, "", 30),
+        duration: Number(flight.duration || 0),
+        airplane: compact(flight.airplane, "", 80),
+      }));
+      const stopCount = Math.max(0, segments.length - 1);
+      const allLowCost = Boolean(segments.length) && segments.every(isLowCostSegment);
+      const anyLowCost = segments.some(isLowCostSegment);
+      const airlineType = allLowCost ? "low_cost" : anyLowCost ? "mixed" : "full_service";
+      const purchaseLinks = flightPurchaseLinks(payload, airline, segments);
       return {
         id: safeId(`${route}-${airline}-${item.price}-${index}`, "flight"),
         type: "flight",
@@ -522,16 +970,34 @@ function normalizeFlightResults(data, payload, currency) {
           `${payload.departureId || ""} ${payload.arrivalId || ""} ${payload.outboundDate || ""} ${payload.returnDate || ""}`,
         )}`,
         airline,
-        duration: item.total_duration || "",
-        stops: item.stops ?? "",
+        duration: Number(item.total_duration || 0),
+        stops: stopCount,
         departure: firstFlight.departure_airport?.time || "",
         arrival: lastFlight.arrival_airport?.time || "",
+        departureAirport: firstFlight.departure_airport?.id || payload.departureId || "",
+        arrivalAirport: lastFlight.arrival_airport?.id || payload.arrivalId || "",
         departureDate: payload.outboundDate || "",
         returnDate: payload.returnDate || "",
         tripDays: payload.returnDate ? daysBetween(payload.outboundDate, payload.returnDate) : 0,
+        travelClass: compact(payload.travelClass, "1", 4),
+        cabinClass: compact(payload.cabinClass, "economy", 30),
+        cabinLabel: compact(payload.cabinLabel, "經濟艙", 30),
+        segments,
+        airlineType,
+        airlineTypeLabel: airlineType === "low_cost" ? "廉價航空" : airlineType === "mixed" ? "混合航空" : "傳統航空",
+        purchaseLinks,
       };
     })
     .filter(Boolean)
+    .filter((item) => {
+      const airlineType = compact(payload.airlineType, "all", 24);
+      const routeType = compact(payload.routeType, "any", 24);
+      if (airlineType === "low_cost" && item.airlineType !== "low_cost") return false;
+      if (airlineType === "full_service" && item.airlineType !== "full_service") return false;
+      if (routeType === "nonstop" && item.stops !== 0) return false;
+      if (routeType === "connecting" && item.stops === 0) return false;
+      return true;
+    })
     .sort((left, right) => left.price - right.price)
     .slice(0, 20);
 
@@ -581,9 +1047,13 @@ function flightWatchFromPayload(payload, env) {
   const startDate = isoDate(payload.startDate, "");
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
   const lookaheadDays = Math.max(1, Math.min(Number(payload.lookaheadDays || 30), 365));
-  const modeLabel = mode === "annual_low" ? "未來一年最低" : `${startDate} 起 ${lookaheadDays} 天`;
+  const modeLabel = mode === "annual_low" ? "未來一年低價探索" : `${startDate} 起 ${lookaheadDays} 天`;
   const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${modeLabel}`, 140);
   const currency = currencyLabel(payload.currency);
+  const travelClass = compact(payload.travelClass, "1", 4);
+  const cabin = FLIGHT_CABINS.find((item) => item.code === travelClass) || FLIGHT_CABINS[0];
+  const airlineType = ["all", "low_cost", "full_service"].includes(payload.airlineType) ? payload.airlineType : "all";
+  const routeType = ["any", "nonstop", "connecting"].includes(payload.routeType) ? payload.routeType : "any";
   const useSkyscanner = Boolean(envValue(env, "SKYSCANNER_API_KEY"));
   const source = {
     type: useSkyscanner ? "skyscanner_indicative_flights" : "serpapi_google_flights_sampled",
@@ -599,13 +1069,21 @@ function flightWatchFromPayload(payload, env) {
     currency,
     market: compact(payload.market, "TW", 8),
     locale: compact(payload.locale, "zh-TW", 12),
+    travel_class: cabin.code,
+    cabin_class: cabin.key,
+    cabin_label: cabin.label,
+    airline_type: airlineType,
+    route_type: routeType,
+    stops: routeType === "nonstop" ? "1" : "0",
+    include_airlines: airlineType === "low_cost" ? [...LOW_COST_AIRLINE_CODES].join(",") : "",
+    exclude_airlines: airlineType === "full_service" ? [...LOW_COST_AIRLINE_CODES].join(",") : "",
     check_interval_hours: useSkyscanner ? 12 : 24,
   };
   return {
     enabled: true,
-    id: safeId(payload.id || `${departureId}-${arrivalId}-${mode}-${startDate}-${tripDays}`, "flight"),
+    id: safeId(payload.id || `${departureId}-${arrivalId}-${mode}-${startDate}-${tripDays}-${cabin.key}`, "flight"),
     type: "flight",
-    name,
+    name: name.endsWith(cabin.label) ? name : `${name} ${cabin.label}`,
     currency,
     target_price: normalizeMoney(payload.targetPrice),
     alert_on_new_low: true,
@@ -642,15 +1120,18 @@ async function handlePriceWatchConfig(request, env) {
     hasSerpApi: Boolean(envValue(env, "SERPAPI_API_KEY")),
     hasSkyscanner: Boolean(envValue(env, "SKYSCANNER_API_KEY")),
     hasKv: Boolean(env.PRICE_WATCH_KV),
-    requiresToken: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() !== "true",
-    publicSearch: envValue(env, "PRICE_WATCH_PUBLIC_SEARCH").toLowerCase() === "true",
+    requiresToken: !isPublicPriceWatchSearch(env),
+    trackingRequiresToken: true,
+    publicSearch: isPublicPriceWatchSearch(env),
   });
 }
 
 async function handlePriceWatchSearch(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (request.method !== "POST") return methodNotAllowed();
-  if (!hasPriceWatchAccess(request, env, true)) return priceWatchAuthError(env);
+  if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
+  const rateLimited = await publicSearchRateLimit(request, env, "search");
+  if (rateLimited) return rateLimited;
 
   const payload = await request.json().catch(() => ({}));
   const type = compact(payload.type, "product", 20).toLowerCase();
@@ -669,11 +1150,12 @@ async function handlePriceWatchSearch(request, env) {
       },
       env,
     );
+    const normalized = normalizeShoppingResults(data, currency, query);
     return json(200, {
       type: "product",
       query,
       currency,
-      results: normalizeShoppingResults(data, currency),
+      ...normalized,
     });
   }
 
@@ -722,20 +1204,47 @@ async function handlePriceWatchSearch(request, env) {
   return json(400, { error: "Unsupported search type." });
 }
 
+function priceWatchSearchErrorResponse(error) {
+  const message = safeErrorMessage(error?.message || "");
+  if (/quota|searches|plan|credit|limit/i.test(message)) {
+    return json(429, { code: "provider_quota", error: "SerpApi 查詢額度目前不足，請稍後再試或升級方案。" });
+  }
+  if (/timeout|aborted|signal/i.test(message)) {
+    return json(504, { code: "provider_timeout", error: "資料來源回應逾時，請稍後重試或縮小搜尋條件。" });
+  }
+  return json(502, { code: "provider_error", error: "資料來源暫時無法回應，請稍後重試。" });
+}
+
 async function handlePriceWatchPlaces(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (request.method !== "POST") return methodNotAllowed();
-  if (!hasPriceWatchAccess(request, env, true)) return priceWatchAuthError(env);
+  if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
   const payload = await request.json().catch(() => ({}));
-  const places = envValue(env, "SKYSCANNER_API_KEY")
-    ? await skyscannerPlaceSearch(payload, env)
-    : await serpApiPlaceSearch(payload, env);
-  return json(200, { places });
+  const query = compact(payload.query, "", 80);
+  const isIataPrefix = /^[A-Za-z]{1,3}$/.test(query);
+  let places;
+  let source = "autocomplete";
+  if (isIataPrefix) {
+    try {
+      places = await iataPrefixAirportSearch(query, env);
+      source = "global_iata_directory";
+    } catch {
+      places = envValue(env, "SKYSCANNER_API_KEY")
+        ? await skyscannerPlaceSearch(payload, env)
+        : await serpApiPlaceSearch(payload, env);
+      source = "autocomplete_fallback";
+    }
+  } else {
+    places = envValue(env, "SKYSCANNER_API_KEY")
+      ? await skyscannerPlaceSearch(payload, env)
+      : await serpApiPlaceSearch(payload, env);
+  }
+  return json(200, { places, source, count: places.length });
 }
 
 async function handlePriceWatchWatches(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
-  if (!hasPriceWatchAccess(request, env, false)) return priceWatchAuthError(env);
+  if (!(await hasPriceWatchAccess(request, env, false))) return priceWatchAuthError(env);
 
   if (request.method === "GET") {
     return json(200, { watches: await readPriceWatches(env) });
@@ -1038,7 +1547,11 @@ export default {
       return handlePriceWatchConfig(request, env);
     }
     if (url.pathname === "/api/price-watch/search") {
-      return handlePriceWatchSearch(request, env);
+      try {
+        return await handlePriceWatchSearch(request, env);
+      } catch (error) {
+        return priceWatchSearchErrorResponse(error);
+      }
     }
     if (url.pathname === "/api/price-watch/places") {
       return handlePriceWatchPlaces(request, env);
