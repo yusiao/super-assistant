@@ -4062,6 +4062,48 @@ def send_line_broadcast(channel_access_token: str, message: str) -> None:
         return
 
 
+def send_prepared_line_notification(file_config: dict[str, str], manifest_path: Path) -> int:
+    manifest = read_json_file(manifest_path)
+    if not isinstance(manifest, dict) or not manifest.get("message"):
+        raise RuntimeError(f"Prepared LINE manifest is missing or invalid: {manifest_path}")
+
+    line_token = get_config_value(file_config, "LINE_CHANNEL_ACCESS_TOKEN", "")
+    line_mode = get_config_value(file_config, "LINE_MODE", "broadcast").strip().lower()
+    line_to = get_config_value(file_config, "LINE_TO", "")
+    if not line_token:
+        raise RuntimeError("LINE token is missing; prepared PDF notification was not sent.")
+    if line_mode == "push":
+        if not line_to:
+            raise RuntimeError("LINE_TO is missing for push mode; prepared PDF notification was not sent.")
+        send_line_push(line_token, line_to, str(manifest["message"]))
+    else:
+        send_line_broadcast(line_token, str(manifest["message"]))
+
+    ledger_path = resolve_workspace_path(
+        get_config_value(
+            file_config,
+            "SYNC_LEDGER_PATH",
+            "system/skills/local-scheduler/config/sync-ledger.json",
+        )
+    )
+    local_now = datetime.fromisoformat(str(manifest["local_now"]))
+    task_id = str(manifest.get("task_id") or get_config_value(file_config, "TASK_ID", "a7-leju-digest"))
+    report_path = Path(str(manifest["report_path"]))
+    ledger_file = get_ledger_file(ledger_path)
+    update_ledger(
+        ledger_path,
+        ledger_file,
+        task_id,
+        report_path,
+        local_now,
+        line_sent=True,
+        report_kind=str(manifest.get("report_kind", "週報")),
+        weekly_report_key=str(manifest.get("weekly_report_key", "")),
+    )
+    print("Prepared PDF LINE notification sent successfully.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-path", default=str(Path(__file__).with_name("a7-leju-monitor.env")))
@@ -4071,12 +4113,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--skip-line", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--send-prepared-line", default="")
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
     file_config = read_env_file(Path(args.config_path))
+    if args.send_prepared_line:
+        return send_prepared_line_notification(
+            file_config,
+            resolve_workspace_path(args.send_prepared_line),
+        )
     for env_key in ("LEJU_FETCH_PROXY_URL", "LEJU_FETCH_PROXY_TOKEN"):
         if env_key not in os.environ and file_config.get(env_key):
             os.environ[env_key] = file_config[env_key]
@@ -4153,6 +4201,7 @@ def main() -> int:
     date_string = local_now.strftime("%Y-%m-%d")
     report_path = report_root / f"a7-leju-digest-{date_string}.md"
     pdf_path = report_root / f"a7-market-report-{date_string}.pdf"
+    prepared_line_path = report_root / "a7-line-prepared.json"
 
     ledger_file = get_ledger_file(ledger_path)
     if not args.force and not intraday_alerts and test_ledger_already_ran(ledger_file, task_id, date_string):
@@ -4268,11 +4317,27 @@ def main() -> int:
             print(f"PDF path: {pdf_path}")
         return 0
 
+    if args.skip_line and should_send_line:
+        write_json_file(
+            prepared_line_path,
+            {
+                "message": line_message,
+                "task_id": task_id,
+                "report_path": str(pdf_path if pdf_delivery_enabled else report_path),
+                "local_now": local_now.isoformat(),
+                "report_kind": report_kind,
+                "weekly_report_key": weekly_report_key if weekly_due else "",
+            },
+        )
+        print(f"Prepared LINE notification: {prepared_line_path}")
+    elif prepared_line_path.exists():
+        prepared_line_path.unlink()
+
     line_sent = False
     if not args.skip_line and should_send_line:
         if pdf_delivery_enabled:
             if report_github_token and report_github_repository:
-                report_pdf_public_url = publish_pdf_report(
+                uploaded_pdf_url = publish_pdf_report(
                     pdf_path,
                     local_now,
                     report_github_repository,
@@ -4281,6 +4346,8 @@ def main() -> int:
                     pdf_latest_asset_name,
                     pdf_keep_dated_archive,
                 )
+                if not report_pdf_public_url:
+                    report_pdf_public_url = uploaded_pdf_url
             if not report_pdf_public_url:
                 raise RuntimeError(
                     "PDF delivery is enabled, but no public PDF URL is available. "
