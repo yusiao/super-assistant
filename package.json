@@ -1,8 +1,15 @@
 {
   "scripts": {
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test:insurance": "node scripts/test-insurance-planner-v45.mjs && node scripts/test-insurance-catalog-alerts.mjs",
+    "test:insurance:catalog": "node scripts/test-insurance-catalog-alerts.mjs",
+    "test:insurance:simulation": "node scripts/test-insurance-planner-10000.mjs",
+    "test:insurance:api-load": "node scripts/test-insurance-planner-api-load.mjs",
+    "discover:insurance:finfo:index": "node scripts/discover-finfo-catalog.mjs",
+    "discover:insurance:finfo": "node scripts/discover-finfo-products.mjs",
+    "validate:insurance": "node scripts/validate-insurance-products.mjs"
   },
   "devDependencies": {
-    "wrangler": "^4.24.0"
+    "wrangler": "^4.125.0"
   }
 }

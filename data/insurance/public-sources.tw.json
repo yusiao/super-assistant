@@ -1,0 +1,50 @@
+{
+  "updatedAt": "2026-07-15",
+  "sourceNote": "公開來源蒐集器使用的壽險公司首頁與可能商品頁種子。實際商品資料仍以各公司公開條款、費率表與保發中心資料為準。",
+  "sources": [
+    { "tiiCode": "201", "name": "臺銀人壽", "homepage": "https://www.twfhclife.com.tw/" },
+    { "tiiCode": "202", "name": "台灣人壽", "homepage": "https://www.taiwanlife.com/" },
+    { "tiiCode": "203", "name": "保誠人壽", "homepage": "https://www.pcalife.com.tw/" },
+    {
+      "tiiCode": "204",
+      "name": "國泰人壽",
+      "homepage": "https://www.cathaylife.com.tw/",
+      "seedUrls": [
+        "https://www.cathaylife.com.tw/cathaylife/products/health-surgery",
+        "https://www.cathaylife.com.tw/cathaylife/products/accident"
+      ]
+    },
+    { "tiiCode": "205", "name": "凱基人壽", "homepage": "https://www.kgilife.com.tw/" },
+    { "tiiCode": "206", "name": "南山人壽", "homepage": "https://www.nanshanlife.com.tw/" },
+    { "tiiCode": "208", "name": "新光人壽", "homepage": "https://www.skl.com.tw/" },
+    {
+      "tiiCode": "209",
+      "name": "富邦人壽",
+      "homepage": "https://www.fubon.com/life/",
+      "seedUrls": [
+        "https://www.fubon.com/life/product/personal/life-refund/",
+        "https://www.fubon.com/life/product/personal/medical/",
+        "https://www.fubon.com/life/product/personal/long-term-saving/",
+        "https://www.fubon.com/life/product/personal/accident/",
+        "https://www.fubon.com/life/product/personal/annuity-assurance/",
+        "https://www.fubon.com/life/product/personal/investing/",
+        "https://www.fubon.com/life/product/personal/oiu/"
+      ]
+    },
+    { "tiiCode": "211", "name": "三商美邦人壽", "homepage": "https://www.mli.com.tw/" },
+    { "tiiCode": "216", "name": "遠雄人壽", "homepage": "https://www.fglife.com.tw/" },
+    { "tiiCode": "217", "name": "宏泰人壽", "homepage": "https://www.hontai.com.tw/" },
+    { "tiiCode": "218", "name": "安聯人壽", "homepage": "https://www.allianz.com.tw/" },
+    { "tiiCode": "221", "name": "第一金人壽", "homepage": "https://www.firstlife.com.tw/" },
+    { "tiiCode": "222", "name": "合作金庫人壽", "homepage": "https://www.tcb-life.com.tw/" },
+    { "tiiCode": "256", "name": "安達國際人壽", "homepage": "https://life.chubb.com/tw-zh/" },
+    { "tiiCode": "257", "name": "友邦人壽", "homepage": "https://www.aia.com.tw/" },
+    { "tiiCode": "258", "name": "宏利人壽", "homepage": "https://www.manulife.com.tw/" },
+    { "tiiCode": "261", "name": "元大人壽", "homepage": "https://www.yuantalife.com.tw/" },
+    { "tiiCode": "264", "name": "全球人壽", "homepage": "https://www.transglobe.com.tw/" },
+    { "tiiCode": "267", "name": "法國巴黎人壽", "homepage": "https://life.cardif.com.tw/" },
+    { "tiiCode": "270", "name": "安達人壽", "homepage": "https://life.chubb.com/tw-zh/" },
+    { "tiiCode": "271", "name": "匯豐人壽", "homepage": "https://www.insurance.hsbc.com.tw/" },
+    { "tiiCode": "272", "name": "蘇黎世國際人壽", "homepage": "https://www.zurich.com.tw/" }
+  ]
+}

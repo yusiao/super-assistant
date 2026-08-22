@@ -1,0 +1,16 @@
+{
+  "name": "保管",
+  "short_name": "保管",
+  "description": "記錄保單、預估年度保費、評估保障缺口，並依保費預算推薦補強方案。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#18332f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

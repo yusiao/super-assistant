@@ -1,0 +1,119 @@
+{
+  "status": "ok",
+  "catalogUpdatedAt": "2026-08-22",
+  "generatedAt": "2026-08-22T07:01:58.134Z",
+  "totalUsers": 10000,
+  "gender": {
+    "male": 5000,
+    "female": 5000
+  },
+  "distribution": {
+    "10-25": {
+      "users": 2500,
+      "male": 1250,
+      "female": 1250,
+      "usersWithPolicies": 2500,
+      "restrictedUsers": 0,
+      "products": {
+        "DCE": 2500,
+        "LM5": 2500,
+        "CJ2": 2500,
+        "XCD": 2500
+      },
+      "terms": {
+        "DCE 30年期": 2500,
+        "LM5 20年期": 2500,
+        "CJ2 5年期": 2500,
+        "XCD 1年期": 2500
+      },
+      "averagePolicies": 4,
+      "averageAnnualPremium": 6678
+    },
+    "26-40": {
+      "users": 2500,
+      "male": 1250,
+      "female": 1250,
+      "usersWithPolicies": 2500,
+      "restrictedUsers": 0,
+      "products": {
+        "DCE": 2500,
+        "LM5": 2500,
+        "CJ2": 2500,
+        "XCD": 2500
+      },
+      "terms": {
+        "DCE 30年期": 2500,
+        "LM5 20年期": 2500,
+        "CJ2 5年期": 2500,
+        "XCD 1年期": 2500
+      },
+      "averagePolicies": 4,
+      "averageAnnualPremium": 10608
+    },
+    "41-65": {
+      "users": 2500,
+      "male": 1250,
+      "female": 1250,
+      "usersWithPolicies": 2500,
+      "restrictedUsers": 0,
+      "products": {
+        "DCE": 2500,
+        "LM5": 2500,
+        "CJ2": 2500,
+        "XCD": 2500
+      },
+      "terms": {
+        "CJ2 5年期": 2500,
+        "XCD 1年期": 2500,
+        "LM5 20年期": 2300,
+        "DCE 30年期": 500,
+        "DCE 25年期": 500,
+        "DCE 20年期": 500,
+        "DCE 15年期": 500,
+        "DCE 10年期": 500,
+        "LM5 15年期": 200
+      },
+      "averagePolicies": 4,
+      "averageAnnualPremium": 26415
+    },
+    "66+": {
+      "users": 2500,
+      "male": 1250,
+      "female": 1250,
+      "usersWithPolicies": 1900,
+      "restrictedUsers": 600,
+      "products": {
+        "LM5": 1900,
+        "MRE": 1000,
+        "XCD": 500
+      },
+      "terms": {
+        "LM5 6年期": 900,
+        "LM5 10年期": 700,
+        "XCD 1年期": 500,
+        "LM5 15年期": 300
+      },
+      "averagePolicies": 1.36,
+      "averageAnnualPremium": 11627
+    }
+  },
+  "restrictedUsers": 600,
+  "restrictedAgeRange": "85-90",
+  "performance": {
+    "durationMs": 1475.6,
+    "usersPerSecond": 6777,
+    "payloadBytesP50": 1576,
+    "payloadBytesP95": 1588,
+    "payloadBytesMax": 1590
+  },
+  "checks": {
+    "exactGenderSplit": true,
+    "exactAgeGroupSplit": true,
+    "caseInsensitiveCodeLookup": true,
+    "noDuplicatePolicies": true,
+    "noInvalidPremiums": true,
+    "noExpiredProducts": true,
+    "noMissingMainPlans": true,
+    "noBudgetOverruns": true
+  }
+}

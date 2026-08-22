@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#18332f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="保管">
+  <meta name="description" content="記錄保單、預估年度保費、評估保障缺口，並依保費預算推薦補強方案。">
+  <title>保管</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="保管">
+      <span class="brand-mark">保</span>
+      <span>
+        <strong>保管</strong>
+        <small>保單管理</small>
+      </span>
+    </a>
+    <nav class="top-actions" aria-label="資料操作">
+      <button id="accountButton" type="button">登入</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">年度保費與保障缺口</p>
+        <h1>把保單、保費與缺口整理成一張可行動的地圖</h1>
+        <p class="lede">輸入目前擁有的保單後，網站會估算未來保費、判斷保障是否不足，並在你的保費上限內挑出較合適的補強或替代方案。</p>
+        <div class="source-note">
+          市場熱度參考金管會保險局「114 年 12 月保險市場重要指標」與常見保障需求分類；此工具不是保險招攬、核保或理賠承諾。
+        </div>
+      </div>
+
+      <form class="profile-card" id="profileForm">
+        <div class="card-heading">
+          <p>你的條件</p>
+          <h2>預算與家庭狀態</h2>
+        </div>
+        <div class="profile-grid">
+          <label>
+            年齡
+            <input id="age" name="age" type="number" min="18" max="85" inputmode="numeric">
+          </label>
+          <label>
+            扶養人數
+            <input id="dependents" name="dependents" type="number" min="0" max="8" inputmode="numeric">
+          </label>
+          <label>
+            年收入
+            <input id="annualIncome" name="annualIncome" type="number" min="0" step="10000" inputmode="numeric">
+          </label>
+          <label>
+            負債餘額
+            <input id="debt" name="debt" type="number" min="0" step="10000" inputmode="numeric">
+          </label>
+          <label>
+            每月保費上限
+            <input id="monthlyBudget" name="monthlyBudget" type="number" min="0" step="500" inputmode="numeric">
+          </label>
+          <label>
+            規劃年期
+            <select id="horizon" name="horizon">
+              <option value="10">10 年</option>
+              <option value="20">20 年</option>
+              <option value="30">30 年</option>
+            </select>
+          </label>
+        </div>
+        <fieldset class="priority-field">
+          <legend>推薦策略</legend>
+          <div class="segmented">
+            <label><input type="radio" name="priority" value="balanced"><span>平衡</span></label>
+            <label><input type="radio" name="priority" value="lowPremium"><span>省保費</span></label>
+            <label><input type="radio" name="priority" value="coverage"><span>補足優先</span></label>
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    <section class="metrics" aria-label="總覽">
+      <article>
+        <span>目前壽險責任額</span>
+        <strong id="lifeNeedMetric">--</strong>
+        <small id="lifeNeedCopy">依年齡、扶養責任與貸款估算</small>
+      </article>
+      <article>
+        <span>今年年繳保費</span>
+        <strong id="premiumMetric">--</strong>
+        <small id="budgetCopy">尚未設定保費</small>
+      </article>
+      <article>
+        <span>規劃期末保費</span>
+        <strong id="futurePremiumMetric">--</strong>
+        <small id="premiumTrendCopy">看定期保單漲幅</small>
+      </article>
+      <article>
+        <span>預算空間</span>
+        <strong id="budgetMetric">--</strong>
+        <small id="budgetHealthCopy">依每月上限計算</small>
+      </article>
+    </section>
+
+    <section class="workbench">
+      <article class="panel policy-editor">
+        <div class="card-heading">
+          <p>新增或編輯</p>
+          <h2>保單資料</h2>
+        </div>
+        <form id="policyForm">
+          <input id="policyId" type="hidden">
+          <div class="form-grid">
+            <label>
+              保險代號
+              <div class="code-combobox">
+                <input id="productCode" type="text" autocomplete="off" placeholder="例：XCD" aria-autocomplete="list" aria-expanded="false" aria-controls="productCodeSuggestions">
+                <div id="productCodeSuggestions" class="product-code-suggestions" role="listbox" hidden></div>
+              </div>
+              <span id="productCodeStatus" class="field-hint">大小寫皆可；輸入代號後會自動帶入已知商品資料，查不到也可以手動填寫。</span>
+            </label>
+            <div class="form-field">
+              <label for="policyOwner">被保險人</label>
+              <div class="person-picker">
+                <select id="policyOwner">
+                  <option value="self">自己</option>
+                  <option value="father">爸爸</option>
+                  <option value="mother">媽媽</option>
+                  <option value="spouse">配偶</option>
+                  <option value="child">孩子</option>
+                  <option value="other">其他家人</option>
+                </select>
+                <button class="icon-button" type="button" id="addInsuredPersonButton" aria-label="新增被保險人" title="新增被保險人">+</button>
+              </div>
+              <span class="field-hint">選擇成員後會自動帶入資料；按右側 + 可新增自訂名稱。</span>
+            </div>
+            <label>
+              性別
+              <select id="insuredGender">
+                <option value="male">男性</option>
+                <option value="female">女性</option>
+              </select>
+            </label>
+            <label>
+              職業類別
+              <select id="occupationClass">
+                <option value="1">第 1 類</option>
+                <option value="2">第 2 類</option>
+                <option value="3">第 3 類</option>
+                <option value="4">第 4 類</option>
+                <option value="5">第 5 類</option>
+                <option value="6">第 6 類</option>
+              </select>
+            </label>
+            <label>
+              目前年齡
+              <input id="insuredCurrentAge" type="number" min="0" max="100" inputmode="numeric" placeholder="例：35">
+            </label>
+            <label>
+              投保年份
+              <input id="policyStartYear" type="number" min="1900" max="2100" inputmode="numeric" placeholder="例：2021">
+              <input id="policyStartAge" type="hidden">
+            </label>
+            <label id="premiumTermField" hidden>
+              繳費年期
+              <select id="premiumTerm"></select>
+            </label>
+            <label class="wide">
+              保單名稱
+              <input id="policyName" type="text" autocomplete="off" placeholder="例：醫療實支實付 A 計畫">
+            </label>
+            <label>
+              保險公司
+              <input id="insurer" type="text" autocomplete="organization" placeholder="例：某某人壽">
+            </label>
+            <label>
+              保障類型
+              <select id="category">
+                <option value="medical">醫療 / 實支實付</option>
+                <option value="critical">重大傷病 / 癌症</option>
+                <option value="life">壽險</option>
+                <option value="accident">意外</option>
+                <option value="disability">失能</option>
+                <option value="longcare">長照</option>
+                <option value="savings">儲蓄 / 年金</option>
+              </select>
+            </label>
+            <label>
+              保障額度（萬元）
+              <input id="coverageWan" type="number" min="0" step="0.1" inputmode="decimal" placeholder="300">
+            </label>
+            <label>
+              方案／計畫別
+              <select id="planNameSelect" hidden></select>
+              <input id="planName" type="text" autocomplete="off" placeholder="例：計劃三（雜費15萬）">
+              <span id="planNameHint" class="field-hint">有公開方案資料時可直接選擇。</span>
+            </label>
+            <label>
+              目前年繳保費
+              <input id="annualPremium" type="number" min="0" step="1" inputmode="numeric" placeholder="12000">
+            </label>
+            <label>
+              繳費或保障至幾歲
+              <input id="endAge" type="number" min="18" max="110" inputmode="numeric" placeholder="75">
+            </label>
+            <label>
+              保費模式（系統判定）
+              <input id="premiumModeDisplay" type="text" value="輸入代號後自動判定" readonly>
+              <input id="premiumMode" type="hidden" value="level">
+              <span class="field-hint">依 Finfo 商品費率表或商品內容判定，使用者不需自行選擇。</span>
+            </label>
+            <label id="growthRateField" hidden>
+              年增率（系統判定）
+              <input id="growthRate" type="number" min="0" max="40" step="0.1" inputmode="decimal" placeholder="5" readonly>
+            </label>
+            <label class="wide">
+              備註
+              <textarea id="policyNote" rows="2" placeholder="例：附約、等待期、是否保證續保、已知限制"></textarea>
+            </label>
+          </div>
+          <div id="rateResult" class="rate-result"></div>
+          <div class="form-actions">
+            <div class="form-action-primary">
+              <button class="primary-button" type="submit" id="savePolicyButton">儲存保單</button>
+              <button class="ghost-button" type="submit" id="saveAndAddPolicyButton">儲存並新增同批保單</button>
+            </div>
+            <button class="ghost-button" type="button" id="clearPolicyButton">清空表單</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel forecast-panel">
+        <div class="benefit-overview">
+          <div class="card-heading">
+            <p>理賠保障</p>
+            <h2>理賠項目與金額</h2>
+          </div>
+          <div id="benefitChart" class="benefit-chart" aria-label="理賠項目與金額圖表"></div>
+        </div>
+        <div class="card-heading">
+          <p>未來成本</p>
+          <h2>年度保費預估</h2>
+        </div>
+        <div id="forecastTable" class="forecast-table"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div class="card-heading">
+          <p>目前擁有</p>
+          <h2>保單清單</h2>
+        </div>
+        <button class="danger-button" id="resetButton" type="button">清除全部</button>
+      </div>
+      <div id="policyList" class="policy-list"></div>
+    </section>
+
+    <section class="panel claims-panel" id="claimsSection">
+      <div class="section-head">
+        <div class="card-heading">
+          <p>事故與疾病</p>
+          <h2>理賠專區</h2>
+        </div>
+        <span class="budget-badge">可申請初判</span>
+      </div>
+      <div class="claims-layout">
+        <form id="claimForm" class="claim-form">
+          <label>
+            被保險人
+            <select id="claimOwner"></select>
+          </label>
+          <label>
+            發生日期
+            <input id="claimEventDate" type="date">
+          </label>
+          <label class="wide">
+            最近發生的狀況
+            <textarea id="claimDescription" rows="5" maxlength="800" placeholder="例：昨天發生車禍，送急診後住院三天並接受骨折手術" required></textarea>
+          </label>
+          <button class="primary-button" type="submit">比對可申請保單</button>
+        </form>
+        <div id="claimResult" class="claim-result" aria-live="polite">
+          <div class="empty-state compact">選擇被保險人並輸入事故或疾病狀況。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel recommendations-panel">
+      <div class="section-head">
+        <div class="card-heading">
+          <p>預算內方案</p>
+          <h2>補強與替代建議</h2>
+        </div>
+        <span id="recommendationBudget" class="budget-badge">--</span>
+      </div>
+      <div id="replacementBox" class="replacement-box"></div>
+      <div id="recommendationPlan" class="recommendation-plan"></div>
+      <div class="catalog-head">
+        <div>
+          <p class="eyebrow">熱門保障類型</p>
+          <h3>常見保單方向</h3>
+        </div>
+        <small>Finfo 採用熱度是 CP 值排序訊號之一，仍需綜合保障內容、費率、預算與個人條件。</small>
+      </div>
+      <div id="catalogGrid" class="catalog-grid"></div>
+    </section>
+
+    <section class="panel cancer-underwriting-panel">
+      <div class="section-head">
+        <div class="card-heading">
+          <p>癌症病史核保</p>
+          <h2>曾罹癌者可保性初評</h2>
+        </div>
+        <span id="cancerRiskBadge" class="budget-badge">未填寫</span>
+      </div>
+      <div class="cancer-layout">
+        <form id="cancerForm" class="cancer-form">
+          <div class="form-grid">
+            <label>
+              是否曾罹患癌症
+              <select id="hasCancerHistory">
+                <option value="no">沒有</option>
+                <option value="yes">有</option>
+              </select>
+            </label>
+            <div id="cancerHistoryDetails" class="cancer-history-fields" hidden>
+              <label>
+                癌症種類
+                <select id="cancerType">
+                  <option value="">請選擇癌症種類</option>
+                  <option value="breast">乳癌</option>
+                  <option value="colorectal">大腸直腸癌</option>
+                  <option value="thyroid">甲狀腺癌</option>
+                  <option value="cervical">子宮頸癌</option>
+                  <option value="prostate">攝護腺癌</option>
+                  <option value="lung">肺癌</option>
+                  <option value="liver">肝癌</option>
+                  <option value="blood">血液癌 / 淋巴癌</option>
+                  <option value="other">其他癌症</option>
+                </select>
+              </label>
+              <label>
+                診斷年齡
+                <input id="diagnosisAge" type="number" min="0" max="90" inputmode="numeric" placeholder="請輸入確診時年齡">
+              </label>
+              <label>
+                癌症期數
+                <select id="cancerStage">
+                  <option value="0">0 期 / 原位癌</option>
+                  <option value="1">第 1 期</option>
+                  <option value="2">第 2 期</option>
+                  <option value="3">第 3 期</option>
+                  <option value="4">第 4 期</option>
+                  <option value="unknown">不確定</option>
+                </select>
+              </label>
+              <label>
+                是否擴散或轉移
+                <select id="metastatic">
+                  <option value="no">沒有</option>
+                  <option value="localNode">局部淋巴結</option>
+                  <option value="distant">遠端轉移</option>
+                  <option value="unknown">不確定</option>
+                </select>
+              </label>
+              <label>
+                治療狀態
+                <select id="treatmentStatus">
+                  <option value="remission">已完成治療且追蹤穩定</option>
+                  <option value="maintenance">仍需荷爾蒙 / 標靶等維持治療</option>
+                  <option value="active">治療中</option>
+                  <option value="recurrence">曾復發或目前疑似復發</option>
+                </select>
+              </label>
+              <label>
+                治療完成後幾年
+                <input id="yearsSinceTreatment" type="number" min="0" max="40" step="0.5" inputmode="decimal" placeholder="5">
+              </label>
+              <label>
+                最近追蹤結果
+                <select id="latestFollowup">
+                  <option value="normal">穩定 / 無復發證據</option>
+                  <option value="minor">仍需密切追蹤</option>
+                  <option value="abnormal">異常或待確認</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </form>
+        <div class="cancer-result">
+          <div id="cancerSummary" class="underwriting-summary"></div>
+          <div id="insurableList" class="insurable-list"></div>
+          <div id="restrictionList" class="restriction-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="member-dialog account-dialog" id="accountDialog" aria-labelledby="accountDialogTitle">
+    <section id="accountSignedOut">
+      <div class="card-heading">
+        <p>雲端帳號</p>
+        <h2 id="accountDialogTitle">登入保管</h2>
+      </div>
+      <div class="account-mode-tabs" role="tablist" aria-label="帳號操作">
+        <button type="button" id="accountLoginTab" role="tab" aria-selected="true">登入</button>
+        <button type="button" id="accountRegisterTab" role="tab" aria-selected="false">註冊</button>
+      </div>
+      <form id="accountForm">
+        <input id="accountMode" type="hidden" value="login">
+        <label id="accountDisplayNameField" hidden>
+          顯示名稱
+          <input id="accountDisplayName" type="text" maxlength="30" autocomplete="name" placeholder="例：王小明">
+        </label>
+        <label>
+          帳號
+          <input id="accountUsername" type="text" minlength="4" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="英文、數字或 Email" required>
+        </label>
+        <label>
+          密碼
+          <input id="accountPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="至少 8 個字元" required>
+        </label>
+        <label id="accountPrivacyField" class="privacy-consent" hidden>
+          <input id="accountPrivacyConsent" type="checkbox">
+          <span>我同意將保單、家庭成員與癌症病史等敏感資料加密傳輸並儲存在雲端帳號中。</span>
+        </label>
+        <details class="privacy-details">
+          <summary>資料與隱私說明</summary>
+          <p>資料只用於保單管理、保費試算與保障分析，不會用於保險招攬。你可在登入後永久刪除帳號與全部雲端資料。</p>
+        </details>
+        <p id="accountFormStatus" class="account-status" role="status"></p>
+        <div class="form-actions">
+          <button class="ghost-button" type="button" id="cancelAccountButton">取消</button>
+          <button class="primary-button" type="submit" id="accountSubmitButton">登入</button>
+        </div>
+      </form>
+    </section>
+    <section id="accountSignedIn" hidden>
+      <div class="card-heading">
+        <p>雲端帳號</p>
+        <h2 id="accountUserName">已登入</h2>
+      </div>
+      <dl class="account-summary">
+        <div><dt>帳號</dt><dd id="accountUserId"></dd></div>
+        <div><dt>保單</dt><dd id="accountPolicyCount">0 張</dd></div>
+        <div><dt>同步狀態</dt><dd id="accountSyncStatus">已同步</dd></div>
+      </dl>
+      <p class="dialog-copy">保單、家庭成員與癌症病史會同步至雲端。永久刪除帳號後無法復原。</p>
+      <div class="form-actions" id="accountSignedInActions">
+        <button class="danger-button" type="button" id="deleteAccountButton">刪除帳號</button>
+        <button class="ghost-button" type="button" id="closeAccountButton">關閉</button>
+        <button class="ghost-button" type="button" id="logoutButton">登出</button>
+      </div>
+      <form id="accountDeleteForm" class="account-delete-form" hidden>
+        <label>
+          輸入目前密碼
+          <input id="accountDeletePassword" type="password" maxlength="128" autocomplete="current-password">
+        </label>
+        <label class="privacy-consent">
+          <input id="accountDeleteConfirm" type="checkbox">
+          <span>我了解帳號、所有保單、家庭成員及健康資料會永久刪除且無法復原。</span>
+        </label>
+        <p id="accountDeleteStatus" class="account-status" role="status"></p>
+        <div class="form-actions">
+          <button class="ghost-button" type="button" id="cancelDeleteAccountButton">取消</button>
+          <button class="danger-button" type="submit" id="confirmDeleteAccountButton">永久刪除</button>
+        </div>
+      </form>
+    </section>
+  </dialog>
+
+  <dialog class="member-dialog" id="insuredPersonDialog" aria-labelledby="insuredPersonDialogTitle">
+    <form id="insuredPersonForm">
+      <div class="card-heading">
+        <p>家庭成員</p>
+        <h2 id="insuredPersonDialogTitle">新增被保險人</h2>
+      </div>
+      <label for="insuredPersonName">名稱</label>
+      <input id="insuredPersonName" type="text" maxlength="30" autocomplete="name" placeholder="例：大寶、阿嬤" required>
+      <p class="dialog-copy">新增後，系統會替這位成員記住性別、目前年齡與職業類別。</p>
+      <div class="form-actions">
+        <button class="ghost-button" type="button" id="cancelInsuredPersonButton">取消</button>
+        <button class="primary-button" type="submit">新增成員</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app-v45.js"></script>
+</body>
+</html>

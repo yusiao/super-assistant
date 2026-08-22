@@ -1,0 +1,50 @@
+name: Manual insurance planner staging API load test
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Preview or staging URL containing staging, preview, or load-test
+        required: true
+        type: string
+      users:
+        description: Synthetic accounts (1-10000)
+        required: true
+        default: "200"
+        type: string
+      concurrency:
+        description: Concurrent virtual users (1-250)
+        required: true
+        default: "25"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  api-load:
+    runs-on: ubuntu-latest
+    environment: insurance-load-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run isolated account and D1 API load test
+        env:
+          INSURANCE_LOAD_BASE_URL: ${{ inputs.base_url }}
+          INSURANCE_LOAD_USERS: ${{ inputs.users }}
+          INSURANCE_LOAD_CONCURRENCY: ${{ inputs.concurrency }}
+          INSURANCE_LOAD_CONFIRM_STAGING: YES
+          INSURANCE_LOAD_TOKEN: ${{ secrets.INSURANCE_LOAD_TOKEN }}
+        run: node scripts/test-insurance-planner-api-load.mjs
+
+      - name: Upload load report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insurance-api-load-report
+          path: output/insurance-planner/api-load-report.json
+          if-no-files-found: warn

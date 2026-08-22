@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-22T14:48:18.504Z",
+  "baselineCreated": false,
+  "thresholds": {
+    "minPopularity": 10,
+    "minPopularityIncrease": 10,
+    "popularityGrowthRatio": 1.5
+  },
+  "monitoredProducts": 11,
+  "requestedCodes": 2,
+  "unresolvedCount": 0,
+  "alerts": []
+}

@@ -1,0 +1,3427 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T13:16:43.248Z",
+  "sitemapUrl": "https://finfo.tw/sitemap.xml.gz",
+  "sitemapPages": [
+    {
+      "url": "https://finfo.tw/sitemap.xml.gz",
+      "locations": 2,
+      "type": "index"
+    },
+    {
+      "url": "https://finfo.tw/sitemap1.xml.gz",
+      "locations": 50000,
+      "type": "urlset"
+    },
+    {
+      "url": "https://finfo.tw/sitemap2.xml.gz",
+      "locations": 552,
+      "type": "urlset"
+    }
+  ],
+  "totalUrls": 50550,
+  "lifeProductVersions": 8485,
+  "uniqueCodes": 3527,
+  "duplicateCodeCount": 398,
+  "duplicateCodes": [
+    {
+      "code": "06",
+      "insurers": [
+        "中央人壽",
+        "臺銀人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "1A",
+      "insurers": [
+        "臺銀人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "1P",
+      "insurers": [
+        "臺銀人壽",
+        "中國人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "1Q",
+      "insurers": [
+        "臺銀人壽",
+        "中國人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "1V",
+      "insurers": [
+        "臺銀人壽",
+        "中國人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "1W",
+      "insurers": [
+        "中國人壽",
+        "臺銀人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "25",
+      "insurers": [
+        "中國人壽",
+        "中央人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "2U",
+      "insurers": [
+        "新光人壽",
+        "中國人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "A2",
+      "insurers": [
+        "元大人壽",
+        "國寶人壽"
+      ],
+      "versions": 14
+    },
+    {
+      "code": "AA",
+      "insurers": [
+        "台灣人壽",
+        "國寶人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "ACA",
+      "insurers": [
+        "新光人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "ADB",
+      "insurers": [
+        "友邦人壽",
+        "富邦人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "ADBR",
+      "insurers": [
+        "友邦人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "ADD",
+      "insurers": [
+        "宏利人壽",
+        "安泰人壽",
+        "台新人壽",
+        "友邦人壽",
+        "台灣人壽",
+        "保誠人壽",
+        "三商美邦人壽",
+        "幸福人壽",
+        "國華人壽",
+        "保德信國際人壽",
+        "新光人壽"
+      ],
+      "versions": 30
+    },
+    {
+      "code": "ADDR",
+      "insurers": [
+        "三商美邦人壽",
+        "安達人壽"
+      ],
+      "versions": 13
+    },
+    {
+      "code": "ADIPA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "AHCL",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "AHI",
+      "insurers": [
+        "富邦人壽",
+        "宏泰人壽",
+        "安泰人壽"
+      ],
+      "versions": 17
+    },
+    {
+      "code": "AHRL",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "AI",
+      "insurers": [
+        "南山人壽",
+        "富邦人壽"
+      ],
+      "versions": 19
+    },
+    {
+      "code": "AIR",
+      "insurers": [
+        "安聯人壽",
+        "中國人壽",
+        "南山人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "ALES",
+      "insurers": [
+        "南山人壽",
+        "安泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "AMRS",
+      "insurers": [
+        "富邦人壽",
+        "安聯人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "AMTIPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "APAED",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽",
+        "保誠人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "APBIA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "APJGPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "APJHPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "APKEPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "APKMPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "APKQTL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "APKZPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "APLHPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "APMHPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "APWHPL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "AQ0",
+      "insurers": [
+        "台灣人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "AS",
+      "insurers": [
+        "新光人壽",
+        "中央人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "ATCA",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "ATMR",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 18
+    },
+    {
+      "code": "AW",
+      "insurers": [
+        "新光人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "AY1",
+      "insurers": [
+        "台灣人壽",
+        "遠雄人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "B1",
+      "insurers": [
+        "南山人壽",
+        "國泰人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "B2",
+      "insurers": [
+        "南山人壽",
+        "國泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "BAA",
+      "insurers": [
+        "新光人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "BB",
+      "insurers": [
+        "台灣人壽",
+        "新光人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "BCA",
+      "insurers": [
+        "新光人壽",
+        "遠雄人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "BHCL",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "BPA",
+      "insurers": [
+        "宏泰人壽",
+        "新光人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "BPAA",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "BQ",
+      "insurers": [
+        "國泰人壽",
+        "國華人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "BT",
+      "insurers": [
+        "新光人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "C2",
+      "insurers": [
+        "新光人壽",
+        "元大人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "CAR",
+      "insurers": [
+        "南山人壽",
+        "環球瑞泰人壽",
+        "台灣人壽"
+      ],
+      "versions": 17
+    },
+    {
+      "code": "CE",
+      "insurers": [
+        "新光人壽",
+        "國泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "CHRL",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "CI",
+      "insurers": [
+        "宏泰人壽",
+        "新光人壽",
+        "紐約人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "CIA",
+      "insurers": [
+        "宏泰人壽",
+        "友邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "CIR",
+      "insurers": [
+        "友邦人壽",
+        "大都會國際人壽",
+        "中國信託人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "CL1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "CP",
+      "insurers": [
+        "宏泰人壽",
+        "國泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "CQ1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "CR",
+      "insurers": [
+        "南山人壽",
+        "保德信國際人壽",
+        "三商美邦人壽",
+        "喬治亞人壽",
+        "紐約人壽",
+        "臺銀人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "CR2",
+      "insurers": [
+        "安聯人壽",
+        "中國人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "CT",
+      "insurers": [
+        "國華人壽",
+        "保誠人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "CV1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "CW1",
+      "insurers": [
+        "興農人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "CWB",
+      "insurers": [
+        "統一安聯人壽",
+        "國泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "CY",
+      "insurers": [
+        "元大人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "DB",
+      "insurers": [
+        "新光人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "DCA",
+      "insurers": [
+        "全球人壽",
+        "新光人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "DCB",
+      "insurers": [
+        "宏泰人壽",
+        "全球人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "DCE",
+      "insurers": [
+        "宏泰人壽",
+        "全球人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "DCF",
+      "insurers": [
+        "宏泰人壽",
+        "全球人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "DCTR",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "DD123",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "DDA",
+      "insurers": [
+        "中國信託人壽",
+        "新光人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "DDAR",
+      "insurers": [
+        "安聯人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "DDB",
+      "insurers": [
+        "全球人壽",
+        "南山人壽",
+        "安泰人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "DDR",
+      "insurers": [
+        "宏泰人壽",
+        "合作金庫人壽",
+        "保德信國際人壽",
+        "康健人壽",
+        "南山人壽",
+        "安聯人壽"
+      ],
+      "versions": 12
+    },
+    {
+      "code": "DH",
+      "insurers": [
+        "元大人壽",
+        "新光人壽",
+        "國泰人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "DHI",
+      "insurers": [
+        "南山人壽",
+        "中國人壽",
+        "興農人壽",
+        "國華人壽",
+        "國寶人壽"
+      ],
+      "versions": 17
+    },
+    {
+      "code": "DI",
+      "insurers": [
+        "元大人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "DI1",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "DIR",
+      "insurers": [
+        "安達人壽",
+        "台灣人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "DP",
+      "insurers": [
+        "元大人壽",
+        "宏泰人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "DPA",
+      "insurers": [
+        "台灣人壽",
+        "國泰人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "DPAA",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "DR",
+      "insurers": [
+        "安達人壽",
+        "紐約人壽",
+        "國華人壽",
+        "安聯人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "DT",
+      "insurers": [
+        "國泰人壽",
+        "宏泰人壽",
+        "元大人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "DU",
+      "insurers": [
+        "國泰人壽",
+        "新光人壽",
+        "元大人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "DV",
+      "insurers": [
+        "國泰人壽",
+        "元大人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "DW1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "EA",
+      "insurers": [
+        "臺銀人壽",
+        "元大人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "ECTR",
+      "insurers": [
+        "保誠人壽",
+        "中國人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "EDA",
+      "insurers": [
+        "富邦人壽",
+        "全球人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "EE",
+      "insurers": [
+        "新光人壽",
+        "臺銀人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "EF",
+      "insurers": [
+        "國華人壽",
+        "元大人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "EL",
+      "insurers": [
+        "元大人壽",
+        "臺銀人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "EPA",
+      "insurers": [
+        "全球人壽",
+        "合作金庫人壽",
+        "安聯人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "EPAA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "ESA",
+      "insurers": [
+        "新光人壽",
+        "全球人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "FA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "FCA",
+      "insurers": [
+        "宏泰人壽",
+        "新光人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "FD",
+      "insurers": [
+        "臺銀人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "FG1",
+      "insurers": [
+        "遠雄人壽",
+        "國泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "FILA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "FIR",
+      "insurers": [
+        "安聯人壽",
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "FL",
+      "insurers": [
+        "三商美邦人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "FT",
+      "insurers": [
+        "臺銀人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "FV",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "FWL",
+      "insurers": [
+        "三商美邦人壽",
+        "富邦人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "FX2",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "FX4",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "FX7",
+      "insurers": [
+        "遠雄人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "FX8",
+      "insurers": [
+        "遠雄人壽",
+        "國泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "G1",
+      "insurers": [
+        "台灣人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "G4",
+      "insurers": [
+        "國泰人壽",
+        "台灣人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "G7",
+      "insurers": [
+        "台灣人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "GL",
+      "insurers": [
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "GM",
+      "insurers": [
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "GN",
+      "insurers": [
+        "臺銀人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "GNHRL",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "GQ",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "GWPR",
+      "insurers": [
+        "三商美邦人壽",
+        "中國人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "H1",
+      "insurers": [
+        "元大人壽",
+        "紐約人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "HA",
+      "insurers": [
+        "臺銀人壽",
+        "國泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HAA",
+      "insurers": [
+        "康健人壽",
+        "新光人壽",
+        "富邦人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "HAB",
+      "insurers": [
+        "安達人壽",
+        "富邦人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HB",
+      "insurers": [
+        "臺銀人壽",
+        "國泰人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HC",
+      "insurers": [
+        "元大人壽",
+        "臺銀人壽",
+        "宏泰人壽",
+        "南山人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "HCA",
+      "insurers": [
+        "新光人壽",
+        "宏泰人壽"
+      ],
+      "versions": 12
+    },
+    {
+      "code": "HCB",
+      "insurers": [
+        "全球人壽",
+        "宏泰人壽",
+        "康健人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "HCR",
+      "insurers": [
+        "三商美邦人壽",
+        "全球人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "HDAAAN",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HDBBBN",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HE",
+      "insurers": [
+        "臺銀人壽",
+        "宏泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "HF",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "新光人壽",
+        "宏泰人壽"
+      ],
+      "versions": 15
+    },
+    {
+      "code": "HF1",
+      "insurers": [
+        "遠雄人壽",
+        "國泰人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "HFA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HH",
+      "insurers": [
+        "新光人壽",
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "HI",
+      "insurers": [
+        "元大人壽",
+        "宏泰人壽",
+        "保德信國際人壽",
+        "台灣人壽",
+        "台新人壽",
+        "宏利人壽",
+        "國泰人壽"
+      ],
+      "versions": 12
+    },
+    {
+      "code": "HIB",
+      "insurers": [
+        "保誠人壽",
+        "富邦人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HIR",
+      "insurers": [
+        "南山人壽",
+        "三商美邦人壽",
+        "全球人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "HIW",
+      "insurers": [
+        "富邦人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HJ",
+      "insurers": [
+        "臺銀人壽",
+        "元大人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "HK",
+      "insurers": [
+        "新光人壽",
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "HM",
+      "insurers": [
+        "中國人壽",
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "HMI",
+      "insurers": [
+        "宏利人壽",
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "HMR",
+      "insurers": [
+        "宏利人壽",
+        "富邦人壽",
+        "安聯人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "HN",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "國泰人壽",
+        "臺銀人壽",
+        "新光人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "HNRB",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 14
+    },
+    {
+      "code": "HQ",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽",
+        "國華人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HR",
+      "insurers": [
+        "南山人壽",
+        "紐約人壽",
+        "元大人壽",
+        "臺銀人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "HRA",
+      "insurers": [
+        "富邦人壽",
+        "保誠人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "HS",
+      "insurers": [
+        "富邦人壽",
+        "元大人壽",
+        "南山人壽",
+        "宏泰人壽",
+        "保德信國際人壽",
+        "台新人壽",
+        "紐約人壽",
+        "臺銀人壽",
+        "新光人壽",
+        "喬治亞人壽"
+      ],
+      "versions": 44
+    },
+    {
+      "code": "HSD",
+      "insurers": [
+        "南山人壽",
+        "宏泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HSE",
+      "insurers": [
+        "富邦人壽",
+        "宏泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "HSF",
+      "insurers": [
+        "富邦人壽",
+        "宏泰人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HSG",
+      "insurers": [
+        "富邦人壽",
+        "南山人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "HSR",
+      "insurers": [
+        "安泰人壽",
+        "保誠人壽",
+        "三商美邦人壽",
+        "環球瑞泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HSRN",
+      "insurers": [
+        "安泰人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HTA",
+      "insurers": [
+        "國泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "HTLA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "HX",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "臺銀人壽",
+        "國華人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "HXA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "HXB",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "ICG",
+      "insurers": [
+        "全球人壽",
+        "幸福人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "ICI",
+      "insurers": [
+        "合作金庫人壽",
+        "三商美邦人壽",
+        "富邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "IHI",
+      "insurers": [
+        "法商法國巴黎人壽",
+        "幸福人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "IJ",
+      "insurers": [
+        "新光人壽",
+        "國華人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "IL",
+      "insurers": [
+        "台灣人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "ILA",
+      "insurers": [
+        "新光人壽",
+        "第一金人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "IPA",
+      "insurers": [
+        "安聯人壽",
+        "台灣人壽",
+        "南山人壽",
+        "安泰人壽",
+        "宏泰人壽"
+      ],
+      "versions": 24
+    },
+    {
+      "code": "ISA",
+      "insurers": [
+        "南山人壽",
+        "宏泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "ISCN",
+      "insurers": [
+        "保誠人壽",
+        "中國人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "ISPA",
+      "insurers": [
+        "康健人壽",
+        "安達人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "IV",
+      "insurers": [
+        "新光人壽",
+        "元大人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "JA",
+      "insurers": [
+        "元大人壽",
+        "臺銀人壽",
+        "國泰人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "JB",
+      "insurers": [
+        "元大人壽",
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "JC",
+      "insurers": [
+        "元大人壽",
+        "臺銀人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "JD",
+      "insurers": [
+        "新光人壽",
+        "元大人壽",
+        "臺銀人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "JE",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "JF",
+      "insurers": [
+        "元大人壽",
+        "臺銀人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "JG",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "JN",
+      "insurers": [
+        "國泰人壽",
+        "臺銀人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "JO",
+      "insurers": [
+        "元大人壽",
+        "國泰人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "JQ",
+      "insurers": [
+        "遠雄人壽",
+        "全球人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "JR",
+      "insurers": [
+        "元大人壽",
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "JT",
+      "insurers": [
+        "元大人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "JTL",
+      "insurers": [
+        "友邦人壽",
+        "富邦人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "JWA",
+      "insurers": [
+        "國泰人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "LE",
+      "insurers": [
+        "中國信託人壽",
+        "元大人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "LEGOAE",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "LEGOHG",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "LEGOLA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "LEGOQA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "LEGORA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "LEGOTA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "LEGOVB",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "LEGOYD",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "LEGOZA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "LL",
+      "insurers": [
+        "國泰人壽",
+        "元大人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "LLE",
+      "insurers": [
+        "幸福人壽",
+        "全球人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "LPA",
+      "insurers": [
+        "安聯人壽",
+        "法國法國巴黎人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "LPPMI",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "LS",
+      "insurers": [
+        "友邦人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "LTC",
+      "insurers": [
+        "宏泰人壽",
+        "安聯人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "LTC2",
+      "insurers": [
+        "第一金人壽",
+        "台灣人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "LTR",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "LWC",
+      "insurers": [
+        "全球人壽",
+        "幸福人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "LWL",
+      "insurers": [
+        "台灣人壽",
+        "全球人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "M4",
+      "insurers": [
+        "國泰人壽",
+        "元大人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "MADD",
+      "insurers": [
+        "宏泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "MAJIDB",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MAJIEA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "MAJIGC",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MAJIOA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MAJIPB",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "MAJIQA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MAJISA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MAJITA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MAJIUA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "MAJIWA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "MAJIXA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MBE",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MBR",
+      "insurers": [
+        "安聯人壽",
+        "安達人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "MC",
+      "insurers": [
+        "元大人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MDD",
+      "insurers": [
+        "中國信託人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MEPAAA",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "MI",
+      "insurers": [
+        "元大人壽",
+        "中國人壽",
+        "紐約人壽"
+      ],
+      "versions": 17
+    },
+    {
+      "code": "MICAAI",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MIPA",
+      "insurers": [
+        "宏泰人壽",
+        "台灣人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "ML",
+      "insurers": [
+        "中國人壽",
+        "保誠人壽",
+        "凱基人壽"
+      ],
+      "versions": 14
+    },
+    {
+      "code": "MPA",
+      "insurers": [
+        "富邦人壽",
+        "南山人壽",
+        "新光人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "MR",
+      "insurers": [
+        "宏泰人壽",
+        "元大人壽",
+        "安泰人壽",
+        "台新人壽",
+        "紐約人壽",
+        "新光人壽",
+        "保德信國際人壽"
+      ],
+      "versions": 20
+    },
+    {
+      "code": "MRA",
+      "insurers": [
+        "遠雄人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MRB",
+      "insurers": [
+        "遠雄人壽",
+        "國華人壽",
+        "富邦人壽"
+      ],
+      "versions": 15
+    },
+    {
+      "code": "MRE",
+      "insurers": [
+        "遠雄人壽",
+        "宏泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MRS",
+      "insurers": [
+        "宏泰人壽",
+        "紐約人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MS",
+      "insurers": [
+        "南山人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "MSCN",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "MT",
+      "insurers": [
+        "中國人壽",
+        "國泰人壽",
+        "保誠人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "N",
+      "insurers": [
+        "第一金人壽",
+        "安達人壽",
+        "合作金庫人壽",
+        "台灣人壽",
+        "國泰人壽",
+        "法國巴黎人壽",
+        "康健人壽",
+        "中國人壽",
+        "法商法國巴黎人壽",
+        "保誠人壽",
+        "元大人壽",
+        "全球人壽",
+        "安聯人壽",
+        "紐約人壽",
+        "南山人壽",
+        "中央人壽",
+        "新光人壽"
+      ],
+      "versions": 90
+    },
+    {
+      "code": "NA",
+      "insurers": [
+        "新光人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "NADD",
+      "insurers": [
+        "安泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "NAMR",
+      "insurers": [
+        "台灣人壽",
+        "安聯人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NC",
+      "insurers": [
+        "紐約人壽",
+        "國華人壽",
+        "全球人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "NCI",
+      "insurers": [
+        "宏泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "NCR",
+      "insurers": [
+        "保德信國際人壽",
+        "全球人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "NCRB",
+      "insurers": [
+        "台新人壽",
+        "三商美邦人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NDLB",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NDRB",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "NHB",
+      "insurers": [
+        "台灣人壽",
+        "宏利人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NHICIR",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NHIRNHIR02",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NHR",
+      "insurers": [
+        "安聯人壽",
+        "富邦人壽"
+      ],
+      "versions": 12
+    },
+    {
+      "code": "NHS",
+      "insurers": [
+        "宏泰人壽",
+        "南山人壽",
+        "喬治亞人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "NHSD",
+      "insurers": [
+        "富邦人壽",
+        "安泰人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NISLWLB",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "NISWL",
+      "insurers": [
+        "南山人壽",
+        "友邦人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NJTRA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NMR",
+      "insurers": [
+        "友邦人壽",
+        "富邦人壽",
+        "安泰人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "NPL",
+      "insurers": [
+        "宏利人壽",
+        "南山人壽",
+        "保誠人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "NPSI",
+      "insurers": [
+        "南山人壽",
+        "安泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NR",
+      "insurers": [
+        "元大人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "NS",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NTL",
+      "insurers": [
+        "南山人壽",
+        "台灣人壽",
+        "合作金庫人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "NTR",
+      "insurers": [
+        "宏泰人壽",
+        "安泰人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "NTRA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "NV",
+      "insurers": [
+        "中國人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "NWLA",
+      "insurers": [
+        "台新人壽",
+        "保德信國際人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NWLB",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "NWP",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "NY",
+      "insurers": [
+        "中國人壽",
+        "國寶人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "OM",
+      "insurers": [
+        "國泰人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "OPA",
+      "insurers": [
+        "康健人壽",
+        "ADDR-台灣人壽",
+        "台灣人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "OPAMR",
+      "insurers": [
+        "台灣人壽",
+        "大都會國際人壽",
+        "中國信託人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "OQ",
+      "insurers": [
+        "國泰人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "PA",
+      "insurers": [
+        "新光人壽",
+        "南山人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PAAR",
+      "insurers": [
+        "安聯人壽",
+        "中國人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "PAD",
+      "insurers": [
+        "三商美邦人壽",
+        "全球人壽"
+      ],
+      "versions": 15
+    },
+    {
+      "code": "PAE",
+      "insurers": [
+        "康健人壽",
+        "富邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "PAF",
+      "insurers": [
+        "富邦人壽",
+        "康健人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "PAR",
+      "insurers": [
+        "南山人壽",
+        "喬治亞人壽"
+      ],
+      "versions": 20
+    },
+    {
+      "code": "PCC",
+      "insurers": [
+        "全球人壽",
+        "安泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "PDA",
+      "insurers": [
+        "宏利人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PDR",
+      "insurers": [
+        "南山人壽",
+        "安泰人壽",
+        "安聯人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "PHA",
+      "insurers": [
+        "全球人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "PHE",
+      "insurers": [
+        "遠雄人壽",
+        "全球人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PHI",
+      "insurers": [
+        "南山人壽",
+        "全球人壽",
+        "富邦人壽"
+      ],
+      "versions": 13
+    },
+    {
+      "code": "PHSI",
+      "insurers": [
+        "富邦人壽",
+        "安泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PJ",
+      "insurers": [
+        "新光人壽",
+        "國泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PL",
+      "insurers": [
+        "南山人壽",
+        "安泰人壽",
+        "宏利人壽",
+        "宏泰人壽",
+        "全球人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "PLB",
+      "insurers": [
+        "宏泰人壽",
+        "新光人壽",
+        "喬治亞人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PLS2",
+      "insurers": [
+        "富邦人壽",
+        "安泰人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PQ",
+      "insurers": [
+        "國泰人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "PR",
+      "insurers": [
+        "元大人壽",
+        "紐約人壽",
+        "國華人壽"
+      ],
+      "versions": 14
+    },
+    {
+      "code": "PSIA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "PWL",
+      "insurers": [
+        "保德信國際人壽",
+        "三商美邦人壽",
+        "富邦人壽",
+        "台新人壽",
+        "宏泰人壽"
+      ],
+      "versions": 13
+    },
+    {
+      "code": "PWLA",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "PZ",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "Q6",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "Q7",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "Q8QC",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "QB",
+      "insurers": [
+        "全球人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "QCA",
+      "insurers": [
+        "台灣人壽",
+        "遠雄人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "QLPB",
+      "insurers": [
+        "中國信託人壽",
+        "台灣人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "QRC",
+      "insurers": [
+        "台灣人壽",
+        "大都會國際人壽",
+        "中國信託人壽"
+      ],
+      "versions": 19
+    },
+    {
+      "code": "QRC7",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "QRCA",
+      "insurers": [
+        "台灣人壽",
+        "大都會國際人壽",
+        "中國信託人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "R3",
+      "insurers": [
+        "國泰人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RAC",
+      "insurers": [
+        "第一金人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "RAD",
+      "insurers": [
+        "第一金人壽",
+        "遠雄人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "RAF",
+      "insurers": [
+        "遠雄人壽",
+        "第一金人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "RCA",
+      "insurers": [
+        "合作金庫人壽",
+        "紐約人壽",
+        "國寶人壽",
+        "遠雄人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "RCG",
+      "insurers": [
+        "康健人壽",
+        "第一金人壽",
+        "安達人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "RCH",
+      "insurers": [
+        "康健人壽",
+        "第一金人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "RDM",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RE",
+      "insurers": [
+        "元大人壽",
+        "國華人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "RHA",
+      "insurers": [
+        "遠雄人壽",
+        "康健人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "RHB",
+      "insurers": [
+        "遠雄人壽",
+        "朝陽人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "RHC",
+      "insurers": [
+        "康健人壽",
+        "遠雄人壽",
+        "興農人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "RHD",
+      "insurers": [
+        "遠雄人壽",
+        "國寶人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "RHL",
+      "insurers": [
+        "遠雄人壽",
+        "康健人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "RHP",
+      "insurers": [
+        "遠雄人壽",
+        "新光人壽",
+        "朝陽人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "RI",
+      "insurers": [
+        "元大人壽",
+        "國華人壽",
+        "國寶人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RJ",
+      "insurers": [
+        "元大人壽",
+        "國華人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "RK",
+      "insurers": [
+        "國寶人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RL",
+      "insurers": [
+        "元大人壽",
+        "大都會國際人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "RM",
+      "insurers": [
+        "宏利人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RMR",
+      "insurers": [
+        "國寶人壽",
+        "興農人壽",
+        "朝陽人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "RPA",
+      "insurers": [
+        "宏泰人壽",
+        "國寶人壽",
+        "朝陽人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "RQ",
+      "insurers": [
+        "中國人壽",
+        "元大人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "RU",
+      "insurers": [
+        "中國人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "RY",
+      "insurers": [
+        "元大人壽",
+        "中國人壽",
+        "國寶人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "SDB",
+      "insurers": [
+        "富邦人壽",
+        "保德信國際人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "SDD",
+      "insurers": [
+        "南山人壽",
+        "富邦人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "SDR",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "SH",
+      "insurers": [
+        "元大人壽",
+        "國泰人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "SHI",
+      "insurers": [
+        "友邦人壽",
+        "南山人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "SI",
+      "insurers": [
+        "國泰人壽",
+        "元大人壽",
+        "南山人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "SIR",
+      "insurers": [
+        "南山人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "SLTC",
+      "insurers": [
+        "南山人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "SMRA",
+      "insurers": [
+        "台灣人壽",
+        "大都會國際人壽",
+        "中國信託人壽"
+      ],
+      "versions": 15
+    },
+    {
+      "code": "SPA",
+      "insurers": [
+        "南山人壽",
+        "三商美邦人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "SR",
+      "insurers": [
+        "國泰人壽",
+        "國華人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "SWB",
+      "insurers": [
+        "康健人壽",
+        "富邦人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "TADDL",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "TC",
+      "insurers": [
+        "國泰人壽",
+        "安達人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "TCA",
+      "insurers": [
+        "新光人壽",
+        "康健人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "TDDA",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "TIB",
+      "insurers": [
+        "台灣人壽",
+        "康健人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "TLA",
+      "insurers": [
+        "保德信國際人壽",
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "TM",
+      "insurers": [
+        "元大人壽",
+        "新光人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "TR",
+      "insurers": [
+        "安泰人壽",
+        "南山人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "VDA",
+      "insurers": [
+        "康健人壽",
+        "新光人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "VDDR",
+      "insurers": [
+        "中國人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "W",
+      "insurers": [
+        "新光人壽",
+        "郵政簡易人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "W5A",
+      "insurers": [
+        "新光人壽",
+        "國泰人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "WAA",
+      "insurers": [
+        "康健人壽",
+        "遠雄人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "WDA",
+      "insurers": [
+        "新光人壽",
+        "安達人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "WHC",
+      "insurers": [
+        "第一金人壽",
+        "安聯人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "WL",
+      "insurers": [
+        "三商美邦人壽",
+        "紐約人壽",
+        "保德信國際人壽",
+        "安泰人壽",
+        "全球人壽"
+      ],
+      "versions": 13
+    },
+    {
+      "code": "WLA",
+      "insurers": [
+        "宏泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 10
+    },
+    {
+      "code": "WLC",
+      "insurers": [
+        "康健人壽",
+        "南山人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "WOP",
+      "insurers": [
+        "南山人壽",
+        "友邦人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "WP",
+      "insurers": [
+        "富邦人壽",
+        "安泰人壽",
+        "國泰人壽"
+      ],
+      "versions": 11
+    },
+    {
+      "code": "WP2",
+      "insurers": [
+        "台新人壽",
+        "新光人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "WPA",
+      "insurers": [
+        "富邦人壽",
+        "友邦人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "WPB",
+      "insurers": [
+        "友邦人壽",
+        "台灣人壽"
+      ],
+      "versions": 4
+    },
+    {
+      "code": "WPR",
+      "insurers": [
+        "安聯人壽",
+        "全球人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "WRB",
+      "insurers": [
+        "宏泰人壽",
+        "安達人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "WSB",
+      "insurers": [
+        "康健人壽",
+        "統一安聯人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "WY",
+      "insurers": [
+        "國泰人壽",
+        "國寶人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "XAR",
+      "insurers": [
+        "全球人壽",
+        "富邦人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "XCA",
+      "insurers": [
+        "全球人壽",
+        "遠雄人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "XCB",
+      "insurers": [
+        "全球人壽",
+        "遠雄人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "XCR",
+      "insurers": [
+        "全球人壽",
+        "富邦人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "XDP",
+      "insurers": [
+        "富邦人壽",
+        "遠雄人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "XDW",
+      "insurers": [
+        "全球人壽",
+        "富邦人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "XHP",
+      "insurers": [
+        "遠雄人壽",
+        "全球人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "XHQ",
+      "insurers": [
+        "全球人壽",
+        "遠雄人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "XJ1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "XK1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 6
+    },
+    {
+      "code": "XLC",
+      "insurers": [
+        "富邦人壽",
+        "全球人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "XM1",
+      "insurers": [
+        "國泰人壽",
+        "遠雄人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "XSR",
+      "insurers": [
+        "富邦人壽",
+        "全球人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "XTL",
+      "insurers": [
+        "安泰人壽",
+        "富邦人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "XWL",
+      "insurers": [
+        "三商美邦人壽",
+        "富邦人壽"
+      ],
+      "versions": 16
+    },
+    {
+      "code": "YC",
+      "insurers": [
+        "元大人壽",
+        "國泰人壽"
+      ],
+      "versions": 8
+    },
+    {
+      "code": "YCA",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽",
+        "宏利人壽"
+      ],
+      "versions": 7
+    },
+    {
+      "code": "YCB",
+      "insurers": [
+        "台灣人壽",
+        "中國信託人壽"
+      ],
+      "versions": 9
+    },
+    {
+      "code": "YDDR",
+      "insurers": [
+        "友邦人壽",
+        "凱基人壽"
+      ],
+      "versions": 2
+    },
+    {
+      "code": "YHR",
+      "insurers": [
+        "第一金人壽",
+        "安聯人壽"
+      ],
+      "versions": 5
+    },
+    {
+      "code": "YP",
+      "insurers": [
+        "中國人壽",
+        "新光人壽",
+        "元大人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "YQ",
+      "insurers": [
+        "中國人壽",
+        "國泰人壽",
+        "新光人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "YR",
+      "insurers": [
+        "新光人壽",
+        "元大人壽"
+      ],
+      "versions": 3
+    },
+    {
+      "code": "YSA",
+      "insurers": [
+        "台灣人壽",
+        "新光人壽"
+      ],
+      "versions": 7
+    }
+  ],
+  "changes": {
+    "addedCount": 0,
+    "updatedCount": 0,
+    "removedFromSitemapCount": 0,
+    "addedProducts": [],
+    "updatedProducts": [],
+    "removedProducts": []
+  },
+  "verification": {
+    "DCE": {
+      "code": "DCE",
+      "name": "醫卡讚85重大傷病定期健康保險",
+      "insurer": "全球人壽",
+      "category": "critical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/DCE-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%8D%A1%E8%AE%9A85%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 6,
+      "alternateProducts": [
+        {
+          "insurer": "宏泰人壽",
+          "name": "扶佑一生失能照護終身保險甲型",
+          "effectiveDate": "2020-07-01",
+          "sourceUrl": "https://finfo.tw/products/DCE-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%89%B6%E4%BD%91%E4%B8%80%E7%94%9F%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2020-07-01"
+        }
+      ]
+    },
+    "T08F0": {
+      "code": "T08F0",
+      "name": "傳承富滿利率變動型終身壽險",
+      "insurer": "台灣人壽",
+      "category": "savings",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/T08F0-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E5%82%B3%E6%89%BF%E5%AF%8C%E6%BB%BF%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2021-12-01",
+      "effectiveDate": "2021-12-01",
+      "versionCount": 2,
+      "alternateProducts": []
+    },
+    "OTL1": {
+      "code": "OTL1",
+      "name": "新好易保一年定期壽險",
+      "insurer": "台灣人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "ageBand",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/OTL1-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%A5%BD%E6%98%93%E4%BF%9D%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA-2021-07-01",
+      "effectiveDate": "2021-07-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    }
+  }
+}

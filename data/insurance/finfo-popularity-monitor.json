@@ -1,0 +1,714 @@
+﻿{
+    "updatedAt":  "2026-07-16T15:43:34.4859628Z",
+    "schemaVersion":  1,
+    "lastRun":  {
+                    "notifications":  [
+
+                                      ],
+                    "errors":  [
+                                   "fetch_failed: https://finfo.tw/compares/%E5%AF%A6%E6%94%AF%E5%AF%A6%E4%BB%98%E9%86%AB%E7%99%82%E9%9A%AA",
+                                   "fetch_failed: https://finfo.tw/compares/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E9%9A%AA",
+                                   "fetch_failed: https://finfo.tw/compares/%E4%B8%80%E5%B9%B4%E6%9C%9F%E5%A4%B1%E8%83%BD%E9%9A%AA",
+                                   "fetch_failed: https://finfo.tw/compares/%E7%B5%82%E8%BA%AB%E5%A4%B1%E8%83%BD%E9%9A%AA%20(%E4%B8%8D%E9%82%84%E6%9C%AC)",
+                                   "fetch_failed: https://finfo.tw/compares/%E7%B5%82%E8%BA%AB%E5%A4%B1%E8%83%BD%E9%9A%AA%20(%E9%82%84%E6%9C%AC)",
+                                   "fetch_failed: https://finfo.tw/compares/%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA",
+                                   "fetch_failed: https://finfo.tw/compares/%E6%88%90%E4%BA%BA%E6%84%8F%E5%A4%96%E9%9A%AA%E5%B0%88%E6%A1%88",
+                                   "fetch_failed: https://finfo.tw/compares/%E5%85%92%E7%AB%A5%E6%84%8F%E5%A4%96%E9%9A%AA%E5%B0%88%E6%A1%88"
+                               ],
+                    "errorCount":  8,
+                    "firstRun":  false
+                },
+    "notificationHistory":  [
+                                {
+                                    "lastNotifiedAt":  "2026-07-16T14:42:50.5327175+00:00",
+                                    "lastNotifiedPopularity":  7880,
+                                    "key":  "全球人壽+XDE"
+                                }
+                            ],
+    "latestSnapshot":  {
+                           "categories":  [
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XHD-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%AF%A6%E5%88%86%E9%91%AB%E5%AE%89%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-03-30",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "全球人壽+XHD",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "實分鑫安醫療費用健康保險附約",
+                                                                       "code":  "XHD",
+                                                                       "popularity":  5210,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XHO-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%85%A8%E5%BF%83%E5%85%A8%E6%84%8F%E8%87%AA%E8%B2%A0%E9%A1%8D%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "全球人壽+XHO",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "全心全意自負額醫療費用健康保險附約",
+                                                                       "code":  "XHO",
+                                                                       "popularity":  3531,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/U5-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%91%B5%E8%AD%B7%E5%AE%89%E5%BF%83%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "新光人壽+U5",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "新呵護安心住院醫療健康保險附約",
+                                                                       "code":  "U5",
+                                                                       "popularity":  1779,
+                                                                       "insurer":  "新光人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XHP-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%85%A8%E5%BF%83%E5%85%A8%E6%84%8F2%E8%87%AA%E8%B2%A0%E9%A1%8D%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-03-30",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "全球人壽+XHP",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "全心全意2自負額醫療費用健康保險附約",
+                                                                       "code":  "XHP",
+                                                                       "popularity":  329,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/HSV-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E4%BD%B3%E5%AF%A6%E5%9C%A8%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-07-15",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "富邦人壽+HSV",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "佳實在一年期住院醫療健康保險附約",
+                                                                       "code":  "HSV",
+                                                                       "popularity":  182,
+                                                                       "insurer":  "富邦人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "medical",
+                                                  "name":  "熱門醫療險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E5%AF%A6%E6%94%AF%E5%AF%A6%E4%BB%98%E9%86%AB%E7%99%82%E9%9A%AA"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XDE-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%8D%A1%E8%AE%9A%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E4%B8%80%E5%B9%B4%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-01-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "全球人壽+XDE",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "醫卡讚重大傷病一年期健康保險附約",
+                                                                       "code":  "XDE",
+                                                                       "popularity":  7880,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/M4D-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%8D%A1%E9%A0%86%E5%BF%83%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-01-01",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "新光人壽+M4D",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "醫卡順心一年期重大傷病健康保險附約",
+                                                                       "code":  "M4D",
+                                                                       "popularity":  487,
+                                                                       "insurer":  "新光人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/RN1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%AE%89%E5%BA%B7%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "遠雄人壽+RN1",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "保安康重大傷病一年定期健康保險附約",
+                                                                       "code":  "RN1",
+                                                                       "popularity":  187,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/SDL-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%BA%A2%E5%8D%A1%E5%AE%89%E5%BF%83%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-06-02",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "富邦人壽+SDL",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "溢卡安心重大傷病一年定期健康保險附約",
+                                                                       "code":  "SDL",
+                                                                       "popularity":  107,
+                                                                       "insurer":  "富邦人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/MAJIEA-%E5%87%B1%E5%9F%BA%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%8D%A1%E5%81%A5%E5%BA%B7%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-01-01",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "凱基人壽+MAJIEA",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "醫卡健康一年期重大傷病健康保險附約",
+                                                                       "code":  "MAJIEA",
+                                                                       "popularity":  102,
+                                                                       "insurer":  "凱基人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "critical",
+                                                  "name":  "熱門重疾重傷險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E9%9A%AA"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/GODR-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BDGO%E7%BD%A9%E4%B8%80%E5%B9%B4%E6%9C%9F%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E9%99%84%E5%8A%A0%E6%A2%9D%E6%AC%BE-2022-09-16",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "三商美邦人壽+GODR",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "Go罩一年期傷害失能附加條款",
+                                                                       "code":  "GODR",
+                                                                       "popularity":  16,
+                                                                       "insurer":  "三商美邦人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/PDR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%AE%88%E8%AD%B7%E5%AF%B6%E7%85%A7%E8%AD%B7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-08-30",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "安聯人壽+PDR",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "守護寶照護健康保險附約",
+                                                                       "code":  "PDR",
+                                                                       "popularity":  5,
+                                                                       "insurer":  "安聯人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/NTYA0504-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E5%A5%BD%E6%89%B6%E6%B0%A3%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%87%8D%E5%A4%A7%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E6%89%B6%E5%8A%A9%E4%BF%9D%E9%9A%AA%E7%B5%A6%E4%BB%98%E9%99%84%E5%8A%A0%E6%A2%9D%E6%AC%BE-2024-10-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "台灣人壽+NTYA0504",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "好扶氣一年定期重大傷害失能扶助保險給付附加條款",
+                                                                       "code":  "NTYA0504",
+                                                                       "popularity":  4,
+                                                                       "insurer":  "台灣人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/ADRA-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E5%85%A8%E5%BF%83%E7%85%A7%E8%AD%B7%E4%B8%80%E5%B9%B4%E6%9C%9F%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84115-2026-05-13",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "安達人壽+ADRA",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "全心照護一年期意外傷害失能保險附約(115)",
+                                                                       "code":  "ADRA",
+                                                                       "popularity":  4,
+                                                                       "insurer":  "安達人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/ADIRA-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%AE%B6360%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%B8%80%E8%87%B3%E5%85%AD%E7%B4%9A%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E6%89%B6%E5%8A%A9%E4%BF%9D%E9%9A%AA%E9%87%91%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84115-2026-05-13",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "安達人壽+ADIRA",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "安家360一年期一至六級意外傷害失能扶助保險金保險附約(115)",
+                                                                       "code":  "ADIRA",
+                                                                       "popularity":  2,
+                                                                       "insurer":  "安達人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "disability_1y",
+                                                  "name":  "熱門一年期失能險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E4%B8%80%E5%B9%B4%E6%9C%9F%E5%A4%B1%E8%83%BD%E9%9A%AA"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XDK-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%A4%B1%E6%89%B665%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2020-07-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "全球人壽+XDK",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)全球人壽失扶65定期健康保險附約",
+                                                                       "code":  "XDK",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/XDJ-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%A4%B1%E6%89%B685%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2020-07-01",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "全球人壽+XDJ",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)全球人壽失扶85定期健康保險附約",
+                                                                       "code":  "XDJ",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DDIR-%E5%8F%8B%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%89%B6%E5%A7%94%E5%8C%AF%E5%AE%9A%E6%9C%9F%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2018-09-11",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "友邦人壽+DDIR",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)友邦人壽扶委匯定期保險附約",
+                                                                       "code":  "DDIR",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "友邦人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/LDG-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%A4%B1%E6%89%B6%E5%A5%BD%E7%85%A7%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AAG%E7%89%88-2020-07-01",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "全球人壽+LDG",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)全球人壽失扶好照終身健康保險(G版)",
+                                                                       "code":  "LDG",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DCC-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E7%A5%9D%E6%89%B6180%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2020-07-01",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "宏泰人壽+DCC",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)宏泰人壽祝扶180失能照護終身健康保險",
+                                                                       "code":  "DCC",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "宏泰人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DCD-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E7%A5%9D%E6%89%B6100%E5%A4%B1%E8%83%BD%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2020-07-01",
+                                                                       "rank":  6,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "宏泰人壽+DCD",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)宏泰人壽祝扶100失能終身健康保險",
+                                                                       "code":  "DCD",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "宏泰人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/PDI7T05H2-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E7%8F%8D%E5%A5%BD%E5%BF%83180%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2020-07-01",
+                                                                       "rank":  7,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "台灣人壽+PDI7/T05H2",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)台灣人壽新珍好心180照護終身健康保險",
+                                                                       "code":  "PDI7/T05H2",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "台灣人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/MF2-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E8%B6%85%E5%A5%BD%E5%BF%83C%E5%9E%8B%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2020-01-01",
+                                                                       "rank":  8,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "遠雄人壽+MF2",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)遠雄人壽新超好心C型失能照護終身健康保險",
+                                                                       "code":  "MF2",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/ME2-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E8%B6%85%E5%A5%BD%E5%BF%83B%E5%9E%8B%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2020-01-01",
+                                                                       "rank":  9,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "遠雄人壽+ME2",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)遠雄人壽新超好心B型失能照護終身健康保險附約",
+                                                                       "code":  "ME2",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/KAD-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%97%9C%E6%84%9B%E4%B9%85%E4%B9%85%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2020-01-20",
+                                                                       "rank":  10,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "三商美邦人壽+KAD",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(舊版)三商美邦人壽關愛久久失能照護定期健康保險",
+                                                                       "code":  "KAD",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "三商美邦人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "disability_life_no_return",
+                                                  "name":  "熱門終身失能險(不還本)",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E7%B5%82%E8%BA%AB%E5%A4%B1%E8%83%BD%E9%9A%AA%20(%E4%B8%8D%E9%82%84%E6%9C%AC)"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/BMW7PIS-%E5%8F%8B%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%BB%BF%E6%89%B6%E4%BF%9D%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2021-07-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "友邦人壽+BMW7PIS",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(舊版)友邦人壽滿扶保利率變動型終身保險",
+                                                                       "code":  "BMW7PIS",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "友邦人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/LDH-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%A4%B1%E6%89%B6%E5%A5%BD%E7%85%A7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AAH%E7%89%88-2020-07-01",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "全球人壽+LDH",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)全球人壽失扶好照終身保險(H版)",
+                                                                       "code":  "LDH",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/PDL8T05Y2-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E7%8F%8D%E5%AE%89%E5%BF%83180%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2020-07-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "台灣人壽+PDL8/T05Y2",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)台灣人壽新珍安心180照護終身保險",
+                                                                       "code":  "PDL8/T05Y2",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "台灣人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DCF-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%89%B6%E4%BD%91%E4%B8%80%E7%94%9F%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E4%B9%99%E5%9E%8B-2020-07-01",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "宏泰人壽+DCF",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)宏泰人壽扶佑一生失能照護終身保險(乙型)",
+                                                                       "code":  "DCF",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "宏泰人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DCE-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%89%B6%E4%BD%91%E4%B8%80%E7%94%9F%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2020-07-01",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "宏泰人壽+DCE",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)宏泰人壽扶佑一生失能照護終身保險(甲型)",
+                                                                       "code":  "DCE",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "宏泰人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/MD2-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E8%B6%85%E5%A5%BD%E5%BF%83A%E5%9E%8B%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2020-01-01",
+                                                                       "rank":  6,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "遠雄人壽+MD2",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)遠雄人壽新超好心A型失能照護終身保險",
+                                                                       "code":  "MD2",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DJ-%E5%85%83%E5%A4%A7%E4%BA%BA%E5%A3%BD%E5%B9%B8%E6%89%B6%E4%B8%80%E4%B8%96%E9%9B%99%E9%87%8D%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2020-09-01",
+                                                                       "rank":  7,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "元大人壽+DJ",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)元大人壽幸扶一世雙重照護終身保險",
+                                                                       "code":  "DJ",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "元大人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/DI-%E5%85%83%E5%A4%A7%E4%BA%BA%E5%A3%BD%E5%B9%B8%E6%89%B6%E4%B8%80%E7%94%9F%E9%9B%99%E9%87%8D%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2020-09-01",
+                                                                       "rank":  8,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "元大人壽+DI",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)元大人壽幸扶一生雙重照護終身保險",
+                                                                       "code":  "DI",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "元大人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/MG1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E5%B9%B8%E7%A6%8F%E5%A5%BD%E7%85%A7A%E5%9E%8B%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2020-05-22",
+                                                                       "rank":  9,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "discontinued",
+                                                                       "key":  "遠雄人壽+MG1",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "(停售)遠雄人壽幸福好照A型失能照護終身保險",
+                                                                       "code":  "MG1",
+                                                                       "popularity":  426,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "disability_life_return",
+                                                  "name":  "熱門終身失能險(還本)",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E7%B5%82%E8%BA%AB%E5%A4%B1%E8%83%BD%E9%9A%AA%20(%E9%82%84%E6%9C%AC)"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/FD6-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA110-2025-01-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "遠雄人壽+FD6",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "新定期壽險(110)",
+                                                                       "code":  "FD6",
+                                                                       "popularity":  259,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/HP-%E8%87%BA%E9%8A%80%E4%BA%BA%E5%A3%BD%E8%B2%B8%E8%B2%B8%E5%B9%B8%E7%A6%8F%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA%E5%B9%B3%E6%BA%96%E5%9E%8B-2025-01-02",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "臺銀人壽+HP",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "貸貸幸福定期壽險(平準型)",
+                                                                       "code":  "HP",
+                                                                       "popularity":  77,
+                                                                       "insurer":  "臺銀人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/QTR-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA%E9%99%84%E7%B4%84-2025-01-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "全球人壽+QTR",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "定期壽險附約",
+                                                                       "code":  "QTR",
+                                                                       "popularity":  48,
+                                                                       "insurer":  "全球人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/QA6-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA%E9%99%84%E7%B4%84110-2025-01-01",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "遠雄人壽+QA6",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "新定期壽險附約(110)",
+                                                                       "code":  "QA6",
+                                                                       "popularity":  40,
+                                                                       "insurer":  "遠雄人壽"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/HQ-%E8%87%BA%E9%8A%80%E4%BA%BA%E5%A3%BD%E8%B2%B8%E8%B2%B8%E5%B9%B8%E7%A6%8F%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA%E9%81%9E%E6%B8%9B%E5%9E%8B-2025-01-02",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "臺銀人壽+HQ",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "貸貸幸福定期壽險(遞減型)",
+                                                                       "code":  "HQ",
+                                                                       "popularity":  32,
+                                                                       "insurer":  "臺銀人壽"
+                                                                   }
+                                                               ],
+                                                  "key":  "term_life",
+                                                  "name":  "熱門壽險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E5%AF%8C%E9%82%A6%E7%94%A2%E7%89%A9%E3%80%8C%E6%96%B0%E5%8D%81%E5%85%A8%E5%A4%A7%E8%A3%9C%E5%A2%9E%E5%AE%89%E5%BF%83%E3%80%8D%E5%B0%88%E6%A1%88-2024-07-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "富邦產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「新十全大補增安心」專案",
+                                                                       "code":  "",
+                                                                       "popularity":  135,
+                                                                       "insurer":  "富邦產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E8%8F%AF%E5%8D%97%E7%94%A2%E7%89%A9%E3%80%8CBEST-A-30%E3%80%8D%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E9%9A%AA%E5%B0%88%E6%A1%88-2025-08-01",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "華南產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「BEST A 3.0」個人傷害險專案",
+                                                                       "code":  "",
+                                                                       "popularity":  43,
+                                                                       "insurer":  "華南產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E5%AF%8C%E9%82%A6%E7%94%A2%E7%89%A9%E3%80%8C%E7%92%80%E7%92%A8%E4%BA%BA%E7%94%9F20%E3%80%8D%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E5%B0%88%E6%A1%88-2025-07-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "富邦產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「璀璨人生2.0」意外傷害專案",
+                                                                       "code":  "",
+                                                                       "popularity":  14,
+                                                                       "insurer":  "富邦產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E8%8F%AF%E5%8D%97%E7%94%A2%E7%89%A9%E3%80%8C%E6%BB%BF%E7%A6%8F%E4%BF%9D30%E3%80%8D%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E9%9A%AA%E5%B0%88%E6%A1%88-2025-08-01",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "華南產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「滿福保3.0」個人傷害險專案",
+                                                                       "code":  "",
+                                                                       "popularity":  9,
+                                                                       "insurer":  "華南產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E4%B8%AD%E5%9C%8B%E4%BF%A1%E8%A8%97%E7%94%A2%E7%89%A9%E3%80%8C%E6%96%B0%E6%84%8F%E4%BF%9D%E5%B9%B3%E5%AE%89%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E9%9A%AA%E3%80%8D%E5%B0%88%E6%A1%88-2026-05-01",
+                                                                       "rank":  5,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "中國信託產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「新意保平安個人傷害險」專案",
+                                                                       "code":  "",
+                                                                       "popularity":  9,
+                                                                       "insurer":  "中國信託產物"
+                                                                   }
+                                                               ],
+                                                  "key":  "adult_accident",
+                                                  "name":  "熱門成人意外險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E6%88%90%E4%BA%BA%E6%84%8F%E5%A4%96%E9%9A%AA%E5%B0%88%E6%A1%88"
+                                              },
+                                              {
+                                                  "products":  [
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E6%96%B0%E5%AE%89%E6%9D%B1%E4%BA%AC%E6%B5%B7%E4%B8%8A%E7%94%A2%E7%89%A9%E3%80%8C%E6%96%B0%E5%BF%AB%E6%A8%82%E7%AB%A5%E5%B9%B4%E3%80%8D%E5%82%B7%E5%AE%B3%E9%9A%AA%E5%B0%88%E6%A1%88-2025-12-01",
+                                                                       "rank":  1,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "新安東京海上產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「新快樂童年」傷害險專案",
+                                                                       "code":  "",
+                                                                       "popularity":  556,
+                                                                       "insurer":  "新安東京海上產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E5%AF%8C%E9%82%A6%E7%94%A2%E7%89%A9%E3%80%8C%E6%96%B0%E5%8D%81%E5%85%A8%E5%85%92%E7%AB%A5%E7%85%A7%E8%AD%B7%E5%8D%87%E7%B4%9A%E7%89%8820%E3%80%8D%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E5%B0%88%E6%A1%88-2024-07-01",
+                                                                       "rank":  2,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "富邦產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「新十全兒童照護升級版2.0」意外傷害專案",
+                                                                       "code":  "",
+                                                                       "popularity":  391,
+                                                                       "insurer":  "富邦產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E5%AE%89%E9%81%94%E7%94%A2%E7%89%A9%E3%80%8C%E5%80%8D%E6%AF%94%E5%AE%89%E3%80%8D%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E5%B0%88%E6%A1%88-2026-02-01",
+                                                                       "rank":  3,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "安達產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "「倍比安」個人傷害保險專案",
+                                                                       "code":  "",
+                                                                       "popularity":  11,
+                                                                       "insurer":  "安達產物"
+                                                                   },
+                                                                   {
+                                                                       "url":  "https://finfo.tw/products/%E6%98%8E%E5%8F%B0%E7%94%A2%E9%9A%AA%E3%80%8C%E5%AE%88%E8%AD%B7%E7%AB%A5%E5%BF%83%E3%81%AE%E5%A5%BD%E9%9A%AA%E3%80%8D%E5%B0%88%E6%A1%88-2026-01-01",
+                                                                       "rank":  4,
+                                                                       "delta":  null,
+                                                                       "saleStatus":  "active",
+                                                                       "key":  "明台產物+",
+                                                                       "deltaPct":  null,
+                                                                       "previousPopularity":  null,
+                                                                       "name":  "明台產險「守護童心の好險」專案",
+                                                                       "code":  "",
+                                                                       "popularity":  2,
+                                                                       "insurer":  "明台產物"
+                                                                   }
+                                                               ],
+                                                  "key":  "child_accident",
+                                                  "name":  "熱門兒童意外險",
+                                                  "compareUrl":  "https://finfo.tw/compares/%E5%85%92%E7%AB%A5%E6%84%8F%E5%A4%96%E9%9A%AA%E5%B0%88%E6%A1%88"
+                                              }
+                                          ],
+                           "source":  "finfo-public-compares-and-product-pages",
+                           "capturedAt":  "2026-07-16T15:43:34.4859628Z"
+                       }
+}

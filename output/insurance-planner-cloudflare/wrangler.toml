@@ -1,0 +1,14 @@
+name = "jarvis-insurance-planner"
+account_id = "a98467b999e5769b5617fc5b8ad6fc3d"
+pages_build_output_dir = "."
+compatibility_date = "2026-08-22"
+
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+
+[[d1_databases]]
+binding = "DB"
+database_name = "jarvis-insurance-accounts"
+database_id = "bfe4263d-e4d9-4b30-ab49-51c895417daf"
+migrations_dir = "../../migrations/insurance-planner"

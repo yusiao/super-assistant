@@ -1,0 +1,12 @@
+{
+  "updatedAt": "2026-07-15",
+  "sourceNote": "Regression-check priority codes only. Complete discovery comes from the Finfo sitemap index, not this list.",
+  "codes": [
+    "XHB",
+    "MRE",
+    "XAN",
+    "CJ2",
+    "XCD",
+    "DCE"
+  ]
+}

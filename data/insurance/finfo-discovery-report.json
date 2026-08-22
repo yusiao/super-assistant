@@ -1,0 +1,2851 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-09T13:02:57.106Z",
+  "source": "finfo-public",
+  "indexedCodes": 3527,
+  "requestedCodes": 2,
+  "priorityCodes": [
+    "HNRC",
+    "HNRD"
+  ],
+  "automaticCodes": [],
+  "productsFoundThisRun": 2,
+  "detailedProductsStored": 11,
+  "readyRateProducts": 11,
+  "pendingDetailCount": 3516,
+  "pendingDetailExamples": [
+    "00",
+    "06",
+    "09",
+    "101A",
+    "102030TLTCR",
+    "1020RLTC",
+    "10HCA110T04E0",
+    "10NPHI",
+    "10TDD",
+    "10TLTC",
+    "10TSDD",
+    "10VPH3",
+    "11R",
+    "17",
+    "171",
+    "1A",
+    "1B",
+    "1B0",
+    "1C",
+    "1CGT",
+    "1CIC",
+    "1CPT",
+    "1E",
+    "1E2",
+    "1FA",
+    "1G",
+    "1GA",
+    "1H0",
+    "1HI",
+    "1HIR",
+    "1HS",
+    "1HSCO",
+    "1HSD",
+    "1LTC",
+    "1M",
+    "1NHI",
+    "1O",
+    "1P",
+    "1Q",
+    "1R",
+    "1RAS",
+    "1SIR",
+    "1STT",
+    "1T",
+    "1T3",
+    "1TED",
+    "1U",
+    "1U0",
+    "1V",
+    "1W",
+    "1W1",
+    "1X",
+    "1Z",
+    "20",
+    "20090",
+    "202",
+    "20301",
+    "20511",
+    "20540",
+    "20600",
+    "20701",
+    "20901",
+    "20A",
+    "20B",
+    "20C00",
+    "20CL",
+    "20D",
+    "20DDPL",
+    "20E01",
+    "20F01",
+    "20G01",
+    "20G11",
+    "20G21",
+    "20G31",
+    "20HTBC",
+    "20HTSC",
+    "20IPLN",
+    "20ISWL",
+    "20JDL",
+    "20NAWL",
+    "20NNPL",
+    "20PCHI",
+    "20PL",
+    "20PLAN",
+    "20PPL6N",
+    "20PPL6O",
+    "20RHI",
+    "20T02H2",
+    "20THA",
+    "20TL",
+    "20WPA",
+    "211R",
+    "25",
+    "265",
+    "266",
+    "26R",
+    "275",
+    "2A",
+    "2BA",
+    "2C",
+    "2D3",
+    "2D5",
+    "2E",
+    "2F",
+    "2K",
+    "2N",
+    "2R",
+    "2U",
+    "2Y",
+    "3",
+    "30",
+    "30RLTC",
+    "31",
+    "32D",
+    "34",
+    "345",
+    "355",
+    "37",
+    "380",
+    "39",
+    "3977",
+    "3A",
+    "3B0",
+    "3D0",
+    "3G1",
+    "3G4",
+    "3M",
+    "3P0",
+    "3P1",
+    "3P2",
+    "3S",
+    "3T0",
+    "3V1",
+    "3V2",
+    "3W",
+    "3X1",
+    "3Y0",
+    "3Y1",
+    "42",
+    "430",
+    "450",
+    "47",
+    "4C",
+    "4H0",
+    "4H1",
+    "4H2",
+    "4H3",
+    "4H4",
+    "4H5",
+    "4H5NTPH0305",
+    "4I0",
+    "4I1",
+    "4J0",
+    "4J1",
+    "4K",
+    "4S0",
+    "4T0",
+    "4V0",
+    "4W",
+    "5A",
+    "5BA",
+    "5C",
+    "5CA",
+    "5DD",
+    "5G0",
+    "5H0",
+    "5IA",
+    "5JF",
+    "5K7K",
+    "5M",
+    "5N",
+    "5N0",
+    "5P",
+    "5P0",
+    "5S0",
+    "5T1",
+    "5Z0",
+    "5Z1",
+    "60",
+    "600",
+    "626",
+    "680",
+    "680H",
+    "681",
+    "691",
+    "6A",
+    "6AFTE",
+    "6AFTE2",
+    "6ATL",
+    "6B",
+    "6CD01",
+    "6CTL",
+    "6ED01",
+    "6G0",
+    "6H0",
+    "6I0",
+    "6ISLE",
+    "6ISLE2",
+    "6K0",
+    "6K8K",
+    "6M",
+    "6NISLE2",
+    "6NISLE3",
+    "6Q",
+    "6QY",
+    "6QY02",
+    "6QY03",
+    "6QY1",
+    "6WPA",
+    "6X0",
+    "7",
+    "71D",
+    "72",
+    "72D",
+    "73",
+    "735",
+    "75",
+    "77",
+    "78HM378T06A0",
+    "79",
+    "7A",
+    "7A0",
+    "7B0",
+    "7C0",
+    "7D0",
+    "7D1",
+    "7G",
+    "7JB",
+    "7JD",
+    "7JDNTTW0503",
+    "7L1",
+    "7L2",
+    "7L3",
+    "7L3NTPH1205",
+    "7X1",
+    "8A",
+    "8AA",
+    "8D1",
+    "8D1NTTW0103",
+    "8E0",
+    "8E0NTTW0203",
+    "8F1",
+    "8F1NTTW0703",
+    "8G",
+    "8G0",
+    "8G0NTTW0803",
+    "8H",
+    "8H1",
+    "8H1NTTW0303",
+    "8I",
+    "8I0",
+    "8I1",
+    "8KA",
+    "8L",
+    "8L0",
+    "8QA",
+    "8RA",
+    "8RAHP",
+    "8S",
+    "8SQ",
+    "8TA",
+    "8VD",
+    "8VF",
+    "8WD",
+    "9",
+    "91",
+    "92A",
+    "94A",
+    "95A",
+    "9BA",
+    "9EA",
+    "9S",
+    "A1",
+    "A2",
+    "A2A3",
+    "A3",
+    "A6",
+    "AA",
+    "AA0",
+    "AADDC",
+    "AADDM",
+    "AAHOP",
+    "AAHRL",
+    "AAHSR",
+    "AAIPA",
+    "AASPA",
+    "AB0",
+    "ABDDC",
+    "ABIPA",
+    "AC0",
+    "AC1",
+    "AC2",
+    "ACA",
+    "ACCNTB1",
+    "ACCNTR1",
+    "ACCNTR2",
+    "ACCNTR3",
+    "ACCRTB1",
+    "ACCRTB3",
+    "ACDILA",
+    "ACINTB2",
+    "ACINTB3",
+    "ACLPEN11",
+    "ACLPEN12",
+    "ACLPEN18",
+    "ACLPEN22",
+    "ACLPEN27",
+    "ACLPEN32",
+    "ACLPLN3",
+    "ACLPLN5",
+    "ACLPLN9",
+    "ACNPL",
+    "ACR",
+    "AD",
+    "ADB",
+    "ADBE",
+    "ADBENTYA0502",
+    "ADBR",
+    "ADC",
+    "ADD",
+    "ADD03",
+    "ADDN",
+    "ADDNTB1",
+    "ADDNTB2",
+    "ADDNTR1",
+    "ADDR",
+    "ADDRAIR",
+    "ADDRC",
+    "ADE",
+    "ADF",
+    "ADG",
+    "ADH",
+    "ADI",
+    "ADIPA",
+    "ADIR",
+    "ADIRA",
+    "ADJ",
+    "ADM",
+    "ADMNTB1",
+    "ADMRTB1",
+    "ADR",
+    "ADRA",
+    "AE0",
+    "AE1",
+    "AE2",
+    "AED",
+    "AFR",
+    "AFRR",
+    "AG",
+    "AG0",
+    "AGA",
+    "AGB",
+    "AGC",
+    "AGD",
+    "AGE",
+    "AGF",
+    "AGG",
+    "AGIPL",
+    "AH",
+    "AH0AHA",
+    "AHA",
+    "AHB",
+    "AHCL",
+    "AHI",
+    "AHIE",
+    "AHINLR1",
+    "AHINTB",
+    "AHINTB2",
+    "AHINTR1",
+    "AHIR",
+    "AHIRLB1",
+    "AHIRLB2",
+    "AHIRLB3",
+    "AHJIPL",
+    "AHK",
+    "AHL",
+    "AHN1",
+    "AHN2",
+    "AHR",
+    "AHRL",
+    "AHS",
+    "AHSR",
+    "AHY1",
+    "AI",
+    "AI0",
+    "AI1",
+    "AI2",
+    "AIA",
+    "AIB",
+    "AIC",
+    "AIF",
+    "AIF1",
+    "AIJ",
+    "AIM1",
+    "AIO",
+    "AIR",
+    "AIU",
+    "AJA",
+    "AJA1",
+    "AJB",
+    "AJC",
+    "AJC1",
+    "AJD",
+    "AJE",
+    "AJF",
+    "AJG",
+    "AJH",
+    "AJI",
+    "AJIPL",
+    "AJJ",
+    "AK",
+    "AKA",
+    "ALA",
+    "ALE",
+    "ALES",
+    "ALPEA",
+    "ALPL",
+    "ALTC",
+    "ALTRLB1",
+    "ALTRTB1",
+    "AM",
+    "AMDIPL",
+    "AMLIPL",
+    "AMN",
+    "AMQIPL",
+    "AMR",
+    "AMRN",
+    "AMRNTR1",
+    "AMRR",
+    "AMRS",
+    "AMTIPL",
+    "AMTNTR1",
+    "AN1",
+    "ANA",
+    "ANADD",
+    "ANHRL",
+    "ANIPL",
+    "ANLPLN1",
+    "ANLPLN2",
+    "ANLTLN10",
+    "ANLTLN11",
+    "ANUWL",
+    "ANXPL",
+    "AO1",
+    "AOR",
+    "AP0",
+    "AP0NTPA1005",
+    "AP1",
+    "APA",
+    "APAA",
+    "APAED",
+    "APANTR1",
+    "APANTR7",
+    "APB",
+    "APBIA",
+    "APC",
+    "APEIPL",
+    "APGAIC",
+    "APHOPL",
+    "APHPPL",
+    "APIIPL",
+    "APJGPL",
+    "APJHPL",
+    "APKEPL",
+    "APKMPL",
+    "APKQTL",
+    "APKTPL",
+    "APKZPL",
+    "APLHPL",
+    "APMHPL",
+    "APMTPL",
+    "APNCPL",
+    "APNLPL",
+    "APNWPL",
+    "APTIPL",
+    "APWHPL",
+    "APWIPL",
+    "APXIPL",
+    "AQ0",
+    "AQ1",
+    "AR",
+    "AR0",
+    "AR1",
+    "ARDPLN1",
+    "ARDPLN2",
+    "ARDPLN4",
+    "ARLPLN10",
+    "ARLPLN16",
+    "ARLPLN19",
+    "ARLPLN20",
+    "ARLPLN25",
+    "ARLPLN6",
+    "ARLPLN8",
+    "ARLPN003",
+    "AS",
+    "AS0",
+    "ASGNLB3",
+    "ASGNLB4",
+    "ASGRLB1",
+    "AT0"
+  ],
+  "saleStatusChanges": [],
+  "unresolvedCodes": [],
+  "ambiguousCodes": [],
+  "results": [
+    {
+      "code": "HNRC",
+      "found": true,
+      "search": {
+        "searchUrl": "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29",
+        "links": [
+          "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29"
+        ],
+        "exact": [
+          "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29"
+        ],
+        "selectedUrl": "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29",
+        "source": "finfo-sitemap-index"
+      },
+      "product": {
+        "code": "HNRC",
+        "aliases": [
+          "FINFO-HNRC"
+        ],
+        "name": "新住院醫療保險附約85",
+        "insurer": "台灣人壽",
+        "category": "medical",
+        "coverageWan": 15,
+        "planName": "計劃三 (雜費15萬)",
+        "coverageLabel": "計劃三 (雜費15萬)",
+        "annualPremium": 5657,
+        "endAge": 85,
+        "premiumMode": "ageBand",
+        "rateBasis": "attainedAge",
+        "premiumTerm": "",
+        "premiumTermYears": 0,
+        "availableTerms": [],
+        "premiumChange": "Finfo 公開 premiums API 已取得熱門方案年齡級距保費；實際仍需以保險公司正式費率表為準。",
+        "premiumBands": [
+          {
+            "age": "0歲",
+            "premium": 3769
+          },
+          {
+            "age": "1歲",
+            "premium": 3769
+          },
+          {
+            "age": "2歲",
+            "premium": 3769
+          },
+          {
+            "age": "3歲",
+            "premium": 3769
+          },
+          {
+            "age": "4歲",
+            "premium": 3769
+          },
+          {
+            "age": "5歲",
+            "premium": 3769
+          },
+          {
+            "age": "6歲",
+            "premium": 3769
+          },
+          {
+            "age": "7歲",
+            "premium": 3769
+          },
+          {
+            "age": "8歲",
+            "premium": 3769
+          },
+          {
+            "age": "9歲",
+            "premium": 3769
+          },
+          {
+            "age": "10歲",
+            "premium": 3769
+          },
+          {
+            "age": "11歲",
+            "premium": 3769
+          }
+        ],
+        "rateStatus": "ready",
+        "ratePricingModel": "planTotal",
+        "termRatePricingModel": "planTotal",
+        "rateUnitCoverage": 150000,
+        "rateSource": "https://drive.google.com/file/d/1LnYI-8uQJ29O2EJL8shNv1-xCst1eOiW/view?usp=sharing",
+        "rateTable": [
+          {
+            "age": 0,
+            "premium": 3769
+          },
+          {
+            "age": 1,
+            "premium": 3769
+          },
+          {
+            "age": 2,
+            "premium": 3769
+          },
+          {
+            "age": 3,
+            "premium": 3769
+          },
+          {
+            "age": 4,
+            "premium": 3769
+          },
+          {
+            "age": 5,
+            "premium": 3769
+          },
+          {
+            "age": 6,
+            "premium": 3769
+          },
+          {
+            "age": 7,
+            "premium": 3769
+          },
+          {
+            "age": 8,
+            "premium": 3769
+          },
+          {
+            "age": 9,
+            "premium": 3769
+          },
+          {
+            "age": 10,
+            "premium": 3769
+          },
+          {
+            "age": 11,
+            "premium": 3769
+          },
+          {
+            "age": 12,
+            "premium": 3769
+          },
+          {
+            "age": 13,
+            "premium": 3769
+          },
+          {
+            "age": 14,
+            "premium": 3895
+          },
+          {
+            "age": 15,
+            "premium": 3895
+          },
+          {
+            "age": 16,
+            "premium": 3895
+          },
+          {
+            "age": 17,
+            "premium": 3895
+          },
+          {
+            "age": 18,
+            "premium": 3895
+          },
+          {
+            "age": 19,
+            "premium": 3895
+          },
+          {
+            "age": 20,
+            "premium": 3895
+          },
+          {
+            "age": 21,
+            "premium": 3895
+          },
+          {
+            "age": 22,
+            "premium": 3895
+          },
+          {
+            "age": 23,
+            "premium": 3895
+          },
+          {
+            "age": 24,
+            "premium": 4658
+          },
+          {
+            "age": 25,
+            "premium": 4658
+          },
+          {
+            "age": 26,
+            "premium": 4658
+          },
+          {
+            "age": 27,
+            "premium": 4658
+          },
+          {
+            "age": 28,
+            "premium": 4658
+          },
+          {
+            "age": 29,
+            "premium": 4658
+          },
+          {
+            "age": 30,
+            "premium": 4658
+          },
+          {
+            "age": 31,
+            "premium": 4658
+          },
+          {
+            "age": 32,
+            "premium": 4658
+          },
+          {
+            "age": 33,
+            "premium": 4658
+          },
+          {
+            "age": 34,
+            "premium": 5657
+          },
+          {
+            "age": 35,
+            "premium": 5657
+          },
+          {
+            "age": 36,
+            "premium": 5657
+          },
+          {
+            "age": 37,
+            "premium": 5657
+          },
+          {
+            "age": 38,
+            "premium": 5657
+          },
+          {
+            "age": 39,
+            "premium": 5657
+          },
+          {
+            "age": 40,
+            "premium": 5657
+          },
+          {
+            "age": 41,
+            "premium": 5657
+          },
+          {
+            "age": 42,
+            "premium": 5657
+          },
+          {
+            "age": 43,
+            "premium": 5657
+          },
+          {
+            "age": 44,
+            "premium": 7083
+          },
+          {
+            "age": 45,
+            "premium": 7083
+          },
+          {
+            "age": 46,
+            "premium": 7083
+          },
+          {
+            "age": 47,
+            "premium": 7083
+          },
+          {
+            "age": 48,
+            "premium": 7083
+          },
+          {
+            "age": 49,
+            "premium": 7083
+          },
+          {
+            "age": 50,
+            "premium": 7083
+          },
+          {
+            "age": 51,
+            "premium": 7083
+          },
+          {
+            "age": 52,
+            "premium": 7083
+          },
+          {
+            "age": 53,
+            "premium": 7083
+          },
+          {
+            "age": 54,
+            "premium": 9201
+          },
+          {
+            "age": 55,
+            "premium": 9201
+          },
+          {
+            "age": 56,
+            "premium": 9201
+          },
+          {
+            "age": 57,
+            "premium": 9201
+          },
+          {
+            "age": 58,
+            "premium": 9201
+          },
+          {
+            "age": 59,
+            "premium": 9201
+          },
+          {
+            "age": 60,
+            "premium": 9201
+          },
+          {
+            "age": 61,
+            "premium": 9201
+          },
+          {
+            "age": 62,
+            "premium": 9201
+          },
+          {
+            "age": 63,
+            "premium": 9201
+          },
+          {
+            "age": 64,
+            "premium": 15052
+          },
+          {
+            "age": 65,
+            "premium": 15052
+          },
+          {
+            "age": 66,
+            "premium": 15052
+          },
+          {
+            "age": 67,
+            "premium": 15052
+          },
+          {
+            "age": 68,
+            "premium": 15052
+          },
+          {
+            "age": 69,
+            "premium": 15052
+          },
+          {
+            "age": 70,
+            "premium": 15052
+          },
+          {
+            "age": 71,
+            "premium": 15052
+          },
+          {
+            "age": 72,
+            "premium": 15052
+          },
+          {
+            "age": 73,
+            "premium": 15052
+          },
+          {
+            "age": 74,
+            "premium": 22194
+          },
+          {
+            "age": 75,
+            "premium": 22194
+          },
+          {
+            "age": 76,
+            "premium": 22194
+          },
+          {
+            "age": 77,
+            "premium": 22194
+          },
+          {
+            "age": 78,
+            "premium": 22194
+          },
+          {
+            "age": 79,
+            "premium": 26524
+          },
+          {
+            "age": 80,
+            "premium": 27964
+          },
+          {
+            "age": 81,
+            "premium": 29410
+          },
+          {
+            "age": 82,
+            "premium": 31278
+          },
+          {
+            "age": 83,
+            "premium": 33152
+          },
+          {
+            "age": 84,
+            "premium": 35025
+          }
+        ],
+        "rateTablesByGender": {
+          "male": [
+            {
+              "age": 0,
+              "premium": 3769
+            },
+            {
+              "age": 1,
+              "premium": 3769
+            },
+            {
+              "age": 2,
+              "premium": 3769
+            },
+            {
+              "age": 3,
+              "premium": 3769
+            },
+            {
+              "age": 4,
+              "premium": 3769
+            },
+            {
+              "age": 5,
+              "premium": 3769
+            },
+            {
+              "age": 6,
+              "premium": 3769
+            },
+            {
+              "age": 7,
+              "premium": 3769
+            },
+            {
+              "age": 8,
+              "premium": 3769
+            },
+            {
+              "age": 9,
+              "premium": 3769
+            },
+            {
+              "age": 10,
+              "premium": 3769
+            },
+            {
+              "age": 11,
+              "premium": 3769
+            },
+            {
+              "age": 12,
+              "premium": 3769
+            },
+            {
+              "age": 13,
+              "premium": 3769
+            },
+            {
+              "age": 14,
+              "premium": 3895
+            },
+            {
+              "age": 15,
+              "premium": 3895
+            },
+            {
+              "age": 16,
+              "premium": 3895
+            },
+            {
+              "age": 17,
+              "premium": 3895
+            },
+            {
+              "age": 18,
+              "premium": 3895
+            },
+            {
+              "age": 19,
+              "premium": 3895
+            },
+            {
+              "age": 20,
+              "premium": 3895
+            },
+            {
+              "age": 21,
+              "premium": 3895
+            },
+            {
+              "age": 22,
+              "premium": 3895
+            },
+            {
+              "age": 23,
+              "premium": 3895
+            },
+            {
+              "age": 24,
+              "premium": 4658
+            },
+            {
+              "age": 25,
+              "premium": 4658
+            },
+            {
+              "age": 26,
+              "premium": 4658
+            },
+            {
+              "age": 27,
+              "premium": 4658
+            },
+            {
+              "age": 28,
+              "premium": 4658
+            },
+            {
+              "age": 29,
+              "premium": 4658
+            },
+            {
+              "age": 30,
+              "premium": 4658
+            },
+            {
+              "age": 31,
+              "premium": 4658
+            },
+            {
+              "age": 32,
+              "premium": 4658
+            },
+            {
+              "age": 33,
+              "premium": 4658
+            },
+            {
+              "age": 34,
+              "premium": 5657
+            },
+            {
+              "age": 35,
+              "premium": 5657
+            },
+            {
+              "age": 36,
+              "premium": 5657
+            },
+            {
+              "age": 37,
+              "premium": 5657
+            },
+            {
+              "age": 38,
+              "premium": 5657
+            },
+            {
+              "age": 39,
+              "premium": 5657
+            },
+            {
+              "age": 40,
+              "premium": 5657
+            },
+            {
+              "age": 41,
+              "premium": 5657
+            },
+            {
+              "age": 42,
+              "premium": 5657
+            },
+            {
+              "age": 43,
+              "premium": 5657
+            },
+            {
+              "age": 44,
+              "premium": 7083
+            },
+            {
+              "age": 45,
+              "premium": 7083
+            },
+            {
+              "age": 46,
+              "premium": 7083
+            },
+            {
+              "age": 47,
+              "premium": 7083
+            },
+            {
+              "age": 48,
+              "premium": 7083
+            },
+            {
+              "age": 49,
+              "premium": 7083
+            },
+            {
+              "age": 50,
+              "premium": 7083
+            },
+            {
+              "age": 51,
+              "premium": 7083
+            },
+            {
+              "age": 52,
+              "premium": 7083
+            },
+            {
+              "age": 53,
+              "premium": 7083
+            },
+            {
+              "age": 54,
+              "premium": 9201
+            },
+            {
+              "age": 55,
+              "premium": 9201
+            },
+            {
+              "age": 56,
+              "premium": 9201
+            },
+            {
+              "age": 57,
+              "premium": 9201
+            },
+            {
+              "age": 58,
+              "premium": 9201
+            },
+            {
+              "age": 59,
+              "premium": 9201
+            },
+            {
+              "age": 60,
+              "premium": 9201
+            },
+            {
+              "age": 61,
+              "premium": 9201
+            },
+            {
+              "age": 62,
+              "premium": 9201
+            },
+            {
+              "age": 63,
+              "premium": 9201
+            },
+            {
+              "age": 64,
+              "premium": 15052
+            },
+            {
+              "age": 65,
+              "premium": 15052
+            },
+            {
+              "age": 66,
+              "premium": 15052
+            },
+            {
+              "age": 67,
+              "premium": 15052
+            },
+            {
+              "age": 68,
+              "premium": 15052
+            },
+            {
+              "age": 69,
+              "premium": 15052
+            },
+            {
+              "age": 70,
+              "premium": 15052
+            },
+            {
+              "age": 71,
+              "premium": 15052
+            },
+            {
+              "age": 72,
+              "premium": 15052
+            },
+            {
+              "age": 73,
+              "premium": 15052
+            },
+            {
+              "age": 74,
+              "premium": 22194
+            },
+            {
+              "age": 75,
+              "premium": 22194
+            },
+            {
+              "age": 76,
+              "premium": 22194
+            },
+            {
+              "age": 77,
+              "premium": 22194
+            },
+            {
+              "age": 78,
+              "premium": 22194
+            },
+            {
+              "age": 79,
+              "premium": 26524
+            },
+            {
+              "age": 80,
+              "premium": 27964
+            },
+            {
+              "age": 81,
+              "premium": 29410
+            },
+            {
+              "age": 82,
+              "premium": 31278
+            },
+            {
+              "age": 83,
+              "premium": 33152
+            },
+            {
+              "age": 84,
+              "premium": 35025
+            }
+          ],
+          "female": [
+            {
+              "age": 0,
+              "premium": 3769
+            },
+            {
+              "age": 1,
+              "premium": 3769
+            },
+            {
+              "age": 2,
+              "premium": 3769
+            },
+            {
+              "age": 3,
+              "premium": 3769
+            },
+            {
+              "age": 4,
+              "premium": 3769
+            },
+            {
+              "age": 5,
+              "premium": 3769
+            },
+            {
+              "age": 6,
+              "premium": 3769
+            },
+            {
+              "age": 7,
+              "premium": 3769
+            },
+            {
+              "age": 8,
+              "premium": 3769
+            },
+            {
+              "age": 9,
+              "premium": 3769
+            },
+            {
+              "age": 10,
+              "premium": 3769
+            },
+            {
+              "age": 11,
+              "premium": 3769
+            },
+            {
+              "age": 12,
+              "premium": 3769
+            },
+            {
+              "age": 13,
+              "premium": 3769
+            },
+            {
+              "age": 14,
+              "premium": 3895
+            },
+            {
+              "age": 15,
+              "premium": 3895
+            },
+            {
+              "age": 16,
+              "premium": 3895
+            },
+            {
+              "age": 17,
+              "premium": 3895
+            },
+            {
+              "age": 18,
+              "premium": 3895
+            },
+            {
+              "age": 19,
+              "premium": 3895
+            },
+            {
+              "age": 20,
+              "premium": 3895
+            },
+            {
+              "age": 21,
+              "premium": 3895
+            },
+            {
+              "age": 22,
+              "premium": 3895
+            },
+            {
+              "age": 23,
+              "premium": 3895
+            },
+            {
+              "age": 24,
+              "premium": 4658
+            },
+            {
+              "age": 25,
+              "premium": 4658
+            },
+            {
+              "age": 26,
+              "premium": 4658
+            },
+            {
+              "age": 27,
+              "premium": 4658
+            },
+            {
+              "age": 28,
+              "premium": 4658
+            },
+            {
+              "age": 29,
+              "premium": 4658
+            },
+            {
+              "age": 30,
+              "premium": 4658
+            },
+            {
+              "age": 31,
+              "premium": 4658
+            },
+            {
+              "age": 32,
+              "premium": 4658
+            },
+            {
+              "age": 33,
+              "premium": 4658
+            },
+            {
+              "age": 34,
+              "premium": 5657
+            },
+            {
+              "age": 35,
+              "premium": 5657
+            },
+            {
+              "age": 36,
+              "premium": 5657
+            },
+            {
+              "age": 37,
+              "premium": 5657
+            },
+            {
+              "age": 38,
+              "premium": 5657
+            },
+            {
+              "age": 39,
+              "premium": 5657
+            },
+            {
+              "age": 40,
+              "premium": 5657
+            },
+            {
+              "age": 41,
+              "premium": 5657
+            },
+            {
+              "age": 42,
+              "premium": 5657
+            },
+            {
+              "age": 43,
+              "premium": 5657
+            },
+            {
+              "age": 44,
+              "premium": 7083
+            },
+            {
+              "age": 45,
+              "premium": 7083
+            },
+            {
+              "age": 46,
+              "premium": 7083
+            },
+            {
+              "age": 47,
+              "premium": 7083
+            },
+            {
+              "age": 48,
+              "premium": 7083
+            },
+            {
+              "age": 49,
+              "premium": 7083
+            },
+            {
+              "age": 50,
+              "premium": 7083
+            },
+            {
+              "age": 51,
+              "premium": 7083
+            },
+            {
+              "age": 52,
+              "premium": 7083
+            },
+            {
+              "age": 53,
+              "premium": 7083
+            },
+            {
+              "age": 54,
+              "premium": 9201
+            },
+            {
+              "age": 55,
+              "premium": 9201
+            },
+            {
+              "age": 56,
+              "premium": 9201
+            },
+            {
+              "age": 57,
+              "premium": 9201
+            },
+            {
+              "age": 58,
+              "premium": 9201
+            },
+            {
+              "age": 59,
+              "premium": 9201
+            },
+            {
+              "age": 60,
+              "premium": 9201
+            },
+            {
+              "age": 61,
+              "premium": 9201
+            },
+            {
+              "age": 62,
+              "premium": 9201
+            },
+            {
+              "age": 63,
+              "premium": 9201
+            },
+            {
+              "age": 64,
+              "premium": 15052
+            },
+            {
+              "age": 65,
+              "premium": 15052
+            },
+            {
+              "age": 66,
+              "premium": 15052
+            },
+            {
+              "age": 67,
+              "premium": 15052
+            },
+            {
+              "age": 68,
+              "premium": 15052
+            },
+            {
+              "age": 69,
+              "premium": 15052
+            },
+            {
+              "age": 70,
+              "premium": 15052
+            },
+            {
+              "age": 71,
+              "premium": 15052
+            },
+            {
+              "age": 72,
+              "premium": 15052
+            },
+            {
+              "age": 73,
+              "premium": 15052
+            },
+            {
+              "age": 74,
+              "premium": 22194
+            },
+            {
+              "age": 75,
+              "premium": 22194
+            },
+            {
+              "age": 76,
+              "premium": 22194
+            },
+            {
+              "age": 77,
+              "premium": 22194
+            },
+            {
+              "age": 78,
+              "premium": 22194
+            },
+            {
+              "age": 79,
+              "premium": 26524
+            },
+            {
+              "age": 80,
+              "premium": 27964
+            },
+            {
+              "age": 81,
+              "premium": 29410
+            },
+            {
+              "age": 82,
+              "premium": 31278
+            },
+            {
+              "age": 83,
+              "premium": 33152
+            },
+            {
+              "age": 84,
+              "premium": 35025
+            }
+          ]
+        },
+        "termRateTablesByGender": {},
+        "structuredRateTable": null,
+        "source": "finfo-public",
+        "sourceUrl": "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29",
+        "sourceName": "Finfo保險資訊站",
+        "effectiveDate": "2021-04-29",
+        "saleStatus": "discontinued",
+        "saleStatusCheckedAt": "2026-08-09T13:02:54.263Z",
+        "discoveredAt": "2026-08-09T13:02:54.265Z",
+        "confidence": 0.9,
+        "popularity": 0,
+        "documents": {
+          "terms": "https://drive.google.com/file/d/17KvD2YCkciyW9L3xcsmzC6kALEUfeddN/view?usp=sharing",
+          "rates": "https://drive.google.com/file/d/1LnYI-8uQJ29O2EJL8shNv1-xCst1eOiW/view?usp=sharing"
+        },
+        "benefits": [
+          {
+            "item": "住院醫療雜費",
+            "amount": "15萬",
+            "note": "計劃三 (雜費15萬)"
+          },
+          {
+            "item": "住院醫療",
+            "amount": "計劃三 (雜費15萬)",
+            "note": ""
+          },
+          {
+            "item": "門診手術費／雜費",
+            "amount": "依方案限額",
+            "note": ""
+          },
+          {
+            "item": "手術醫療",
+            "amount": "依條款限額",
+            "note": ""
+          },
+          {
+            "item": "出院後腫瘤門診治療",
+            "amount": "依條款限額",
+            "note": ""
+          }
+        ],
+        "note": "Finfo 搜尋精準命中；實支實付；最高保障至85歲；理賠使用副本收據，如果有其他家的實支實付也能一起理賠，理賠項目有包含門診的手術費與雜費，出院後腫瘤門診治療也有理賠。做為單實支或雙實支都是不錯的選擇。【公告】111.09.23 起，此商品只能當第 1 家或第 2 家投保的實支實付醫療險，無法當第 3 家投保的實支實付：若您已經擁有 2 張以上的實支實付醫療險，此商品將無法投保。；一年期；計劃三 (雜費15萬)"
+      },
+      "optionAge": 35,
+      "rateRows": 85,
+      "premiumUrl": "https://finfo.tw/api/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29/premiums?age=0&gender=male&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89+%28%E9%9B%9C%E8%B2%BB15%E8%90%AC%29&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D",
+      "premiumUrlsByGender": {
+        "male": "https://finfo.tw/api/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29/premiums?age=0&gender=male&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89+%28%E9%9B%9C%E8%B2%BB15%E8%90%AC%29&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D",
+        "female": "https://finfo.tw/api/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29/premiums?age=0&gender=female&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89+%28%E9%9B%9C%E8%B2%BB15%E8%90%AC%29&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D"
+      },
+      "driveRateRows": 0,
+      "driveRateWarnings": [
+        "PDF contains no extractable text; OCR is required."
+      ],
+      "driveRateError": "",
+      "alternateExactUrls": [],
+      "errors": []
+    },
+    {
+      "code": "HNRD",
+      "found": true,
+      "search": {
+        "searchUrl": "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29",
+        "links": [
+          "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29"
+        ],
+        "exact": [
+          "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29"
+        ],
+        "selectedUrl": "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29",
+        "source": "finfo-sitemap-index"
+      },
+      "product": {
+        "code": "HNRD",
+        "aliases": [
+          "FINFO-HNRD"
+        ],
+        "name": "祝安心自負額住院醫療健康保險附約",
+        "insurer": "台灣人壽",
+        "category": "medical",
+        "coverageWan": 0,
+        "planName": "計劃三",
+        "coverageLabel": "計劃三",
+        "annualPremium": 2721,
+        "endAge": 85,
+        "premiumMode": "ageBand",
+        "rateBasis": "attainedAge",
+        "premiumTerm": "",
+        "premiumTermYears": 0,
+        "availableTerms": [],
+        "premiumChange": "Finfo 公開 premiums API 已取得熱門方案年齡級距保費；實際仍需以保險公司正式費率表為準。",
+        "premiumBands": [
+          {
+            "age": "0歲",
+            "premium": 1776
+          },
+          {
+            "age": "1歲",
+            "premium": 1776
+          },
+          {
+            "age": "2歲",
+            "premium": 1776
+          },
+          {
+            "age": "3歲",
+            "premium": 1776
+          },
+          {
+            "age": "4歲",
+            "premium": 1776
+          },
+          {
+            "age": "5歲",
+            "premium": 1776
+          },
+          {
+            "age": "6歲",
+            "premium": 1776
+          },
+          {
+            "age": "7歲",
+            "premium": 1776
+          },
+          {
+            "age": "8歲",
+            "premium": 1776
+          },
+          {
+            "age": "9歲",
+            "premium": 1776
+          },
+          {
+            "age": "10歲",
+            "premium": 1776
+          },
+          {
+            "age": "11歲",
+            "premium": 1776
+          }
+        ],
+        "rateStatus": "ready",
+        "ratePricingModel": "planTotal",
+        "termRatePricingModel": "planTotal",
+        "rateUnitCoverage": 10000,
+        "rateSource": "https://drive.google.com/file/d/1hMNt615VRjivf913RgHP9PnFv0RmUuse/view?usp=sharing",
+        "rateTable": [
+          {
+            "age": 0,
+            "premium": 1776
+          },
+          {
+            "age": 1,
+            "premium": 1776
+          },
+          {
+            "age": 2,
+            "premium": 1776
+          },
+          {
+            "age": 3,
+            "premium": 1776
+          },
+          {
+            "age": 4,
+            "premium": 1776
+          },
+          {
+            "age": 5,
+            "premium": 1776
+          },
+          {
+            "age": 6,
+            "premium": 1776
+          },
+          {
+            "age": 7,
+            "premium": 1776
+          },
+          {
+            "age": 8,
+            "premium": 1776
+          },
+          {
+            "age": 9,
+            "premium": 1776
+          },
+          {
+            "age": 10,
+            "premium": 1776
+          },
+          {
+            "age": 11,
+            "premium": 1776
+          },
+          {
+            "age": 12,
+            "premium": 1776
+          },
+          {
+            "age": 13,
+            "premium": 1776
+          },
+          {
+            "age": 14,
+            "premium": 1840
+          },
+          {
+            "age": 15,
+            "premium": 1840
+          },
+          {
+            "age": 16,
+            "premium": 1840
+          },
+          {
+            "age": 17,
+            "premium": 1840
+          },
+          {
+            "age": 18,
+            "premium": 1840
+          },
+          {
+            "age": 19,
+            "premium": 1840
+          },
+          {
+            "age": 20,
+            "premium": 1840
+          },
+          {
+            "age": 21,
+            "premium": 1840
+          },
+          {
+            "age": 22,
+            "premium": 1840
+          },
+          {
+            "age": 23,
+            "premium": 1840
+          },
+          {
+            "age": 24,
+            "premium": 2203
+          },
+          {
+            "age": 25,
+            "premium": 2203
+          },
+          {
+            "age": 26,
+            "premium": 2203
+          },
+          {
+            "age": 27,
+            "premium": 2203
+          },
+          {
+            "age": 28,
+            "premium": 2203
+          },
+          {
+            "age": 29,
+            "premium": 2203
+          },
+          {
+            "age": 30,
+            "premium": 2203
+          },
+          {
+            "age": 31,
+            "premium": 2203
+          },
+          {
+            "age": 32,
+            "premium": 2203
+          },
+          {
+            "age": 33,
+            "premium": 2203
+          },
+          {
+            "age": 34,
+            "premium": 2721
+          },
+          {
+            "age": 35,
+            "premium": 2721
+          },
+          {
+            "age": 36,
+            "premium": 2721
+          },
+          {
+            "age": 37,
+            "premium": 2721
+          },
+          {
+            "age": 38,
+            "premium": 2721
+          },
+          {
+            "age": 39,
+            "premium": 2721
+          },
+          {
+            "age": 40,
+            "premium": 2721
+          },
+          {
+            "age": 41,
+            "premium": 2721
+          },
+          {
+            "age": 42,
+            "premium": 2721
+          },
+          {
+            "age": 43,
+            "premium": 2721
+          },
+          {
+            "age": 44,
+            "premium": 3456
+          },
+          {
+            "age": 45,
+            "premium": 3456
+          },
+          {
+            "age": 46,
+            "premium": 3456
+          },
+          {
+            "age": 47,
+            "premium": 3456
+          },
+          {
+            "age": 48,
+            "premium": 3456
+          },
+          {
+            "age": 49,
+            "premium": 3456
+          },
+          {
+            "age": 50,
+            "premium": 3456
+          },
+          {
+            "age": 51,
+            "premium": 3456
+          },
+          {
+            "age": 52,
+            "premium": 3456
+          },
+          {
+            "age": 53,
+            "premium": 3456
+          },
+          {
+            "age": 54,
+            "premium": 4483
+          },
+          {
+            "age": 55,
+            "premium": 4483
+          },
+          {
+            "age": 56,
+            "premium": 4483
+          },
+          {
+            "age": 57,
+            "premium": 4483
+          },
+          {
+            "age": 58,
+            "premium": 4483
+          },
+          {
+            "age": 59,
+            "premium": 4483
+          },
+          {
+            "age": 60,
+            "premium": 4483
+          },
+          {
+            "age": 61,
+            "premium": 4483
+          },
+          {
+            "age": 62,
+            "premium": 4483
+          },
+          {
+            "age": 63,
+            "premium": 4483
+          },
+          {
+            "age": 64,
+            "premium": 6910
+          },
+          {
+            "age": 65,
+            "premium": 6910
+          },
+          {
+            "age": 66,
+            "premium": 6910
+          },
+          {
+            "age": 67,
+            "premium": 6910
+          },
+          {
+            "age": 68,
+            "premium": 6910
+          },
+          {
+            "age": 69,
+            "premium": 6910
+          },
+          {
+            "age": 70,
+            "premium": 6910
+          },
+          {
+            "age": 71,
+            "premium": 6910
+          },
+          {
+            "age": 72,
+            "premium": 6910
+          },
+          {
+            "age": 73,
+            "premium": 6910
+          },
+          {
+            "age": 74,
+            "premium": 10180
+          },
+          {
+            "age": 75,
+            "premium": 10180
+          },
+          {
+            "age": 76,
+            "premium": 10180
+          },
+          {
+            "age": 77,
+            "premium": 10180
+          },
+          {
+            "age": 78,
+            "premium": 10180
+          },
+          {
+            "age": 79,
+            "premium": 12166
+          },
+          {
+            "age": 80,
+            "premium": 12827
+          },
+          {
+            "age": 81,
+            "premium": 13490
+          },
+          {
+            "age": 82,
+            "premium": 14346
+          },
+          {
+            "age": 83,
+            "premium": 15205
+          },
+          {
+            "age": 84,
+            "premium": 16064
+          }
+        ],
+        "rateTablesByGender": {
+          "male": [
+            {
+              "age": 0,
+              "premium": 1776
+            },
+            {
+              "age": 1,
+              "premium": 1776
+            },
+            {
+              "age": 2,
+              "premium": 1776
+            },
+            {
+              "age": 3,
+              "premium": 1776
+            },
+            {
+              "age": 4,
+              "premium": 1776
+            },
+            {
+              "age": 5,
+              "premium": 1776
+            },
+            {
+              "age": 6,
+              "premium": 1776
+            },
+            {
+              "age": 7,
+              "premium": 1776
+            },
+            {
+              "age": 8,
+              "premium": 1776
+            },
+            {
+              "age": 9,
+              "premium": 1776
+            },
+            {
+              "age": 10,
+              "premium": 1776
+            },
+            {
+              "age": 11,
+              "premium": 1776
+            },
+            {
+              "age": 12,
+              "premium": 1776
+            },
+            {
+              "age": 13,
+              "premium": 1776
+            },
+            {
+              "age": 14,
+              "premium": 1840
+            },
+            {
+              "age": 15,
+              "premium": 1840
+            },
+            {
+              "age": 16,
+              "premium": 1840
+            },
+            {
+              "age": 17,
+              "premium": 1840
+            },
+            {
+              "age": 18,
+              "premium": 1840
+            },
+            {
+              "age": 19,
+              "premium": 1840
+            },
+            {
+              "age": 20,
+              "premium": 1840
+            },
+            {
+              "age": 21,
+              "premium": 1840
+            },
+            {
+              "age": 22,
+              "premium": 1840
+            },
+            {
+              "age": 23,
+              "premium": 1840
+            },
+            {
+              "age": 24,
+              "premium": 2203
+            },
+            {
+              "age": 25,
+              "premium": 2203
+            },
+            {
+              "age": 26,
+              "premium": 2203
+            },
+            {
+              "age": 27,
+              "premium": 2203
+            },
+            {
+              "age": 28,
+              "premium": 2203
+            },
+            {
+              "age": 29,
+              "premium": 2203
+            },
+            {
+              "age": 30,
+              "premium": 2203
+            },
+            {
+              "age": 31,
+              "premium": 2203
+            },
+            {
+              "age": 32,
+              "premium": 2203
+            },
+            {
+              "age": 33,
+              "premium": 2203
+            },
+            {
+              "age": 34,
+              "premium": 2721
+            },
+            {
+              "age": 35,
+              "premium": 2721
+            },
+            {
+              "age": 36,
+              "premium": 2721
+            },
+            {
+              "age": 37,
+              "premium": 2721
+            },
+            {
+              "age": 38,
+              "premium": 2721
+            },
+            {
+              "age": 39,
+              "premium": 2721
+            },
+            {
+              "age": 40,
+              "premium": 2721
+            },
+            {
+              "age": 41,
+              "premium": 2721
+            },
+            {
+              "age": 42,
+              "premium": 2721
+            },
+            {
+              "age": 43,
+              "premium": 2721
+            },
+            {
+              "age": 44,
+              "premium": 3456
+            },
+            {
+              "age": 45,
+              "premium": 3456
+            },
+            {
+              "age": 46,
+              "premium": 3456
+            },
+            {
+              "age": 47,
+              "premium": 3456
+            },
+            {
+              "age": 48,
+              "premium": 3456
+            },
+            {
+              "age": 49,
+              "premium": 3456
+            },
+            {
+              "age": 50,
+              "premium": 3456
+            },
+            {
+              "age": 51,
+              "premium": 3456
+            },
+            {
+              "age": 52,
+              "premium": 3456
+            },
+            {
+              "age": 53,
+              "premium": 3456
+            },
+            {
+              "age": 54,
+              "premium": 4483
+            },
+            {
+              "age": 55,
+              "premium": 4483
+            },
+            {
+              "age": 56,
+              "premium": 4483
+            },
+            {
+              "age": 57,
+              "premium": 4483
+            },
+            {
+              "age": 58,
+              "premium": 4483
+            },
+            {
+              "age": 59,
+              "premium": 4483
+            },
+            {
+              "age": 60,
+              "premium": 4483
+            },
+            {
+              "age": 61,
+              "premium": 4483
+            },
+            {
+              "age": 62,
+              "premium": 4483
+            },
+            {
+              "age": 63,
+              "premium": 4483
+            },
+            {
+              "age": 64,
+              "premium": 6910
+            },
+            {
+              "age": 65,
+              "premium": 6910
+            },
+            {
+              "age": 66,
+              "premium": 6910
+            },
+            {
+              "age": 67,
+              "premium": 6910
+            },
+            {
+              "age": 68,
+              "premium": 6910
+            },
+            {
+              "age": 69,
+              "premium": 6910
+            },
+            {
+              "age": 70,
+              "premium": 6910
+            },
+            {
+              "age": 71,
+              "premium": 6910
+            },
+            {
+              "age": 72,
+              "premium": 6910
+            },
+            {
+              "age": 73,
+              "premium": 6910
+            },
+            {
+              "age": 74,
+              "premium": 10180
+            },
+            {
+              "age": 75,
+              "premium": 10180
+            },
+            {
+              "age": 76,
+              "premium": 10180
+            },
+            {
+              "age": 77,
+              "premium": 10180
+            },
+            {
+              "age": 78,
+              "premium": 10180
+            },
+            {
+              "age": 79,
+              "premium": 12166
+            },
+            {
+              "age": 80,
+              "premium": 12827
+            },
+            {
+              "age": 81,
+              "premium": 13490
+            },
+            {
+              "age": 82,
+              "premium": 14346
+            },
+            {
+              "age": 83,
+              "premium": 15205
+            },
+            {
+              "age": 84,
+              "premium": 16064
+            }
+          ],
+          "female": [
+            {
+              "age": 0,
+              "premium": 1776
+            },
+            {
+              "age": 1,
+              "premium": 1776
+            },
+            {
+              "age": 2,
+              "premium": 1776
+            },
+            {
+              "age": 3,
+              "premium": 1776
+            },
+            {
+              "age": 4,
+              "premium": 1776
+            },
+            {
+              "age": 5,
+              "premium": 1776
+            },
+            {
+              "age": 6,
+              "premium": 1776
+            },
+            {
+              "age": 7,
+              "premium": 1776
+            },
+            {
+              "age": 8,
+              "premium": 1776
+            },
+            {
+              "age": 9,
+              "premium": 1776
+            },
+            {
+              "age": 10,
+              "premium": 1776
+            },
+            {
+              "age": 11,
+              "premium": 1776
+            },
+            {
+              "age": 12,
+              "premium": 1776
+            },
+            {
+              "age": 13,
+              "premium": 1776
+            },
+            {
+              "age": 14,
+              "premium": 1840
+            },
+            {
+              "age": 15,
+              "premium": 1840
+            },
+            {
+              "age": 16,
+              "premium": 1840
+            },
+            {
+              "age": 17,
+              "premium": 1840
+            },
+            {
+              "age": 18,
+              "premium": 1840
+            },
+            {
+              "age": 19,
+              "premium": 1840
+            },
+            {
+              "age": 20,
+              "premium": 1840
+            },
+            {
+              "age": 21,
+              "premium": 1840
+            },
+            {
+              "age": 22,
+              "premium": 1840
+            },
+            {
+              "age": 23,
+              "premium": 1840
+            },
+            {
+              "age": 24,
+              "premium": 2203
+            },
+            {
+              "age": 25,
+              "premium": 2203
+            },
+            {
+              "age": 26,
+              "premium": 2203
+            },
+            {
+              "age": 27,
+              "premium": 2203
+            },
+            {
+              "age": 28,
+              "premium": 2203
+            },
+            {
+              "age": 29,
+              "premium": 2203
+            },
+            {
+              "age": 30,
+              "premium": 2203
+            },
+            {
+              "age": 31,
+              "premium": 2203
+            },
+            {
+              "age": 32,
+              "premium": 2203
+            },
+            {
+              "age": 33,
+              "premium": 2203
+            },
+            {
+              "age": 34,
+              "premium": 2721
+            },
+            {
+              "age": 35,
+              "premium": 2721
+            },
+            {
+              "age": 36,
+              "premium": 2721
+            },
+            {
+              "age": 37,
+              "premium": 2721
+            },
+            {
+              "age": 38,
+              "premium": 2721
+            },
+            {
+              "age": 39,
+              "premium": 2721
+            },
+            {
+              "age": 40,
+              "premium": 2721
+            },
+            {
+              "age": 41,
+              "premium": 2721
+            },
+            {
+              "age": 42,
+              "premium": 2721
+            },
+            {
+              "age": 43,
+              "premium": 2721
+            },
+            {
+              "age": 44,
+              "premium": 3456
+            },
+            {
+              "age": 45,
+              "premium": 3456
+            },
+            {
+              "age": 46,
+              "premium": 3456
+            },
+            {
+              "age": 47,
+              "premium": 3456
+            },
+            {
+              "age": 48,
+              "premium": 3456
+            },
+            {
+              "age": 49,
+              "premium": 3456
+            },
+            {
+              "age": 50,
+              "premium": 3456
+            },
+            {
+              "age": 51,
+              "premium": 3456
+            },
+            {
+              "age": 52,
+              "premium": 3456
+            },
+            {
+              "age": 53,
+              "premium": 3456
+            },
+            {
+              "age": 54,
+              "premium": 4483
+            },
+            {
+              "age": 55,
+              "premium": 4483
+            },
+            {
+              "age": 56,
+              "premium": 4483
+            },
+            {
+              "age": 57,
+              "premium": 4483
+            },
+            {
+              "age": 58,
+              "premium": 4483
+            },
+            {
+              "age": 59,
+              "premium": 4483
+            },
+            {
+              "age": 60,
+              "premium": 4483
+            },
+            {
+              "age": 61,
+              "premium": 4483
+            },
+            {
+              "age": 62,
+              "premium": 4483
+            },
+            {
+              "age": 63,
+              "premium": 4483
+            },
+            {
+              "age": 64,
+              "premium": 6910
+            },
+            {
+              "age": 65,
+              "premium": 6910
+            },
+            {
+              "age": 66,
+              "premium": 6910
+            },
+            {
+              "age": 67,
+              "premium": 6910
+            },
+            {
+              "age": 68,
+              "premium": 6910
+            },
+            {
+              "age": 69,
+              "premium": 6910
+            },
+            {
+              "age": 70,
+              "premium": 6910
+            },
+            {
+              "age": 71,
+              "premium": 6910
+            },
+            {
+              "age": 72,
+              "premium": 6910
+            },
+            {
+              "age": 73,
+              "premium": 6910
+            },
+            {
+              "age": 74,
+              "premium": 10180
+            },
+            {
+              "age": 75,
+              "premium": 10180
+            },
+            {
+              "age": 76,
+              "premium": 10180
+            },
+            {
+              "age": 77,
+              "premium": 10180
+            },
+            {
+              "age": 78,
+              "premium": 10180
+            },
+            {
+              "age": 79,
+              "premium": 12166
+            },
+            {
+              "age": 80,
+              "premium": 12827
+            },
+            {
+              "age": 81,
+              "premium": 13490
+            },
+            {
+              "age": 82,
+              "premium": 14346
+            },
+            {
+              "age": 83,
+              "premium": 15205
+            },
+            {
+              "age": 84,
+              "premium": 16064
+            }
+          ]
+        },
+        "termRateTablesByGender": {},
+        "structuredRateTable": null,
+        "source": "finfo-public",
+        "sourceUrl": "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29",
+        "sourceName": "Finfo保險資訊站",
+        "effectiveDate": "2021-04-29",
+        "saleStatus": "discontinued",
+        "saleStatusCheckedAt": "2026-08-09T13:02:57.105Z",
+        "discoveredAt": "2026-08-09T13:02:57.105Z",
+        "confidence": 0.9,
+        "popularity": 0,
+        "documents": {
+          "terms": "https://drive.google.com/file/d/1s0mZt_XXC4vSbr-9c3Sas8kzvQBg0DAv/view?usp=sharing",
+          "rates": "https://drive.google.com/file/d/1hMNt615VRjivf913RgHP9PnFv0RmUuse/view?usp=sharing"
+        },
+        "benefits": [
+          {
+            "item": "住院醫療",
+            "amount": "計劃三",
+            "note": ""
+          }
+        ],
+        "note": "Finfo 搜尋精準命中；實支實付；最高保障至85歲；此商品須搭配「台灣人壽新住院醫療保險附約(85) (HNRC)」同時購買，是用來加強 HNRC 的保障額度。；一年期；計劃三"
+      },
+      "optionAge": 35,
+      "rateRows": 85,
+      "premiumUrl": "https://finfo.tw/api/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29/premiums?age=0&gender=male&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D",
+      "premiumUrlsByGender": {
+        "male": "https://finfo.tw/api/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29/premiums?age=0&gender=male&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D",
+        "female": "https://finfo.tw/api/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29/premiums?age=0&gender=female&term=%E4%B8%80%E5%B9%B4%E6%9C%9F&plan=%E8%A8%88%E5%8A%83%E4%B8%89&is_renewal=%E9%A6%96%E6%AC%A1%E6%8A%95%E4%BF%9D"
+      },
+      "driveRateRows": 0,
+      "driveRateWarnings": [],
+      "driveRateError": "",
+      "alternateExactUrls": [],
+      "errors": []
+    }
+  ]
+}

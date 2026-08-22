@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-22T14:48:18.504Z",
+  "products": {
+    "遠雄人壽|CJ2": {
+      "code": "CJ2",
+      "name": "愛家守護五年定期癌症健康保險附約",
+      "insurer": "遠雄人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 2974,
+      "effectiveDate": "2024-10-01",
+      "sourceUrl": "https://finfo.tw/products/CJ2-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%9B%E5%AE%B6%E5%AE%88%E8%AD%B7%E4%BA%94%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
+    },
+    "全球人壽|DCE": {
+      "code": "DCE",
+      "name": "醫卡讚85重大傷病定期健康保險",
+      "insurer": "全球人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 7674,
+      "effectiveDate": "2025-01-01",
+      "sourceUrl": "https://finfo.tw/products/DCE-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%8D%A1%E8%AE%9A85%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2025-01-01"
+    },
+    "台灣人壽|HNRC": {
+      "code": "HNRC",
+      "name": "新住院醫療保險附約85",
+      "insurer": "台灣人壽",
+      "saleStatus": "discontinued",
+      "rateStatus": "ready",
+      "popularity": 0,
+      "effectiveDate": "2021-04-29",
+      "sourceUrl": "https://finfo.tw/products/HNRC-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%8485-2021-04-29"
+    },
+    "台灣人壽|HNRD": {
+      "code": "HNRD",
+      "name": "祝安心自負額住院醫療健康保險附約",
+      "insurer": "台灣人壽",
+      "saleStatus": "discontinued",
+      "rateStatus": "ready",
+      "popularity": 0,
+      "effectiveDate": "2021-04-29",
+      "sourceUrl": "https://finfo.tw/products/HNRD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%A5%9D%E5%AE%89%E5%BF%83%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-04-29"
+    },
+    "遠雄人壽|LM5": {
+      "code": "LM5",
+      "name": "全家保小額終身壽險111",
+      "insurer": "遠雄人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 20,
+      "effectiveDate": "2026-01-01",
+      "sourceUrl": "https://finfo.tw/products/LM5-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E5%85%A8%E5%AE%B6%E4%BF%9D%E5%B0%8F%E9%A1%8D%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA111-2026-01-01"
+    },
+    "遠雄人壽|MRE": {
+      "code": "MRE",
+      "name": "真實在傷害醫療保險附約",
+      "insurer": "遠雄人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 1866,
+      "effectiveDate": "2024-10-01",
+      "sourceUrl": "https://finfo.tw/products/MRE-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E7%9C%9F%E5%AF%A6%E5%9C%A8%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
+    },
+    "台灣人壽|OTL1": {
+      "code": "OTL1",
+      "name": "新好易保一年定期壽險",
+      "insurer": "台灣人壽",
+      "saleStatus": "unknown",
+      "rateStatus": "ready",
+      "popularity": 0,
+      "effectiveDate": "2021-07-01",
+      "sourceUrl": "https://finfo.tw/products/OTL1-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%A5%BD%E6%98%93%E4%BF%9D%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA-2021-07-01"
+    },
+    "台灣人壽|T08F0": {
+      "code": "T08F0",
+      "name": "傳承富滿利率變動型終身壽險",
+      "insurer": "台灣人壽",
+      "saleStatus": "unknown",
+      "rateStatus": "ready",
+      "popularity": 0,
+      "effectiveDate": "2021-12-01",
+      "sourceUrl": "https://finfo.tw/products/T08F0-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E5%82%B3%E6%89%BF%E5%AF%8C%E6%BB%BF%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2021-12-01"
+    },
+    "全球人壽|XAN": {
+      "code": "XAN",
+      "name": "臻平安傷害保險附約",
+      "insurer": "全球人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 579,
+      "effectiveDate": "2024-09-30",
+      "sourceUrl": "https://finfo.tw/products/XAN-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E8%87%BB%E5%B9%B3%E5%AE%89%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+    },
+    "遠雄人壽|XCD": {
+      "code": "XCD",
+      "name": "一年定期癌症健康保險附約",
+      "insurer": "遠雄人壽",
+      "saleStatus": "active",
+      "rateStatus": "ready",
+      "popularity": 2222,
+      "effectiveDate": "2024-10-01",
+      "sourceUrl": "https://finfo.tw/products/XCD-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
+    },
+    "全球人壽|XHB": {
+      "code": "XHB",
+      "name": "實在醫靠醫療費用健康保險附約",
+      "insurer": "全球人壽",
+      "saleStatus": "discontinued",
+      "rateStatus": "ready",
+      "popularity": 0,
+      "effectiveDate": "2023-02-09",
+      "sourceUrl": "https://finfo.tw/products/XHB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%AF%A6%E5%9C%A8%E9%86%AB%E9%9D%A0%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2023-02-09"
+    }
+  }
+}
