@@ -816,41 +816,112 @@ function calculateLoan() {
 
 function renderLessons() {
   const list = document.querySelector("#lessonList");
-  list.innerHTML = lessons.map((lesson, index) => `
-    <article class="lesson-item ${index === 0 ? "is-open" : ""}">
-      <button class="lesson-toggle" type="button" aria-expanded="${index === 0 ? "true" : "false"}">
-        <span class="lesson-number">${String(index + 1).padStart(2, "0")}</span>
-        <span class="lesson-title">
-          <strong>${lesson.title}</strong>
-          <small>${lesson.tag}</small>
-        </span>
-        <span class="lesson-icon" aria-hidden="true">+</span>
-      </button>
-      <div class="lesson-body">
-        <p class="lesson-summary">${lesson.summary}</p>
-        <div class="lesson-deep-grid">
-          ${lesson.sections.map((section) => `
-            <section class="lesson-deep-block">
-              <h4>${section.heading}</h4>
-              <p>${section.body}</p>
-              <ul>
-                ${section.items.map((item) => `<li>${item}</li>`).join("")}
-              </ul>
-            </section>
-          `).join("")}
+  if (!list) return;
+
+  let completed = storageSet("realEstateCompletedLessons");
+  let openIndex = lessons.findIndex((_, index) => !completed.has(String(index)));
+  if (openIndex < 0) openIndex = 0;
+
+  const readingMinutes = (lesson) => {
+    const textLength = [
+      lesson.summary,
+      lesson.drill,
+      ...lesson.sections.flatMap((section) => [section.heading, section.body, ...section.items])
+    ].join("").length;
+    return Math.max(5, Math.ceil(textLength / 260));
+  };
+
+  const render = () => {
+    const completedCount = completed.size;
+    const progress = Math.round(completedCount / lessons.length * 100);
+    const nextIndex = lessons.findIndex((_, index) => !completed.has(String(index)));
+
+    list.innerHTML = `
+      <div class="lesson-progress-summary">
+        <div>
+          <span>我的課程進度</span>
+          <strong>${completedCount} / ${lessons.length} 堂</strong>
         </div>
-        <div class="lesson-drill">${lesson.drill}</div>
+        <div class="lesson-progress-track" aria-label="課程完成 ${progress}%">
+          <span style="width: ${progress}%"></span>
+        </div>
+        <button class="primary-mini" type="button" data-continue-lesson ${nextIndex < 0 ? "disabled" : ""}>
+          ${nextIndex < 0 ? "8 堂已完成" : `繼續第 ${nextIndex + 1} 堂`}
+        </button>
       </div>
-    </article>
-  `).join("");
+      ${lessons.map((lesson, index) => {
+        const isComplete = completed.has(String(index));
+        const isOpen = index === openIndex;
+        return `
+          <article class="lesson-item ${isOpen ? "is-open" : ""} ${isComplete ? "is-complete" : ""}" data-lesson-index="${index}">
+            <button class="lesson-toggle" type="button" aria-expanded="${isOpen}">
+              <span class="lesson-number">${isComplete ? "✓" : String(index + 1).padStart(2, "0")}</span>
+              <span class="lesson-title">
+                <strong>${lesson.title}</strong>
+                <small>${lesson.tag} · 約 ${readingMinutes(lesson)} 分鐘</small>
+              </span>
+              <span class="lesson-icon" aria-hidden="true">+</span>
+            </button>
+            <div class="lesson-body">
+              <p class="lesson-summary">${lesson.summary}</p>
+              <div class="lesson-deep-grid">
+                ${lesson.sections.map((section) => `
+                  <section class="lesson-deep-block">
+                    <h4>${section.heading}</h4>
+                    <p>${section.body}</p>
+                    <ul>
+                      ${section.items.map((item) => `<li>${item}</li>`).join("")}
+                    </ul>
+                  </section>
+                `).join("")}
+              </div>
+              <div class="lesson-drill">${lesson.drill}</div>
+              <button class="lesson-complete" type="button" data-complete-lesson="${index}">
+                ${isComplete ? "取消完成標記" : "完成這堂課"}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    `;
+  };
 
   list.addEventListener("click", (event) => {
+    const completeButton = event.target.closest("[data-complete-lesson]");
+    if (completeButton) {
+      const id = completeButton.dataset.completeLesson;
+      if (completed.has(id)) {
+        completed.delete(id);
+        openIndex = Number(id);
+      } else {
+        completed.add(id);
+        const nextIndex = lessons.findIndex((_, index) => !completed.has(String(index)));
+        openIndex = nextIndex < 0 ? Number(id) : nextIndex;
+      }
+      saveStorageSet("realEstateCompletedLessons", completed);
+      render();
+      document.querySelector(`[data-lesson-index="${openIndex}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (event.target.closest("[data-continue-lesson]")) {
+      const nextIndex = lessons.findIndex((_, index) => !completed.has(String(index)));
+      if (nextIndex < 0) return;
+      openIndex = nextIndex;
+      render();
+      document.querySelector(`[data-lesson-index="${openIndex}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     const toggle = event.target.closest(".lesson-toggle");
     if (!toggle) return;
     const item = toggle.closest(".lesson-item");
     const isOpen = item.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", String(isOpen));
+    openIndex = Number(item.dataset.lessonIndex);
   });
+
+  render();
 }
 
 function renderChecklist() {
@@ -1095,7 +1166,7 @@ function renderMarkers() {
         <button type="button" data-remove-marker="${index}">刪除</button>
       </div>
     `).join("")
-    : `<div class="marker-item"><div><strong>還沒有標記</strong><span>上傳圖面後點圖加入位置。</span></div></div>`;
+    : `<div class="marker-item"><div><strong>還沒有標記</strong><span>有圖可點位置；沒有圖也能先選房間與目標，取得配置清單。</span></div></div>`;
 }
 
 function bindLayoutPlanner() {
@@ -1105,6 +1176,7 @@ function bindLayoutPlanner() {
   const canvas = document.querySelector("#planCanvas");
   const markerType = document.querySelector("#markerType");
   const copyButton = document.querySelector("#copyPlannerAdvice");
+  const noImageButton = document.querySelector("#plannerNoImage");
   const clearButton = document.querySelector("#clearMarkers");
   const markerList = document.querySelector("#markerList");
 
@@ -1163,6 +1235,16 @@ function bindLayoutPlanner() {
         copyButton.textContent = "複製建議";
       }, 1200);
     }
+  });
+
+  noImageButton?.addEventListener("click", () => {
+    renderPlannerAdvice();
+    document.querySelector("#plannerAdvice")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.querySelector("#plannerRoom")?.focus({ preventScroll: true });
+    noImageButton.textContent = "已建立無圖清單";
+    setTimeout(() => {
+      noImageButton.textContent = "沒有圖，先做清單";
+    }, 1600);
   });
 
   ["#plannerRoom", "#plannerGoal", "#markerType"].forEach((selector) => {
@@ -1459,6 +1541,24 @@ const coachProfiles = [
     lessons: ["04 看屋驗屋", "06 裝潢配置", "08 出場與轉手性"],
     categories: ["renovation_inspection"],
     tasks: ["上傳格局圖或竣工圖", "標出電器、櫃體和插座位置", "複製配置建議給設計師或家人討論"]
+  },
+  {
+    id: "upgrade-home",
+    label: "換屋家庭",
+    title: "把出售、交屋與新貸款排在同一張時間表",
+    lead: "換屋不是再買一次首購。先確認舊屋處分、重複持有期、貸款限制、稅費與搬家時間，避免兩間房的現金流同時擠壓家庭。",
+    lessons: ["01 貸款與換屋資金", "05 合約稅費", "08 持有與出場"],
+    categories: ["policy_credit", "contract_tax_risk", "market_supply"],
+    tasks: ["列出舊屋最晚出售時間", "用保守成數試算新屋資金缺口", "向銀行與代書確認當期換屋規定"]
+  },
+  {
+    id: "experienced",
+    label: "已有經驗／專業者",
+    title: "略過基礎敘述，直接做資料與風險交叉檢核",
+    lead: "已有交易經驗時，重點不是再聽一次買房入門，而是核對政策、供給、價格、產權與退場假設。影片只當線索，結論要回到官方資料。",
+    lessons: ["02 區域價值", "05 合約產權", "07 市場供給與 08 出場"],
+    categories: ["market_supply", "area_research", "contract_tax_risk", "policy_credit"],
+    tasks: ["用同類型實價成交重建價格帶", "列出三個會推翻買進理由的反證", "重查最新政策、建照使照與供給資料"]
   }
 ];
 
@@ -1618,8 +1718,9 @@ function renderCoachGuide() {
         `).join("")}
       </div>
       <div class="coach-actions">
-        <a class="primary-mini" href="#calculator">先快算預算</a>
-        <a class="text-button" href="#youtube-lab">去看分類影片</a>
+        ${profile.id === "experienced"
+          ? `<a class="primary-mini" href="#sources">先看官方查證入口</a><a class="text-button" href="#youtube-lab">篩選進階素材</a>`
+          : `<a class="primary-mini" href="#calculator">先快算預算</a><a class="text-button" href="#youtube-lab">去看分類影片</a>`}
       </div>
     `;
   };
@@ -1959,6 +2060,383 @@ function enhancePlannerGuide() {
   `);
 }
 
+const syntheticPersonaTypes = [
+  {
+    id: "new-buyer",
+    label: "首購小白",
+    level: "小白",
+    weight: 32,
+    coach: "first-home",
+    route: ["coach", "calculator", "lessons", "youtube-lab", "checklist"]
+  },
+  {
+    id: "careful-buyer",
+    label: "謹慎首購族",
+    level: "入門",
+    weight: 20,
+    coach: "first-home",
+    route: ["coach", "calculator", "lessons", "checklist"]
+  },
+  {
+    id: "pre-sale-researcher",
+    label: "預售屋研究者",
+    level: "進階",
+    weight: 17,
+    coach: "pre-sale",
+    route: ["coach", "calculator", "youtube-lab", "layout-planner"]
+  },
+  {
+    id: "family-upgrader",
+    label: "換屋家庭",
+    level: "進階",
+    weight: 14,
+    coach: "upgrade-home",
+    route: ["coach", "calculator", "lessons", "youtube-lab"]
+  },
+  {
+    id: "rental-evaluator",
+    label: "收租評估者",
+    level: "熟手",
+    weight: 8,
+    coach: "experienced",
+    route: ["coach", "calculator", "youtube-lab", "lessons"]
+  },
+  {
+    id: "property-expert",
+    label: "房地產專家",
+    level: "專業",
+    weight: 5,
+    coach: "experienced",
+    route: ["coach", "youtube-lab", "lessons", "sources"]
+  },
+  {
+    id: "renovating-owner",
+    label: "交屋裝修族",
+    level: "入門",
+    weight: 4,
+    coach: "renovation",
+    route: ["coach", "layout-planner", "lessons", "checklist"]
+  }
+];
+
+const syntheticFrictionLabels = {
+  shortSession: "單次時間不足以完成推薦路線",
+  budgetTerms: "不確定房貸負擔率與成數怎麼填",
+  sourceVolume: "影片素材量大，需要先搜尋或分類",
+  officialProof: "進階角色需要更快找到官方查證入口",
+  missingPlan: "想規劃裝潢，但手邊沒有格局圖",
+  coachMismatch: "找不到符合身份的學習分流",
+  noResume: "課程中斷後找不到續讀位置"
+};
+
+function createSeededRandom(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6D2B79F5;
+    let result = value;
+    result = Math.imul(result ^ result >>> 15, result | 1);
+    result ^= result + Math.imul(result ^ result >>> 7, result | 61);
+    return ((result ^ result >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function weightedSyntheticPick(items, random) {
+  const point = random() * items.reduce((total, item) => total + item.weight, 0);
+  let cursor = 0;
+  return items.find((item) => {
+    cursor += item.weight;
+    return point < cursor;
+  }) || items[items.length - 1];
+}
+
+function syntheticSeed() {
+  if (window.crypto?.getRandomValues) {
+    return window.crypto.getRandomValues(new Uint32Array(1))[0];
+  }
+  return Date.now() >>> 0;
+}
+
+function generateSyntheticLearners(count, seed) {
+  const random = createSeededRandom(seed);
+  const genders = Array.from({ length: count }, (_, index) => index < Math.floor(count / 2) ? "女性" : "男性");
+
+  for (let index = genders.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [genders[index], genders[swapIndex]] = [genders[swapIndex], genders[index]];
+  }
+
+  return Array.from({ length: count }, (_, index) => {
+    const type = weightedSyntheticPick(syntheticPersonaTypes, random);
+    const sessionMinutes = weightedSyntheticPick([
+      { value: 5, weight: 18 },
+      { value: 10, weight: 30 },
+      { value: 15, weight: 27 },
+      { value: 20, weight: 17 },
+      { value: 30, weight: 8 }
+    ], random).value;
+    const deviceWidth = weightedSyntheticPick([
+      { value: 360, weight: 18 },
+      { value: 375, weight: 24 },
+      { value: 390, weight: 32 },
+      { value: 412, weight: 18 },
+      { value: 430, weight: 8 }
+    ], random).value;
+
+    return {
+      id: `S${String(index + 1).padStart(4, "0")}`,
+      gender: genders[index],
+      age: 26 + Math.floor(random() * 15),
+      type: type.label,
+      typeId: type.id,
+      level: type.level,
+      coach: type.coach,
+      route: [...type.route],
+      sessionMinutes,
+      deviceWidth,
+      hasPlanImage: random() < (type.id === "renovating-owner" ? 0.72 : 0.34),
+      random
+    };
+  });
+}
+
+function runSyntheticLearningSimulation(count = 1000, seed = syntheticSeed()) {
+  const learners = generateSyntheticLearners(count, seed);
+  const capabilities = {
+    coachIds: new Set(coachProfiles.map((profile) => profile.id)),
+    hasCalculator: document.querySelectorAll("#loanForm input").length >= 5,
+    hasLessonProgress: Boolean(document.querySelector(".lesson-progress-summary")),
+    hasMaterialSearch: Boolean(document.querySelector("#materialSearchInput")),
+    hasMaterialPages: Boolean(document.querySelector("[data-digest-page]")),
+    hasLayoutPlanner: Boolean(document.querySelector("#planImage")),
+    hasNoImagePlanner: Boolean(document.querySelector("#plannerNoImage")),
+    hasOfficialSources: document.querySelectorAll("#sources a").length > 0
+  };
+
+  const results = learners.map((learner) => {
+    const frictions = [];
+    const visited = [];
+    let completedStages = 0;
+
+    learner.route.forEach((stage) => {
+      visited.push(stage);
+      let completed = true;
+
+      if (stage === "coach" && !capabilities.coachIds.has(learner.coach)) {
+        frictions.push("coachMismatch");
+        completed = false;
+      }
+
+      if (stage === "calculator") {
+        completed = capabilities.hasCalculator;
+        if (["小白", "入門"].includes(learner.level) && learner.random() < 0.22) {
+          frictions.push("budgetTerms");
+          completed = learner.random() > 0.38;
+        }
+      }
+
+      if (stage === "lessons") {
+        if (learner.sessionMinutes < 12) frictions.push("shortSession");
+        if (learner.sessionMinutes < 10 && !capabilities.hasLessonProgress) {
+          frictions.push("noResume");
+          completed = false;
+        }
+      }
+
+      if (stage === "youtube-lab") {
+        if (learner.random() < (["小白", "入門"].includes(learner.level) ? 0.28 : 0.13)) {
+          frictions.push("sourceVolume");
+        }
+        completed = capabilities.hasMaterialSearch && capabilities.hasMaterialPages;
+      }
+
+      if (stage === "layout-planner") {
+        completed = capabilities.hasLayoutPlanner && (learner.hasPlanImage || capabilities.hasNoImagePlanner);
+        if (!learner.hasPlanImage) frictions.push("missingPlan");
+      }
+
+      if (stage === "sources") {
+        completed = capabilities.hasOfficialSources;
+        if (["熟手", "專業"].includes(learner.level) && learner.random() < 0.34) {
+          frictions.push("officialProof");
+        }
+      }
+
+      if (completed) completedStages += 1;
+    });
+
+    const uniqueFrictions = [...new Set(frictions)];
+    return {
+      ...learner,
+      random: undefined,
+      visited,
+      frictions: uniqueFrictions,
+      completion: Math.round(completedStages / learner.route.length * 100)
+    };
+  });
+
+  const frictionCounts = results.flatMap((item) => item.frictions).reduce((totals, key) => {
+    totals[key] = (totals[key] || 0) + 1;
+    return totals;
+  }, {});
+  const roleCounts = results.reduce((totals, item) => {
+    totals[item.type] = (totals[item.type] || 0) + 1;
+    return totals;
+  }, {});
+  const averageCompletion = Math.round(results.reduce((total, item) => total + item.completion, 0) / results.length);
+
+  return {
+    generatedAt: new Date().toISOString(),
+    seed,
+    count,
+    method: "瀏覽器端規則式合成測試，非真實使用者分析",
+    results,
+    summary: {
+      genders: results.reduce((totals, item) => {
+        totals[item.gender] = (totals[item.gender] || 0) + 1;
+        return totals;
+      }, {}),
+      ageMin: Math.min(...results.map((item) => item.age)),
+      ageMax: Math.max(...results.map((item) => item.age)),
+      roleCounts,
+      frictionCounts,
+      averageCompletion
+    }
+  };
+}
+
+function initSyntheticSimulation() {
+  window.syntheticLearningTest = { run: runSyntheticLearningSimulation };
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("simulation") !== "1") return;
+
+  const section = document.querySelector("#simulation-lab");
+  const toolbar = document.querySelector("#simulationToolbar");
+  const summary = document.querySelector("#simulationSummary");
+  const findings = document.querySelector("#simulationFindings");
+  const people = document.querySelector("#simulationPeople");
+  if (!section || !toolbar || !summary || !findings || !people) return;
+
+  section.hidden = false;
+  const navLink = document.createElement("a");
+  navLink.href = "#simulation-lab";
+  navLink.textContent = "模擬";
+  document.querySelector(".quick-nav")?.append(navLink);
+
+  let report;
+  let page = 1;
+  const pageSize = 8;
+
+  const renderPeople = () => {
+    const totalPages = Math.ceil(report.results.length / pageSize);
+    const visible = report.results.slice((page - 1) * pageSize, page * pageSize);
+    people.innerHTML = `
+      <div class="simulation-list-head">
+        <div>
+          <span>角色樣本</span>
+          <strong>第 ${page} / ${totalPages} 頁</strong>
+        </div>
+        <small>每頁 8 人，完整 1000 人只留在本機記憶體</small>
+      </div>
+      <div class="simulation-list">
+        ${visible.map((learner) => `
+          <article>
+            <div class="simulation-person-title">
+              <b>${learner.id} · ${learner.type}</b>
+              <span>${learner.completion}% 路徑完成</span>
+            </div>
+            <p>${learner.gender}，${learner.age} 歲，${learner.level}；手機 ${learner.deviceWidth}px，單次 ${learner.sessionMinutes} 分鐘。</p>
+            <small>${learner.frictions.length ? learner.frictions.map((key) => syntheticFrictionLabels[key]).join("；") : "本次推演未遇到主要卡點"}</small>
+          </article>
+        `).join("")}
+      </div>
+      <div class="simulation-pagination">
+        <button type="button" data-simulation-page="${page - 1}" ${page === 1 ? "disabled" : ""} aria-label="上一頁">‹</button>
+        <span>${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, report.results.length)} / ${report.results.length}</span>
+        <button type="button" data-simulation-page="${page + 1}" ${page === totalPages ? "disabled" : ""} aria-label="下一頁">›</button>
+      </div>
+    `;
+  };
+
+  const renderReport = () => {
+    const topFrictions = Object.entries(report.summary.frictionCounts)
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4);
+    const roleEntries = Object.entries(report.summary.roleCounts)
+      .sort((left, right) => right[1] - left[1]);
+
+    toolbar.innerHTML = `
+      <div>
+        <b>本機模式</b>
+        <span>0 次 API · 0 次資料庫寫入 · 種子 ${report.seed}</span>
+      </div>
+      <div class="simulation-actions">
+        <button class="primary-mini" type="button" data-simulation-rerun>重新生成</button>
+        <button class="text-button" type="button" data-simulation-download>下載報告</button>
+      </div>
+    `;
+
+    summary.innerHTML = `
+      <article><span>合成角色</span><strong>${report.count}</strong><small>每次重新隨機生成</small></article>
+      <article><span>男女分布</span><strong>${report.summary.genders.女性} / ${report.summary.genders.男性}</strong><small>女性 / 男性</small></article>
+      <article><span>年齡範圍</span><strong>${report.summary.ageMin}-${report.summary.ageMax}</strong><small>歲</small></article>
+      <article><span>平均路徑完成</span><strong>${report.summary.averageCompletion}%</strong><small>規則式推演值</small></article>
+    `;
+
+    findings.innerHTML = `
+      <article class="simulation-finding-block">
+        <span>角色分布</span>
+        <div class="simulation-role-bars">
+          ${roleEntries.map(([label, value]) => `
+            <div><b>${label}</b><span><i style="width: ${value / report.count * 100}%"></i></span><small>${value} 人</small></div>
+          `).join("")}
+        </div>
+      </article>
+      <article class="simulation-finding-block">
+        <span>本輪主要卡點</span>
+        <ol>
+          ${topFrictions.map(([key, value]) => `<li><b>${syntheticFrictionLabels[key]}</b><small>${value} 人觸發</small></li>`).join("")}
+        </ol>
+        <p>這些數字用來找介面弱點，不能替代真實訪談或匿名使用數據。</p>
+      </article>
+    `;
+
+    page = 1;
+    renderPeople();
+  };
+
+  const rerun = () => {
+    report = runSyntheticLearningSimulation(1000, syntheticSeed());
+    renderReport();
+  };
+
+  toolbar.addEventListener("click", (event) => {
+    if (event.target.closest("[data-simulation-rerun]")) {
+      rerun();
+      return;
+    }
+
+    if (!event.target.closest("[data-simulation-download]")) return;
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `real-estate-learning-simulation-${report.seed}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  people.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-simulation-page]");
+    if (!button || button.disabled) return;
+    page = Number(button.dataset.simulationPage);
+    renderPeople();
+    people.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  rerun();
+}
+
 renderSourceMaterials = renderCoachSourceMaterials;
 
 document.querySelectorAll("#loanForm input").forEach((input) => {
@@ -1977,3 +2455,4 @@ renderMarket();
 bindMarketTabs();
 bindTheme();
 calculateLoan();
+initSyntheticSimulation();

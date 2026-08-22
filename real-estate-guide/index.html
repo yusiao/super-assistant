@@ -74,6 +74,18 @@
       <article class="support-panel" id="supportPanel" aria-live="polite"></article>
     </section>
 
+    <section class="simulation-lab" id="simulation-lab" aria-labelledby="simulation-title" hidden>
+      <div class="section-head compact">
+        <p class="eyebrow">Synthetic Learning Test</p>
+        <h2 id="simulation-title">1000 人合成學習測試</h2>
+        <p>在這台裝置隨機建立不同程度與買房目標的匿名角色，依網站現有功能推演學習路徑。這是介面壓力測試，不是真實使用者統計。</p>
+      </div>
+      <div class="simulation-toolbar" id="simulationToolbar"></div>
+      <div class="simulation-summary" id="simulationSummary" aria-live="polite"></div>
+      <div class="simulation-findings" id="simulationFindings"></div>
+      <div class="simulation-people" id="simulationPeople"></div>
+    </section>
+
     <section class="coach" id="coach" aria-labelledby="coach-title">
       <div class="section-head compact">
         <p class="eyebrow">Coach Mode</p>
@@ -94,6 +106,7 @@
 
       <div class="calc-grid">
         <form class="calc-panel" id="loanForm">
+          <p class="calc-field-note">不確定怎麼填時：房貸負擔先用收入 35%，貸款成數先用 70% 做保守試算，再拿實際物件問銀行。</p>
           <label>
             月收入
             <span class="input-wrap">
@@ -245,6 +258,7 @@
 
           <div class="planner-actions">
             <button class="primary-mini" id="copyPlannerAdvice" type="button">複製建議</button>
+            <button class="text-button" id="plannerNoImage" type="button">沒有圖，先做清單</button>
             <button class="text-button" id="clearMarkers" type="button">清除標記</button>
           </div>
 

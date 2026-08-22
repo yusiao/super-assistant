@@ -527,6 +527,253 @@ main > section:not(.hero) {
   align-items: center;
 }
 
+.simulation-lab {
+  padding-bottom: 10px;
+}
+
+.simulation-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.simulation-toolbar > div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.simulation-toolbar b {
+  color: var(--green);
+}
+
+.simulation-toolbar span,
+.simulation-list-head small {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.simulation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.simulation-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.simulation-summary article {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.simulation-summary span,
+.simulation-finding-block > span,
+.simulation-list-head span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.simulation-summary strong {
+  font-size: 24px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.simulation-summary small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.simulation-findings {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.simulation-finding-block {
+  min-width: 0;
+  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.simulation-role-bars {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.simulation-role-bars > div {
+  display: grid;
+  grid-template-columns: minmax(96px, .9fr) minmax(80px, 1.4fr) 48px;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.simulation-role-bars b {
+  min-width: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.simulation-role-bars span {
+  height: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--blue) 12%, transparent);
+  border-radius: 999px;
+}
+
+.simulation-role-bars i {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+}
+
+.simulation-role-bars small {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.simulation-finding-block ol {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.simulation-finding-block li {
+  padding-left: 3px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.simulation-finding-block li small {
+  display: block;
+  color: var(--muted);
+}
+
+.simulation-finding-block p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.simulation-people {
+  margin-top: 10px;
+}
+
+.simulation-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 2px;
+}
+
+.simulation-list-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.simulation-list {
+  display: grid;
+  gap: 8px;
+}
+
+.simulation-list article {
+  min-width: 0;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.simulation-person-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.simulation-person-title b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.simulation-person-title span {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.simulation-list p {
+  margin: 8px 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.simulation-list article > small {
+  display: block;
+  color: var(--brick);
+  line-height: 1.5;
+}
+
+.simulation-pagination {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  gap: 8px;
+  align-items: center;
+  max-width: 280px;
+  margin: 12px auto 0;
+}
+
+.simulation-pagination button {
+  width: 42px;
+  height: 42px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 24px;
+}
+
+.simulation-pagination button:disabled {
+  opacity: .42;
+}
+
+.simulation-pagination span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
 .section-head {
   padding: 44px 0 18px;
 }
@@ -556,6 +803,18 @@ main > section:not(.hero) {
   display: grid;
   gap: 12px;
   padding: 16px;
+}
+
+.calc-field-note {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 20%, transparent);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
 }
 
 .calc-panel label {
@@ -682,8 +941,62 @@ main > section:not(.hero) {
   gap: 10px;
 }
 
+.lesson-progress-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  align-items: center;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.lesson-progress-summary > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.lesson-progress-summary > div:first-child span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.lesson-progress-summary > div:first-child strong {
+  font-size: 20px;
+}
+
+.lesson-progress-track {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--green) 13%, transparent);
+  border-radius: 999px;
+}
+
+.lesson-progress-track span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  transition: width .2s ease;
+}
+
+.lesson-progress-summary .primary-mini:disabled {
+  opacity: .58;
+}
+
 .lesson-item {
   overflow: clip;
+}
+
+.lesson-item.is-complete {
+  border-color: color-mix(in srgb, var(--green) 36%, var(--line));
+}
+
+.lesson-item.is-complete .lesson-number {
+  background: var(--blue);
 }
 
 .lesson-toggle {
@@ -801,6 +1114,22 @@ main > section:not(.hero) {
   font-size: 14px;
   font-weight: 800;
   line-height: 1.65;
+}
+
+.lesson-complete {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  color: #fff;
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.lesson-item.is-complete .lesson-complete {
+  color: var(--green);
+  background: transparent;
 }
 
 .cards {
@@ -1812,6 +2141,10 @@ main > section:not(.hero) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .calc-field-note {
+    grid-column: 1 / -1;
+  }
+
   .source-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1826,6 +2159,18 @@ main > section:not(.hero) {
 
   .support-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .simulation-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .simulation-findings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .simulation-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .coach-route {
@@ -1851,6 +2196,10 @@ main > section:not(.hero) {
 }
 
 @media (min-width: 1040px) {
+  .coach-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
   .quick-nav {
     top: 64px;
     width: min(620px, calc(100% - 40px));
