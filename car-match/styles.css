@@ -215,6 +215,19 @@ a { color: inherit; }
 .brand-keywords b { padding: 7px 9px; border: 1px solid rgba(255,255,255,.25); font-size: 9px; font-weight: 500; }
 .brand-narrative > a { margin-top: 25px; display: inline-block; font-size: 10px; font-weight: 700; text-underline-offset: 5px; }
 
+.comparison-wrap { margin-top: 72px; }
+.comparison-head { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.comparison-head h3 { margin: 0; font-size: clamp(25px, 3vw, 38px); }
+.comparison-head span { color: rgba(255,255,255,.48); font-size: 9px; letter-spacing: .16em; }
+.comparison-scroll { overflow-x: auto; border: 1px solid rgba(255,255,255,.22); background: var(--paper); }
+.comparison-table { width: 100%; min-width: 760px; border-collapse: collapse; color: var(--ink); table-layout: fixed; }
+.comparison-table th, .comparison-table td { padding: 16px 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 11px; line-height: 1.6; }
+.comparison-table thead th { color: var(--paper); background: var(--ink); font-size: 12px; }
+.comparison-table thead th:first-child, .comparison-table tbody th { width: 19%; font-size: 10px; font-weight: 800; letter-spacing: .05em; }
+.comparison-table thead a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.comparison-table tbody tr:last-child th, .comparison-table tbody tr:last-child td { border-bottom: 0; }
+.comparison-table th:last-child, .comparison-table td:last-child { border-right: 0; }
+
 .alternatives-wrap { margin-top: 72px; }
 .alternatives-head { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; }
 .alternatives-head h3 { margin: 0; font-size: clamp(25px, 3vw, 38px); }
@@ -293,6 +306,7 @@ footer > span { color: rgba(255,255,255,.4); font-size: 10px; text-align: right;
   .brand-identity { min-height: 330px; border-right: 0; }
   .brand-monogram { width: 150px; height: 150px; }
   .alternatives { grid-template-columns: 1fr; }
+  .comparison-wrap { margin-top: 56px; }
   .data-note { gap: 5vw; }
   .catalog-grid { grid-template-columns: 1fr; }
 }
@@ -348,6 +362,10 @@ footer > span { color: rgba(255,255,255,.4); font-size: 10px; text-align: right;
   .alt-car { width: 92%; margin: 0 auto; }
   .vehicle-links { gap: 10px 14px; }
   .alternatives-head span { display: none; }
+  .comparison-head span { display: none; }
+  .comparison-table { min-width: 680px; }
+  .comparison-table th, .comparison-table td { padding: 14px 13px; font-size: 10px; }
+  .comparison-table thead th:first-child, .comparison-table tbody th { width: 23%; }
   .result-actions { flex-direction: column; }
   .result-actions button { width: 100%; }
   .disclaimer { text-align: left; }

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f5f1e8">
-  <meta name="description" content="Jarvis Drive 依照預算、車型、動力與生活需求，推薦台灣買得到的汽車。">
-  <title>Jarvis Drive — 找到適合你的下一台車</title>
+  <meta name="description" content="台灣新車推薦依照預算、車型、動力與生活需求，推薦台灣買得到的汽車。">
+  <title>台灣新車推薦 — 找到適合你的下一台車</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -15,9 +15,9 @@
   <div class="noise" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="Jarvis Drive 首頁">
-      <span class="brand-mark">J</span>
-      <span>JARVIS <b>/ DRIVE</b></span>
+    <a class="brand" href="#top" aria-label="台灣新車推薦首頁">
+      <span class="brand-mark">車</span>
+      <span>新車 <b>/ 推薦</b></span>
     </a>
     <div class="topbar-meta" id="dataStatus">
       <span class="status-dot"></span>
@@ -30,7 +30,7 @@
       <div class="hero-copy">
         <div class="kicker"><span>01</span> YOUR NEXT DRIVE</div>
         <h1>找到那台<br><em>會讓你想出門</em>的車。</h1>
-        <p>不用看完五十支評測。告訴我們預算與生活方式，Jarvis 會從台灣在售車款中，整理出真正適合你的選擇。</p>
+        <p>不用看完五十支評測。告訴我們預算與生活方式，系統會從台灣在售車款中，整理出真正適合你的選擇。</p>
         <a class="hero-cta" href="#matcher">開始選車 <span>↘</span></a>
       </div>
 
@@ -165,7 +165,7 @@
         </fieldset>
 
         <div class="submit-zone">
-          <div><span>JARVIS MATCH ENGINE</span><small>依符合程度排序，不接受車商付費置入</small></div>
+          <div><span>TAIWAN CAR MATCH</span><small>依符合程度排序，不接受車商付費置入</small></div>
           <button type="submit" id="matchButton">看看哪台車適合我 <span>→</span></button>
           <p class="form-error" id="formError" role="alert"></p>
         </div>
@@ -183,6 +183,8 @@
 
       <article class="brand-story" id="brandStory"></article>
 
+      <section class="comparison-wrap" id="comparisonWrap" aria-label="推薦車款快速比較"></section>
+
       <div class="alternatives-wrap">
         <div class="alternatives-head"><h3>還有兩台，也很接近。</h3><span>ALTERNATIVE PICKS</span></div>
         <div class="alternatives" id="alternatives"></div>
@@ -192,7 +194,7 @@
         <button class="secondary-button" type="button" id="restartButton">重新選一次</button>
         <button class="primary-button" type="button" id="copyButton">複製我的選車結果</button>
       </div>
-      <p class="disclaimer">建議售價與車色依原廠最新公告為準；實際成交價、交期、配備及政府補助可能調整。建議預約試乘後再決定。</p>
+      <p class="disclaimer" id="resultDataNote">建議售價與車色依原廠最新公告為準；實際成交價、交期、配備及政府補助可能調整。建議預約試乘後再決定。</p>
     </section>
 
     <section class="data-note">
@@ -222,9 +224,9 @@
   </main>
 
   <footer>
-    <a class="brand footer-brand" href="#top"><span class="brand-mark">J</span><span>JARVIS <b>/ DRIVE</b></span></a>
+    <a class="brand footer-brand" href="#top"><span class="brand-mark">車</span><span>新車 <b>/ 推薦</b></span></a>
     <p>選車不該只是規格比較，還要適合你真正的日常。</p>
-    <span>© 2026 JARVIS</span>
+    <span>© 2026 台灣新車推薦</span>
   </footer>
 
   <div class="toast" id="toast" role="status">已複製選車結果</div>

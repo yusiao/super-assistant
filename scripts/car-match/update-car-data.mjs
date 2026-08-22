@@ -9,6 +9,7 @@ const U_CAR_INDEX_URL = "https://newcar.u-car.com.tw/newcar";
 const U_CAR_BASE_URL = "https://newcar.u-car.com.tw";
 const REQUEST_DELAY_MS = Number(process.env.CAR_MATCH_FETCH_DELAY_MS || 250);
 const MIN_FETCHED_CARS = Number(process.env.CAR_MATCH_MIN_FETCHED_CARS || 120);
+const MIN_CATALOG_RETAIN_RATIO = Number(process.env.CAR_MATCH_MIN_CATALOG_RETAIN_RATIO || 0.9);
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
@@ -32,6 +33,17 @@ const brandSlugOverrides = {
 
 const colors = ["white", "black", "gray", "blue", "red"];
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+if (!Number.isFinite(MIN_CATALOG_RETAIN_RATIO) || MIN_CATALOG_RETAIN_RATIO <= 0 || MIN_CATALOG_RETAIN_RATIO > 1) {
+  throw new Error("CAR_MATCH_MIN_CATALOG_RETAIN_RATIO must be a number greater than 0 and no more than 1.");
+}
+
+function getCatalogSafetyThreshold(currentCatalogCount) {
+  return Math.max(
+    MIN_FETCHED_CARS,
+    Math.ceil(Number(currentCatalogCount || 0) * MIN_CATALOG_RETAIN_RATIO)
+  );
+}
 
 function decodeHtml(value = "") {
   const named = {
@@ -326,7 +338,7 @@ function mergeBrandProfiles(existingProfiles, cars) {
       monogram: brand.split(/\s|-/).filter(Boolean).map(part => part[0]).join("").slice(0, 2).toUpperCase() || brand[0],
       origin: "Taiwan new-car catalog",
       chapter: `${brand} is currently listed in Taiwan's new-car market.`,
-      story: `${brand} appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.`,
+      story: `${brand} appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.`,
       position: "Taiwan-market listed brand",
       positioning: "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
       keywords: ["Taiwan market", "monthly update", "new cars"],
@@ -403,8 +415,9 @@ async function main() {
     return [carKey(car.brand, model), car];
   })).values()];
 
-  if (uniqueFetched.length < MIN_FETCHED_CARS) {
-    throw new Error(`Fetched only ${uniqueFetched.length} cars. Refusing to update because minimum is ${MIN_FETCHED_CARS}.`);
+  const expectedMinimum = getCatalogSafetyThreshold(current.cars.length);
+  if (uniqueFetched.length < expectedMinimum) {
+    throw new Error(`Fetched only ${uniqueFetched.length} cars. Refusing to update because this is below the catalog safety threshold of ${expectedMinimum} cars (${Math.round(MIN_CATALOG_RETAIN_RATIO * 100)}% of the current ${current.cars.length}-car catalog, with a hard minimum of ${MIN_FETCHED_CARS}).`);
   }
 
   const mergedCars = mergeCars(current.cars, uniqueFetched, { pruneMissing: prune });
@@ -432,6 +445,8 @@ async function main() {
     fetchedBrands: brands.length,
     fetchedCars: uniqueFetched.length,
     publishedCars: mergedCars.length,
+    minimumFetchedCars: expectedMinimum,
+    minimumCatalogRetainRatio: MIN_CATALOG_RETAIN_RATIO,
     pruneMissing: prune,
     failedBrands
   };
@@ -439,6 +454,7 @@ async function main() {
   const output = createDataFile({ cars: mergedCars, brands: brandProfiles, meta });
 
   console.log(`Fetched unique cars: ${uniqueFetched.length}`);
+  console.log(`Catalog safety threshold: ${expectedMinimum} cars (${Math.round(MIN_CATALOG_RETAIN_RATIO * 100)}% retention)`);
   console.log(`Published cars: ${mergedCars.length}`);
   console.log(`Added: ${added.length}`);
   console.log(`Removed: ${removed.length}`);
@@ -465,6 +481,7 @@ export {
   brandSlug,
   extractBrands,
   extractCarsFromBrandPage,
+  getCatalogSafetyThreshold,
   mergeBrandProfiles,
   mergeCars,
   normalizeForKey,

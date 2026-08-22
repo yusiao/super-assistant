@@ -10866,7 +10866,7 @@
     "monogram": "D",
     "origin": "Taiwan new-car catalog",
     "chapter": "DFSK is currently listed in Taiwan's new-car market.",
-    "story": "DFSK appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "DFSK appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10881,7 +10881,7 @@
     "monogram": "F",
     "origin": "Taiwan new-car catalog",
     "chapter": "Foxtron is currently listed in Taiwan's new-car market.",
-    "story": "Foxtron appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Foxtron appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10896,7 +10896,7 @@
     "monogram": "H",
     "origin": "Taiwan new-car catalog",
     "chapter": "Honda is currently listed in Taiwan's new-car market.",
-    "story": "Honda appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Honda appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10911,7 +10911,7 @@
     "monogram": "H",
     "origin": "Taiwan new-car catalog",
     "chapter": "Hyundai is currently listed in Taiwan's new-car market.",
-    "story": "Hyundai appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Hyundai appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10926,7 +10926,7 @@
     "monogram": "IG",
     "origin": "Taiwan new-car catalog",
     "chapter": "Ineos Grenadier is currently listed in Taiwan's new-car market.",
-    "story": "Ineos Grenadier appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Ineos Grenadier appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10941,7 +10941,7 @@
     "monogram": "I",
     "origin": "Taiwan new-car catalog",
     "chapter": "Infiniti is currently listed in Taiwan's new-car market.",
-    "story": "Infiniti appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Infiniti appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10956,7 +10956,7 @@
     "monogram": "M",
     "origin": "Taiwan new-car catalog",
     "chapter": "Mahindra is currently listed in Taiwan's new-car market.",
-    "story": "Mahindra appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Mahindra appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10971,7 +10971,7 @@
     "monogram": "M",
     "origin": "Taiwan new-car catalog",
     "chapter": "Mazda is currently listed in Taiwan's new-car market.",
-    "story": "Mazda appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Mazda appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -10986,7 +10986,7 @@
     "monogram": "M",
     "origin": "Taiwan new-car catalog",
     "chapter": "Morgan is currently listed in Taiwan's new-car market.",
-    "story": "Morgan appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Morgan appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -11001,7 +11001,7 @@
     "monogram": "T",
     "origin": "Taiwan new-car catalog",
     "chapter": "Tesla is currently listed in Taiwan's new-car market.",
-    "story": "Tesla appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Tesla appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [
@@ -11016,7 +11016,7 @@
     "monogram": "T",
     "origin": "Taiwan new-car catalog",
     "chapter": "Toyota is currently listed in Taiwan's new-car market.",
-    "story": "Toyota appears in the U-CAR new-car catalog tracked by Jarvis Drive. This placeholder profile is created automatically and can be enriched with brand history later.",
+    "story": "Toyota appears in the U-CAR new-car catalog tracked by this new-car finder. This placeholder profile is created automatically and can be enriched with brand history later.",
     "position": "Taiwan-market listed brand",
     "positioning": "Tracked by the monthly vehicle updater. Product positioning, availability, and equipment should still be checked with the Taiwan distributor.",
     "keywords": [

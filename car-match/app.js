@@ -239,6 +239,7 @@ const priorityInputs = [...document.querySelectorAll('input[name="priorities"]')
 const mobileMatchButton = document.querySelector("#mobileMatchButton");
 const mobileDockProgress = document.querySelector("#mobileDockProgress");
 let currentMatches = [];
+let suggestedRelaxationPlans = new Map();
 let autoRefreshTimer;
 let shouldScrollResults = true;
 
@@ -412,13 +413,17 @@ function renderDataFreshness() {
   const label = formatDataDate(dataMeta.updatedAt);
   const status = document.querySelector("#dataStatus");
   const disclaimer = document.querySelector("#catalogDisclaimer");
+  const resultNote = document.querySelector("#resultDataNote");
+  const source = dataMeta.sourceName || "台灣新車目錄";
   if (status && label) {
     status.innerHTML = `<span class="status-dot"></span>`;
     status.append(`台灣新車資料・每月更新・${label}`);
   }
   if (disclaimer) {
-    const source = dataMeta.sourceName || "台灣新車目錄";
     disclaimer.textContent = `收錄範圍：台灣總代理或原廠授權通路公開販售／接單的新乘用車與輕型商用車車系；不含中古車、平行輸入及僅剩歷史網頁的停售車。車款與價格每月自動比對${source}${label ? `，最後更新 ${label}` : ""}。`;
+  }
+  if (resultNote) {
+    resultNote.textContent = `${source}${label ? `資料最後更新 ${label}` : ""}；建議售價、車色與配備請以原廠或展間最新公告為準，實際成交價、交期與政府補助可能調整。建議預約試乘後再決定。`;
   }
 }
 
@@ -481,116 +486,123 @@ function getMatchingCars(profile, ignore = "") {
   return cars.filter(car => matchesSelectedConditions(car, profile, ignore));
 }
 
-function uniqueLabels(values) {
-  return [...new Set(values)].filter(Boolean);
-}
+const fieldLabels = {
+  budget: "預算",
+  origin: "車系來源",
+  body: "車身類型",
+  power: "動力",
+  seats: "乘坐人數",
+  priorities: "最在意的事"
+};
 
-function summarizeSuggestionValues(key, candidates, profile) {
+function relaxationOptions(profile, key) {
   if (key === "budget") {
-    return Object.entries(budgetBands)
-      .filter(([id, band]) => id !== profile.budget && candidates.some(car => car.price >= band.min && car.price <= band.max))
-      .map(([, band]) => band.label)
-      .slice(0, 3);
+    const bandIds = Object.keys(budgetBands);
+    const currentIndex = bandIds.indexOf(profile.budget);
+    return bandIds.slice(currentIndex + 1).map(value => ({ key, value }));
   }
-  if (key === "origin") return uniqueLabels(candidates.map(getCarOrigin).filter(origin => origin !== profile.origin).map(origin => labels.origin[origin] || labels.origin.other)).slice(0, 4);
-  if (key === "body") return uniqueLabels(candidates.map(car => car.body).filter(body => body !== profile.body).map(body => labels.body[body])).slice(0, 3);
-  if (key === "power") return uniqueLabels(candidates.map(car => car.power).filter(power => power !== profile.power).map(power => labels.power[power])).slice(0, 3);
+  if (["origin", "body", "power"].includes(key)) return profile[key] === "any" ? [] : [{ key, value: "any" }];
   if (key === "seats") {
     const neededSeats = Number(profile.seats);
-    return uniqueLabels(candidates
-      .map(car => car.seats >= 7 ? "7" : car.seats >= 5 ? "5" : "2")
-      .filter(value => Number(value) < neededSeats)
-      .map(value => labels.seats[value]))
-      .slice(0, 2);
+    return neededSeats >= 7 ? [{ key, value: "5" }, { key, value: "2" }] : neededSeats >= 5 ? [{ key, value: "2" }] : [];
   }
-  if (key === "priorities") {
-    const selected = new Set(profile.priorities);
-    const counts = {};
-    candidates.forEach(car => getCarPrioritySet(car).forEach(priority => {
-      if (!selected.has(priority)) counts[priority] = (counts[priority] || 0) + 1;
-    }));
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([priority]) => labels.priority[priority]).filter(Boolean).slice(0, 3);
-  }
+  if (key === "priorities") return profile.priorities.length ? [{ key, value: "any" }] : [];
   return [];
 }
 
-function buildNoMatchSuggestions(profile) {
-  const fieldLabels = {
-    budget: "預算",
-    origin: "車系來源",
-    body: "車身類型",
-    power: "動力",
-    seats: "乘坐人數",
-    priorities: "最在意的事"
-  };
-  const tips = filterOrder.map(key => {
-    const candidates = getMatchingCars(profile, key);
-    if (key === "priorities" && !profile.priorities.length) return null;
-    if (!candidates.length) return null;
-    const values = summarizeSuggestionValues(key, candidates, profile);
-    const valueText = values.length ? `，例如改成 ${values.join("、")}` : "";
-    return {
-      key,
-      text: `可以先調整「${fieldLabels[key]}」${valueText}，目前會出現 ${candidates.length} 台可推薦車款。`,
-      count: candidates.length
-    };
-  }).filter(Boolean);
-
-  if (tips.length) return tips.slice(0, 4);
-
-  const adjustableKeys = filterOrder.filter(key => key !== "priorities" || profile.priorities.length);
-  const combinations = (items, size, start = 0, selected = [], output = []) => {
-    if (selected.length === size) {
-      output.push([...selected]);
-      return output;
+function applyRelaxationChanges(profile, changes) {
+  const next = { ...profile, priorities: [...profile.priorities] };
+  changes.forEach(({ key, value }) => {
+    if (key === "priorities") {
+      next.priorities = [];
+      next.priorityAny = true;
+    } else {
+      next[key] = value;
     }
-    for (let index = start; index < items.length; index += 1) {
-      selected.push(items[index]);
-      combinations(items, size, index + 1, selected, output);
-      selected.pop();
-    }
-    return output;
-  };
-
-  for (let size = 2; size <= adjustableKeys.length; size += 1) {
-    const matchingCombination = combinations(adjustableKeys, size).find(keys => getMatchingCars(profile, keys).length);
-    if (matchingCombination) {
-      const candidates = getMatchingCars(profile, matchingCombination);
-      const fields = matchingCombination.map(key => `「${fieldLabels[key]}」`).join("、");
-      return [{ text: `單改一項仍然太窄；至少同時放寬 ${fields}，就會出現 ${candidates.length} 台可推薦車款。` }];
-    }
-  }
-
-  return [{ text: "目前目錄中沒有符合這組條件的車款。建議先將車系來源、車身類型與動力改成不限，再重新篩選。" }];
+  });
+  return next;
 }
 
-function relaxSuggestedCondition(key) {
-  const profile = getProfile();
-  let value = "any";
+function findRelaxationPlan(profile, keys) {
+  const optionSets = keys.map(key => relaxationOptions(profile, key));
+  if (optionSets.some(options => !options.length)) return null;
 
-  if (key === "budget") {
-    const currentMax = budgetBands[profile.budget]?.max || 0;
-    const nextBand = Object.entries(budgetBands)
-      .filter(([id, band]) => id !== profile.budget && band.max > currentMax)
-      .sort(([, a], [, b]) => a.max - b.max)[0];
-    if (!nextBand) return;
-    value = nextBand[0];
+  const search = (index, changes) => {
+    if (index === optionSets.length) {
+      const nextProfile = applyRelaxationChanges(profile, changes);
+      const candidates = getMatchingCars(nextProfile);
+      return candidates.length ? { changes, profile: nextProfile, count: candidates.length } : null;
+    }
+    for (const option of optionSets[index]) {
+      const plan = search(index + 1, [...changes, option]);
+      if (plan) return plan;
+    }
+    return null;
+  };
+
+  return search(0, []);
+}
+
+function describeRelaxation(change) {
+  if (change.key === "budget") return `將「${fieldLabels.budget}」提高至「${budgetBands[change.value].label}」`;
+  if (change.key === "seats") return `將「${fieldLabels.seats}」調整為「${labels.seats[change.value]}」`;
+  if (change.key === "priorities") return `將「${fieldLabels.priorities}」改為「不限」`;
+  return `將「${fieldLabels[change.key]}」改為「不限」`;
+}
+
+function combinations(items, size, start = 0, selected = [], output = []) {
+  if (selected.length === size) {
+    output.push([...selected]);
+    return output;
+  }
+  for (let index = start; index < items.length; index += 1) {
+    selected.push(items[index]);
+    combinations(items, size, index + 1, selected, output);
+    selected.pop();
+  }
+  return output;
+}
+
+function createRelaxationTip(plan, prefix = "") {
+  const id = `relax-${suggestedRelaxationPlans.size + 1}`;
+  suggestedRelaxationPlans.set(id, plan.profile);
+  const changes = plan.changes.map(describeRelaxation).join("，並");
+  return {
+    planId: id,
+    text: `${prefix}${changes}，就會出現 ${plan.count} 台可推薦車款。`,
+    count: plan.count
+  };
+}
+
+function buildNoMatchSuggestions(profile) {
+  suggestedRelaxationPlans = new Map();
+  const adjustableKeys = filterOrder.filter(key => relaxationOptions(profile, key).length);
+  const singlePlans = adjustableKeys.map(key => findRelaxationPlan(profile, [key])).filter(Boolean);
+  if (singlePlans.length) return singlePlans.slice(0, 3).map(plan => createRelaxationTip(plan, "可以先"));
+
+  for (let size = 2; size <= adjustableKeys.length; size += 1) {
+    const plan = combinations(adjustableKeys, size).map(keys => findRelaxationPlan(profile, keys)).find(Boolean);
+    if (plan) return [createRelaxationTip(plan, "單改一項仍然太窄；可以同時")];
   }
 
-  if (key === "seats") {
-    const currentSeats = Number(profile.seats);
-    value = currentSeats >= 7 ? "5" : currentSeats >= 5 ? "2" : "2";
-  }
+  return [{ text: "目前目錄中沒有足夠資料可提供接近方案。請稍後再試，或將車系來源、車身類型與動力改成不限。" }];
+}
 
-  if (key === "priorities") {
-    priorityInputs.forEach(input => { input.checked = input.value === "any"; });
-    updatePriorityLimit();
-  } else {
-    const input = form.querySelector(`input[name="${key}"][value="${value}"]`);
-    if (!input) return;
-    input.checked = true;
-  }
+function applySuggestedRelaxation(planId) {
+  const nextProfile = suggestedRelaxationPlans.get(planId);
+  if (!nextProfile) return;
 
+  ["budget", "body", "origin", "power", "seats", "color"].forEach(key => {
+    const input = form.querySelector(`input[name="${key}"][value="${nextProfile[key]}"]`);
+    if (input) input.checked = true;
+  });
+  priorityInputs.forEach(input => {
+    input.checked = nextProfile.priorities.length
+      ? input.value !== "any" && nextProfile.priorities.includes(input.value)
+      : input.value === "any";
+  });
+
+  updatePriorityLimit();
   updateProgress();
   document.querySelector("#formError").textContent = "";
   shouldScrollResults = true;
@@ -720,7 +732,7 @@ function renderBrandStory(car) {
       <h3>${brand.chapter}</h3>
       <p>${brand.story}</p>
       <div class="brand-positioning">
-        <span>JARVIS 定位判讀</span>
+        <span>本工具定位判讀</span>
         <h4>${brand.position}</h4>
         <p>${brand.positioning}</p>
         <div class="brand-keywords">${brand.keywords.map(keyword => `<b># ${keyword}</b>`).join("")}</div>
@@ -744,6 +756,35 @@ function renderAlternatives(carsToRender, profile) {
   }).join("");
 }
 
+function renderComparison(carsToRender) {
+  const container = document.querySelector("#comparisonWrap");
+  if (!carsToRender.length) {
+    container.classList.add("hidden");
+    container.innerHTML = "";
+    return;
+  }
+
+  const rows = [
+    ["建議售價", car => car.priceLabel],
+    ["車系來源", car => getCarOriginLabel(car)],
+    ["車身 / 動力", car => `${labels.body[car.body]} · ${labels.power[car.power]}`],
+    ["座位", car => `${car.seats} 人座`],
+    ["適合你的原因", car => car.reasons.length ? car.reasons.slice(0, 2).join("；") : car.note]
+  ];
+  container.classList.remove("hidden");
+  container.innerHTML = `
+    <div class="comparison-head"><h3>三台快速比較</h3><span>COMPARE THE SHORTLIST</span></div>
+    <div class="comparison-scroll">
+      <table class="comparison-table">
+        <thead><tr><th scope="col">比較項目</th>${carsToRender.map(car => {
+          const infoLink = getCarInfoLink(car);
+          return `<th scope="col"><a href="${infoLink.url}" target="_blank" rel="noopener">${car.name} ↗</a></th>`;
+        }).join("")}</tr></thead>
+        <tbody>${rows.map(([label, value]) => `<tr><th scope="row">${label}</th>${carsToRender.map(car => `<td>${value(car)}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>`;
+}
+
 function renderNoRecommendation(profile) {
   currentMatches = [];
   const tips = buildNoMatchSuggestions(profile);
@@ -757,20 +798,21 @@ function renderNoRecommendation(profile) {
     <div class="no-match-card">
       <small>NO MATCH FOUND</small>
       <h3>目前沒有推薦的車款。</h3>
-      <p>不是你條件錯，而是這組條件在目前台灣可買的新車資料裡太精準了。可以先改下面其中一項，再讓 Jarvis 重新幫你配對。</p>
-      <ul class="condition-tips">${tips.map(tip => tip.key
-        ? `<li><button class="condition-tip" type="button" data-relax-key="${tip.key}"><span>${tip.text.replace(/「(.+?)」/g, "「<b>$1</b>」")}</span><b>直接套用 ↗</b><small>點選後會立即重算推薦</small></button></li>`
+      <p>不是你條件錯，而是這組條件在目前台灣可買的新車資料裡太精準了。可以直接套用下面的最接近方案，系統會立即重新配對。</p>
+      <ul class="condition-tips">${tips.map(tip => tip.planId
+        ? `<li><button class="condition-tip" type="button" data-relax-plan="${tip.planId}"><span>${tip.text.replace(/「(.+?)」/g, "「<b>$1</b>」")}</span><b>直接套用 ↗</b><small>點選後會立即重算推薦</small></button></li>`
         : `<li class="condition-tip-note">${tip.text.replace(/「(.+?)」/g, "「<b>$1</b>」")}</li>`
       ).join("")}</ul>
     </div>`;
   document.querySelector("#brandStory").classList.add("hidden");
+  document.querySelector("#comparisonWrap").classList.add("hidden");
   document.querySelector(".alternatives-wrap").classList.add("hidden");
 }
 
 document.querySelector("#winnerCard").addEventListener("click", event => {
-  const action = event.target.closest("[data-relax-key]");
+  const action = event.target.closest("[data-relax-plan]");
   if (!action) return;
-  relaxSuggestedCondition(action.dataset.relaxKey);
+  applySuggestedRelaxation(action.dataset.relaxPlan);
 });
 
 form.addEventListener("change", event => {
@@ -813,6 +855,7 @@ form.addEventListener("submit", event => {
   renderWinner(currentMatches[0], profile);
   renderBrandStory(currentMatches[0]);
   renderAlternatives(currentMatches.slice(1), profile);
+  renderComparison(currentMatches);
   const topPriorities = profile.priorities.length ? profile.priorities.slice(0, 2).map(p => labels.priority[p]).join("、") : "整體條件";
   const band = budgetBands[profile.budget];
   const originText = profile.origin === "any" ? "不限車系" : labels.origin[profile.origin];
@@ -841,7 +884,7 @@ document.querySelector("#copyButton").addEventListener("click", async () => {
   if (!currentMatches.length) return;
   const profile = getProfile();
   const alternativesText = currentMatches.slice(1).map(car => car.name).join("、") || "目前沒有其他完全符合條件的備選";
-  const text = `我的 Jarvis 選車推薦：${currentMatches[0].name}（${currentMatches[0].priceLabel}，${currentMatches[0].match}% 符合）\n候補：${alternativesText}\n條件：${labels.origin[profile.origin] || "不限車系"}、${labels.color[profile.color] || "不限"}。建議售價、規格與車色請以原廠最新公告為準。`;
+  const text = `我的選車推薦：${currentMatches[0].name}（${currentMatches[0].priceLabel}，${currentMatches[0].match}% 符合）\n候補：${alternativesText}\n條件：${labels.origin[profile.origin] || "不限車系"}、${labels.color[profile.color] || "不限"}。建議售價、規格與車色請以原廠最新公告為準。`;
   try {
     await navigator.clipboard.writeText(text);
   } catch {
