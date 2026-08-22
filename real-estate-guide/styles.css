@@ -403,10 +403,12 @@ main > section:not(.hero) {
 .coach-video-strip a {
   display: grid;
   gap: 4px;
+  min-width: 0;
   padding: 12px;
   background: var(--paper-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
+  overflow-wrap: anywhere;
 }
 
 .coach-video-strip span {
@@ -418,6 +420,8 @@ main > section:not(.hero) {
 .coach-video-strip strong {
   font-size: 15px;
   line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .snapshot strong,
@@ -1316,6 +1320,8 @@ main > section:not(.hero) {
   margin: 0;
   font-size: 18px;
   line-height: 1.35;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .digest-card p {
