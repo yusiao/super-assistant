@@ -36,6 +36,7 @@
     </section>
 
     <nav class="quick-nav" aria-label="課程快速導覽">
+      <a href="#coach">導覽</a>
       <a href="#calculator">快算</a>
       <a href="#lessons">課程</a>
       <a href="#youtube-lab">素材</a>
@@ -60,6 +61,17 @@
         <strong>安全現金</strong>
         <p>自備款之外，要保留裝修、契稅規費、代書、管理費、修繕與六個月緊急金。</p>
       </article>
+    </section>
+
+    <section class="coach" id="coach" aria-labelledby="coach-title">
+      <div class="section-head compact">
+        <p class="eyebrow">Coach Mode</p>
+        <h2 id="coach-title">先選你的買房狀態</h2>
+        <p>不用一次看完整個資料庫。先選一個最像你的情境，網站會把課程、影片素材和下一步檢查表排成一條今天能讀完的路線。</p>
+      </div>
+
+      <div class="coach-grid" id="coachGrid" aria-label="買房情境選擇"></div>
+      <article class="coach-plan" id="coachPlan" aria-live="polite"></article>
     </section>
 
     <section class="calculator" id="calculator" aria-labelledby="calc-title">
@@ -129,7 +141,7 @@
       <div class="section-head">
         <p class="eyebrow">02 / Course Map</p>
         <h2 id="lessons-title">8 堂手機微課</h2>
-        <p>依你提供的課程 PDF 架構整理，並加上需要隨政策更新的查證入口。</p>
+        <p>每堂課都改成可閱讀的教材：先講觀念，再給實作步驟、常見錯誤、出手前查證清單和一題練習，避免只停在新聞標題式摘要。</p>
       </div>
 
       <div class="lesson-list" id="lessonList"></div>
@@ -139,9 +151,11 @@
       <div class="section-head">
         <p class="eyebrow">YouTube Source Lab</p>
         <h2 id="youtube-title">直播與影片素材庫</h2>
-        <p>已索引你提供的兩個頻道公開內容；股票、台股、美股、個股、ETF 等內容一律排除。直播若沒有公開字幕，只作素材索引，不做逐字摘要。</p>
+        <p>已索引你提供的兩個頻道與「下班去你家」公開播放清單；股票、台股、美股、個股、ETF 等內容一律排除。有公開字幕的影片會整理成已讀字幕重點，直播或節目若沒有公開字幕，只作素材索引，不做逐字摘要。</p>
       </div>
       <div class="material-stats" id="materialStats"></div>
+      <div class="material-progress" id="materialProgress"></div>
+      <div class="material-tools" id="materialTools"></div>
       <div class="material-tabs" id="materialTabs" aria-label="素材分類"></div>
       <div class="material-panel" id="materialPanel"></div>
     </section>
@@ -316,6 +330,7 @@
     <a href="#top">回到上方</a>
   </footer>
 
+  <script src="youtube-digests.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>
