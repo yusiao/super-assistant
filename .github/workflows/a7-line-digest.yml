@@ -74,7 +74,7 @@ jobs:
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             python scripts/a7-line-monitor/a7_leju_digest.py --force --skip-line
           } else {
-            python scripts/a7-line-monitor/a7_leju_digest.py --skip-line
+            python scripts/a7-line-monitor/a7_leju_digest.py --force-generate --skip-line
           }
 
       - name: Prepare PDF for GitHub Pages
