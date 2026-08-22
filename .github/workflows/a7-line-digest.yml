@@ -13,10 +13,19 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   run-digest:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: [self-hosted, windows, a7-runner]
     env:
       TASK_ID: a7-leju-digest-cloud
@@ -34,10 +43,7 @@ jobs:
       INTRADAY_ALERTS: "false"
       URGENT_PENDING_PRESALE_ALERT: "false"
       PDF_DELIVERY_ENABLED: "true"
-      REPORT_GITHUB_TOKEN: ${{ github.token }}
-      PDF_RELEASE_TAG: a7-market-reports
-      PDF_LATEST_ASSET_NAME: a7-market-report-latest.pdf
-      PDF_KEEP_DATED_ARCHIVE: "true"
+      REPORT_PDF_PUBLIC_URL: https://yusiao.github.io/super-assistant/a7-reports/a7-market-report-latest.pdf
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
       LINE_TO: ${{ secrets.LINE_TO }}
@@ -70,9 +76,44 @@ jobs:
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            python scripts/a7-line-monitor/a7_leju_digest.py --force
+            python scripts/a7-line-monitor/a7_leju_digest.py --force --skip-line
           } else {
-            python scripts/a7-line-monitor/a7_leju_digest.py
+            python scripts/a7-line-monitor/a7_leju_digest.py --skip-line
+          }
+
+      - name: Prepare PDF for GitHub Pages
+        shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          $pdf = Get-ChildItem "vault/2-actions/scheduled-reports/a7-leju" -Filter "a7-market-report-*.pdf" |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+          if (-not $pdf) {
+            throw "No generated market report PDF was found."
+          }
+          $target = "output/bazi-ziwei/a7-reports"
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+          Copy-Item -LiteralPath $pdf.FullName -Destination "$target/a7-market-report-latest.pdf" -Force
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/bazi-ziwei
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Send prepared PDF notification
+        shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          $manifest = "vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json"
+          if (Test-Path -LiteralPath $manifest) {
+            python scripts/a7-line-monitor/a7_leju_digest.py --send-prepared-line $manifest
+          } else {
+            Write-Host "No LINE notification is due for this run."
           }
 
       - name: Upload report artifact
