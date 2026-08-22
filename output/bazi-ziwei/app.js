@@ -2829,6 +2829,11 @@ function summarizeReadingStarNames(stars, fallback = "未見明顯星曜") {
   return summarizeStarNames(stars, fallback, starReadingDisplayName);
 }
 
+function summarizeAllReadingStarNames(stars, fallback = "未見明顯星曜") {
+  const names = uniqueItems(stars.map(starReadingDisplayName));
+  return names.length ? names.join("、") : fallback;
+}
+
 function cleanReadingStarNames(names, limit = Infinity) {
   return uniqueItems(names.map(stripStarBrightnessText)).slice(0, limit);
 }
@@ -3082,10 +3087,12 @@ function palaceStarStory(stars, palace, fallback = "星曜訊號不集中，需�
   const key = palaceKey(palace?.name || "");
   const subject = palaceStorySubject(palace);
   const sentences = [];
-  const coveredKeywords = [];
+  const coveredNames = new Set();
+  const matchingNames = (keywords) => names.filter((name) => keywords.some((keyword) => name.includes(keyword)));
+  const coverNames = (matchedNames) => matchedNames.forEach((name) => coveredNames.add(name));
 
   if (namesIncludeAny(names, ["天機"]) && namesIncludeAny(names, ["巨門"])) {
-    coveredKeywords.push("天機", "巨門");
+    coverNames(matchingNames(["天機", "巨門"]));
     if (key === "夫妻") {
       sentences.push("天機加上巨門，另一半多半是高智商、邏輯強、反應快的人，說話有分析力，也容易因想太多或語氣太銳利而需要溝通磨合");
     } else if (key === "官祿") {
@@ -3096,7 +3103,7 @@ function palaceStarStory(stars, palace, fallback = "星曜訊號不集中，需�
   }
 
   if (namesIncludeAny(names, ["紅鸞"])) {
-    coveredKeywords.push("紅鸞");
+    coverNames(matchingNames(["紅鸞"]));
     if (key === "夫妻") {
       sentences.push("紅鸞是斗數最強的正桃花星之一，放在夫妻訊號裡，代表另一半外型精緻、身材線條與風情在人群中很容易被看見，關係也較有正式緣分啟動的味道");
     } else {
@@ -3104,22 +3111,26 @@ function palaceStarStory(stars, palace, fallback = "星曜訊號不集中，需�
     }
   }
 
-  if (namesIncludeAny(names, ["天喜", "天姚", "咸池"])) {
-    coveredKeywords.push("天喜", "天姚", "咸池");
+  const peachStars = matchingNames(["天喜", "天姚", "咸池"]);
+  if (peachStars.length) {
+    coverNames(peachStars);
+    const peachLabel = peachStars.join("、");
     if (key === "夫妻") {
-      sentences.push("天喜、天姚、咸池一類桃花星會讓伴侶緣更重視外貌、氛圍、曖昧感與社交魅力，容易遇到在人群裡有存在感的人");
+      sentences.push(`${peachLabel}帶來的桃花訊號會讓伴侶緣更重視外貌、氛圍、曖昧感與社交魅力，容易遇到在人群裡有存在感的人`);
     } else {
-      sentences.push(`桃花星使${subject}帶有社交、人情與美感包裝，容易因形象、人氣或愉快互動得到機會`);
+      sentences.push(`${peachLabel}使${subject}帶有社交、人情與美感包裝，容易因形象、人氣或愉快互動得到機會`);
     }
   }
 
-  if (namesIncludeAny(names, ["紫微", "天府", "天相"])) {
-    coveredKeywords.push("紫微", "天府", "天相");
-    sentences.push(`${names.filter((name) => ["紫微", "天府", "天相"].some((keyword) => name.includes(keyword))).join("、")}讓${subject}偏向穩重、有位置感與資源整合，遇事會重視身份、制度和可長期承擔的架構`);
+  const leadershipStars = matchingNames(["紫微", "天府", "天相"]);
+  if (leadershipStars.length) {
+    coverNames(leadershipStars);
+    sentences.push(`${leadershipStars.join("、")}讓${subject}偏向穩重、有位置感與資源整合，遇事會重視身份、制度和可長期承擔的架構`);
   }
 
-  if (namesIncludeAny(names, ["武曲", "祿存", "太陰", "天府"])) {
-    coveredKeywords.push("武曲", "祿存", "太陰", "天府");
+  const financeStars = matchingNames(["武曲", "祿存", "太陰", "天府"]);
+  if (financeStars.length) {
+    coverNames(financeStars);
     if (key === "財帛") {
       sentences.push("財務星系集中，命主的錢不是只靠靈感，而是靠紀律、資產配置、儲蓄或可管理的收入管道慢慢累積");
     } else if (key === "田宅") {
@@ -3129,27 +3140,31 @@ function palaceStarStory(stars, palace, fallback = "星曜訊號不集中，需�
     }
   }
 
-  if (namesIncludeAny(names, ["七殺", "破軍"])) {
-    coveredKeywords.push("七殺", "破軍");
-    sentences.push(`七殺、破軍使${subject}帶有開創、衝刺與破舊立新的劇情，通常不喜歡一成不變，但也代表過程會有壓力、切換或重整`);
+  const changeStars = matchingNames(["七殺", "破軍"]);
+  if (changeStars.length) {
+    coverNames(changeStars);
+    sentences.push(`${changeStars.join("、")}使${subject}帶有開創、衝刺與破舊立新的劇情，通常不喜歡一成不變，但也代表過程會有壓力、切換或重整`);
   }
 
-  if (namesIncludeAny(names, ["天梁", "天魁", "天鉞", "左輔", "右弼"])) {
-    coveredKeywords.push("天梁", "天魁", "天鉞", "左輔", "右弼");
+  const supportStars = matchingNames(["天梁", "天魁", "天鉞", "左輔", "右弼"]);
+  if (supportStars.length) {
+    coverNames(supportStars);
     sentences.push(`貴人與保護星進來，${subject}遇到卡關時較容易有長輩、專業人士、制度內資源或旁人牽線協助`);
   }
 
-  if (namesIncludeAny(names, ["擎羊", "陀羅", "火星", "鈴星"])) {
-    coveredKeywords.push("擎羊", "陀羅", "火星", "鈴星");
+  const pressureStars = matchingNames(["擎羊", "陀羅", "火星", "鈴星"]);
+  if (pressureStars.length) {
+    coverNames(pressureStars);
     sentences.push(`煞星加入後，${subject}不是完全輕鬆的宮位，會帶出急迫、衝突、拖磨或情緒爆點，需要用規則和節奏管理`);
   }
 
-  if (namesIncludeAny(names, ["地空", "地劫", "天空", "旬空", "截空"])) {
-    coveredKeywords.push("地空", "地劫", "天空", "旬空", "截空");
+  const emptyStars = matchingNames(["地空", "地劫", "天空", "旬空", "截空"]);
+  if (emptyStars.length) {
+    coverNames(emptyStars);
     sentences.push(`空劫系讓${subject}有理想化、落空或留不住的現象，承諾與資源需要落到文件、時間表和可驗證條件`);
   }
 
-  const uncovered = names.filter((name) => !coveredKeywords.some((keyword) => name.includes(keyword)));
+  const uncovered = names.filter((name) => !coveredNames.has(name));
   if (uncovered.length) {
     sentences.push(`另外${uncovered.slice(0, 4).join("、")}會把${subject}補成更有個人色彩的劇情，實際表現要看它們和主星、對宮及流運如何互相牽動`);
   }
@@ -3177,8 +3192,8 @@ function palaceOverviewReading(palace, astrolabe) {
   const oppositeStars = overviewStarsForPalace(opposite);
   const borrowedPalaceName = opposite ? normalizePalaceName(opposite.name) : "對宮";
   const stars = hasMajorStars
-    ? summarizeReadingStarNames(directStars, "星曜不集中")
-    : `無主星；借${borrowedPalaceName}：${summarizeReadingStarNames(oppositeStars, "對宮星曜不突出")}${directSupportStars.length ? `；本宮輔曜：${summarizeReadingStarNames(directSupportStars, "")}` : ""}`;
+    ? summarizeAllReadingStarNames(directStars, "星曜不集中")
+    : `無主星；借${borrowedPalaceName}：${summarizeAllReadingStarNames(oppositeStars, "對宮星曜不突出")}${directSupportStars.length ? `；本宮輔曜：${summarizeAllReadingStarNames(directSupportStars, "")}` : ""}`;
   const readingText = hasMajorStars
     ? palaceStarStory(directStars, palace)
     : `本宮無主星，需借${borrowedPalaceName}定調；${palaceStarStory([...oppositeStars, ...directSupportStars], palace, "對宮與本宮輔曜訊號都不集中，需回到三方四正補判")}`;
@@ -5694,7 +5709,7 @@ function renderPalaceOverview(astrolabe) {
                 </span>
                 <span>${escapeHtml(stemBranch)}</span>
               </div>
-              <em>主星：${escapeHtml(reading.stars)}</em>
+              <em>星曜：${escapeHtml(reading.stars)}</em>
               <p>${escapeHtml(reading.text)}</p>
               ${reading.note ? `<small>${escapeHtml(reading.note)}</small>` : ""}
             </article>
