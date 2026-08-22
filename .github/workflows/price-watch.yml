@@ -50,6 +50,20 @@ jobs:
           restore-keys: |
             price-watch-state-
 
+      - name: Validate price watch configuration
+        shell: powershell
+        run: |
+          $required = @(
+            "PRICE_WATCH_REMOTE_URL",
+            "PRICE_WATCH_ACCESS_TOKEN",
+            "SERPAPI_API_KEY",
+            "LINE_CHANNEL_ACCESS_TOKEN"
+          )
+          $missing = $required | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) }
+          if ($missing.Count -gt 0) {
+            throw "Missing required GitHub Actions secrets: $($missing -join ', ')"
+          }
+
       - name: Run price watch
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
@@ -62,7 +76,7 @@ jobs:
           }
 
       - name: Upload price watch reports
-        if: always()
+        if: always() && github.event_name != 'push'
         uses: actions/upload-artifact@v4
         with:
           name: price-watch-reports
