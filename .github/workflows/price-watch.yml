@@ -1,6 +1,12 @@
 name: Price Watch
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/price-watch.yml"
+      - "scripts/price-watch/**"
   schedule:
     - cron: "15 * * * *"
   workflow_dispatch:
@@ -47,7 +53,9 @@ jobs:
       - name: Run price watch
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
+          if ("${{ github.event_name }}" -eq "push") {
+            python scripts/price-watch/price_watch.py --dry-run --skip-line
+          } elseif ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
             python scripts/price-watch/price_watch.py --force
           } else {
             python scripts/price-watch/price_watch.py
