@@ -120,11 +120,12 @@ function bodyFromSource(model, segment) {
 function powerFromSource(model, segment, labels, cc) {
   const text = `${model} ${segment} ${labels} ${cc}`.toLowerCase();
   const electricPattern = /electric|ev\b|e-tron|eq[a-z]|ioniq|model [s3xy]|taycan|bz4x|urban cruiser|id\.|ix\d?|i[457]\b|ex\d|ec40|rz|solterra|leaf|ariya|mg4|folgore|elettrica|spectre|macan electric|aceman/;
-  const hybridPattern = /hybrid|phev|e:hev|p350|ibrida|mhev|plug-in|temerario|revuelto|urus se|296|prius/;
+  const hybridPattern = /hybrid|phev|e:hev|p350|ibrida|mhev|plug-in|temerario|revuelto|urus se|296|prius|油電|油電混合|混合動力|插電式|插電混合/;
+  const hybridAvailabilityPattern = /corolla cross|corolla altis|rav4|camry|crown|prius|yaris cross|sienta|alphard|sienna|tucson l|santa fe|sportage|sorento|carnival|cr-v|hr-v|zrv|outlander|forester|crosstrek|nx|rx|ux|es|lbx/i;
   const dieselPattern = /diesel|tdi|bluehdi|d4|d5/;
 
   if (electricPattern.test(text)) return "electric";
-  if (hybridPattern.test(text)) return "hybrid";
+  if (hybridPattern.test(text) || hybridAvailabilityPattern.test(`${model} ${segment}`.toLowerCase())) return "hybrid";
   if (dieselPattern.test(text)) return "diesel";
   return "gas";
 }
@@ -469,4 +470,3 @@ export {
   priceFromText,
   seatsFromSource
 };
-

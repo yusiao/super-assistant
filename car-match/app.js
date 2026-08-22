@@ -233,6 +233,7 @@ const form = document.querySelector("#carForm");
 const results = document.querySelector("#results");
 const progressBar = document.querySelector("#progressBar");
 const progressText = document.querySelector("#progressText");
+const progressLabel = document.querySelector("#progressLabel");
 const priorityInputs = [...document.querySelectorAll('input[name="priorities"]')];
 const mobileMatchButton = document.querySelector("#mobileMatchButton");
 const mobileDockProgress = document.querySelector("#mobileDockProgress");
@@ -274,15 +275,16 @@ function getCarOriginLabel(car) {
 
 function getCarInfoLink(car) {
   const brand = getBrandName(car);
-  const originalUrl = car.url || "";
-  const brandOfficialUrl = officialBrandUrls[brand];
-  const fallbackUrl = brandOfficialUrl || brandProfiles[brand]?.source || originalUrl;
-  const url = fallbackUrl || dataMeta.sourceUrl || "#";
+  const vehicleUrl = car.sourceUrl || car.url || "";
+  const brandUrl = officialBrandUrls[brand] || brandProfiles[brand]?.source || "";
+  const url = vehicleUrl || brandUrl || dataMeta.sourceUrl || "#";
   const fromCatalog = /u-car\.com\.tw/i.test(url);
   return {
     url,
-    isBrandEntry: Boolean(brandOfficialUrl),
-    label: brandOfficialUrl ? `前往 ${brand} 官網確認是否仍販售 ↗` : fromCatalog ? "查看車款資料來源 ↗" : "查看品牌/車款資訊 ↗"
+    brandUrl,
+    hasSeparateBrandUrl: Boolean(brandUrl && brandUrl !== url),
+    label: fromCatalog ? `查看 ${car.name} 車款資料 ↗` : `查看 ${car.name} 原廠資訊 ↗`,
+    brandLabel: `前往 ${brand} 官網 ↗`
   };
 }
 
@@ -357,10 +359,14 @@ function getCarPrioritySet(car) {
 
 function updateProgress() {
   const profile = getProfile();
-  const percent = (profile.budget ? 30 : 0) + (profile.seats ? 30 : 0) + (profile.priorityAny || profile.priorities.length ? 40 : 0);
+  const missing = [];
+  if (!profile.budget) missing.push("預算");
+  if (!profile.seats) missing.push("乘坐人數");
+  const percent = missing.length === 2 ? 0 : missing.length === 1 ? 50 : 100;
   progressBar.style.width = `${percent}%`;
   progressText.textContent = `${percent}%`;
-  mobileDockProgress.textContent = `完成 ${percent}%`;
+  progressLabel.textContent = missing.length ? `還差${missing.join("、")}` : "基本條件已完成";
+  mobileDockProgress.textContent = missing.length ? `先選${missing.join("與")}` : "可以產生推薦";
 }
 
 function updatePriorityLimit(changedInput) {
@@ -380,7 +386,13 @@ function updatePriorityLimit(changedInput) {
     input.disabled = !anyChecked && full && !input.checked && input.value !== "any";
     input.closest("label").classList.toggle("disabled", input.disabled);
   });
-  document.querySelector("#priorityCounter").textContent = anyChecked ? "不限" : checkedSpecific.length ? `已選 ${checkedSpecific.length} / 3 項` : "可選 3 項，或選不限";
+  document.querySelector("#priorityCounter").textContent = anyChecked
+    ? "目前不限；也可改選最多 3 項"
+    : checkedSpecific.length >= 3
+      ? "已選 3 / 3；點已選項目可替換"
+      : checkedSpecific.length
+        ? `已選 ${checkedSpecific.length} / 3 項`
+        : "可選 3 項，或選不限";
 }
 
 function formatDataDate(value) {
@@ -452,7 +464,7 @@ function scoreCar(car, profile) {
 function matchesSelectedConditions(car, profile, ignore = "") {
   const ignored = new Set(Array.isArray(ignore) ? ignore : [ignore]);
   const band = budgetBands[profile.budget];
-  if (!ignored.has("budget") && band && (car.price < band.min || car.price > band.max)) return false;
+  if (!ignored.has("budget") && band && car.price > band.max) return false;
   if (!ignored.has("origin") && profile.origin !== "any" && getCarOrigin(car) !== profile.origin) return false;
   if (!ignored.has("body") && profile.body !== "any" && car.body !== profile.body) return false;
   if (!ignored.has("power") && profile.power !== "any" && car.power !== profile.power) return false;
@@ -516,7 +528,11 @@ function buildNoMatchSuggestions(profile) {
     if (!candidates.length) return null;
     const values = summarizeSuggestionValues(key, candidates, profile);
     const valueText = values.length ? `，例如改成 ${values.join("、")}` : "";
-    return `可以先調整「${fieldLabels[key]}」${valueText}，目前會出現 ${candidates.length} 台可推薦車款。`;
+    return {
+      key,
+      text: `可以先調整「${fieldLabels[key]}」${valueText}，目前會出現 ${candidates.length} 台可推薦車款。`,
+      count: candidates.length
+    };
   }).filter(Boolean);
 
   if (tips.length) return tips.slice(0, 4);
@@ -525,12 +541,45 @@ function buildNoMatchSuggestions(profile) {
     for (let j = i + 1; j < filterOrder.length; j += 1) {
       const pairCandidates = getMatchingCars(profile, [filterOrder[i], filterOrder[j]]);
       if (pairCandidates.length) {
-        return [`單改一項仍然太窄；建議同時放寬「${fieldLabels[filterOrder[i]]}」與「${fieldLabels[filterOrder[j]]}」，會出現 ${pairCandidates.length} 台可推薦車款。`];
+        return [{ text: `單改一項仍然太窄；建議同時放寬「${fieldLabels[filterOrder[i]]}」與「${fieldLabels[filterOrder[j]]}」，會出現 ${pairCandidates.length} 台可推薦車款。` }];
       }
     }
   }
 
-  return ["目前條件太精準，建議先把「車系來源」或「車身類型」改成不限，再重新篩選。"];
+  return [{ text: "目前條件太精準，建議先把「車系來源」或「車身類型」改成不限，再重新篩選。" }];
+}
+
+function relaxSuggestedCondition(key) {
+  const profile = getProfile();
+  let value = "any";
+
+  if (key === "budget") {
+    const currentMax = budgetBands[profile.budget]?.max || 0;
+    const nextBand = Object.entries(budgetBands)
+      .filter(([id, band]) => id !== profile.budget && band.max > currentMax)
+      .sort(([, a], [, b]) => a.max - b.max)[0];
+    if (!nextBand) return;
+    value = nextBand[0];
+  }
+
+  if (key === "seats") {
+    const currentSeats = Number(profile.seats);
+    value = currentSeats >= 7 ? "5" : currentSeats >= 5 ? "2" : "2";
+  }
+
+  if (key === "priorities") {
+    priorityInputs.forEach(input => { input.checked = input.value === "any"; });
+    updatePriorityLimit();
+  } else {
+    const input = form.querySelector(`input[name="${key}"][value="${value}"]`);
+    if (!input) return;
+    input.checked = true;
+  }
+
+  updateProgress();
+  document.querySelector("#formError").textContent = "";
+  shouldScrollResults = true;
+  form.requestSubmit();
 }
 
 function normalizeScores(scored) {
@@ -569,14 +618,21 @@ function carSvg(car, color, className = "", colorLabel = "車色") {
 
 function carVisual(car, color, className = "", colorLabel = "車色") {
   const imageUrl = getCarImageUrl(car);
-  if (!imageUrl) return carSvg(car, color, className, colorLabel);
+  const fallback = carSvg(car, color, "photo-fallback", colorLabel);
+  if (!imageUrl) {
+    return `<figure class="car-photo-frame ${className} photo-unavailable">
+      ${fallback}
+      <div class="photo-unavailable-message"><b>暫無可載入的實車圖片</b><span>可從下方車款資料確認規格與圖片</span></div>
+    </figure>`;
+  }
 
   const safeUrl = escapeAttribute(imageUrl);
   const alt = escapeAttribute(`${car.name} 真實車款照片`);
   return `<figure class="car-photo-frame ${className}">
     <img src="${safeUrl}" alt="${alt}" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.car-photo-frame').classList.add('photo-failed')">
-    ${carSvg(car, color, "photo-fallback", colorLabel)}
+    ${fallback}
     <figcaption>真實車款圖片來源：車款資料來源頁</figcaption>
+    <div class="photo-unavailable-message"><b>圖片暫時無法載入</b><span>可從下方車款資料確認規格與圖片</span></div>
   </figure>`;
 }
 
@@ -597,8 +653,11 @@ function renderWinner(car, profile) {
       <div class="winner-price"><b>${car.priceLabel}</b></div>
       <div class="spec-row"><span>${getCarOriginLabel(car)}</span><span>${labels.body[car.body]}</span><span>${labels.power[car.power]}</span><span>${car.seats} 人座</span><span>${colorLabel}</span></div>
       <ul class="reason-list">${reasons.map(reason => `<li>${reason}</li>`).join("")}</ul>
-      <a class="official-link" href="${infoLink.url}" target="_blank" rel="noopener">${infoLink.label}</a>
-      ${infoLink.isBrandEntry ? `<p class="availability-note">如果官網只回到首頁或找不到此車款，代表原廠單車款頁可能已下架、暫停販售或改版；實際能否購買請以原廠與展間最新公告為準。</p>` : ""}
+      <div class="vehicle-links">
+        <a class="official-link" href="${infoLink.url}" target="_blank" rel="noopener">${infoLink.label}</a>
+        ${infoLink.hasSeparateBrandUrl ? `<a class="brand-link" href="${infoLink.brandUrl}" target="_blank" rel="noopener">${infoLink.brandLabel}</a>` : ""}
+      </div>
+      <p class="availability-note">先查看這台車的資料與規格；實際販售、交期、配備與保固請以原廠官網或展間最新公告為準。</p>
     </div>`;
 }
 
@@ -665,7 +724,7 @@ function renderAlternatives(carsToRender, profile) {
         <span class="alt-score">${car.match}% MATCH</span>
         ${carVisual(car, colorHex[chosenColor], "alt-car", colorLabel)}
       </div>
-      <div class="alt-info"><small>NO. 0${index + 2}</small><h4>${car.name}</h4><span>${car.priceLabel} · ${labels.power[car.power]}</span><p>${car.note}</p><a class="alt-official-link" href="${infoLink.url}" target="_blank" rel="noopener">${infoLink.isBrandEntry ? "前往官網確認是否仍販售 ↗" : infoLink.label}</a></div>
+      <div class="alt-info"><small>NO. 0${index + 2}</small><h4>${car.name}</h4><span>${car.priceLabel} · ${labels.power[car.power]}</span><p>${car.note}</p><a class="alt-official-link" href="${infoLink.url}" target="_blank" rel="noopener">${infoLink.label}</a>${infoLink.hasSeparateBrandUrl ? `<a class="alt-brand-link" href="${infoLink.brandUrl}" target="_blank" rel="noopener">${infoLink.brandLabel}</a>` : ""}</div>
     </article>`;
   }).join("");
 }
@@ -684,11 +743,20 @@ function renderNoRecommendation(profile) {
       <small>NO MATCH FOUND</small>
       <h3>目前沒有推薦的車款。</h3>
       <p>不是你條件錯，而是這組條件在目前台灣可買的新車資料裡太精準了。可以先改下面其中一項，再讓 Jarvis 重新幫你配對。</p>
-      <ul class="condition-tips">${tips.map(tip => `<li>${tip.replace(/「(.+?)」/g, "「<b>$1</b>」")}</li>`).join("")}</ul>
+      <ul class="condition-tips">${tips.map(tip => tip.key
+        ? `<li><button class="condition-tip" type="button" data-relax-key="${tip.key}"><span>${tip.text.replace(/「(.+?)」/g, "「<b>$1</b>」")}</span><b>直接套用 ↗</b><small>點選後會立即重算推薦</small></button></li>`
+        : `<li class="condition-tip-note">${tip.text.replace(/「(.+?)」/g, "「<b>$1</b>」")}</li>`
+      ).join("")}</ul>
     </div>`;
   document.querySelector("#brandStory").classList.add("hidden");
   document.querySelector(".alternatives-wrap").classList.add("hidden");
 }
+
+document.querySelector("#winnerCard").addEventListener("click", event => {
+  const action = event.target.closest("[data-relax-key]");
+  if (!action) return;
+  relaxSuggestedCondition(action.dataset.relaxKey);
+});
 
 form.addEventListener("change", event => {
   if (event.target.name === "priorities") updatePriorityLimit(event.target);
