@@ -141,9 +141,10 @@ const brandProfiles = {
 };
 
 const supplementalCars = window.JARVIS_MARKET_CARS || [];
-supplementalCars.forEach(car => {
-  if (!cars.some(existing => existing.name.toLowerCase() === car.name.toLowerCase())) cars.push(car);
-});
+if (supplementalCars.length) {
+  cars.length = 0;
+  cars.push(...supplementalCars);
+}
 Object.assign(brandProfiles, window.JARVIS_BRANDS || {});
 const dataMeta = window.JARVIS_DATA_META || {};
 
@@ -537,16 +538,30 @@ function buildNoMatchSuggestions(profile) {
 
   if (tips.length) return tips.slice(0, 4);
 
-  for (let i = 0; i < filterOrder.length; i += 1) {
-    for (let j = i + 1; j < filterOrder.length; j += 1) {
-      const pairCandidates = getMatchingCars(profile, [filterOrder[i], filterOrder[j]]);
-      if (pairCandidates.length) {
-        return [{ text: `單改一項仍然太窄；建議同時放寬「${fieldLabels[filterOrder[i]]}」與「${fieldLabels[filterOrder[j]]}」，會出現 ${pairCandidates.length} 台可推薦車款。` }];
-      }
+  const adjustableKeys = filterOrder.filter(key => key !== "priorities" || profile.priorities.length);
+  const combinations = (items, size, start = 0, selected = [], output = []) => {
+    if (selected.length === size) {
+      output.push([...selected]);
+      return output;
+    }
+    for (let index = start; index < items.length; index += 1) {
+      selected.push(items[index]);
+      combinations(items, size, index + 1, selected, output);
+      selected.pop();
+    }
+    return output;
+  };
+
+  for (let size = 2; size <= adjustableKeys.length; size += 1) {
+    const matchingCombination = combinations(adjustableKeys, size).find(keys => getMatchingCars(profile, keys).length);
+    if (matchingCombination) {
+      const candidates = getMatchingCars(profile, matchingCombination);
+      const fields = matchingCombination.map(key => `「${fieldLabels[key]}」`).join("、");
+      return [{ text: `單改一項仍然太窄；至少同時放寬 ${fields}，就會出現 ${candidates.length} 台可推薦車款。` }];
     }
   }
 
-  return [{ text: "目前條件太精準，建議先把「車系來源」或「車身類型」改成不限，再重新篩選。" }];
+  return [{ text: "目前目錄中沒有符合這組條件的車款。建議先將車系來源、車身類型與動力改成不限，再重新篩選。" }];
 }
 
 function relaxSuggestedCondition(key) {
