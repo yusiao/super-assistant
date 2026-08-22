@@ -22,11 +22,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run-digest:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-report:
     runs-on: [self-hosted, windows, a7-runner]
+    outputs:
+      notification_due: ${{ steps.notification.outputs.due }}
     env:
       TASK_ID: a7-leju-digest-cloud
       TIME_ZONE: Asia/Taipei
@@ -44,9 +43,6 @@ jobs:
       URGENT_PENDING_PRESALE_ALERT: "false"
       PDF_DELIVERY_ENABLED: "true"
       REPORT_PDF_PUBLIC_URL: https://yusiao.github.io/super-assistant/a7-reports/a7-market-report-latest.pdf
-      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-      LINE_MODE: ${{ secrets.LINE_MODE }}
-      LINE_TO: ${{ secrets.LINE_TO }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,27 +90,31 @@ jobs:
           New-Item -ItemType Directory -Force -Path $target | Out-Null
           Copy-Item -LiteralPath $pdf.FullName -Destination "$target/a7-market-report-latest.pdf" -Force
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: output/bazi-ziwei
-
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Send prepared PDF notification
+      - name: Check prepared LINE notification
+        id: notification
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           $manifest = "vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json"
           if (Test-Path -LiteralPath $manifest) {
-            python scripts/a7-line-monitor/a7_leju_digest.py --send-prepared-line $manifest
+            [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "due=true`n")
           } else {
-            Write-Host "No LINE notification is due for this run."
+            [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "due=false`n")
           }
+
+      - name: Upload GitHub Pages source
+        uses: actions/upload-artifact@v4
+        with:
+          name: a7-pages-site
+          path: output/bazi-ziwei/a7-reports/
+          if-no-files-found: error
+
+      - name: Upload prepared LINE notification
+        if: ${{ steps.notification.outputs.due == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: a7-line-prepared
+          path: vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json
+          if-no-files-found: error
 
       - name: Upload report artifact
         if: always()
@@ -123,3 +123,59 @@ jobs:
         with:
           name: a7-leju-digest
           path: vault/2-actions/scheduled-reports/a7-leju/
+
+  deploy-pages:
+    needs: build-report
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download GitHub Pages source
+        uses: actions/download-artifact@v4
+        with:
+          name: a7-pages-site
+          path: site/a7-reports
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Package GitHub Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  send-line:
+    needs: [build-report, deploy-pages]
+    if: ${{ needs.build-report.outputs.notification_due == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      TASK_ID: a7-leju-digest-cloud
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      LINE_MODE: ${{ secrets.LINE_MODE }}
+      LINE_TO: ${{ secrets.LINE_TO }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download prepared LINE notification
+        uses: actions/download-artifact@v4
+        with:
+          name: a7-line-prepared
+          path: vault/2-actions/scheduled-reports/a7-leju
+
+      - name: Send prepared PDF notification
+        env:
+          SYNC_LEDGER_PATH: ${{ runner.temp }}/a7-line-ledger.json
+        run: |
+          python scripts/a7-line-monitor/a7_leju_digest.py \
+            --send-prepared-line vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json
