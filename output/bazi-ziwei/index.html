@@ -13,7 +13,7 @@
           <p class="eyebrow">命盤工具</p>
           <h1>八字・紫微斗數排盤</h1>
         </div>
-        <div class="engine-badge">中州派設定 / lunar-js 1.7.7 / iztro 2.5.8</div>
+        <div class="engine-badge" title="紫微採中州派設定，並結合八字四柱排盤">中州派設定 · 八字與紫微雙盤</div>
       </header>
 
       <section class="workspace" aria-label="排盤工作區">
@@ -83,12 +83,12 @@
           </div>
         </form>
 
-        <section class="result-panel" aria-live="polite">
+        <section class="result-panel" id="result-panel" aria-live="polite" hidden>
           <div id="error-message" class="error-message" hidden></div>
 
           <details class="summary-strip collapsible-section" id="summary-strip"></details>
 
-          <nav class="method-switch" aria-label="選擇論盤方法" role="tablist">
+          <nav class="method-switch" id="method-switch" aria-label="選擇論盤方法" role="tablist">
             <button class="method-tab is-active" type="button" role="tab" aria-selected="true" data-reading-method="bazi">
               <strong>八字論盤</strong>
               <small>看日主、十神、五行、大運與流年，適合抓人生能量與行動節奏。</small>
@@ -146,7 +146,7 @@
                 </div>
                 <span class="section-note">五行、十神、干支關係與當期運勢分開判讀</span>
               </div>
-              <details class="reading-filter-panel collapsible-section">
+              <details class="reading-filter-panel collapsible-section" id="bazi-reading-filters">
                 <summary>
                   <span>
                     <b>八字運勢條件</b>
@@ -255,7 +255,7 @@
 
               <div id="palace-overview-output"></div>
 
-              <details class="reading-filter-panel collapsible-section">
+              <details class="reading-filter-panel collapsible-section" id="ziwei-reading-filters">
                 <summary>
                   <span>
                     <b>紫微運勢條件</b>
@@ -396,13 +396,13 @@
             <summary>
               <span>
                 <b>成人專區 18+</b>
-                <small>性向探索、性癖傾向、性器官輪廓與界線安全</small>
+                <small>吸引模式、親密偏好、身體感受與界線安全</small>
               </span>
             </summary>
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Adult 18+</p>
-                <h2>成人私密輪廓</h2>
+                <h2>成人親密輪廓</h2>
               </div>
               <span class="section-note">命盤只能提供象徵式參考，不判定性向、性別認同或任何私密身分</span>
             </div>
@@ -417,7 +417,7 @@
       </section>
 
       <footer class="page-note">
-        排盤採公曆與輸入地本地時間計算；正緣輪廓與親密表達依所選論盤方法作象徵式推估，不能判定性傾向、性別認同或生理性別，請作參考。
+        排盤採公曆與輸入地本地時間計算；正緣輪廓與親密表達只作象徵式整理，不能判定性傾向、性別認同、身體構造或醫療狀況，請以本人經驗與專業意見為準。
       </footer>
     </main>
 

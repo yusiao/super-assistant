@@ -1700,7 +1700,7 @@ button {
 .tree-fruit-label {
   fill: var(--charcoal);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 950;
   pointer-events: none;
 }
@@ -2022,6 +2022,59 @@ button {
   line-height: 1.45;
 }
 
+.reading-context-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  border-left: 4px solid var(--jade);
+  padding: 8px 10px;
+  background: rgba(255, 253, 247, 0.78);
+}
+
+.reading-context-bar > span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.reading-context-bar > b,
+.reading-context-bar > i {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.reading-context-bar > b {
+  background: var(--charcoal);
+  color: #fffdf7;
+}
+
+.reading-context-bar > i {
+  background: #e6efe8;
+  color: var(--jade);
+}
+
+.reading-context-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.reading-context-actions button {
+  border: 1px solid rgba(24, 107, 90, 0.26);
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: #fffdf7;
+  color: var(--jade);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .topic-tree-self-details {
   display: grid;
   gap: 8px;
@@ -2234,6 +2287,19 @@ button {
   font-size: 0.8rem;
   font-weight: 760;
   line-height: 1.55;
+}
+
+.adult-gate button {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 7px;
+  padding: 9px 12px;
+  background: var(--charcoal);
+  color: #fffdf7;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .adult-grid {
@@ -2594,6 +2660,13 @@ button {
   margin-bottom: 12px;
   color: #38413d;
   line-height: 1.72;
+}
+
+.reading-copy .topic-tree-method-hint p {
+  margin: 0;
+  background: #1f201c;
+  color: #fffdf7;
+  line-height: 1.55;
 }
 
 .reading-block {
@@ -3363,6 +3436,22 @@ button {
   line-height: 1.58;
 }
 
+.partner-reason-details {
+  border-top: 1px solid #ece5d8;
+  padding-top: 8px;
+}
+
+.partner-reason-details summary {
+  color: var(--jade);
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.partner-reason-details .partner-list {
+  margin-top: 9px;
+}
+
 .reading-side {
   display: grid;
   align-content: start;
@@ -4054,6 +4143,20 @@ button {
 
   .topic-tree-content {
     gap: 6px;
+  }
+
+  .reading-context-bar {
+    align-items: flex-start;
+  }
+
+  .reading-context-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .reading-context-actions button {
+    flex: 1 1 0;
+    min-height: 34px;
   }
 
   .topic-tree-current {

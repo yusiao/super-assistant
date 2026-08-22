@@ -595,6 +595,10 @@ const trueSolarTimeInput = document.querySelector("#true-solar-time");
 const daylightSavingInput = document.querySelector("#daylight-saving");
 const dayBoundaryRuleSelect = document.querySelector("#day-boundary-rule");
 const errorMessage = document.querySelector("#error-message");
+const resultPanel = document.querySelector("#result-panel");
+const methodSwitch = document.querySelector("#method-switch");
+const baziReadingFilters = document.querySelector("#bazi-reading-filters");
+const ziweiReadingFilters = document.querySelector("#ziwei-reading-filters");
 const summaryStrip = document.querySelector("#summary-strip");
 const pillarGrid = document.querySelector("#pillar-grid");
 const elementBars = document.querySelector("#element-bars");
@@ -661,6 +665,7 @@ let topicFruitFocus = {
 };
 let baziCalibrationEvents = [];
 let calibrationChartSignature = "";
+let adultAccessConfirmed = false;
 let partnerImageState = {
   status: "idle",
   imageUrl: "",
@@ -1683,17 +1688,11 @@ function baziAdultProfile(chart) {
     wealth >= 2 ? "性癖偏好：感官派，容易被氣味、光線、衣料、身體線條、質感場景點燃。" : "",
     print >= 2 ? "性癖偏好：需要被安撫、被照顧、慢慢升溫，事後照顧與安全感比刺激本身更重要。" : "",
   ].filter(Boolean).join(" ");
-  const bodyShape = chart.formValues.gender === "男"
-    ? pressure + wealth >= 3
-      ? "性器官輪廓：男性器象徵偏厚實、有存在感，興奮反應受自信與掌控感影響；身體線條較適合結實、肩背或骨架感明顯的描述。"
-      : output + peer >= 3
-        ? "性器官輪廓：男性器象徵偏纖長、反應快，親密時對語言、節奏與互動回饋敏感；身形較偏俐落、有少年感或運動感。"
-        : "性器官輪廓：男性器象徵偏中等、重視舒適與穩定發揮；身體魅力不走誇張路線，靠乾淨感、氣味與熟悉感加分。"
-    : wealth + print >= 3
-      ? "性器官輪廓：女性私密處象徵偏柔潤、包覆感與敏感度較明顯；胸臀與腰胯線條較容易成為身體魅力焦點。"
-      : output + pressure >= 3
-        ? "性器官輪廓：女性私密處象徵偏緊緻、敏感點集中，興奮反應受語言、張力與節奏牽動；身形較偏俐落、有曲線但不厚重。"
-        : "性器官輪廓：女性私密處象徵偏自然、耐受度與安全感連動；身體魅力偏乾淨、親近、越熟越有吸引力。";
+  const bodyShape = pressure + wealth >= 3
+    ? "身體感受：容易被自信、掌控感、俐落線條與明確節奏點燃；肩背、腰線、姿態與氣味比特定生理尺寸更有吸引力。"
+    : output + peer >= 3
+      ? "身體感受：對語言、回饋、玩心與互動節奏較敏感；魅力常來自靈活動作、表情與越聊越有火花的身體距離。"
+      : "身體感受：熟悉感、乾淨感、舒適觸碰與安全節奏更重要；需要先放鬆，身體回饋才會逐步打開。";
   const text = `${orientation} ${kink || "性癖偏好：訊號較分散，會隨伴侶、情境與當期運勢被引動。"} ${bodyShape} 日主${profile.strength}，越需要用自己承接得住的節奏表達慾望。`;
   return {
     title: "八字成人輪廓",
@@ -1741,17 +1740,13 @@ function ziweiAdultProfile(chart) {
     has(["貪狼", "廉貞", "天姚", "咸池"]) ? "性癖偏好：性感氛圍、身體展示、被看見、被渴望會放大慾望。" : "",
     has(["太陰", "天同", "天府"]) ? "性癖偏好：觸覺、依偎、香氣、柔軟材質與慢慢升溫很重要。" : "",
   ].filter(Boolean).join(" ");
-  const bodyShape = chart.formValues.gender === "男"
-    ? has(["七殺", "破軍", "火星", "鈴星", "擎羊"])
-      ? "性器官輪廓：男性器象徵偏硬挺、反應快、受刺激與挑戰感牽動；身形較適合精實、肌肉線條或骨架明顯。"
-      : has(["太陰", "天同", "天府", "天梁"])
-        ? "性器官輪廓：男性器象徵偏穩定、耐性與舒適感強；身形不一定誇張，但有溫度、厚度與可依靠感。"
-        : "性器官輪廓：男性器象徵偏中等至纖長，魅力來自節奏、語言與氣場，而不是單純尺寸。"
+  const bodyShape = has(["七殺", "破軍", "火星", "鈴星", "擎羊"])
+    ? "身體感受：刺激、速度、挑戰與明確回應較容易放大興奮；魅力焦點多在俐落姿態、肌肉張力或有力量感的動作。"
     : has(["貪狼", "廉貞", "天姚", "咸池", "紅鸞"])
-      ? "性器官輪廓：女性私密處象徵偏敏感、濕潤度與反應感較明顯；胸臀曲線、腰線、皮膚觸感容易成為性感焦點。"
+      ? "身體感受：對被欣賞、視覺氛圍、香氣、衣料與皮膚觸感較敏感；性感來自互動中的注視與回饋。"
       : has(["太陰", "天同", "天府", "天梁"])
-        ? "性器官輪廓：女性私密處象徵偏柔軟、包覆感與舒適度強；身形較容易呈現柔和、圓潤或溫柔的性感。"
-        : "性器官輪廓：女性私密處象徵偏緊緻、反應受情緒與安全感影響；身形魅力偏乾淨、俐落、越互動越有味道。";
+        ? "身體感受：依偎、溫度、柔軟觸感與安全感會明顯影響投入程度；慢慢升溫通常比追求強刺激更適合。"
+        : "身體感受：反應較受情緒與信任牽動，魅力重點落在乾淨氣場、語言節奏與實際相處的舒服度。";
   const text = `${orientation} ${kink || "性癖偏好：訊號較內斂，重點會落在實際伴侶是否能引出放心與興奮。"} ${bodyShape} 重點星曜為${stars.slice(0, 8).join("、") || "不集中"}。`;
   return {
     title: "紫微成人輪廓",
@@ -1782,13 +1777,23 @@ function renderAdultSection(chart) {
     `;
     return;
   }
+  if (!adultAccessConfirmed) {
+    adultOutput.innerHTML = `
+      <div class="adult-warning adult-gate">
+        <b>此區只供 18 歲以上使用者</b>
+        <p>內容會談吸引模式、親密偏好、身體感受與界線；命盤不能判定性向、性別認同或身體構造。</p>
+        <button type="button" data-confirm-adult>我已滿 18 歲，顯示內容</button>
+      </div>
+    `;
+    return;
+  }
   const bazi = baziAdultProfile(chart);
   const ziwei = ziweiAdultProfile(chart);
   const combinedChips = uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8);
   adultOutput.innerHTML = `
     <div class="adult-warning">
       <b>18+ 提醒</b>
-      <p>以下只做成年使用者的私密偏好探索，不替任何人判定性向、性別認同或生理條件。所有親密互動都必須成年、合意、安全、尊重隱私。</p>
+      <p>以下只做成年使用者的私密偏好探索，不替任何人判定性向、性別認同或身體構造。所有親密互動都必須成年、合意、安全、尊重隱私。</p>
     </div>
     <div class="adult-grid">
       ${adultCard("性向與吸引對象", "吸引類型與可能探索方向", ["吸引模式", ...combinedChips.slice(0, 4)], `${bazi.orientation} ${ziwei.orientation}`)}
@@ -1799,9 +1804,9 @@ function renderAdultSection(chart) {
         `${bazi.kink} ${ziwei.kink}`
       )}
       ${adultCard(
-        "性器官與身體輪廓",
-        "形狀感、敏感度、身體魅力",
-        [chart.formValues.gender === "男" ? "男性器輪廓" : "女性私密輪廓", "敏感度", "身體線條", "性感焦點"],
+        "身體感受與魅力線索",
+        "敏感節奏、身體距離與性感焦點",
+        ["敏感節奏", "身體距離", "姿態氣場", "性感焦點"],
         `${bazi.bodyShape} ${ziwei.bodyShape}`
       )}
       ${adultCard(
@@ -4744,32 +4749,24 @@ function partnerBodyMetrics(targetGender, branchElement, starNames, seed) {
   };
   const rangeMap = kind === "feminine" ? femaleRanges : maleRanges;
   const [minHeight, maxHeight, minWeight, maxWeight] = rangeMap[branchElement] || [162, 172, 50, 64];
-  const height = numberFromSeed(seed, minHeight, maxHeight);
-  const weight = numberFromSeed(seed * 7, minWeight, maxWeight);
   const isSoft = namesIncludeAny(starNames, ["太陰", "天同", "紅鸞", "天喜", "天姚", "咸池"]);
   const isSharp = namesIncludeAny(starNames, ["武曲", "七殺", "破軍", "擎羊", "陀羅"]);
 
   if (kind === "feminine") {
-    const cupOptions = branchElement === "土" || branchElement === "水"
-      ? ["C-D", "D", "C", "D-E"]
-      : branchElement === "火"
-        ? ["B-C", "C", "C-D"]
-        : ["B-C", "C", "B", "C-D"];
-    const cup = isSoft
-      ? pickBySeed(["C", "C-D", "D"], seed + 11)
-      : isSharp
-        ? pickBySeed(["B", "B-C", "C"], seed + 13)
-        : pickBySeed(cupOptions, seed + 17);
     return {
-      height: `${height} cm`,
-      weight: `${weight} kg`,
-      bodyRatio: `上圍約${cup}罩杯，腰臀比例偏${isSoft ? "柔和有曲線" : isSharp ? "俐落緊實" : "協調耐看"}`,
+      height: `${minHeight}-${maxHeight} cm`,
+      weight: `${minWeight}-${maxWeight} kg`,
+      bodyRatio: isSoft
+        ? "肩頸與腰臀線條偏柔和，整體有曲線但不以尺寸定義"
+        : isSharp
+          ? "線條偏俐落緊實，姿態與比例比上圍尺寸更醒目"
+          : "上下身比例協調，整體氣質比單一部位更有辨識度",
     };
   }
 
   return {
-    height: `${height} cm`,
-    weight: `${weight} kg`,
+    height: `${minHeight}-${maxHeight} cm`,
+    weight: `${minWeight}-${maxWeight} kg`,
     bodyRatio: isSharp
       ? "肩線清楚、胸背較緊實，給人乾淨俐落的壓迫感"
       : isSoft
@@ -5130,6 +5127,24 @@ function renderPartnerVisual(chart, profile, source = "ziwei") {
   `;
 }
 
+function renderPartnerReasonList(story, reasons, notes = []) {
+  const primary = [story, ...reasons.slice(0, 2)].filter(Boolean);
+  const more = [...reasons.slice(2), ...notes].filter(Boolean);
+  return `
+    <ul class="partner-list">
+      ${primary.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+    </ul>
+    ${more.length ? `
+      <details class="partner-reason-details">
+        <summary>查看完整判讀依據</summary>
+        <ul class="partner-list">
+          ${more.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </details>
+    ` : ""}
+  `;
+}
+
 function renderPartnerProfile(chart) {
   const profile = buildPartnerProfile(chart);
   chart.partnerProfile = profile;
@@ -5167,11 +5182,7 @@ function renderPartnerProfile(chart) {
           <div class="partner-cell"><span>喜歡穿著</span><strong>${escapeHtml(detail.outfit || "穿搭偏乾淨耐看")}</strong></div>
           <div class="partner-cell"><span>參考宮位</span><strong>${escapeHtml(focusText)}</strong></div>
         </div>
-        <ul class="partner-list">
-          ${detail.story ? `<li>${escapeHtml(detail.story)}</li>` : ""}
-          ${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}
-          ${profile.appearance.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
-        </ul>
+        ${renderPartnerReasonList(detail.story, reasons, profile.appearance.notes)}
       </div>
     </div>
   `;
@@ -5214,11 +5225,7 @@ function renderBaziPartnerProfile(chart) {
           <div class="partner-cell"><span>喜歡穿著</span><strong>${escapeHtml(detail.outfit || "穿搭偏乾淨耐看")}</strong></div>
           <div class="partner-cell"><span>判讀依據</span><strong>${escapeHtml(profile.focusText)}</strong></div>
         </div>
-        <ul class="partner-list">
-          ${detail.story ? `<li>${escapeHtml(detail.story)}</li>` : ""}
-          ${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}
-          ${profile.appearance.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}
-        </ul>
+        ${renderPartnerReasonList(detail.story, reasons, profile.appearance.notes)}
       </div>
     </div>
   `;
@@ -5338,10 +5345,10 @@ function chatAdultAnswer() {
   const ziwei = ziweiAdultProfile(currentChart);
   const combinedChips = uniqueItems([...bazi.preferences, ...ziwei.preferences]).slice(0, 8).join("、");
   return [
-    "成人專區可以講得辛辣一點，但不能替你判定同性戀、雙性戀、異性戀、性別認同或生理條件。",
+    "成人專區可以談得直接，但不能替你判定同性戀、雙性戀、異性戀、性別認同或身體構造。",
     `性向與吸引：${bazi.orientation} ${ziwei.orientation}`,
     `性癖偏好：${bazi.kink} ${ziwei.kink}`,
-    `性器官與身體輪廓：${bazi.bodyShape} ${ziwei.bodyShape}`,
+    `身體感受與魅力線索：${bazi.bodyShape} ${ziwei.bodyShape}`,
     `最明顯的偏好關鍵字：${combinedChips || "需要看實際伴侶與當期運勢觸發"}。`,
     "所有成人互動都要成年、合意、安全、有停止權，也要保護隱私。",
   ].join(" ");
@@ -5354,9 +5361,106 @@ function chatPalaceAnswer(question) {
   return palaceChatSummary(findPalaceByName(currentChart.astrolabe, matched));
 }
 
+function applyQuestionPeriod(question) {
+  const asksCurrentMonth = /本月|這個月|當月|流月/.test(question);
+  const asksCurrentYear = asksCurrentMonth || /今年|本年|流年|哪幾月|幾月|月份/.test(question);
+  if (!asksCurrentYear) return;
+  const now = new Date();
+  if (activeReadingMethod === "bazi") {
+    if (baziScopeSelect) baziScopeSelect.value = asksCurrentMonth ? "monthly" : "yearly";
+    if (baziTargetYearInput) baziTargetYearInput.value = String(now.getFullYear());
+    if (baziTargetMonthInput) baziTargetMonthInput.value = String(now.getMonth() + 1);
+    updateBaziReading();
+    return;
+  }
+  if (scopeSelect) scopeSelect.value = asksCurrentMonth ? "monthly" : "yearly";
+  if (targetYearInput) targetYearInput.value = String(now.getFullYear());
+  if (targetMonthInput) targetMonthInput.value = String(now.getMonth() + 1);
+  updateReading();
+}
+
+function baziMonthlyContextForYear(chart, year, month) {
+  const cycle = baziLuckCycleForYear(chart, year);
+  const layers = [];
+  if (cycle?.pillar) layers.push({ label: "大運", pillar: cycle.pillar, cycle });
+  const yearlyPillar = getBaziYearPillar(year);
+  const monthlyPillar = getBaziMonthPillar(year, month);
+  if (yearlyPillar) layers.push({ label: "流年", pillar: yearlyPillar });
+  if (monthlyPillar) layers.push({ label: "流月", pillar: monthlyPillar });
+  return {
+    scope: "monthly",
+    periodName: `${year}年${month}月 流月`,
+    pillar: monthlyPillar,
+    targetYear: year,
+    targetMonth: month,
+    cycle,
+    layers,
+  };
+}
+
+function ziweiMonthlyContextForYear(chart, year, month) {
+  const maxDay = new Date(year, month, 0).getDate();
+  const targetDay = Math.min(15, maxDay);
+  const targetDate = `${year}-${String(month).padStart(2, "0")}-${String(targetDay).padStart(2, "0")} 12:00`;
+  const horoscope = getHoroscopeSafe(chart.astrolabe, targetDate);
+  const periodIndex = horoscope?.monthly?.index ?? null;
+  return {
+    scope: "monthly",
+    targetYear: year,
+    targetMonth: month,
+    targetDay,
+    targetHour: 12,
+    targetDate,
+    horoscope,
+    periodIndex,
+    periodName: `${year}年${month}月 流月`,
+    periodPalace: Number.isInteger(periodIndex) ? chart.astrolabe.palaces[periodIndex] : null,
+  };
+}
+
+function bestTopicMonths(mode, topicKey, chart, year) {
+  const baziProfile = mode === "bazi" ? baziDayMasterProfile(chart) : null;
+  const baziPower = mode === "bazi" ? baziTenGodPower(chart) : null;
+  return Array.from({ length: 12 }, (_, index) => {
+    const month = index + 1;
+    const period = mode === "bazi"
+      ? baziMonthlyContextForYear(chart, year, month)
+      : ziweiMonthlyContextForYear(chart, year, month);
+    const guide = mode === "bazi"
+      ? baziMonthlyActionForTopic(topicKey, chart, period, baziProfile, baziPower)
+      : ziweiMonthlyActionForTopic(topicKey, chart, period);
+    return { month, ...guide };
+  }).sort((first, second) => second.score - first.score || first.month - second.month).slice(0, 3);
+}
+
+function chatPeriodTopicAnswer(topicKey, question) {
+  const topic = TOPIC_CONFIG[topicKey];
+  const year = new Date().getFullYear();
+  const wantsMonths = /哪幾月|幾月|月份|月分|本月|流月/.test(question);
+  if (activeReadingMethod === "bazi") {
+    const period = buildBaziPeriodContext(currentChart);
+    const branch = baziTreeBranchDetails(topicKey, currentChart, period)?.[2];
+    const conclusion = String(branch?.text || baziTopicAnalysis(topicKey, currentChart, topic, period).text).replace(/^結論：/, "");
+    const months = wantsMonths ? bestTopicMonths("bazi", topicKey, currentChart, year) : [];
+    const monthText = months.length
+      ? `今年較適合主動處理${topic.label}的月份是${months.map((item) => `${item.month}月（${item.action.replace(/尤佳$/, "")}）`).join("、")}。`
+      : "";
+    return `我直接說結論：${conclusion} ${monthText}月份是行動優先順序，不是事件保證；仍要配合現實機會與你的準備程度。`;
+  }
+  const context = buildPeriodContext(currentChart);
+  const branch = ziweiTopicBranchDetails(topicKey, currentChart, context)?.[2];
+  const conclusion = String(branch?.text || chatTopicAnswer(topicKey)).replace(/^結論：/, "");
+  const months = wantsMonths ? bestTopicMonths("ziwei", topicKey, currentChart, year) : [];
+  const monthText = months.length
+    ? `今年較適合主動處理${topic.label}的月份是${months.map((item) => `${item.month}月（${item.action.replace(/尤佳$/, "")}）`).join("、")}。`
+    : "";
+  return `我直接說結論：${conclusion} ${monthText}我已把原命、三方四正、四化與流月權重一起算入；月份仍需用實際事件校正。`;
+}
+
 function buildBotAnswer(question) {
   if (!currentChart) return "請先輸入出生資料並排盤，我才能用目前命盤回答。";
   const q = question.trim();
+  applyQuestionPeriod(q);
   const causePalace = getCausePalace(currentChart.astrolabe);
   const bodyPalace = getBodyPalace(currentChart.astrolabe);
   const context = buildPeriodContext(currentChart);
@@ -5391,7 +5495,9 @@ function buildBotAnswer(question) {
       : "目前沒有取得身宮。";
   }
 
-  if (/大限|流年|流月|今年|本月/.test(q) && !/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
+  if (/大限|流年|流月|今年|本月|哪幾月|幾月|月份/.test(q) && !/四化|飛星|飛入|飛出|自化|互飛|閉環|宮干/.test(q)) {
+    const topicKey = topicFromQuestion(q);
+    if (topicKey) return chatPeriodTopicAnswer(topicKey, q);
     if (activeReadingMethod === "bazi") {
       const baziPeriod = buildBaziPeriodContext(currentChart);
       const guide = baziMonthlyActionGuide(currentChart, baziPeriod);
@@ -6323,16 +6429,64 @@ function ziweiCompactStars(branch, fallback = "未見明顯主星") {
 }
 
 function ziweiSignalSummary(network, flying, options = {}) {
-  const support = network.supportStars.length
-    ? `助力在${network.supportStars.slice(0, options.supportLimit || 2).join("、")}`
-    : "助力星不集中";
-  const pressure = network.pressureStars.length
-    ? `壓力在${network.pressureStars.slice(0, options.pressureLimit || 2).join("、")}`
-    : "壓力星不集中";
-  const flyingTags = flying.tags?.length
-    ? `四化標籤：${flying.tags.slice(0, options.tagLimit || 2).join("、")}`
-    : "四化訊號中等";
-  return `${support}，${pressure}，${flyingTags}`;
+  const supportCount = network.supportStars.length;
+  const pressureCount = network.pressureStars.length;
+  const balance = supportCount > pressureCount
+    ? "可用資源多於阻力"
+    : pressureCount > supportCount
+      ? "目前阻力比助力更需要先處理"
+      : "助力與壓力並存，成敗取決於節奏與執行";
+  const support = supportCount
+    ? `可借力${network.supportStars.slice(0, options.supportLimit || 2).join("、")}`
+    : "外部助力不集中";
+  const pressure = pressureCount
+    ? `要留意${network.pressureStars.slice(0, options.pressureLimit || 2).join("、")}帶來的急躁、摩擦或反覆`
+    : "沒有特別集中的壓力星";
+  return `${balance}；${support}，${pressure}`;
+}
+
+function ziweiSignalLevel(score) {
+  if (score >= 7) return "強";
+  if (score >= 2) return "中等偏強";
+  if (score >= -1) return "中等";
+  return "偏弱";
+}
+
+function ziweiStarStory(topicKey, starText) {
+  const stars = String(starText || "");
+  const has = (...names) => names.some((name) => stars.includes(name));
+  const stories = {
+    property: has("武曲", "天府", "太陰")
+      ? "財務較適合靠紀律、穩定現金流與長期資產累積，不宜只追逐短線題材"
+      : has("天機", "巨門", "文昌", "文曲")
+        ? "收入較容易來自分析、資訊、溝通、顧問或知識變現，合約與口頭承諾要寫清楚"
+        : "財富更看工作能力能否持續變現，以及能不能把收入留下來",
+    career: has("天機", "巨門", "文昌", "文曲")
+      ? "適合分析、研究、企劃、顧問、產品或需要說服溝通的工作；職涯會靠腦力與解題能力被看見"
+      : has("紫微", "天府", "天相")
+        ? "適合管理、資源整合、制度型組織或能累積決策權的位置"
+        : has("武曲", "七殺", "破軍")
+          ? "適合成果導向、技術、營運、改革或高壓決策型工作，越能承擔難題越容易建立位置"
+          : "職涯不宜只用單一職稱定義，真正優勢要從合作對象、外部舞台與可累積的專業看",
+    marriage: has("天機", "巨門")
+      ? "容易被聰明、反應快、邏輯強又有話題的人吸引；關係能不能長久，關鍵在溝通不能變成猜測或辯輸贏"
+      : has("紅鸞", "天喜", "天姚", "咸池")
+        ? "對象通常有明顯吸引力、審美或社交存在感，但桃花要靠真實社交與穩定互動才會落地"
+        : has("太陰", "天同", "天府", "天梁")
+          ? "容易被溫和、可靠、願意照顧情緒的人打開，穩定陪伴比強烈刺激更重要"
+          : "關係更重視相處節奏、信任與生活能否真正配合，不適合只看第一眼心動",
+    children: has("天機", "文昌", "文曲")
+      ? "與子女、晚輩或作品的連結偏向學習、表達與創意，需要保留討論和自主空間"
+      : has("太陰", "天同", "天府")
+        ? "照顧與陪伴需求較強，穩定生活節奏會直接影響親子與作品發展"
+        : "子女議題同時反映照顧責任、作品輸出與親密表達，需要先把生活支持系統建好",
+    health: has("七殺", "破軍", "擎羊", "火星", "鈴星")
+      ? "壓力容易以急、緊、睡眠不穩或過度消耗的形式出現，適合先降載並建立固定修復節奏"
+      : has("太陰", "天同", "天梁", "天府")
+        ? "身體狀態與情緒安全、睡眠和規律生活連動明顯，溫和持續的保養比短期猛衝有效"
+        : "健康重點在壓力是否長期累積，以及休息、運動和檢查能否成為固定制度",
+  };
+  return stories[topicKey] || "先看主宮故事，再用三方四正與流運確認事件是否真的被觸發";
 }
 
 function ziweiScoreAction(score, topicKey) {
@@ -6370,28 +6524,30 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
   const primary = network.baseEvaluations?.[0] || network.evaluations?.[0];
   const monthText = context?.periodName || "原局";
   const finalScore = network.score + flying.score;
+  const signalLevel = ziweiSignalLevel(finalScore);
+  const periodAction = ziweiScoreAction(finalScore, topicKey);
   const methodHint = (focusNames = []) => ziweiFlyingMethodHint(topicKey, chart, context || buildPeriodContext(chart), network, flying, focusNames);
   const details = {
     property: [
       (() => {
         const wealth = palaceBranchText(chart, "財帛宮");
         return {
-          leaves: [wealth.label, `主星：${wealth.stars}`, network.supportStars.length ? `助力${network.supportStars.slice(0, 2).join("、")}` : "助力星不集中"],
-          text: `結論：${wealth.label}主星為${ziweiCompactStars(wealth)}，財路重點是穩定收入與現金流；${ziweiSignalSummary(network, flying)}。`,
+          leaves: [wealth.label, "收入方式", "現金流"],
+          text: `結論：${ziweiStarStory("property", ziweiCompactStars(wealth))}。${ziweiSignalSummary(network, flying)}。`,
           methodHint: methodHint(["財帛宮", "官祿宮", "田宅宮"]),
         };
       })(),
       (() => {
         const property = palaceBranchText(chart, "田宅宮");
         return {
-          leaves: [property.label, `主星：${property.stars}`, flying.tags?.[0] || "飛星待展開"],
-          text: `結論：${property.label}主星為${ziweiCompactStars(property)}，房產緣看長期承載與家庭資源；${flying.tags?.[0] || "目前未見強烈單點觸發"}。`,
+          leaves: [property.label, "置產條件", `承載${signalLevel}`],
+          text: `結論：房產緣不是單看有沒有田宅主星，而是看現金流、家庭資源與長期負擔能否一起承接；本期承載訊號${signalLevel}，${periodAction}。`,
           methodHint: methodHint(["田宅宮", "財帛宮", "福德宮"]),
         };
       })(),
       {
-        leaves: [monthText, `分數${Math.round(network.score + flying.score)}`, flying.tags?.slice(0, 2).join("、") || "四化不集中"],
-        text: `結論：${monthText}財富分數約${Math.round(finalScore)}，${ziweiScoreAction(finalScore, topicKey)}。`,
+        leaves: [monthText, `機會${signalLevel}`, periodAction],
+        text: `結論：${monthText}財富機會${signalLevel}，${periodAction}。偏財適合先用小額驗證與停損規則，不宜因單一星曜或短期情緒重押。`,
         methodHint: methodHint(["財帛宮", "田宅宮", "官祿宮", "流月命宮"]),
       },
     ],
@@ -6399,8 +6555,8 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
       (() => {
         const career = palaceBranchText(chart, "官祿宮");
         return {
-          leaves: [career.label, `主星：${career.stars}`, primary ? `評分${Math.round(primary.score)}` : ""],
-          text: `結論：${career.label}主星為${ziweiCompactStars(career)}，事業定位先看專業角色、責任感與可累積的舞台。`,
+          leaves: [career.label, "專業角色", "長期舞台"],
+          text: `結論：${ziweiStarStory("career", ziweiCompactStars(career))}。`,
           methodHint: methodHint(["官祿宮", "命宮", "身宮"]),
         };
       })(),
@@ -6408,14 +6564,14 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
         const travel = palaceBranchText(chart, "遷移宮");
         const friends = palaceBranchText(chart, "僕役宮");
         return {
-          leaves: [travel.label, friends.label, network.supportStars.slice(0, 2).join("、") || "助力不集中"],
-          text: `結論：外部機會看${travel.label}，合作資源看${friends.label}；${ziweiSignalSummary(network, flying)}。`,
+          leaves: ["外部機會", "合作人脈", network.supportStars.slice(0, 2).join("、") || "靠自己開局"],
+          text: `結論：工作機會較容易從外部曝光、跨圈合作與他人引薦進來；${ziweiSignalSummary(network, flying)}。`,
           methodHint: methodHint(["遷移宮", "僕役宮", "官祿宮"]),
         };
       })(),
       {
-        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "變動未強", `分數${Math.round(network.score + flying.score)}`],
-        text: `結論：${monthText}若四化打到官祿、命身或遷移，才會有明顯換工作、升遷或轉型訊號；${ziweiScoreAction(finalScore, topicKey)}。`,
+        leaves: [monthText, `變動${signalLevel}`, periodAction],
+        text: `結論：${monthText}的換工作、升遷或轉型訊號為${signalLevel}。${periodAction}；先用面試、提案或職務協商測試市場，再決定是否正式離開。`,
         methodHint: methodHint(["官祿宮", "命宮", "身宮", "遷移宮"]),
       },
     ],
@@ -6423,19 +6579,19 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
       (() => {
         const spouse = palaceBranchText(chart, "夫妻宮");
         return {
-          leaves: [spouse.label, `主星：${spouse.stars}`, network.flowerStars.length ? `桃花${network.flowerStars.join("、")}` : "桃花不集中"],
-          text: `結論：${spouse.label}主星為${ziweiCompactStars(spouse)}，伴侶輪廓先看互動模式、溝通感與關係承諾。`,
+          leaves: [spouse.label, "互動模式", "承諾節奏"],
+          text: `結論：${ziweiStarStory("marriage", ziweiCompactStars(spouse))}。`,
           methodHint: methodHint(["夫妻宮", "福德宮", "遷移宮"]),
         };
       })(),
       {
-        leaves: [network.flowerStars.slice(0, 3).join("、") || "桃花慢熱", network.supportStars.slice(0, 2).join("、") || "助力不集中", network.pressureStars.slice(0, 2).join("、") || "壓力低"],
-        text: `結論：桃花看紅鸞、天喜、咸池等吸引訊號；${network.flowerStars.length ? `此盤桃花點在${network.flowerStars.slice(0, 3).join("、")}` : "此盤桃花不是一眼爆發型"}。`,
+        leaves: [network.flowerStars.slice(0, 3).join("、") || "桃花慢熱", "社交曝光", "界線溝通"],
+        text: `結論：${network.flowerStars.length ? `桃花訊號可見，容易透過${network.flowerStars.slice(0, 3).join("、")}帶出吸引力` : "桃花偏慢熱，要靠固定互動累積"}。若生活長期兩點一線、沒有社交入口，再旺的桃花也不容易成為實際關係。`,
         methodHint: methodHint(["夫妻宮", "子女宮", "福德宮"]),
       },
       {
-        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`],
-        text: `結論：${monthText}關係推進看夫妻宮、命宮、遷移宮與流運四化交會；${ziweiScoreAction(finalScore, topicKey)}。`,
+        leaves: [monthText, `推進${signalLevel}`, periodAction],
+        text: `結論：${monthText}的關係推進訊號為${signalLevel}，${periodAction}。真正能成局的關鍵是有沒有持續見面、清楚表達與生活安排。`,
         methodHint: methodHint(["夫妻宮", "命宮", "遷移宮", "流月命宮"]),
       },
     ],
@@ -6443,19 +6599,19 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
       (() => {
         const child = palaceBranchText(chart, "子女宮");
         return {
-          leaves: [child.label, `主星：${child.stars}`, network.supportStars.slice(0, 2).join("、") || "助力不集中"],
-          text: `結論：${child.label}主星為${ziweiCompactStars(child)}，子女緣也反映作品、晚輩與親密表達的成熟度。`,
+          leaves: [child.label, "照顧責任", "作品輸出"],
+          text: `結論：${ziweiStarStory("children", ziweiCompactStars(child))}。`,
           methodHint: methodHint(["子女宮", "田宅宮", "福德宮"]),
         };
       })(),
       {
-        leaves: [network.flowerStars.slice(0, 3).join("、") || "吸引慢熱", network.pressureStars.slice(0, 2).join("、") || "界線壓力低", "不判定性向"],
-        text: `結論：親密表達看子女宮、夫妻宮與福德宮；命盤只能看表達模式與需求張力，不能直接判定性向。`,
+        leaves: ["需求表達", "互動節奏", "界線安全"],
+        text: `結論：親密互動較重視被理解、回饋與安全感；命盤只能整理表達模式與需求張力，不能判定性向、性別認同或身體構造。`,
         methodHint: methodHint(["子女宮", "夫妻宮", "福德宮"]),
       },
       {
-        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "事件未強", `分數${Math.round(network.score + flying.score)}`],
-        text: `結論：${monthText}子女或作品事件看子女宮、田宅宮與流月四化；${ziweiScoreAction(finalScore, topicKey)}。`,
+        leaves: [monthText, `事件${signalLevel}`, periodAction],
+        text: `結論：${monthText}的子女、作品或照顧責任訊號為${signalLevel}，${periodAction}。先確認時間、分工與支持資源，再安排重大決定。`,
         methodHint: methodHint(["子女宮", "田宅宮", "流月命宮"]),
       },
     ],
@@ -6463,22 +6619,22 @@ function ziweiTopicBranchDetails(topicKey, chart, context = null) {
       (() => {
         const illness = palaceBranchText(chart, "疾厄宮");
         return {
-          leaves: [illness.label, `主星：${illness.stars}`, network.pressureStars.slice(0, 2).join("、") || "壓力不集中"],
-          text: `結論：${illness.label}主星為${ziweiCompactStars(illness)}，健康先看壓力來源、消耗型態與身心修復能力。`,
+          leaves: [illness.label, "耗能型態", "修復節奏"],
+          text: `結論：${ziweiStarStory("health", ziweiCompactStars(illness))}。這是保養提醒，不是疾病診斷。`,
           methodHint: methodHint(["疾厄宮", "命宮", "身宮"]),
         };
       })(),
       (() => {
         const fortune = palaceBranchText(chart, "福德宮");
         return {
-          leaves: [fortune.label, network.pressureStars.slice(0, 3).join("、") || "壓力星少", network.supportStars.slice(0, 2).join("、") || "修復星少"],
-          text: `結論：${fortune.label}看精神壓力與恢復力；${ziweiSignalSummary(network, flying)}。`,
+          leaves: [fortune.label, "精神壓力", "恢復資源"],
+          text: `結論：目前最重要的是辨識長期耗能來源，並把睡眠、運動、休息與求助做成固定制度；${ziweiSignalSummary(network, flying)}。`,
           methodHint: methodHint(["福德宮", "疾厄宮", "遷移宮"]),
         };
       })(),
       {
-        leaves: [monthText, flying.tags?.slice(0, 2).join("、") || "四化不集中", `分數${Math.round(network.score + flying.score)}`],
-        text: `結論：${monthText}健康重點看疾厄、福德與命身是否被四化引動；${ziweiScoreAction(finalScore, topicKey)}。`,
+        leaves: [monthText, `壓力${signalLevel}`, periodAction],
+        text: `結論：${monthText}的健康壓力訊號為${signalLevel}，${periodAction}。若已有不適、失眠或疼痛，仍應直接就醫，不用命盤替代檢查。`,
         methodHint: methodHint(["疾厄宮", "福德宮", "命宮", "流月命宮"]),
       },
     ],
@@ -6500,6 +6656,62 @@ function renderTopicTreeMethodHint(hint) {
       <p>${escapeHtml(hint)}</p>
     </details>
   `;
+}
+
+function topicFruitDisplayLabel(label) {
+  const labels = {
+    "收入來源": "收入",
+    "房產承載": "房產",
+    "機會風險": "機會",
+    "事業定位": "定位",
+    "職場人脈": "人脈",
+    "變動訊號": "變動",
+    "伴侶結構": "伴侶",
+    "正緣輪廓": "正緣",
+    "關係時間": "時間",
+    "子女宮": "子女",
+    "親密表達": "親密",
+    "事件時間": "時間",
+    "疾厄訊號": "體質",
+    "壓力來源": "壓力",
+    "照護節奏": "照護",
+    "財富來源": "來源",
+    "現金流": "現金流",
+    "決策時機": "時機",
+    "職業方向": "方向",
+    "職場模式": "模式",
+    "轉職時機": "時機",
+    "對象特質": "特質",
+    "相處模式": "相處",
+    "桃花時間": "桃花",
+    "子女訊號": "子女",
+    "作品輸出": "作品",
+    "身體節奏": "身體",
+    "修復方式": "修復",
+    "時間提醒": "時間",
+  };
+  return labels[label] || [...label].slice(0, 4).join("");
+}
+
+function topicBranchCaption(label) {
+  const captions = {
+    "收入來源": "錢主要從哪裡來，以及如何留得住",
+    "房產承載": "置產條件、家庭資源與長期負擔",
+    "機會風險": "目前適合推進，還是先控制風險",
+    "事業定位": "適合的角色、工作方式與長期舞台",
+    "職場人脈": "外部機會、合作助力與競爭壓力",
+    "變動訊號": "換工作、升遷或轉型的當期節奏",
+    "伴侶結構": "容易被哪種對象與互動方式吸引",
+    "正緣輪廓": "外型氣質、職業與可能相遇場景",
+    "關係時間": "桃花、關係推進與穩定窗口",
+    "子女宮": "子女、晚輩、作品與照顧責任",
+    "親密表達": "需求、互動節奏與界線感",
+    "事件時間": "本期適合準備、推進或觀察",
+    "疾厄訊號": "壓力如何反映在身體與生活節奏",
+    "壓力來源": "主要耗能點與恢復資源",
+    "照護節奏": "本期最值得先做的保養行動",
+  };
+  return captions[label] || "點選後查看此分支的命盤結論";
 }
 
 function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
@@ -6527,9 +6739,9 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
     ? `${activeTopic.label} · ${selectedBranch.label}`
     : selfSelected ? selfProfile.label : topicSelected ? activeTopic.label : "主題樹";
   const currentHint = selectedBranch
-    ? selectedBranch.leaves.join("、")
+    ? topicBranchCaption(selectedBranch.label)
     : selfSelected ? selfProfile.hint : topicSelected ? activeMeta.hint : "點一團樹冠展開大類；再點同一團可收回。";
-  const fruitLayout = [[150, 92], [250, 92], [350, 92]];
+  const fruitLayout = [[126, 90], [250, 76], [374, 90]];
   const treeBranchOrder = topicSelected
     ? [
       ...TOPIC_ORDER.filter((topicKey) => topicKey !== activeTopicKey),
@@ -6574,13 +6786,12 @@ function renderTopicMindMap(mode, activeTopicKey, chart, contextOrPeriod) {
   const fruitHtml = topicSelected && !selfSelected ? activeBranches.map((branch, index) => {
     const [x, y] = fruitLayout[index] || [180 + (index - 1) * 34, 92];
     const fruitSelected = selectedFruitIndex === index;
-    const labelChars = [...branch.label];
-    const labelLines = labelChars.length > 3
-      ? [labelChars.slice(0, 2).join(""), labelChars.slice(2).join("")]
-      : [branch.label];
+    const displayLabel = topicFruitDisplayLabel(branch.label);
+    const labelChars = [...displayLabel];
+    const labelLines = [displayLabel];
     const labelMaxLength = Math.max(...labelLines.map((line) => [...line].length));
     const labelWidth = Math.max(58, labelMaxLength * 18 + 20);
-    const labelHeight = labelLines.length > 1 ? 42 : 27;
+    const labelHeight = 29;
     const labelY = y - labelHeight - 34;
     return `
       <g class="topic-tree-fruit ${fruitSelected ? "is-active" : ""}" data-topic-fruit="${index}" tabindex="0" role="button" aria-label="展開${escapeHtml(branch.label)}" aria-pressed="${String(fruitSelected)}">
@@ -6712,6 +6923,23 @@ function renderReadingDetailPanel(title, subtitle, content, options = {}) {
   `;
 }
 
+function renderReadingContextBar(mode, period, topicLabel) {
+  const currentYear = new Date().getFullYear();
+  const isCurrentYear = period?.scope === "yearly" && Number(period.targetYear) === currentYear;
+  const modeLabel = mode === "bazi" ? "八字" : "紫微";
+  return `
+    <div class="reading-context-bar" aria-label="目前判讀條件">
+      <span>${escapeHtml(modeLabel)}目前判讀</span>
+      <b>${escapeHtml(period?.periodName || "原局")}</b>
+      <i>${escapeHtml(topicLabel)}</i>
+      <div class="reading-context-actions">
+        ${isCurrentYear ? "" : `<button type="button" data-set-current-year="${escapeHtml(mode)}">看今年</button>`}
+        <button type="button" data-open-reading-filters="${escapeHtml(mode)}">調整條件</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderReadingSubDetail(title, content) {
   return `
     <details class="reading-subdetail-panel">
@@ -6772,6 +7000,7 @@ function buildBaziReading(chart) {
   return `
     <div class="reading-main reading-main-compact bazi-reading-main">
       <div class="reading-copy">
+        ${renderReadingContextBar("bazi", period, topic.label)}
         ${renderTopicMindMap("bazi", topicKey, chart, period)}
         ${renderDrilldownGroup("八字結構", "日主、月令、格局、喜用", [
           {
@@ -7080,6 +7309,7 @@ function buildReading(chart) {
   return `
     <div class="reading-main reading-main-compact">
       <div class="reading-copy">
+        ${renderReadingContextBar("ziwei", context, topic.label)}
         ${renderTopicMindMap("ziwei", topicKey, chart, context)}
         ${renderDrilldownGroup("宮位網絡", "主宮、三方四正、桃花", [
           {
@@ -7960,6 +8190,7 @@ function calculate() {
   clearError();
 
   currentChart = buildChartFromValues(getFormValues());
+  if (resultPanel) resultPanel.hidden = false;
   const { astrolabe, elementCounts, formValues, lunar, naYin, timeIndex } = currentChart;
   const nextCalibrationSignature = `${formValues.inputBirthDate}|${formValues.inputBirthTime}|${formValues.birthDate}|${formValues.birthTime}|${formValues.dayBoundaryRule}`;
   if (calibrationChartSignature && calibrationChartSignature !== nextCalibrationSignature) {
@@ -8011,6 +8242,10 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   try {
     calculate();
+    if (resultPanel) {
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      resultPanel.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    }
   } catch (error) {
     showError(error);
   }
@@ -8168,7 +8403,44 @@ function toggleTopicFruitTarget(fruitButton) {
   return true;
 }
 
+function setCurrentYearReading(mode) {
+  const currentYear = new Date().getFullYear();
+  if (mode === "bazi") {
+    if (baziScopeSelect) baziScopeSelect.value = "yearly";
+    if (baziTargetYearInput) baziTargetYearInput.value = String(currentYear);
+    updateBaziReading();
+    return;
+  }
+  if (scopeSelect) scopeSelect.value = "yearly";
+  if (targetYearInput) targetYearInput.value = String(currentYear);
+  updateReading();
+}
+
+function openReadingFilters(mode) {
+  const panel = mode === "bazi" ? baziReadingFilters : ziweiReadingFilters;
+  if (!panel) return;
+  panel.open = true;
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  panel.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+}
+
 document.addEventListener("click", (event) => {
+  const currentYearButton = event.target.closest("[data-set-current-year]");
+  if (currentYearButton) {
+    setCurrentYearReading(currentYearButton.dataset.setCurrentYear);
+    return;
+  }
+  const filterButton = event.target.closest("[data-open-reading-filters]");
+  if (filterButton) {
+    openReadingFilters(filterButton.dataset.openReadingFilters);
+    return;
+  }
+  const adultButton = event.target.closest("[data-confirm-adult]");
+  if (adultButton && currentChart) {
+    adultAccessConfirmed = true;
+    renderAdultSection(currentChart);
+    return;
+  }
   const removeCalibrationButton = event.target.closest("[data-remove-calibration]");
   if (removeCalibrationButton) {
     const id = removeCalibrationButton.dataset.removeCalibration;
