@@ -108,10 +108,10 @@ function priceFromText(value = "") {
 function bodyFromSource(model, segment) {
   const text = `${model} ${segment}`.toLowerCase();
 
-  if (/suv|crossover|range rover|defender|wrangler|grenadier|urus|dbx|purosangue|sportage|rav4|x-trail|xforce|forester|outback|vitara|jimny|cx-|tucson|santa fe|kuga|territory|macan|cayenne|xc|ex|ec|2008|3008|5008|mokka|grandland|stelvio|f-pace|evoque|velar|countryman|bentayga|cullinan|eletre|grecale/i.test(text)) return "suv";
-  if (/mpv|van|cargo|truck|caravelle|carnival|staria|alphard|sienna|granvia|hiace|v-class|berlingo|rifter|caddy|tourneo|town ace|j space|veryca|delica|multivan|california|crafter|zinger/i.test(text)) return "mpv";
+  if (/suv|crossover|range rover|defender|wrangler|grenadier|urus|dbx|purosangue|sportage|rav4|x-trail|xforce|forester|outback|vitara|jimny|cx-|tucson|santa fe|kuga|territory|macan|cayenne|gls|xc|ex|ec|2008|3008|5008|mokka|grandland|stelvio|f-pace|evoque|velar|countryman|bentayga|cullinan|eletre|grecale/i.test(text)) return "suv";
+  if (/mpv|\bvan\b|mini-?van|cargo|truck|商用車|廂型|caravelle|carnival|staria|alphard|sienna|granvia|hiace|v-class|berlingo|rifter|caddy|tourneo|town ace|j space|veryca|delica|multivan|california|crafter|zinger/i.test(text)) return "mpv";
   if (/wagon|variant|avant|touring|shooting brake|combi|sportback|hatch|swift|ignis|mazda3 5d|fit|picanto|ceed|focus|polo|golf|fabia|scala|v60|corsa|astra|mg4|cooper|aceman/i.test(text)) return "hatch";
-  if (/coupe|coup|cabrio|convertible|spider|roadster|targa|gt|artura|vantage|mc20|emira|roma|revuelto|temerario|supra|gr86|brz|mx-5|mustang|911|taycan|panamera|lc|z4|m2|m4|amg|vantage|db12|vanquish|750s|12cilindri/i.test(text)) return "sports";
+  if (/coupe|coup|cabrio|convertible|spider|roadster|targa|gt|artura|vantage|mc20|emira|roma|revuelto|temerario|supra|gr86|brz|mx-5|mustang|911|taycan|panamera|lc|z4|m2|m4|vantage|db12|vanquish|750s|12cilindri/i.test(text)) return "sports";
   if (/sedan|saloon|class|series|altis|camry|crown|civic|sentra|lancer|wrx|mazda3|model 3|octavia|superb|a3|a5|a6|a8|3 series|5 series|7 series|cla|is|es|ls|giulia|ghost|phantom|flying spur|emeya/i.test(text)) return "sedan";
 
   return "suv";
@@ -119,19 +119,21 @@ function bodyFromSource(model, segment) {
 
 function powerFromSource(model, segment, labels, cc) {
   const text = `${model} ${segment} ${labels} ${cc}`.toLowerCase();
-  const electricPattern = /electric|ev\b|e-tron|eq[a-z]|ioniq|model [s3xy]|taycan|bz4x|urban cruiser|id\.|ix\d?|i[457]\b|ex\d|ec40|rz|solterra|leaf|ariya|mg4|folgore|elettrica|spectre|macan electric|aceman/;
-  const hybridPattern = /hybrid|phev|e:hev|p350|ibrida|mhev|plug-in|temerario|revuelto|urus se|296|prius|油電|油電混合|混合動力|插電式|插電混合/;
+  const electricPattern = /\belectric\b|\bev\b|\be-tron\b|\beq[a-z0-9-]*\b|\bioniq\b|\bmodel [s3xy]\b|\btaycan\b|\bbz4x\b|\burban cruiser\b|\bid\.\d+\b|\bix\d?\b|\bi[457]\b|\bex\d{1,2}\b|\bec40\b|\brz\b|\bsolterra\b|\bleaf\b|\bariya\b|\bmg4\b|\bfolgore\b|\belettrica\b|\bspectre\b|\bmacan electric\b|\baceman\b/;
+  const hybridPattern = /hybrid|phev|e:hev|p350|ibrida|mhev|plug-in|temerario|revuelto|urus se|296|prius|eq boost|油電|油電混合|混合動力|插電式|插電混合/;
   const hybridAvailabilityPattern = /corolla cross|corolla altis|rav4|camry|crown|prius|yaris cross|sienta|alphard|sienna|tucson l|santa fe|sportage|sorento|carnival|cr-v|hr-v|zrv|outlander|forester|crosstrek|nx|rx|ux|es|lbx/i;
   const dieselPattern = /diesel|tdi|bluehdi|d4|d5/;
 
-  if (electricPattern.test(text)) return "electric";
   if (hybridPattern.test(text) || hybridAvailabilityPattern.test(`${model} ${segment}`.toLowerCase())) return "hybrid";
+  if (electricPattern.test(text)) return "electric";
   if (dieselPattern.test(text)) return "diesel";
   return "gas";
 }
 
 function seatsFromSource(model, body, segment) {
   const text = `${model} ${segment}`.toLowerCase();
+  if (/a380 winmax|商用車|cargo|truck|veryca|crafter/.test(text)) return 2;
+  if (/maybach gls/.test(text)) return 5;
   if (/7-seater|allspace|alphard|sienna|granvia|hiace|v-class|carnival|sorento|ev9|glb|gls|x7|lx|gx|kodiaq|defender 110|defender 130|discovery|land cruiser|ex90|xc90|5008|rifter|berlingo|staria|caravelle|multivan|tourneo|caddy|delica/i.test(text)) return 7;
   if (body === "mpv") return 7;
   if (/roadster|spider|mx-5|z4|mc20|emira|vantage|artura|750s|gts|vanquish|12cilindri/i.test(text)) return 2;
@@ -289,10 +291,10 @@ function mergeCars(currentCars, fetchedCars, { pruneMissing }) {
     merged.push(normalizeCarShape({
       ...(existing || {}),
       ...fetched,
-      tagline: existing?.tagline || fetched.tagline,
-      note: existing?.note || fetched.note,
+      tagline: fetched.tagline,
+      note: fetched.note,
       colors: existing?.colors || fetched.colors,
-      priorities: existing?.priorities || fetched.priorities,
+      priorities: fetched.priorities,
       source: "ucar"
     }));
     seen.add(key);

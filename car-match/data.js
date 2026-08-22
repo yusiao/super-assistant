@@ -93,8 +93,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Giulia: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7006.jpg",
     "url": "https://newcar.u-car.com.tw/alfa%20romeo/giulia/7006/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/alfa%20romeo/giulia/7006/overall",
@@ -121,8 +121,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Stelvio: synced from Taiwan new-car catalog.",
+    "note": "豪華級距SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7007.jpg",
     "url": "https://newcar.u-car.com.tw/alfa%20romeo/stelvio/7007/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/alfa%20romeo/stelvio/7007/overall",
@@ -134,9 +134,9 @@
     "variant": "U-CAR new-car catalog",
     "price": 1198,
     "priceLabel": "1198 TWD 10k",
-    "body": "mpv",
+    "body": "sports",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "driving",
       "design",
@@ -149,8 +149,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Vantage: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7075.jpg",
     "url": "https://newcar.u-car.com.tw/aston%20martin/vantage/7075/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/aston%20martin/vantage/7075/overall",
@@ -162,13 +162,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 1288,
     "priceLabel": "1288 TWD 10k",
-    "body": "mpv",
+    "body": "sports",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
-      "space",
-      "comfort",
-      "value"
+      "driving",
+      "design",
+      "tech"
     ],
     "colors": [
       "white",
@@ -205,8 +205,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "DB12: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7092.jpg",
     "url": "https://newcar.u-car.com.tw/aston%20martin/db12/7092/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/aston%20martin/db12/7092/overall",
@@ -246,9 +246,9 @@
     "variant": "U-CAR new-car catalog",
     "price": 2358,
     "priceLabel": "2358 TWD 10k",
-    "body": "mpv",
+    "body": "sports",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "driving",
       "design",
@@ -261,8 +261,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Vanquish: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7095.jpg",
     "url": "https://newcar.u-car.com.tw/aston%20martin/vanquish/7095/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/aston%20martin/vanquish/7095/overall",
@@ -274,13 +274,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 2558,
     "priceLabel": "2558 TWD 10k",
-    "body": "mpv",
+    "body": "sports",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
-      "space",
-      "comfort",
-      "value"
+      "driving",
+      "design",
+      "tech"
     ],
     "colors": [
       "white",
@@ -362,9 +362,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -373,8 +373,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "A3 Sportback: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7047.jpg",
     "url": "https://newcar.u-car.com.tw/audi/a3%20sportback/7047/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/a3%20sportback/7047/overall",
@@ -401,8 +401,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q3: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7185.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q3/7185/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q3/7185/overall",
@@ -457,8 +457,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q4 e-tron: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6914.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q4%20e-tron/6914/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q4%20e-tron/6914/overall",
@@ -499,7 +499,7 @@
     "price": 227,
     "priceLabel": "227-367.1 TWD 10k",
     "body": "sedan",
-    "power": "electric",
+    "power": "gas",
     "seats": 5,
     "priorities": [
       "comfort",
@@ -513,8 +513,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "A5: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7242.jpg",
     "url": "https://newcar.u-car.com.tw/audi/a5/7242/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/a5/7242/overall",
@@ -526,12 +526,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 227,
     "priceLabel": "227-367.1 TWD 10k",
-    "body": "mpv",
-    "power": "electric",
-    "seats": 7,
+    "body": "hatch",
+    "power": "gas",
+    "seats": 5,
     "priorities": [
-      "space",
-      "comfort",
+      "city",
+      "design",
       "value"
     ],
     "colors": [
@@ -555,10 +555,10 @@
     "price": 240,
     "priceLabel": "240-341.5 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -569,8 +569,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q5: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7249.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q5/7249/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q5/7249/overall",
@@ -583,12 +583,12 @@
     "price": 251,
     "priceLabel": "251-352.5 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -625,8 +625,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q6 e-tron: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7247.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q6%20e-tron/7247/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q6%20e-tron/7247/overall",
@@ -638,13 +638,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 280,
     "priceLabel": "280-480 TWD 10k",
-    "body": "mpv",
+    "body": "hatch",
     "power": "electric",
-    "seats": 7,
+    "seats": 5,
     "priorities": [
-      "space",
-      "comfort",
-      "value"
+      "tech",
+      "economy",
+      "comfort"
     ],
     "colors": [
       "white",
@@ -723,12 +723,12 @@
     "price": 288,
     "priceLabel": "288-346 TWD 10k",
     "body": "sedan",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -737,8 +737,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "A6: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7020.jpg",
     "url": "https://newcar.u-car.com.tw/audi/a6/7020/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/a6/7020/overall",
@@ -750,13 +750,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 298,
     "priceLabel": "298-356 TWD 10k",
-    "body": "mpv",
+    "body": "hatch",
     "power": "hybrid",
-    "seats": 7,
+    "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
-      "value"
+      "tech"
     ],
     "colors": [
       "white",
@@ -793,8 +793,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q7: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7055.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q7/7055/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q7/7055/overall",
@@ -950,7 +950,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -961,8 +961,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Q8: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7056.jpg",
     "url": "https://newcar.u-car.com.tw/audi/q8/7056/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/q8/7056/overall",
@@ -975,7 +975,7 @@
     "price": 462,
     "priceLabel": "462-593 TWD 10k",
     "body": "sedan",
-    "power": "electric",
+    "power": "gas",
     "seats": 5,
     "priorities": [
       "comfort",
@@ -989,8 +989,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "A8: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7246.jpg",
     "url": "https://newcar.u-car.com.tw/audi/a8/7246/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/a8/7246/overall",
@@ -1017,8 +1017,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "RS Q8: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7112.jpg",
     "url": "https://newcar.u-car.com.tw/audi/rs%20q8/7112/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/audi/rs%20q8/7112/overall",
@@ -1045,8 +1045,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Bentayga: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7067.jpg",
     "url": "https://newcar.u-car.com.tw/bentley/bentayga/7067/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bentley/bentayga/7067/overall",
@@ -1073,8 +1073,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Flying Spur: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7066.jpg",
     "url": "https://newcar.u-car.com.tw/bentley/flying%20spur/7066/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bentley/flying%20spur/7066/overall",
@@ -1129,8 +1129,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Continental GT: synced from Taiwan new-car catalog.",
+    "note": "豪華級距轎跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7064.jpg",
     "url": "https://newcar.u-car.com.tw/bentley/continental%20gt/7064/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bentley/continental%20gt/7064/overall",
@@ -1157,8 +1157,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Continental GTC: synced from Taiwan new-car catalog.",
+    "note": "豪華級距敞篷車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7065.jpg",
     "url": "https://newcar.u-car.com.tw/bentley/continental%20gtc/7065/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bentley/continental%20gtc/7065/overall",
@@ -1174,9 +1174,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -1185,8 +1185,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "1 Series: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6976.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/1%20series/6976/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/1%20series/6976/overall",
@@ -1202,9 +1202,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -1213,8 +1213,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "2 Series Active Tourer: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6630.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/2%20series%20active%20tourer/6630/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/2%20series%20active%20tourer/6630/overall",
@@ -1258,9 +1258,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -1286,7 +1286,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -1297,8 +1297,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X1: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7049.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x1/7049/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x1/7049/overall",
@@ -1325,8 +1325,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "iX1: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7256.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/ix1/7256/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/ix1/7256/overall",
@@ -1353,8 +1353,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "2 Series Coupé: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6846.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/6846/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/6846/overall",
@@ -1370,9 +1370,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -1381,8 +1381,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "3 Series: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6816.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/3%20series/6816/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/3%20series/6816/overall",
@@ -1409,8 +1409,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X2: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7060.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x2/7060/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x2/7060/overall",
@@ -1454,7 +1454,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -1465,8 +1465,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X3: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7115.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x3/7115/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x3/7115/overall",
@@ -1549,8 +1549,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "i4: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7059.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/i4/7059/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/i4/7059/overall",
@@ -1605,8 +1605,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "5 Series: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7073.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/5%20series/7073/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/5%20series/7073/overall",
@@ -1622,9 +1622,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -1661,8 +1661,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "i5: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6967.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/i5/6967/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/i5/6967/overall",
@@ -1689,8 +1689,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "iX: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6960.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/ix/6960/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/ix/6960/overall",
@@ -1734,7 +1734,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -1745,8 +1745,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X5: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7170.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x5/7170/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x5/7170/overall",
@@ -1801,8 +1801,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Z4: synced from Taiwan new-car catalog.",
+    "note": "敞蓬車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7078.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/z4/7078/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/z4/7078/overall",
@@ -1829,8 +1829,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "M2: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6850.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/m2/6850/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/m2/6850/overall",
@@ -1846,7 +1846,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -1857,8 +1857,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X6: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7171.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x6/7171/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x6/7171/overall",
@@ -1874,9 +1874,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -1885,8 +1885,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "7 Series: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6498.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/7%20series/6498/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/7%20series/6498/overall",
@@ -1913,8 +1913,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "X7: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6493.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/x7/6493/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/x7/6493/overall",
@@ -1941,8 +1941,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "i7: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6645.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/i7/6645/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/i7/6645/overall",
@@ -1958,9 +1958,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
+      "space",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -1969,8 +1969,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "M3: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6735.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/m3/6735/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/m3/6735/overall",
@@ -2098,7 +2098,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -2126,9 +2126,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -2151,7 +2151,7 @@
     "price": 889,
     "priceLabel": "889 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
       "economy",
@@ -2165,8 +2165,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "XM: synced from Taiwan new-car catalog.",
+    "note": "豪華級距SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6395.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/xm/6395/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/xm/6395/overall",
@@ -2180,7 +2180,7 @@
     "priceLabel": "118.8 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -2221,8 +2221,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Berlingo短軸: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6787.jpg",
     "url": "https://newcar.u-car.com.tw/citro%C3%ABn/berlingo%E7%9F%AD%E8%BB%B8/6787/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/citro%C3%ABn/berlingo%E7%9F%AD%E8%BB%B8/6787/overall",
@@ -2238,7 +2238,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -2249,8 +2249,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "C5 Aircross: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7187.jpg",
     "url": "https://newcar.u-car.com.tw/citro%C3%ABn/c5%20aircross/7187/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/citro%C3%ABn/c5%20aircross/7187/overall",
@@ -2264,7 +2264,7 @@
     "priceLabel": "48.1-56.2 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -2292,7 +2292,7 @@
     "priceLabel": "55.3-74.8 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -2305,8 +2305,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "J Space廂型車: synced from Taiwan new-car catalog.",
+    "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7208.jpg",
     "url": "https://newcar.u-car.com.tw/cmc/j%20space%E5%BB%82%E5%9E%8B%E8%BB%8A/7208/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/cmc/j%20space%E5%BB%82%E5%9E%8B%E8%BB%8A/7208/overall",
@@ -2324,7 +2324,7 @@
     "priorities": [
       "space",
       "comfort",
-      "tech"
+      "value"
     ],
     "colors": [
       "white",
@@ -2333,8 +2333,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Zinger Pick Up: synced from Taiwan new-car catalog.",
+    "note": "Pickup; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6821.jpg",
     "url": "https://newcar.u-car.com.tw/cmc/zinger%20pick%20up/6821/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/cmc/zinger%20pick%20up/6821/overall",
@@ -2352,7 +2352,7 @@
     "priorities": [
       "space",
       "comfort",
-      "value"
+      "tech"
     ],
     "colors": [
       "white",
@@ -2361,8 +2361,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Zinger: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7168.jpg",
     "url": "https://newcar.u-car.com.tw/cmc/zinger/7168/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/cmc/zinger/7168/overall",
@@ -2374,13 +2374,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 74.9,
     "priceLabel": "74.9-77 TWD 10k",
-    "body": "suv",
+    "body": "mpv",
     "power": "hybrid",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
-      "economy",
+      "space",
       "comfort",
-      "tech"
+      "value"
     ],
     "colors": [
       "white",
@@ -2458,13 +2458,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 49.8,
     "priceLabel": "49.8 TWD 10k",
-    "body": "suv",
+    "body": "mpv",
     "power": "gas",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
-      "tech"
+      "value"
     ],
     "colors": [
       "white",
@@ -2486,13 +2486,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 65.8,
     "priceLabel": "65.8 TWD 10k",
-    "body": "sedan",
+    "body": "mpv",
     "power": "gas",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
+      "space",
       "comfort",
-      "driving",
-      "design"
+      "value"
     ],
     "colors": [
       "white",
@@ -2585,8 +2585,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "296 GTB: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6218.jpg",
     "url": "https://newcar.u-car.com.tw/ferrari/296%20gtb/6218/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ferrari/296%20gtb/6218/overall",
@@ -2613,8 +2613,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "296 GTS: synced from Taiwan new-car catalog.",
+    "note": "豪華級距敞篷車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6299.jpg",
     "url": "https://newcar.u-car.com.tw/ferrari/296%20gts/6299/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ferrari/296%20gts/6299/overall",
@@ -2641,8 +2641,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Purosangue: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6356.jpg",
     "url": "https://newcar.u-car.com.tw/ferrari/purosangue/6356/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ferrari/purosangue/6356/overall",
@@ -2697,8 +2697,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "12Cilindri: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6761.jpg",
     "url": "https://newcar.u-car.com.tw/ferrari/12cilindri/6761/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ferrari/12cilindri/6761/overall",
@@ -2753,8 +2753,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "12Cilindri Spider: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7090.jpg",
     "url": "https://newcar.u-car.com.tw/ferrari/12cilindri%20spider/7090/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ferrari/12cilindri%20spider/7090/overall",
@@ -2770,9 +2770,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -2798,7 +2798,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -2828,7 +2828,7 @@
     "priorities": [
       "space",
       "comfort",
-      "value"
+      "tech"
     ],
     "colors": [
       "white",
@@ -2837,8 +2837,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Tourneo Connect: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6869.jpg",
     "url": "https://newcar.u-car.com.tw/ford/tourneo%20connect/6869/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ford/tourneo%20connect/6869/overall",
@@ -2865,8 +2865,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Tourneo Custom: synced from Taiwan new-car catalog.",
+    "note": "其他級距進口MPV廂式休旅車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6928.jpg",
     "url": "https://newcar.u-car.com.tw/ford/tourneo%20custom/6928/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ford/tourneo%20custom/6928/overall",
@@ -2893,8 +2893,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Ranger: synced from Taiwan new-car catalog.",
+    "note": "Pickup; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6925.jpg",
     "url": "https://newcar.u-car.com.tw/ford/ranger/6925/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ford/ranger/6925/overall",
@@ -2921,8 +2921,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mustang: synced from Taiwan new-car catalog.",
+    "note": "性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7232.jpg",
     "url": "https://newcar.u-car.com.tw/ford/mustang/7232/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/ford/mustang/7232/overall",
@@ -2991,12 +2991,12 @@
     "price": 75.9,
     "priceLabel": "75.9-82.9 TWD 10k",
     "body": "hatch",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3005,8 +3005,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Fit: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6307.jpg",
     "url": "https://newcar.u-car.com.tw/honda/fit/6307/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/honda/fit/6307/overall",
@@ -3019,10 +3019,10 @@
     "price": 79.9,
     "priceLabel": "79.9-98.5 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3033,8 +3033,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "HR-V: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6946.jpg",
     "url": "https://newcar.u-car.com.tw/honda/hr-v/6946/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/honda/hr-v/6946/overall",
@@ -3047,12 +3047,12 @@
     "price": 99.9,
     "priceLabel": "99.9-129.9 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3103,11 +3103,11 @@
     "price": 174.9,
     "priceLabel": "174.9-176.9 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -3117,8 +3117,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Prelude: synced from Taiwan new-car catalog.",
+    "note": "跑車/跑房車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7269.jpg",
     "url": "https://newcar.u-car.com.tw/honda/prelude/7269/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/honda/prelude/7269/overall",
@@ -3145,8 +3145,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Venue: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6662.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/venue/6662/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/venue/6662/overall",
@@ -3158,13 +3158,13 @@
     "variant": "U-CAR new-car catalog",
     "price": 74.8,
     "priceLabel": "74.8-95.8 TWD 10k",
-    "body": "suv",
+    "body": "mpv",
     "power": "gas",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
-      "tech"
+      "value"
     ],
     "colors": [
       "white",
@@ -3201,8 +3201,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mufasa: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7091.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/mufasa/7091/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/mufasa/7091/overall",
@@ -3218,9 +3218,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3229,8 +3229,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Inster: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7048.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/inster/7048/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/inster/7048/overall",
@@ -3246,7 +3246,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3257,8 +3257,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Tucson L: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7206.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/tucson%20l/7206/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/tucson%20l/7206/overall",
@@ -3272,7 +3272,7 @@
     "priceLabel": "126.8-159.4 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -3313,8 +3313,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Custin: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7236.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/custin/7236/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/custin/7236/overall",
@@ -3369,8 +3369,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Ioniq 5: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6917.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/ioniq%205/6917/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/ioniq%205/6917/overall",
@@ -3397,8 +3397,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Santa Fe: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7181.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7181/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7181/overall",
@@ -3453,8 +3453,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Ioniq 5 N: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6834.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/ioniq%205%20n/6834/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/ioniq%205%20n/6834/overall",
@@ -3610,7 +3610,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3649,8 +3649,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "F-Pace: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6251.jpg",
     "url": "https://newcar.u-car.com.tw/jaguar/f-pace/6251/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/jaguar/f-pace/6251/overall",
@@ -3733,8 +3733,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Picanto: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6893.jpg",
     "url": "https://newcar.u-car.com.tw/kia/picanto/6893/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/picanto/6893/overall",
@@ -3746,9 +3746,9 @@
     "variant": "U-CAR new-car catalog",
     "price": 76.8,
     "priceLabel": "76.8-102.8 TWD 10k",
-    "body": "suv",
+    "body": "mpv",
     "power": "gas",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -3761,8 +3761,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "K2500: synced from Taiwan new-car catalog.",
+    "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6684.jpg",
     "url": "https://newcar.u-car.com.tw/kia/k2500/6684/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/k2500/6684/overall",
@@ -3778,7 +3778,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3789,8 +3789,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Stonic: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7142.jpg",
     "url": "https://newcar.u-car.com.tw/kia/stonic/7142/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/stonic/7142/overall",
@@ -3806,9 +3806,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3817,8 +3817,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Ceed Sportswagon: synced from Taiwan new-car catalog.",
+    "note": "其他級距進口旅行車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7037.jpg",
     "url": "https://newcar.u-car.com.tw/kia/ceed%20sportswagon/7037/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/ceed%20sportswagon/7037/overall",
@@ -3834,7 +3834,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3845,8 +3845,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Sportage: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7184.jpg",
     "url": "https://newcar.u-car.com.tw/kia/sportage/7184/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/sportage/7184/overall",
@@ -3862,9 +3862,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3873,8 +3873,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EV6: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6933.jpg",
     "url": "https://newcar.u-car.com.tw/kia/ev6/6933/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/ev6/6933/overall",
@@ -3901,8 +3901,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Carnival: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7015.jpg",
     "url": "https://newcar.u-car.com.tw/kia/carnival/7015/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/carnival/7015/overall",
@@ -3929,8 +3929,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Sorento: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7207.jpg",
     "url": "https://newcar.u-car.com.tw/kia/sorento/7207/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/sorento/7207/overall",
@@ -3946,9 +3946,9 @@
     "power": "gas",
     "seats": 7,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -3957,8 +3957,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EV9: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6670.jpg",
     "url": "https://newcar.u-car.com.tw/kia/ev9/6670/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/kia/ev9/6670/overall",
@@ -3974,7 +3974,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -3999,7 +3999,7 @@
     "price": 1798,
     "priceLabel": "1798 TWD 10k",
     "body": "sports",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 4,
     "priorities": [
       "driving",
@@ -4013,8 +4013,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Temerario: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6837.jpg",
     "url": "https://newcar.u-car.com.tw/lamborghini/temerario/6837/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lamborghini/temerario/6837/overall",
@@ -4041,8 +4041,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Revuelto: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6393.jpg",
     "url": "https://newcar.u-car.com.tw/lamborghini/revuelto/6393/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lamborghini/revuelto/6393/overall",
@@ -4058,7 +4058,7 @@
     "power": "gas",
     "seats": 7,
     "priorities": [
-      "economy",
+      "space",
       "comfort",
       "tech"
     ],
@@ -4069,8 +4069,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Discovery Sport: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7229.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/discovery%20sport/7229/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/discovery%20sport/7229/overall",
@@ -4097,8 +4097,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Range Rover Evoque: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7215.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20evoque/7215/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20evoque/7215/overall",
@@ -4125,8 +4125,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Defender 90: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7111.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/defender%2090/7111/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/defender%2090/7111/overall",
@@ -4153,8 +4153,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Defender 110: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7110.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/defender%20110/7110/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/defender%20110/7110/overall",
@@ -4181,8 +4181,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Range Rover Velar: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7216.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20velar/7216/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20velar/7216/overall",
@@ -4195,10 +4195,10 @@
     "price": 367,
     "priceLabel": "367-403 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -4209,8 +4209,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Discovery: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7180.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/discovery/7180/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/discovery/7180/overall",
@@ -4237,8 +4237,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Range Rover Sport: synced from Taiwan new-car catalog.",
+    "note": "豪華級距SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7134.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20sport/7134/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/range%20rover%20sport/7134/overall",
@@ -4265,8 +4265,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Range Rover: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7135.jpg",
     "url": "https://newcar.u-car.com.tw/land%20rover/range%20rover/7135/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/land%20rover/range%20rover/7135/overall",
@@ -4282,7 +4282,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -4293,8 +4293,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "LBX: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6982.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/lbx/6982/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/lbx/6982/overall",
@@ -4321,8 +4321,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "UX: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7128.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/ux/7128/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/ux/7128/overall",
@@ -4335,7 +4335,7 @@
     "price": 171,
     "priceLabel": "171-284.5 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
       "economy",
@@ -4349,8 +4349,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "NX: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6984.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/nx/6984/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/nx/6984/overall",
@@ -4377,8 +4377,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "ES: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7178.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/es/7178/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/es/7178/overall",
@@ -4394,9 +4394,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -4405,8 +4405,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "IS: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7084.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/is/7084/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/is/7084/overall",
@@ -4419,12 +4419,12 @@
     "price": 205,
     "priceLabel": "205-250 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -4461,8 +4461,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "RZ: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7071.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/rz/7071/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/rz/7071/overall",
@@ -4489,8 +4489,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "RX: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6764.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/rx/6764/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/rx/6764/overall",
@@ -4517,8 +4517,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "LM: synced from Taiwan new-car catalog.",
+    "note": "豪華級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6983.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/lm/6983/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/lm/6983/overall",
@@ -4545,8 +4545,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "LS: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6313.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/ls/6313/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/ls/6313/overall",
@@ -4573,8 +4573,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "LC: synced from Taiwan new-car catalog.",
+    "note": "豪華級距轎跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6391.jpg",
     "url": "https://newcar.u-car.com.tw/lexus/lc/6391/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lexus/lc/6391/overall",
@@ -4629,8 +4629,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Emira: synced from Taiwan new-car catalog.",
+    "note": "跑車/跑房車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7088.jpg",
     "url": "https://newcar.u-car.com.tw/lotus/emira/7088/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/lotus/emira/7088/overall",
@@ -4674,7 +4674,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -4702,9 +4702,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -4713,8 +4713,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "n⁷: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6734.jpg",
     "url": "https://newcar.u-car.com.tw/luxgen/n%E2%81%B7/6734/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/luxgen/n%E2%81%B7/6734/overall",
@@ -4797,8 +4797,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Grecale: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6938.jpg",
     "url": "https://newcar.u-car.com.tw/maserati/grecale/6938/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/maserati/grecale/6938/overall",
@@ -4842,9 +4842,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
+      "comfort",
       "driving",
-      "design",
-      "tech"
+      "design"
     ],
     "colors": [
       "white",
@@ -4853,8 +4853,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GranTurismo: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6458.jpg",
     "url": "https://newcar.u-car.com.tw/maserati/granturismo/6458/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/maserati/granturismo/6458/overall",
@@ -4881,8 +4881,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GranCabrio: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6730.jpg",
     "url": "https://newcar.u-car.com.tw/maserati/grancabrio/6730/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/maserati/grancabrio/6730/overall",
@@ -4965,8 +4965,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "MC20: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6217.jpg",
     "url": "https://newcar.u-car.com.tw/maserati/mc20/6217/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/maserati/mc20/6217/overall",
@@ -5049,8 +5049,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CX-3: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7021.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/cx-3/7021/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-3/7021/overall",
@@ -5077,8 +5077,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mazda3 四門: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7126.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7126/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7126/overall",
@@ -5105,8 +5105,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CX-30: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7124.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/cx-30/7124/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-30/7124/overall",
@@ -5133,8 +5133,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CX-5: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7264.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/cx-5/7264/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-5/7264/overall",
@@ -5161,8 +5161,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CX-60: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6959.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/cx-60/6959/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-60/6959/overall",
@@ -5217,8 +5217,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "MX-5 RF: synced from Taiwan new-car catalog.",
+    "note": "敞蓬車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7114.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/mx-5%20rf/7114/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/mx-5%20rf/7114/overall",
@@ -5234,7 +5234,7 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "economy",
+      "space",
       "comfort",
       "tech"
     ],
@@ -5245,8 +5245,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CX-90: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6833.jpg",
     "url": "https://newcar.u-car.com.tw/mazda/cx-90/6833/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-90/6833/overall",
@@ -5273,8 +5273,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GTS: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超級跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7000.jpg",
     "url": "https://newcar.u-car.com.tw/mclaren/gts/7000/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mclaren/gts/7000/overall",
@@ -5329,8 +5329,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Artura Spider: synced from Taiwan new-car catalog.",
+    "note": "豪華級距敞篷車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6999.jpg",
     "url": "https://newcar.u-car.com.tw/mclaren/artura%20spider/6999/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mclaren/artura%20spider/6999/overall",
@@ -5402,9 +5402,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "comfort",
+      "driving",
+      "design"
     ],
     "colors": [
       "white",
@@ -5413,8 +5413,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "A-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7188.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/a-class/7188/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/a-class/7188/overall",
@@ -5430,9 +5430,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "comfort",
+      "driving",
+      "design"
     ],
     "colors": [
       "white",
@@ -5441,8 +5441,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "B-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6939.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/b-class/6939/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/b-class/6939/overall",
@@ -5483,12 +5483,12 @@
     "price": 187,
     "priceLabel": "187-220 TWD 10k",
     "body": "suv",
-    "power": "gas",
+    "power": "electric",
     "seats": 5,
     "priorities": [
-      "space",
-      "comfort",
-      "tech"
+      "tech",
+      "economy",
+      "comfort"
     ],
     "colors": [
       "white",
@@ -5514,7 +5514,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -5525,8 +5525,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GLA: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7191.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/gla/7191/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/gla/7191/overall",
@@ -5542,9 +5542,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -5553,8 +5553,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CLA: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7144.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/cla/7144/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/cla/7144/overall",
@@ -5567,12 +5567,12 @@
     "price": 194,
     "priceLabel": "194-227 TWD 10k",
     "body": "suv",
-    "power": "gas",
+    "power": "electric",
     "seats": 5,
     "priorities": [
-      "space",
-      "comfort",
-      "tech"
+      "tech",
+      "economy",
+      "comfort"
     ],
     "colors": [
       "white",
@@ -5665,8 +5665,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "V-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7253.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/v-class/7253/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/v-class/7253/overall",
@@ -5682,7 +5682,7 @@
     "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -5693,8 +5693,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GLB: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7258.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/glb/7258/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glb/7258/overall",
@@ -5721,8 +5721,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQA: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6944.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqa/6944/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqa/6944/overall",
@@ -5749,8 +5749,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQB: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6945.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqb/6945/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqb/6945/overall",
@@ -5763,12 +5763,12 @@
     "price": 225,
     "priceLabel": "225-305 TWD 10k",
     "body": "sedan",
-    "power": "gas",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -5777,8 +5777,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "C-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7151.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/c-class/7151/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/c-class/7151/overall",
@@ -5790,12 +5790,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 243,
     "priceLabel": "243-349 TWD 10k",
-    "body": "sports",
+    "body": "sedan",
     "power": "hybrid",
-    "seats": 4,
+    "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -5822,9 +5822,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -5861,8 +5861,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GLC: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7155.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/glc/7155/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc/7155/overall",
@@ -5878,7 +5878,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -5917,8 +5917,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "CLE Coupé: synced from Taiwan new-car catalog.",
+    "note": "豪華級距轎跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7163.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/cle%20coup%C3%A9/7163/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/cle%20coup%C3%A9/7163/overall",
@@ -5934,7 +5934,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -5973,8 +5973,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQE SUV: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7231.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqe%20suv/7231/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqe%20suv/7231/overall",
@@ -5990,9 +5990,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -6001,8 +6001,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "E-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7172.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/e-class/7172/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/e-class/7172/overall",
@@ -6018,7 +6018,7 @@
     "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6074,9 +6074,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -6113,8 +6113,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQE: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7230.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqe/7230/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqe/7230/overall",
@@ -6127,10 +6127,10 @@
     "price": 343,
     "priceLabel": "343-415 TWD 10k",
     "body": "suv",
-    "power": "gas",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6141,8 +6141,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GLE: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7237.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/gle/7237/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/gle/7237/overall",
@@ -6182,12 +6182,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 391,
     "priceLabel": "391 TWD 10k",
-    "body": "sports",
-    "power": "electric",
-    "seats": 4,
+    "body": "sedan",
+    "power": "hybrid",
+    "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -6214,7 +6214,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6238,12 +6238,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 405,
     "priceLabel": "405 TWD 10k",
-    "body": "sports",
+    "body": "sedan",
     "power": "hybrid",
-    "seats": 4,
+    "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -6267,12 +6267,12 @@
     "price": 414,
     "priceLabel": "414-624 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -6326,7 +6326,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6382,7 +6382,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6406,12 +6406,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 492,
     "priceLabel": "492 TWD 10k",
-    "body": "sports",
-    "power": "electric",
-    "seats": 4,
+    "body": "sedan",
+    "power": "hybrid",
+    "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -6449,8 +6449,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "S-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7218.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/s-class/7218/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/s-class/7218/overall",
@@ -6466,7 +6466,7 @@
     "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6477,8 +6477,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GLS: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6479.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/gls/6479/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/gls/6479/overall",
@@ -6533,8 +6533,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQS: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6627.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqs/6627/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqs/6627/overall",
@@ -6561,8 +6561,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EQS SUV: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6628.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/eqs%20suv/6628/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/eqs%20suv/6628/overall",
@@ -6589,8 +6589,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mercedes-AMG GT: synced from Taiwan new-car catalog.",
+    "note": "豪華級距轎跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7252.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20gt/7252/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20gt/7252/overall",
@@ -6602,12 +6602,12 @@
     "variant": "U-CAR new-car catalog",
     "price": 677,
     "priceLabel": "677 TWD 10k",
-    "body": "sports",
+    "body": "sedan",
     "power": "hybrid",
-    "seats": 4,
+    "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "economy",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -6617,8 +6617,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mercedes-AMG SL: synced from Taiwan new-car catalog.",
+    "note": "豪華級距敞篷車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7251.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20sl/7251/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20sl/7251/overall",
@@ -6634,7 +6634,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6645,8 +6645,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "G-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7161.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/g-class/7161/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/g-class/7161/overall",
@@ -6687,12 +6687,12 @@
     "price": 970,
     "priceLabel": "970 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -6718,7 +6718,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6742,11 +6742,11 @@
     "variant": "U-CAR new-car catalog",
     "price": 1147,
     "priceLabel": "1147 TWD 10k",
-    "body": "sedan",
+    "body": "suv",
     "power": "hybrid",
-    "seats": 7,
+    "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6757,8 +6757,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mercedes-Maybach GLS: synced from Taiwan new-car catalog.",
+    "note": "豪華級距超豪華車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6480.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20gls/6480/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20gls/6480/overall",
@@ -6774,9 +6774,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -6785,8 +6785,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mercedes-Maybach S-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7160.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7160/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7160/overall",
@@ -6802,9 +6802,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -6841,8 +6841,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "ZS: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7265.jpg",
     "url": "https://newcar.u-car.com.tw/mg/zs/7265/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mg/zs/7265/overall",
@@ -6855,10 +6855,10 @@
     "price": 93.9,
     "priceLabel": "93.9-124.9 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -6869,8 +6869,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "HS: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6829.jpg",
     "url": "https://newcar.u-car.com.tw/mg/hs/6829/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mg/hs/6829/overall",
@@ -6897,8 +6897,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "MG4: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6668.jpg",
     "url": "https://newcar.u-car.com.tw/mg/mg4/6668/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mg/mg4/6668/overall",
@@ -7009,8 +7009,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Countryman: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6613.jpg",
     "url": "https://newcar.u-car.com.tw/mini/countryman/6613/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mini/countryman/6613/overall",
@@ -7037,8 +7037,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Countryman Electric: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7070.jpg",
     "url": "https://newcar.u-car.com.tw/mini/countryman%20electric/7070/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mini/countryman%20electric/7070/overall",
@@ -7082,9 +7082,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -7093,8 +7093,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Colt Plus: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6768.jpg",
     "url": "https://newcar.u-car.com.tw/mitsubishi/colt%20plus/6768/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/colt%20plus/6768/overall",
@@ -7149,8 +7149,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "XForce: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7082.jpg",
     "url": "https://newcar.u-car.com.tw/mitsubishi/xforce/7082/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/xforce/7082/overall",
@@ -7166,7 +7166,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -7177,8 +7177,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Outlander: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6825.jpg",
     "url": "https://newcar.u-car.com.tw/mitsubishi/outlander/6825/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/outlander/6825/overall",
@@ -7191,12 +7191,12 @@
     "price": 618,
     "priceLabel": "618-663 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "gas",
     "seats": 5,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -7233,8 +7233,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Kicks: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7263.jpg",
     "url": "https://newcar.u-car.com.tw/nissan/kicks/7263/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/nissan/kicks/7263/overall",
@@ -7261,8 +7261,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Sentra: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7137.jpg",
     "url": "https://newcar.u-car.com.tw/nissan/sentra/7137/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/nissan/sentra/7137/overall",
@@ -7278,7 +7278,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -7317,8 +7317,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Ariya: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6692.jpg",
     "url": "https://newcar.u-car.com.tw/nissan/ariya/6692/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/nissan/ariya/6692/overall",
@@ -7345,8 +7345,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mokka: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6293.jpg",
     "url": "https://newcar.u-car.com.tw/opel/mokka/6293/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/opel/mokka/6293/overall",
@@ -7373,8 +7373,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Astra: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6380.jpg",
     "url": "https://newcar.u-car.com.tw/opel/astra/6380/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/opel/astra/6380/overall",
@@ -7418,7 +7418,7 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "economy",
+      "space",
       "comfort",
       "tech"
     ],
@@ -7429,8 +7429,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Grandland: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6357.jpg",
     "url": "https://newcar.u-car.com.tw/opel/grandland/6357/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/opel/grandland/6357/overall",
@@ -7457,8 +7457,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Mokka Electric: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6294.jpg",
     "url": "https://newcar.u-car.com.tw/opel/mokka%20electric/6294/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/opel/mokka%20electric/6294/overall",
@@ -7502,7 +7502,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -7513,8 +7513,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "2008: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6575.jpg",
     "url": "https://newcar.u-car.com.tw/peugeot/2008/6575/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/peugeot/2008/6575/overall",
@@ -7541,8 +7541,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "408: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6843.jpg",
     "url": "https://newcar.u-car.com.tw/peugeot/408/6843/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/peugeot/408/6843/overall",
@@ -7569,8 +7569,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "3008: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6962.jpg",
     "url": "https://newcar.u-car.com.tw/peugeot/3008/6962/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/peugeot/3008/6962/overall",
@@ -7597,8 +7597,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "5008: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6963.jpg",
     "url": "https://newcar.u-car.com.tw/peugeot/5008/6963/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/peugeot/5008/6963/overall",
@@ -7625,8 +7625,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Macan: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6626.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/macan/6626/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/macan/6626/overall",
@@ -7709,8 +7709,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Macan Electric: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7050.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/macan%20electric/7050/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/macan%20electric/7050/overall",
@@ -7726,9 +7726,9 @@
     "power": "electric",
     "seats": 4,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "driving",
+      "design",
+      "tech"
     ],
     "colors": [
       "white",
@@ -7737,8 +7737,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Taycan: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7224.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/taycan/7224/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/taycan/7224/overall",
@@ -7765,8 +7765,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Cayenne: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7119.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/cayenne/7119/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne/7119/overall",
@@ -7810,7 +7810,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -7866,8 +7866,8 @@
     "power": "hybrid",
     "seats": 4,
     "priorities": [
-      "economy",
-      "comfort",
+      "driving",
+      "design",
       "tech"
     ],
     "colors": [
@@ -7877,8 +7877,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Panamera: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6693.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/panamera/6693/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/panamera/6693/overall",
@@ -7905,8 +7905,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "911: synced from Taiwan new-car catalog.",
+    "note": "豪華級距性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6902.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/911/6902/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/911/6902/overall",
@@ -8062,9 +8062,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -8090,9 +8090,9 @@
     "power": "electric",
     "seats": 5,
     "priorities": [
-      "driving",
-      "design",
-      "tech"
+      "tech",
+      "economy",
+      "comfort"
     ],
     "colors": [
       "white",
@@ -8101,8 +8101,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Spectre: synced from Taiwan new-car catalog.",
+    "note": "豪華級距轎跑車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6530.jpg",
     "url": "https://newcar.u-car.com.tw/rolls-royce/spectre/6530/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/rolls-royce/spectre/6530/overall",
@@ -8118,7 +8118,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -8157,8 +8157,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Fabia: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7101.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7101/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7101/overall",
@@ -8185,8 +8185,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Scala: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7107.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7107/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7107/overall",
@@ -8213,8 +8213,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Kamiq: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7102.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7102/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7102/overall",
@@ -8230,9 +8230,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -8241,8 +8241,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Octavia: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7105.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/octavia/7105/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/octavia/7105/overall",
@@ -8269,8 +8269,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Karoq: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7103.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7103/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7103/overall",
@@ -8297,8 +8297,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Octavia Combi: synced from Taiwan new-car catalog.",
+    "note": "其他級距進口旅行車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7106.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/octavia%20combi/7106/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/octavia%20combi/7106/overall",
@@ -8325,8 +8325,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Superb: synced from Taiwan new-car catalog.",
+    "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7108.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/superb/7108/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/superb/7108/overall",
@@ -8370,7 +8370,7 @@
     "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -8381,8 +8381,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Kodiaq: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7104.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/kodiaq/7104/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/kodiaq/7104/overall",
@@ -8398,9 +8398,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -8409,8 +8409,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Enyaq: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6694.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq/6694/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq/6694/overall",
@@ -8454,7 +8454,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -8465,8 +8465,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Crosstrek: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6366.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/crosstrek/6366/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/crosstrek/6366/overall",
@@ -8479,7 +8479,7 @@
     "price": 129.8,
     "priceLabel": "129.8-149.8 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
       "economy",
@@ -8493,8 +8493,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Forester: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6970.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/forester/6970/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/forester/6970/overall",
@@ -8521,8 +8521,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Outback: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6204.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/outback/6204/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/outback/6204/overall",
@@ -8538,9 +8538,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -8549,8 +8549,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "WRX: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6368.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/wrx/6368/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/wrx/6368/overall",
@@ -8577,8 +8577,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Solterra: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7176.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/solterra/7176/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/solterra/7176/overall",
@@ -8594,9 +8594,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -8605,8 +8605,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "WRX Wagon: synced from Taiwan new-car catalog.",
+    "note": "其他級距進口旅行車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6369.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/wrx%20wagon/6369/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/wrx%20wagon/6369/overall",
@@ -8619,7 +8619,7 @@
     "price": 171.8,
     "priceLabel": "171.8-172.8 TWD 10k",
     "body": "sports",
-    "power": "electric",
+    "power": "gas",
     "seats": 4,
     "priorities": [
       "driving",
@@ -8633,8 +8633,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "BRZ: synced from Taiwan new-car catalog.",
+    "note": "性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6260.jpg",
     "url": "https://newcar.u-car.com.tw/subaru/brz/6260/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/subaru/brz/6260/overall",
@@ -8646,9 +8646,9 @@
     "variant": "U-CAR new-car catalog",
     "price": 49.9,
     "priceLabel": "49.9 TWD 10k",
-    "body": "suv",
+    "body": "mpv",
     "power": "gas",
-    "seats": 5,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -8661,8 +8661,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Carry: synced from Taiwan new-car catalog.",
+    "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6191.jpg",
     "url": "https://newcar.u-car.com.tw/suzuki/carry/6191/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/suzuki/carry/6191/overall",
@@ -8678,9 +8678,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "economy",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -8689,8 +8689,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Swift: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6683.jpg",
     "url": "https://newcar.u-car.com.tw/suzuki/swift/6683/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/suzuki/swift/6683/overall",
@@ -8717,8 +8717,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Jimny: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7234.jpg",
     "url": "https://newcar.u-car.com.tw/suzuki/jimny/7234/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/suzuki/jimny/7234/overall",
@@ -8734,7 +8734,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -8762,7 +8762,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -8773,8 +8773,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Vitara: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7261.jpg",
     "url": "https://newcar.u-car.com.tw/suzuki/vitara/7261/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/suzuki/vitara/7261/overall",
@@ -8829,8 +8829,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Model 3: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7036.jpg",
     "url": "https://newcar.u-car.com.tw/tesla/model%203/7036/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/tesla/model%203/7036/overall",
@@ -8857,8 +8857,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Model Y: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7089.jpg",
     "url": "https://newcar.u-car.com.tw/tesla/model%20y/7089/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/tesla/model%20y/7089/overall",
@@ -8928,7 +8928,7 @@
     "priceLabel": "51.5-57.5 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -8956,7 +8956,7 @@
     "priceLabel": "53.9-63.5 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -8969,8 +8969,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Town Ace Van: synced from Taiwan new-car catalog.",
+    "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6927.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/6927/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/6927/overall",
@@ -8986,9 +8986,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
+      "space",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -8997,8 +8997,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Vios: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6696.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/vios/6696/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/vios/6696/overall",
@@ -9014,7 +9014,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -9025,8 +9025,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Yaris Cross: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6741.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/yaris%20cross/6741/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/yaris%20cross/6741/overall",
@@ -9042,9 +9042,9 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
+      "economy",
       "comfort",
-      "driving",
-      "design"
+      "tech"
     ],
     "colors": [
       "white",
@@ -9053,8 +9053,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Corolla Altis: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7182.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/corolla%20altis/7182/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/corolla%20altis/7182/overall",
@@ -9070,7 +9070,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -9081,8 +9081,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Corolla Cross: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7183.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/corolla%20cross/7183/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/corolla%20cross/7183/overall",
@@ -9098,9 +9098,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "space",
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -9109,8 +9109,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Corolla Sport: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7262.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/corolla%20sport/7262/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/corolla%20sport/7262/overall",
@@ -9137,8 +9137,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "RAV4: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7143.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/rav4/7143/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/rav4/7143/overall",
@@ -9165,8 +9165,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Camry: synced from Taiwan new-car catalog.",
+    "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7268.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/camry/7268/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/camry/7268/overall",
@@ -9180,7 +9180,7 @@
     "priceLabel": "126.6-128.2 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -9238,9 +9238,9 @@
     "power": "electric",
     "seats": 2,
     "priorities": [
-      "tech",
-      "economy",
-      "comfort"
+      "driving",
+      "design",
+      "tech"
     ],
     "colors": [
       "white",
@@ -9249,8 +9249,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "bZ4X: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7034.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/bz4x/7034/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/bz4x/7034/overall",
@@ -9263,12 +9263,12 @@
     "price": 129.9,
     "priceLabel": "129.9-137.9 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "tech",
       "economy",
-      "comfort"
+      "comfort",
+      "tech"
     ],
     "colors": [
       "white",
@@ -9305,8 +9305,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Crown: synced from Taiwan new-car catalog.",
+    "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6640.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/crown/6640/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown/6640/overall",
@@ -9322,7 +9322,7 @@
     "power": "hybrid",
     "seats": 5,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -9333,8 +9333,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Hilux: synced from Taiwan new-car catalog.",
+    "note": "Pickup; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7228.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/hilux/7228/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/hilux/7228/overall",
@@ -9361,8 +9361,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Granvia: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7197.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/granvia/7197/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/granvia/7197/overall",
@@ -9378,8 +9378,8 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "driving",
-      "design",
+      "space",
+      "comfort",
       "tech"
     ],
     "colors": [
@@ -9389,8 +9389,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GR 86: synced from Taiwan new-car catalog.",
+    "note": "跑車/跑房車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7271.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/gr%2086/7271/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/gr%2086/7271/overall",
@@ -9406,9 +9406,9 @@
     "power": "gas",
     "seats": 5,
     "priorities": [
-      "city",
-      "design",
-      "value"
+      "comfort",
+      "driving",
+      "design"
     ],
     "colors": [
       "white",
@@ -9417,8 +9417,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GR Yaris: synced from Taiwan new-car catalog.",
+    "note": "性能車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7223.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/gr%20yaris/7223/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/gr%20yaris/7223/overall",
@@ -9445,8 +9445,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Sienna: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7241.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/sienna/7241/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/sienna/7241/overall",
@@ -9473,8 +9473,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "GR Supra: synced from Taiwan new-car catalog.",
+    "note": "跑車/跑房車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6932.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/gr%20supra/6932/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/gr%20supra/6932/overall",
@@ -9490,7 +9490,7 @@
     "power": "hybrid",
     "seats": 7,
     "priorities": [
-      "space",
+      "economy",
       "comfort",
       "tech"
     ],
@@ -9529,8 +9529,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Alphard: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6844.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/alphard/6844/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/alphard/6844/overall",
@@ -9557,8 +9557,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Polo: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7062.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/polo/7062/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/polo/7062/overall",
@@ -9585,8 +9585,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "T-Cross: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6956.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/t-cross/6956/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/t-cross/6956/overall",
@@ -9613,8 +9613,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Golf: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7209.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/golf/7209/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/golf/7209/overall",
@@ -9641,8 +9641,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "T-Roc: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7266.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/t-roc/7266/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/t-roc/7266/overall",
@@ -9683,7 +9683,7 @@
     "price": 139.8,
     "priceLabel": "139.8-198.8 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "gas",
     "seats": 5,
     "priorities": [
       "space",
@@ -9697,8 +9697,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Tiguan: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7087.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/tiguan/7087/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/tiguan/7087/overall",
@@ -9781,8 +9781,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "ID.4: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6725.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/id.4/6725/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/id.4/6725/overall",
@@ -9809,8 +9809,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "ID.5: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6726.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/id.5/6726/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/id.5/6726/overall",
@@ -9837,8 +9837,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Golf R: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7210.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen/golf%20r/7210/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen/golf%20r/7210/overall",
@@ -9880,7 +9880,7 @@
     "priceLabel": "89.8 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -9893,8 +9893,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Caddy Cargo: synced from Taiwan new-car catalog.",
+    "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7029.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/caddy%20cargo/7029/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/caddy%20cargo/7029/overall",
@@ -9949,8 +9949,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Caravelle: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7138.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/caravelle/7138/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/caravelle/7138/overall",
@@ -9977,8 +9977,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Amarok: synced from Taiwan new-car catalog.",
+    "note": "Pickup; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7053.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/amarok/7053/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/amarok/7053/overall",
@@ -10005,8 +10005,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Multivan: synced from Taiwan new-car catalog.",
+    "note": "豪華級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7069.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/multivan/7069/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/multivan/7069/overall",
@@ -10019,7 +10019,7 @@
     "price": 245,
     "priceLabel": "245-269.8 TWD 10k",
     "body": "mpv",
-    "power": "electric",
+    "power": "gas",
     "seats": 7,
     "priorities": [
       "space",
@@ -10061,8 +10061,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "California: synced from Taiwan new-car catalog.",
+    "note": "豪華級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6571.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/california/6571/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/california/6571/overall",
@@ -10076,7 +10076,7 @@
     "priceLabel": "289.8 TWD 10k",
     "body": "mpv",
     "power": "gas",
-    "seats": 7,
+    "seats": 2,
     "priorities": [
       "space",
       "comfort",
@@ -10089,8 +10089,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "Crafter: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7052.jpg",
     "url": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/crafter/7052/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volkswagen%20commercial%20vehicles/crafter/7052/overall",
@@ -10145,8 +10145,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EX30: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6973.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/ex30/6973/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/ex30/6973/overall",
@@ -10173,8 +10173,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EX40: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7129.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/ex40/7129/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/ex40/7129/overall",
@@ -10201,8 +10201,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "XC40: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7131.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/xc40/7131/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/xc40/7131/overall",
@@ -10229,8 +10229,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "EC40: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7130.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/ec40/7130/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/ec40/7130/overall",
@@ -10243,7 +10243,7 @@
     "price": 195,
     "priceLabel": "195-277.6 TWD 10k",
     "body": "hatch",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
       "economy",
@@ -10257,8 +10257,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "V60: synced from Taiwan new-car catalog.",
+    "note": "豪華級距旅行車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7098.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/v60/7098/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/v60/7098/overall",
@@ -10271,7 +10271,7 @@
     "price": 239,
     "priceLabel": "239-299 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 5,
     "priorities": [
       "economy",
@@ -10285,8 +10285,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "XC60: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_7177.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/xc60/7177/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/xc60/7177/overall",
@@ -10299,7 +10299,7 @@
     "price": 295.6,
     "priceLabel": "295.6-377.6 TWD 10k",
     "body": "suv",
-    "power": "electric",
+    "power": "hybrid",
     "seats": 7,
     "priorities": [
       "economy",
@@ -10313,8 +10313,8 @@
       "blue",
       "red"
     ],
-    "tagline": "收錄於台灣授權新車市場。",
-    "note": "台灣總代理或授權通路公開販售／接單車系；起始價格為市場級距參考，請以原廠最新報價為準。",
+    "tagline": "XC90: synced from Taiwan new-car catalog.",
+    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
     "imageUrl": "https://image.u-car.com.tw/newcar_6995.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/xc90/6995/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/xc90/6995/overall",
@@ -11031,7 +11031,7 @@
   window.JARVIS_DATA_META = {
   "sourceName": "U-CAR new-car catalog",
   "sourceUrl": "https://newcar.u-car.com.tw/newcar",
-  "updatedAt": "2026-08-22T05:56:27.162Z",
+  "updatedAt": "2026-08-22T07:31:15.644Z",
   "updateCadence": "monthly",
   "fetchedBrands": 47,
   "fetchedCars": 369,
