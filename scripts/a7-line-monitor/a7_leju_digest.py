@@ -15,7 +15,7 @@ import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
-from html import unescape
+from html import escape, unescape
 from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
@@ -3151,6 +3151,632 @@ def build_macro_summary(
     return lines
 
 
+def parse_report_sections(content: str) -> tuple[str, list[tuple[str, list[str]]]]:
+    title = "房市投資報告"
+    sections: list[tuple[str, list[str]]] = []
+    current_heading = ""
+    current_lines: list[str] = []
+
+    for raw_line in content.splitlines():
+        line = raw_line.rstrip()
+        if line.startswith("# ") and title == "房市投資報告":
+            title = line[2:].strip()
+            continue
+        if line.startswith("## "):
+            if current_heading:
+                sections.append((current_heading, current_lines))
+            current_heading = line[3:].strip()
+            current_lines = []
+            continue
+        if current_heading:
+            current_lines.append(line)
+
+    if current_heading:
+        sections.append((current_heading, current_lines))
+    return title, sections
+
+
+def get_pdf_font_paths() -> tuple[Path | None, Path | None]:
+    windir = Path(os.environ.get("WINDIR", r"C:\Windows"))
+    normal_candidates = [
+        windir / "Fonts" / "msjh.ttc",
+        windir / "Fonts" / "mingliu.ttc",
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
+    ]
+    bold_candidates = [
+        windir / "Fonts" / "msjhbd.ttc",
+        windir / "Fonts" / "mingliub.ttc",
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"),
+    ]
+    normal = next((path for path in normal_candidates if path.exists()), None)
+    bold = next((path for path in bold_candidates if path.exists()), normal)
+    return normal, bold
+
+
+def register_pdf_fonts() -> tuple[str, str]:
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    normal_path, bold_path = get_pdf_font_paths()
+    if normal_path:
+        normal_name = "MarketReportCJK"
+        bold_name = "MarketReportCJKBold"
+        if normal_name not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont(normal_name, str(normal_path), subfontIndex=0))
+        if bold_name not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont(bold_name, str(bold_path or normal_path), subfontIndex=0))
+        return normal_name, bold_name
+
+    fallback_name = "MSung-Light"
+    if fallback_name not in pdfmetrics.getRegisteredFontNames():
+        pdfmetrics.registerFont(UnicodeCIDFont(fallback_name))
+    return fallback_name, fallback_name
+
+
+def report_line_to_pdf_markup(text: str, raw_url_label: str = "開啟建案或資料來源") -> str:
+    stripped = text.strip()
+    if re.fullmatch(r"https?://\S+", stripped):
+        safe_url = escape(stripped, quote=True)
+        return f'<link href="{safe_url}" color="#176B5B"><u>{raw_url_label}</u></link>'
+
+    parts: list[str] = []
+    cursor = 0
+    for match in re.finditer(r"https?://\S+", stripped):
+        parts.append(escape(stripped[cursor:match.start()]))
+        safe_url = escape(match.group(0), quote=True)
+        parts.append(f'<link href="{safe_url}" color="#176B5B"><u>開啟連結</u></link>')
+        cursor = match.end()
+    parts.append(escape(stripped[cursor:]))
+    return "".join(parts)
+
+
+def extract_area_pdf_metrics(
+    sections: list[tuple[str, list[str]]],
+    area_names: list[str],
+) -> list[dict[str, Any]]:
+    metrics: list[dict[str, Any]] = []
+    section_map = {heading: lines for heading, lines in sections}
+    patterns = {
+        "observable": r"可觀察預售案合計：\s*(\d+)",
+        "active": r"銷售中預售屋：\s*(\d+)",
+        "pending": r"未開賣預售：\s*(\d+)",
+    }
+    for area_name in area_names:
+        lines = section_map.get(area_name, [])
+        joined = "\n".join(lines)
+        row: dict[str, Any] = {"name": area_name}
+        for key, pattern in patterns.items():
+            match = re.search(pattern, joined)
+            row[key] = int(match.group(1)) if match else 0
+        row["stale"] = any("抓取失敗" in line for line in lines)
+        metrics.append(row)
+    return metrics
+
+
+def make_pdf_supply_chart(metrics: list[dict[str, Any]], normal_font: str) -> Any | None:
+    usable = [item for item in metrics if not item.get("stale")]
+    if not usable:
+        return None
+
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
+    from reportlab.graphics.charts.legends import Legend
+    from reportlab.graphics.shapes import Drawing
+    from reportlab.lib import colors
+
+    drawing = Drawing(470, 190)
+    chart = VerticalBarChart()
+    chart.x = 42
+    chart.y = 34
+    chart.height = 126
+    chart.width = 396
+    chart.data = [
+        [item["active"] for item in usable],
+        [item["pending"] for item in usable],
+    ]
+    chart.categoryAxis.categoryNames = [
+        item["name"].replace("A7站重劃區-", "") for item in usable
+    ]
+    chart.categoryAxis.labels.fontName = normal_font
+    chart.categoryAxis.labels.fontSize = 8
+    chart.categoryAxis.labels.dy = -8
+    chart.valueAxis.labels.fontName = normal_font
+    chart.valueAxis.labels.fontSize = 8
+    chart.valueAxis.valueMin = 0
+    chart.valueAxis.valueMax = max(5, max((item["active"] + item["pending"] for item in usable), default=1) + 1)
+    chart.valueAxis.valueStep = 1
+    chart.valueAxis.strokeColor = colors.HexColor("#D9DFDC")
+    chart.categoryAxis.strokeColor = colors.HexColor("#D9DFDC")
+    chart.bars[0].fillColor = colors.HexColor("#176B5B")
+    chart.bars[1].fillColor = colors.HexColor("#D58A2A")
+    chart.bars.strokeColor = None
+    chart.barSpacing = 2
+    chart.groupSpacing = 10
+    drawing.add(chart)
+
+    legend = Legend()
+    legend.x = 154
+    legend.y = 8
+    legend.fontName = normal_font
+    legend.fontSize = 8
+    legend.colorNamePairs = [
+        (colors.HexColor("#176B5B"), "銷售中預售"),
+        (colors.HexColor("#D58A2A"), "待開案預售"),
+    ]
+    legend.dx = 7
+    legend.dy = 7
+    legend.deltax = 95
+    drawing.add(legend)
+    return drawing
+
+
+def generate_pdf_report(
+    report_content: str,
+    output_path: Path,
+    local_now: datetime,
+    report_kind: str,
+    area_names: list[str],
+) -> None:
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.platypus import (
+            KeepTogether,
+            PageBreak,
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
+    except ImportError as exc:
+        raise RuntimeError("PDF generation requires reportlab. Install it with: python -m pip install reportlab") from exc
+
+    normal_font, bold_font = register_pdf_fonts()
+    _, sections = parse_report_sections(report_content)
+    metrics = extract_area_pdf_metrics(sections, area_names)
+    section_map = {heading: lines for heading, lines in sections}
+    macro_lines = [
+        line[2:].strip()
+        for line in section_map.get("大數據觀察", [])
+        if line.strip().startswith("- ")
+    ][:5]
+    if not macro_lines:
+        macro_lines = ["本期資料已整理為區域供給、價格異常與建案動態，詳細內容請見後續章節。"]
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    page_width, _ = A4
+    green = colors.HexColor("#173F35")
+    teal = colors.HexColor("#176B5B")
+    amber = colors.HexColor("#D58A2A")
+    ink = colors.HexColor("#18211E")
+    muted = colors.HexColor("#65716C")
+    pale = colors.HexColor("#F3F6F4")
+    line_color = colors.HexColor("#D9DFDC")
+
+    base = getSampleStyleSheet()
+    styles = {
+        "cover_title": ParagraphStyle(
+            "CoverTitle",
+            parent=base["Title"],
+            fontName=bold_font,
+            fontSize=26,
+            leading=34,
+            textColor=colors.white,
+            alignment=TA_LEFT,
+            spaceAfter=5 * mm,
+        ),
+        "cover_meta": ParagraphStyle(
+            "CoverMeta",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=11,
+            leading=17,
+            textColor=colors.HexColor("#DDE8E4"),
+        ),
+        "section": ParagraphStyle(
+            "Section",
+            parent=base["Heading1"],
+            fontName=bold_font,
+            fontSize=18,
+            leading=24,
+            textColor=green,
+            spaceBefore=3 * mm,
+            spaceAfter=4 * mm,
+            keepWithNext=True,
+        ),
+        "subsection": ParagraphStyle(
+            "Subsection",
+            parent=base["Heading2"],
+            fontName=bold_font,
+            fontSize=12,
+            leading=17,
+            textColor=teal,
+            spaceBefore=3 * mm,
+            spaceAfter=2 * mm,
+            keepWithNext=True,
+        ),
+        "body": ParagraphStyle(
+            "Body",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=9.5,
+            leading=15,
+            textColor=ink,
+            spaceAfter=1.7 * mm,
+        ),
+        "bullet": ParagraphStyle(
+            "Bullet",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=9.5,
+            leading=15,
+            leftIndent=5 * mm,
+            firstLineIndent=-3.5 * mm,
+            textColor=ink,
+            spaceAfter=1.5 * mm,
+        ),
+        "detail": ParagraphStyle(
+            "Detail",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=8.5,
+            leading=13,
+            leftIndent=7 * mm,
+            textColor=muted,
+            spaceAfter=1.2 * mm,
+        ),
+        "takeaway": ParagraphStyle(
+            "Takeaway",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=10.5,
+            leading=17,
+            leftIndent=5 * mm,
+            firstLineIndent=-3.5 * mm,
+            textColor=ink,
+            spaceAfter=2.2 * mm,
+        ),
+        "kpi_value": ParagraphStyle(
+            "KpiValue",
+            parent=base["BodyText"],
+            fontName=bold_font,
+            fontSize=18,
+            leading=21,
+            alignment=TA_CENTER,
+            textColor=green,
+        ),
+        "kpi_label": ParagraphStyle(
+            "KpiLabel",
+            parent=base["BodyText"],
+            fontName=normal_font,
+            fontSize=8,
+            leading=11,
+            alignment=TA_CENTER,
+            textColor=muted,
+        ),
+    }
+
+    doc = SimpleDocTemplate(
+        str(output_path),
+        pagesize=A4,
+        leftMargin=17 * mm,
+        rightMargin=17 * mm,
+        topMargin=18 * mm,
+        bottomMargin=17 * mm,
+        title=f"房市投資{report_kind} {local_now:%Y-%m-%d}",
+        author="房市監測系統",
+        subject="A7、雙北與桃園預售屋監測",
+    )
+
+    story: list[Any] = []
+    banner = Table(
+        [[
+            Paragraph("房市投資報告", styles["cover_title"]),
+            Paragraph(
+                f"{escape(report_kind)}<br/>{local_now:%Y.%m.%d}",
+                styles["cover_meta"],
+            ),
+        ]],
+        colWidths=[118 * mm, 42 * mm],
+        rowHeights=[39 * mm],
+    )
+    banner.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), green),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (0, 0), 8 * mm),
+        ("RIGHTPADDING", (1, 0), (1, 0), 7 * mm),
+        ("TOPPADDING", (0, 0), (-1, -1), 5 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4 * mm),
+    ]))
+    story.extend([
+        banner,
+        Spacer(1, 7 * mm),
+        Paragraph("A7核心區 · 雙北桃園預售 · 低價異常 · 市場與建設訊號", styles["body"]),
+        Spacer(1, 2 * mm),
+        Paragraph("本期判讀", styles["section"]),
+    ])
+    for item in macro_lines:
+        story.append(Paragraph(f"• {report_line_to_pdf_markup(item)}", styles["takeaway"]))
+
+    total_observable = sum(item["observable"] for item in metrics if not item.get("stale"))
+    total_active = sum(item["active"] for item in metrics if not item.get("stale"))
+    total_pending = sum(item["pending"] for item in metrics if not item.get("stale"))
+    successful_areas = sum(1 for item in metrics if not item.get("stale"))
+    kpi_data = [[
+        Paragraph(f"{total_observable}<br/><font size='8' color='#65716C'>可觀察預售案</font>", styles["kpi_value"]),
+        Paragraph(f"{total_active}<br/><font size='8' color='#65716C'>銷售中預售</font>", styles["kpi_value"]),
+        Paragraph(f"{total_pending}<br/><font size='8' color='#65716C'>待開案預售</font>", styles["kpi_value"]),
+        Paragraph(f"{successful_areas}/{len(metrics)}<br/><font size='8' color='#65716C'>成功取得區域</font>", styles["kpi_value"]),
+    ]]
+    kpi_table = Table(kpi_data, colWidths=[40 * mm] * 4, rowHeights=[20 * mm])
+    kpi_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), pale),
+        ("BOX", (0, 0), (-1, -1), 0.6, line_color),
+        ("INNERGRID", (0, 0), (-1, -1), 0.6, colors.white),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 3 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+    ]))
+    story.extend([Spacer(1, 3 * mm), kpi_table, Spacer(1, 5 * mm)])
+    chart = make_pdf_supply_chart(metrics, normal_font)
+    if chart:
+        story.extend([Paragraph("A7各區預售供給", styles["subsection"]), chart])
+
+    macro_heading = "大數據觀察"
+    priority = [
+        "近一週市場脈動",
+        "雙北桃園低價預售觀察",
+        "價格抬升觀察",
+        "價格下降觀察",
+        "預售案逐步抬價觀察",
+    ]
+    ordered_sections: list[tuple[str, list[str]]] = []
+    for heading in priority:
+        if heading in section_map:
+            ordered_sections.append((heading, section_map[heading]))
+    for heading in area_names:
+        if heading in section_map:
+            ordered_sections.append((heading, section_map[heading]))
+    for heading, lines in sections:
+        if heading != macro_heading and heading not in {item[0] for item in ordered_sections}:
+            ordered_sections.append((heading, lines))
+
+    for heading, lines in ordered_sections:
+        story.append(PageBreak())
+        story.append(Paragraph(escape(heading), styles["section"]))
+        if heading in area_names:
+            row = next((item for item in metrics if item["name"] == heading), None)
+            if row and not row.get("stale"):
+                summary_table = Table(
+                    [[
+                        Paragraph(f"<b>{row['observable']}</b><br/><font size='8'>可觀察</font>", styles["body"]),
+                        Paragraph(f"<b>{row['active']}</b><br/><font size='8'>銷售中</font>", styles["body"]),
+                        Paragraph(f"<b>{row['pending']}</b><br/><font size='8'>待開案</font>", styles["body"]),
+                    ]],
+                    colWidths=[53 * mm] * 3,
+                )
+                summary_table.setStyle(TableStyle([
+                    ("BACKGROUND", (0, 0), (-1, -1), pale),
+                    ("BOX", (0, 0), (-1, -1), 0.5, line_color),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.white),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3 * mm),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3 * mm),
+                ]))
+                story.extend([summary_table, Spacer(1, 4 * mm)])
+
+        line_index = 0
+        while line_index < len(lines):
+            raw_line = lines[line_index]
+            stripped = raw_line.strip()
+            if not stripped:
+                story.append(Spacer(1, 1.5 * mm))
+                line_index += 1
+                continue
+            if stripped.startswith("### "):
+                story.append(Paragraph(escape(stripped[4:].strip()), styles["subsection"]))
+                line_index += 1
+                continue
+            if stripped.startswith("- "):
+                if heading in area_names and re.match(
+                    r"(?:可觀察預售案合計|銷售中預售屋|未開賣預售)：",
+                    stripped[2:],
+                ):
+                    line_index += 1
+                    continue
+                item_flowables: list[Any] = [
+                    Paragraph(f"• {report_line_to_pdf_markup(stripped[2:])}", styles["bullet"])
+                ]
+                line_index += 1
+                while line_index < len(lines):
+                    detail = lines[line_index].strip()
+                    if not detail:
+                        line_index += 1
+                        break
+                    if detail.startswith("- ") or detail.startswith("### "):
+                        break
+                    item_flowables.append(
+                        Paragraph(report_line_to_pdf_markup(detail), styles["detail"])
+                    )
+                    line_index += 1
+                story.append(KeepTogether(item_flowables))
+                continue
+            if re.fullmatch(r"https?://\S+", stripped):
+                story.append(Paragraph(report_line_to_pdf_markup(stripped), styles["detail"]))
+                line_index += 1
+                continue
+            story.append(Paragraph(report_line_to_pdf_markup(stripped), styles["detail"]))
+            line_index += 1
+
+    def draw_page(canvas: Any, current_doc: Any) -> None:
+        canvas.saveState()
+        canvas.setStrokeColor(line_color)
+        canvas.setLineWidth(0.5)
+        canvas.line(17 * mm, 12 * mm, page_width - 17 * mm, 12 * mm)
+        canvas.setFont(normal_font, 7.5)
+        canvas.setFillColor(muted)
+        canvas.drawString(17 * mm, 7.5 * mm, "房市投資報告｜資料僅供市場觀察")
+        canvas.drawRightString(page_width - 17 * mm, 7.5 * mm, f"{local_now:%Y-%m-%d}  ·  {current_doc.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_page, onLaterPages=draw_page)
+
+
+def github_api_json_request(
+    url: str,
+    token: str,
+    method: str = "GET",
+    payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = urllib.request.Request(
+        url,
+        data=data,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "a7-market-report",
+            "Content-Type": "application/json",
+        },
+        method=method,
+    )
+    with urllib.request.urlopen(request, timeout=45) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def get_or_create_report_release(repository: str, token: str, tag: str) -> dict[str, Any]:
+    base_url = f"https://api.github.com/repos/{repository}"
+    try:
+        return github_api_json_request(
+            f"{base_url}/releases/tags/{urllib.parse.quote(tag, safe='')}",
+            token,
+        )
+    except urllib.error.HTTPError as exc:
+        if exc.code != 404:
+            raise
+    return github_api_json_request(
+        f"{base_url}/releases",
+        token,
+        method="POST",
+        payload={
+            "tag_name": tag,
+            "name": "房市投資報告",
+            "body": "由排程更新的 A7、雙北與桃園房市 PDF 報告。",
+            "draft": False,
+            "prerelease": False,
+        },
+    )
+
+
+def upload_github_release_asset(
+    repository: str,
+    token: str,
+    tag: str,
+    pdf_path: Path,
+    asset_name: str,
+) -> str:
+    release = get_or_create_report_release(repository, token, tag)
+    for asset in release.get("assets", []):
+        if asset.get("name") == asset_name and asset.get("id"):
+            request = urllib.request.Request(
+                f"https://api.github.com/repos/{repository}/releases/assets/{asset['id']}",
+                headers={
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": f"Bearer {token}",
+                    "X-GitHub-Api-Version": "2022-11-28",
+                    "User-Agent": "a7-market-report",
+                },
+                method="DELETE",
+            )
+            with urllib.request.urlopen(request, timeout=45):
+                pass
+
+    upload_base = str(release["upload_url"]).split("{", 1)[0]
+    upload_url = f"{upload_base}?name={urllib.parse.quote(asset_name)}"
+    request = urllib.request.Request(
+        upload_url,
+        data=pdf_path.read_bytes(),
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "a7-market-report",
+            "Content-Type": "application/pdf",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=120) as response:
+        result = json.loads(response.read().decode("utf-8"))
+    return str(result["browser_download_url"])
+
+
+def publish_pdf_report(
+    pdf_path: Path,
+    local_now: datetime,
+    repository: str,
+    token: str,
+    release_tag: str,
+    latest_asset_name: str,
+    keep_dated_archive: bool,
+) -> str:
+    latest_url = upload_github_release_asset(
+        repository,
+        token,
+        release_tag,
+        pdf_path,
+        latest_asset_name,
+    )
+    if keep_dated_archive:
+        dated_name = f"a7-market-report-{local_now:%Y-%m-%d}.pdf"
+        upload_github_release_asset(repository, token, release_tag, pdf_path, dated_name)
+    return latest_url
+
+
+def new_pdf_line_message(
+    areas: list[dict[str, Any]],
+    local_now: datetime,
+    pdf_url: str,
+    report_kind: str,
+    bargain_watch: dict[str, Any] | None = None,
+    market_pulse: dict[str, Any] | None = None,
+    urgent_pending_projects: list[dict[str, str]] | None = None,
+) -> str:
+    lines = [f"房市投資{report_kind}｜{local_now:%Y-%m-%d}", ""]
+    pending_items = urgent_pending_projects or []
+    bargain_items = bargain_watch.get("items", []) if bargain_watch else []
+    if pending_items and report_kind != "週報":
+        lines.append("本次新增待開案：")
+        for item in pending_items[:3]:
+            area_text = f"｜{item.get('area', '')}" if item.get("area") else ""
+            lines.append(f"• {item.get('name', '未命名建案')}{area_text}")
+    elif bargain_items and report_kind == "低價新案提醒":
+        lines.append("本次低價異常：")
+        for item in bargain_items[:3]:
+            city = item.get("city") or item.get("region_group")
+            district = item.get("district") or item.get("area_name")
+            location = "/".join(part for part in (city, district) if part)
+            discount = item.get("discount_percent")
+            discount_text = f"｜低於基準 {float(discount):.1f}%" if isinstance(discount, (int, float)) else ""
+            lines.append(f"• {item.get('name', '未命名建案')}｜{location}{discount_text}")
+    else:
+        lines.append("本期重點：")
+        rising_watch = get_rising_price_watch(areas)
+        falling_watch = get_falling_price_watch(areas)
+        for item in build_macro_summary(areas, rising_watch, falling_watch, market_pulse)[:3]:
+            lines.append(f"• {item.removeprefix('- ').strip()}")
+    lines.extend(["", "完整圖表、建案與資料限制：", pdf_url])
+    return "\n".join(lines).strip()
+
+
 def new_report_content(
     areas: list[dict[str, Any]],
     state: dict[str, Any],
@@ -3504,11 +4130,29 @@ def main() -> int:
         "yes",
         "on",
     }
+    pdf_delivery_enabled = get_config_value(file_config, "PDF_DELIVERY_ENABLED", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    report_github_token = get_config_value(file_config, "REPORT_GITHUB_TOKEN", "")
+    report_github_repository = get_config_value(file_config, "GITHUB_REPOSITORY", "")
+    report_pdf_public_url = get_config_value(file_config, "REPORT_PDF_PUBLIC_URL", "")
+    pdf_release_tag = get_config_value(file_config, "PDF_RELEASE_TAG", "a7-market-reports")
+    pdf_latest_asset_name = get_config_value(file_config, "PDF_LATEST_ASSET_NAME", "a7-market-report-latest.pdf")
+    pdf_keep_dated_archive = get_config_value(file_config, "PDF_KEEP_DATED_ARCHIVE", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
     report_root.mkdir(parents=True, exist_ok=True)
     local_now = datetime.now(ZoneInfo(timezone_name))
     date_string = local_now.strftime("%Y-%m-%d")
     report_path = report_root / f"a7-leju-digest-{date_string}.md"
+    pdf_path = report_root / f"a7-market-report-{date_string}.pdf"
 
     ledger_file = get_ledger_file(ledger_path)
     if not args.force and not intraday_alerts and test_ledger_already_ran(ledger_file, task_id, date_string):
@@ -3582,18 +4226,37 @@ def main() -> int:
     if urgent_bargain_items and not weekly_due:
         line_bargain_watch = dict(bargain_watch)
         line_bargain_watch["items"] = urgent_bargain_items
-    line_message = new_line_message(
-        snapshots,
-        state,
-        local_now,
-        line_bargain_watch,
-        market_pulse,
-        report_kind,
-        urgent_pending_projects,
-        area_config,
-    )
     report_path.write_text(report_content + "\n", encoding="utf-8")
-    save_state_file(state_path, state, snapshots, local_now, bargain_watch)
+    if pdf_delivery_enabled:
+        generate_pdf_report(
+            report_content,
+            pdf_path,
+            local_now,
+            report_kind,
+            [area["name"] for area in area_config],
+        )
+
+    if pdf_delivery_enabled:
+        line_message = new_pdf_line_message(
+            snapshots,
+            local_now,
+            report_pdf_public_url or "（正式執行時上傳後填入）",
+            report_kind,
+            line_bargain_watch,
+            market_pulse,
+            urgent_pending_projects,
+        )
+    else:
+        line_message = new_line_message(
+            snapshots,
+            state,
+            local_now,
+            line_bargain_watch,
+            market_pulse,
+            report_kind,
+            urgent_pending_projects,
+            area_config,
+        )
 
     if args.dry_run:
         print("Dry run complete.")
@@ -3601,10 +4264,37 @@ def main() -> int:
             print(f"Weekly report due for schedule {weekly_report_key}.")
         print(line_message)
         print(f"Report path: {report_path}")
+        if pdf_delivery_enabled:
+            print(f"PDF path: {pdf_path}")
         return 0
 
     line_sent = False
     if not args.skip_line and should_send_line:
+        if pdf_delivery_enabled:
+            if report_github_token and report_github_repository:
+                report_pdf_public_url = publish_pdf_report(
+                    pdf_path,
+                    local_now,
+                    report_github_repository,
+                    report_github_token,
+                    pdf_release_tag,
+                    pdf_latest_asset_name,
+                    pdf_keep_dated_archive,
+                )
+            if not report_pdf_public_url:
+                raise RuntimeError(
+                    "PDF delivery is enabled, but no public PDF URL is available. "
+                    "Set REPORT_GITHUB_TOKEN and GITHUB_REPOSITORY, or REPORT_PDF_PUBLIC_URL."
+                )
+            line_message = new_pdf_line_message(
+                snapshots,
+                local_now,
+                report_pdf_public_url,
+                report_kind,
+                line_bargain_watch,
+                market_pulse,
+                urgent_pending_projects,
+            )
         if not line_token:
             print("WARNING: LINE token is missing. Report was generated locally, but no LINE message was sent.")
         elif line_mode == "push":
@@ -3621,11 +4311,13 @@ def main() -> int:
     elif not args.skip_line:
         print("LINE send skipped: no weekly report, new pending presale, or new 20%-below-market project was detected.")
 
+    save_state_file(state_path, state, snapshots, local_now, bargain_watch)
+
     update_ledger(
         ledger_path,
         ledger_file,
         task_id,
-        report_path,
+        pdf_path if pdf_delivery_enabled else report_path,
         local_now,
         line_sent=line_sent,
         report_kind=report_kind,
@@ -3633,6 +4325,8 @@ def main() -> int:
     )
 
     print(f"Report written to {report_path}")
+    if pdf_delivery_enabled:
+        print(f"PDF written to {pdf_path}")
     return 0
 
 
