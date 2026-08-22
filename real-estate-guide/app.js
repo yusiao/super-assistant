@@ -1379,6 +1379,50 @@ function renderSourceMaterialsByCategory() {
   renderPanel(activeCategoryId);
 }
 
+const learnerSupportIssues = [
+  {
+    id: "lost",
+    label: "不知道先看哪",
+    title: "先不要翻全部資料，先選買房狀態",
+    lead: "資料量變大後，最常見的卡點是從影片庫開始亂滑。先用買房狀態把今天的學習路線縮小。",
+    target: "#coach",
+    targetLabel: "去選買房狀態",
+    steps: ["選一個最接近你的買房狀態", "讀完今天的學習路線", "先收藏 3 支影片，不要一次追完全部"],
+    signal: "適合剛進站、只剩零碎時間、還沒確定預算或區域的人。"
+  },
+  {
+    id: "budget",
+    label: "預算算不懂",
+    title: "先用保守月付抓上限，不要先看成交價",
+    lead: "26-40 歲使用者常見困擾是收入、房貸、裝修現金一起混在腦中。先分開看月付、自備款、保守總價。",
+    target: "#calculator",
+    targetLabel: "去快算貸款",
+    steps: ["輸入月收入和可承擔月付", "把成數先用保守情境估，不要直接抓滿貸", "把裝修、稅費、六個月緊急金另外留下"],
+    signal: "若結果讓你剛好壓線，就先降一個總價帶再看屋。"
+  },
+  {
+    id: "material",
+    label: "影片太多",
+    title: "先用搜尋和長版精修，把素材縮到可讀範圍",
+    lead: "影片素材庫不是要一次看完。先搜尋你現在的問題，再用長版精修或收藏建立自己的閱讀順序。",
+    target: "#youtube-lab",
+    targetLabel: "去篩選影片",
+    focus: "#materialSearchInput",
+    steps: ["先搜尋「貸款」「區域」「預售屋」其中一個字", "只看長版精修或收藏清單", "看完一支就標記已讀，避免重複滑"],
+    signal: "如果搜尋沒有結果，清空搜尋後回到分類頁。"
+  },
+  {
+    id: "layout",
+    label: "格局圖不會用",
+    title: "先標電器和管線，再談裝潢風格",
+    lead: "格局圖工具不是看美感，它先幫你把冷氣、冰箱、洗衣機、排水、插座和動線問題攤開。",
+    target: "#layout-planner",
+    targetLabel: "去規劃格局",
+    steps: ["上傳格局圖或竣工圖", "在圖上點選冷氣、冰箱、洗衣機、櫃體位置", "複製建議給設計師、家人或代銷確認"],
+    signal: "如果還沒有圖，先用手機拍合約附件或銷售圖再上傳。"
+  }
+];
+
 const coachProfiles = [
   {
     id: "first-home",
@@ -1429,6 +1473,97 @@ const storageSet = (key) => {
 const saveStorageSet = (key, set) => {
   localStorage.setItem(key, JSON.stringify([...set]));
 };
+
+function renderLearnerSupport() {
+  const grid = document.querySelector("#supportGrid");
+  const panel = document.querySelector("#supportPanel");
+  if (!grid || !panel) return;
+
+  let selectedId = localStorage.getItem("realEstateSupportIssue") || learnerSupportIssues[0].id;
+
+  const findIssue = () => learnerSupportIssues.find((issue) => issue.id === selectedId) || learnerSupportIssues[0];
+
+  const buildReport = (issue) => {
+    const selectedCoach = localStorage.getItem("realEstateCoachProfile") || "尚未選擇";
+    const savedVideos = storageSet("realEstateSavedVideos").size;
+    const readVideos = storageSet("realEstateReadVideos").size;
+    const checkedItems = storageSet("realEstateChecks").size;
+    return [
+      "買房口袋課問題摘要",
+      `時間：${new Date().toLocaleString("zh-TW")}`,
+      `問題：${issue.label}`,
+      `目前頁面：${location.href}`,
+      `螢幕：${window.innerWidth}x${window.innerHeight}`,
+      `買房狀態：${selectedCoach}`,
+      `已讀影片：${readVideos}`,
+      `收藏影片：${savedVideos}`,
+      `看屋清單：${checkedItems} 項`,
+      `使用者描述：`
+    ].join("\n");
+  };
+
+  const scrollToIssueTarget = (issue) => {
+    document.querySelector(issue.target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (issue.focus) {
+      setTimeout(() => document.querySelector(issue.focus)?.focus(), 420);
+    }
+  };
+
+  const render = () => {
+    const issue = findIssue();
+    grid.innerHTML = learnerSupportIssues.map((item) => `
+      <button class="support-chip ${item.id === issue.id ? "is-active" : ""}" type="button" data-support-issue="${item.id}">
+        <span>${item.label}</span>
+      </button>
+    `).join("");
+
+    panel.innerHTML = `
+      <div class="support-panel-head">
+        <span>即時處理路線</span>
+        <h3>${issue.title}</h3>
+        <p>${issue.lead}</p>
+      </div>
+      <ol class="support-steps">
+        ${issue.steps.map((step) => `<li>${step}</li>`).join("")}
+      </ol>
+      <p class="support-signal">${issue.signal}</p>
+      <div class="support-actions">
+        <button class="primary-mini" type="button" data-support-target>${issue.targetLabel}</button>
+        <button class="text-button" type="button" data-support-report>複製狀況摘要</button>
+      </div>
+    `;
+  };
+
+  grid.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-support-issue]");
+    if (!button) return;
+    selectedId = button.dataset.supportIssue;
+    localStorage.setItem("realEstateSupportIssue", selectedId);
+    render();
+  });
+
+  panel.addEventListener("click", async (event) => {
+    const issue = findIssue();
+    if (event.target.closest("[data-support-target]")) {
+      scrollToIssueTarget(issue);
+      return;
+    }
+
+    const reportButton = event.target.closest("[data-support-report]");
+    if (!reportButton) return;
+
+    try {
+      await navigator.clipboard.writeText(buildReport(issue));
+      reportButton.textContent = "已複製摘要";
+      setTimeout(() => { reportButton.textContent = "複製狀況摘要"; }, 1800);
+    } catch {
+      reportButton.textContent = "複製失敗";
+      setTimeout(() => { reportButton.textContent = "複製狀況摘要"; }, 1800);
+    }
+  });
+
+  render();
+}
 
 function renderCoachGuide() {
   const grid = document.querySelector("#coachGrid");
@@ -1830,6 +1965,7 @@ document.querySelectorAll("#loanForm input").forEach((input) => {
   input.addEventListener("input", calculateLoan);
 });
 
+renderLearnerSupport();
 renderCoachGuide();
 renderLessons();
 renderSourceMaterials();
