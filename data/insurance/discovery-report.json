@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T15:56:09.854Z",
+  "generatedAt": "2026-08-23T18:24:10.074Z",
   "sourceCount": 23,
-  "productsDiscovered": 144,
-  "feedProducts": 126,
+  "productsDiscovered": 132,
+  "feedProducts": 127,
   "unresolvedInsurers": [
     {
       "tiiCode": "201",
       "name": "臺銀人壽",
       "homepage": "https://www.twfhclife.com.tw/",
-      "pagesChecked": 4,
+      "pagesChecked": 18,
       "errors": []
     },
     {
@@ -37,66 +37,28 @@
       "tiiCode": "205",
       "name": "凱基人壽",
       "homepage": "https://www.kgilife.com.tw/",
-      "pagesChecked": 0,
-      "errors": [
-        {
-          "url": "https://www.kgilife.com.tw/",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.kgilife.com.tw/robots.txt",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.kgilife.com.tw/sitemap.xml",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.kgilife.com.tw/sitemap_index.xml",
-          "message": "This operation was aborted"
-        }
-      ]
+      "pagesChecked": 18,
+      "errors": []
     },
     {
       "tiiCode": "206",
       "name": "南山人壽",
       "homepage": "https://www.nanshanlife.com.tw/",
-      "pagesChecked": 2,
-      "errors": [
-        {
-          "url": "https://www.nanshanlife.com.tw/",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.nanshanlife.com.tw/sitemap.xml",
-          "message": "This operation was aborted"
-        }
-      ]
+      "pagesChecked": 18,
+      "errors": []
     },
     {
       "tiiCode": "211",
       "name": "三商美邦人壽",
       "homepage": "https://www.mli.com.tw/",
-      "pagesChecked": 11,
+      "pagesChecked": 2,
       "errors": [
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/popularity",
+          "url": "https://www.mli.com.tw/",
           "message": "This operation was aborted"
         },
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/protection-regular",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/protection-lifetime",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/reimbursement-lifetime",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/health-hospitalization",
+          "url": "https://www.mli.com.tw/robots.txt",
           "message": "This operation was aborted"
         }
       ]
@@ -214,13 +176,8 @@
       "tiiCode": "270",
       "name": "安達人壽",
       "homepage": "https://life.chubb.com/tw-zh/",
-      "pagesChecked": 3,
-      "errors": [
-        {
-          "url": "https://life.chubb.com/tw-zh/",
-          "message": "This operation was aborted"
-        }
-      ]
+      "pagesChecked": 18,
+      "errors": []
     },
     {
       "tiiCode": "271",
@@ -276,13 +233,13 @@
       "insurer": "臺銀人壽",
       "tiiCode": "201",
       "homepage": "https://www.twfhclife.com.tw/",
-      "pagesChecked": 4,
+      "pagesChecked": 18,
       "productsFound": 0,
       "pages": [
         {
           "url": "https://www.twfhclife.com.tw/",
           "status": 200,
-          "contentType": "text/html"
+          "contentType": "text/html; charset=UTF-8"
         },
         {
           "url": "https://www.twfhclife.com.tw/robots.txt",
@@ -297,6 +254,76 @@
         {
           "url": "https://www.twfhclife.com.tw/sitemap_index.xml",
           "status": 404,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e6%9c%80%e6%96%b0%e6%b6%88%e6%81%af/%e5%95%86%e5%93%81%e8%a8%8a%e6%81%af/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e4%bf%9d%e9%9a%aa%e8%b2%bb%e7%b9%b3%e7%b4%8d%e4%bd%9c%e6%a5%ad%e7%94%b3%e8%ab%8b%e6%9b%b8/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/#",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e4%bf%9d%e9%9a%aa%e5%96%ae%e5%80%9f%e6%ac%be/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e7%b7%9a%e4%b8%8a%e4%bf%9d%e9%9a%aa%e5%96%ae%e5%80%9f%e6%ac%be/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e4%bf%9d%e9%9a%aa%e7%b5%a6%e4%bb%98%e6%8c%87%e5%ae%9a%e5%8c%af%e6%ac%be%e5%90%8c%e6%84%8f%e6%9b%b8/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%a3%bd%e9%9a%aa/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%b9%b4%e9%87%91%e9%9a%aa/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e6%8a%95%e8%b3%87%e5%9e%8b/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%81%a5%e5%ba%b7%e9%9a%aa-%e9%95%b7%e7%85%a7%e9%9a%aa/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%82%b7%e5%ae%b3%e9%9a%aa/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%80%8b%e4%ba%ba%e9%99%84%e7%b4%84/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.twfhclife.com.tw/%e5%95%86%e5%93%81%e5%b0%88%e5%8d%80/%e5%9c%98%e9%ab%94%e4%bf%9d%e9%9a%aa/",
+          "status": 200,
           "contentType": "text/html; charset=UTF-8"
         }
       ],
@@ -610,38 +637,122 @@
       "insurer": "凱基人壽",
       "tiiCode": "205",
       "homepage": "https://www.kgilife.com.tw/",
-      "pagesChecked": 0,
+      "pagesChecked": 18,
       "productsFound": 0,
-      "pages": [],
-      "errors": [
+      "pages": [
         {
           "url": "https://www.kgilife.com.tw/",
-          "message": "This operation was aborted"
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
         },
         {
           "url": "https://www.kgilife.com.tw/robots.txt",
-          "message": "This operation was aborted"
+          "status": 200,
+          "contentType": "text/plain"
         },
         {
           "url": "https://www.kgilife.com.tw/sitemap.xml",
-          "message": "This operation was aborted"
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
         },
         {
           "url": "https://www.kgilife.com.tw/sitemap_index.xml",
-          "message": "This operation was aborted"
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/recommend",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/insurance-knowledge",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/life-refund",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/annuity-assurance",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/aandh",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/travel",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/micro",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal/investment",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/personal",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/group/annually",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/group/project-product",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/group/micro",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/group/familyhealth",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
+        },
+        {
+          "url": "https://www.kgilife.com.tw/zh-tw/product-overview/group/medicalassociation",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8"
         }
       ],
+      "errors": [],
       "products": []
     },
     {
       "insurer": "南山人壽",
       "tiiCode": "206",
       "homepage": "https://www.nanshanlife.com.tw/",
-      "pagesChecked": 2,
+      "pagesChecked": 18,
       "productsFound": 0,
       "pages": [
         {
+          "url": "https://www.nanshanlife.com.tw/",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
           "url": "https://www.nanshanlife.com.tw/robots.txt",
+          "status": 404,
+          "contentType": "text/html; charset=iso-8859-1"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/sitemap.xml",
           "status": 404,
           "contentType": "text/html; charset=iso-8859-1"
         },
@@ -649,27 +760,98 @@
           "url": "https://www.nanshanlife.com.tw/sitemap_index.xml",
           "status": 404,
           "contentType": "text/html; charset=iso-8859-1"
-        }
-      ],
-      "errors": [
-        {
-          "url": "https://www.nanshanlife.com.tw/",
-          "message": "This operation was aborted"
         },
         {
-          "url": "https://www.nanshanlife.com.tw/sitemap.xml",
-          "message": "This operation was aborted"
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-health",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-long-term-care",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-life-caring",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-savings-refund",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-accident",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-travel",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-group-insurance",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-investment",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-selling-bank",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-selling-online",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/public_promotion/subject/Aging/index.html",
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/products-ns-qa",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/features-protection",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.nanshanlife.com.tw/nanshanlife/features-basic",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
         }
       ],
+      "errors": [],
       "products": []
     },
     {
       "insurer": "新光人壽",
       "tiiCode": "208",
       "homepage": "https://www.skl.com.tw/",
-      "pagesChecked": 7,
+      "pagesChecked": 13,
       "productsFound": 2,
       "pages": [
+        {
+          "url": "https://www.skl.com.tw/",
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://www.skl.com.tw/robots.txt",
+          "status": 200,
+          "contentType": "text/html"
+        },
         {
           "url": "https://www.skl.com.tw/sitemap.xml",
           "status": 200,
@@ -679,6 +861,36 @@
           "url": "https://www.skl.com.tw/sitemap_index.xml",
           "status": 200,
           "contentType": "text/html"
+        },
+        {
+          "url": "https://www.skl.com.tw/#",
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/11R000/%E4%BF%9D%E9%9A%AA%E6%A5%AD%E7%B6%93%E7%87%9F%E9%9B%BB%E5%AD%90%E5%95%86%E5%8B%99%E8%87%AA%E5%BE%8B%E8%A6%8F%E7%AF%84.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
+          "url": "https://www.skl.com.tw/sklife_resource/leap_do/www_form/11R000/%E7%B6%B2%E8%B7%AF%E4%BF%9D%E9%9A%AA%E6%9C%8D%E5%8B%99%E5%A5%91%E7%B4%84.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
+          "url": "https://www.skl.com.tw/sklife_resource/leap_do/gallery/1721289598854/%E7%B6%B2%E8%B7%AF%E4%BD%BF%E7%94%A8%E5%AE%89%E5%85%A8%E6%8F%90%E9%86%92.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
+          "url": "https://www.skl.com.tw/Files/doc/%E5%AF%A6%E8%B3%AA%E8%AA%B2%E7%A8%85%E5%8E%9F%E5%89%87.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
+          "url": "https://www.skl.com.tw/sklife_resource/leap_do/gallery/1597972518921/%E6%96%B0%E5%85%89107%E6%A2%9D%E5%B0%88%E5%8D%80_10908.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
         },
         {
           "url": "https://www.skl.com.tw/Files/doc/投資標的投資風險之揭露.pdf?event=page_viewed&amp;page_name=投資風險揭露",
@@ -694,50 +906,31 @@
           "url": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/11V000/公告新光人壽保險股份有限公司檢舉管道.pdf",
           "status": 200,
           "contentType": "application/pdf"
-        },
-        {
-          "url": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/11R000/%E4%BF%9D%E9%9A%AA%E6%A5%AD%E7%B6%93%E7%87%9F%E9%9B%BB%E5%AD%90%E5%95%86%E5%8B%99%E8%87%AA%E5%BE%8B%E8%A6%8F%E7%AF%84.pdf",
-          "status": 200,
-          "contentType": "application/pdf"
-        },
-        {
-          "url": "https://www.skl.com.tw/Files/doc/%E5%AF%A6%E8%B3%AA%E8%AA%B2%E7%A8%85%E5%8E%9F%E5%89%87.pdf",
-          "status": 200,
-          "contentType": "application/pdf"
         }
       ],
-      "errors": [
-        {
-          "url": "https://www.skl.com.tw/",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.skl.com.tw/robots.txt",
-          "message": "This operation was aborted"
-        }
-      ],
+      "errors": [],
       "products": [
         {
-          "code": "DISC-208-M3QP6Q",
+          "code": "DISC-208-BYZQZT",
           "aliases": [
             "DISCOVERED-208"
           ],
-          "name": "指標變額型終身壽險指標月利率",
+          "name": "網路保險服務契約",
           "insurer": "新光人壽",
-          "category": "life",
+          "category": "medical",
           "coverageWan": 0,
           "endAge": 100,
           "premiumMode": "level",
           "premiumChange": "需以正式條款與費率表為準。",
           "rateStatus": "missing",
           "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/13P000/%E6%8C%87%E6%A8%99%E8%AE%8A%E9%A1%8D%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E6%8C%87%E6%A8%99%E6%9C%88%E5%88%A9%E7%8E%87.pdf",
+          "rateSource": "https://www.skl.com.tw/sklife_resource/leap_do/www_form/11R000/%E7%B6%B2%E8%B7%AF%E4%BF%9D%E9%9A%AA%E6%9C%8D%E5%8B%99%E5%A5%91%E7%B4%84.pdf",
           "source": "public-discovery",
-          "sourceUrl": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/13P000/%E6%8C%87%E6%A8%99%E8%AE%8A%E9%A1%8D%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E6%8C%87%E6%A8%99%E6%9C%88%E5%88%A9%E7%8E%87.pdf",
-          "discoveredAt": "2026-07-15T15:38:33.575Z",
-          "confidence": 0.5,
-          "rejected": false,
-          "rejectionReason": "",
+          "sourceUrl": "https://www.skl.com.tw/sklife_resource/leap_do/www_form/11R000/%E7%B6%B2%E8%B7%AF%E4%BF%9D%E9%9A%AA%E6%9C%8D%E5%8B%99%E5%A5%91%E7%B4%84.pdf",
+          "discoveredAt": "2026-08-23T18:20:19.827Z",
+          "confidence": 0.4,
+          "rejected": true,
+          "rejectionReason": "non-product-document",
           "note": "由公開網站自動發現；尚未完成正式費率表結構化解析，使用前需人工或後續解析器確認。"
         },
         {
@@ -757,7 +950,7 @@
           "rateSource": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/11V000/%E5%85%AC%E5%91%8A%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E4%BF%9D%E9%9A%AA%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E6%AA%A2%E8%88%89%E7%AE%A1%E9%81%93.pdf",
           "source": "public-discovery",
           "sourceUrl": "https://www.skl.com.tw/sklife_resource/leap_do//www_form/11V000/%E5%85%AC%E5%91%8A%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E4%BF%9D%E9%9A%AA%E8%82%A1%E4%BB%BD%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E6%AA%A2%E8%88%89%E7%AE%A1%E9%81%93.pdf",
-          "discoveredAt": "2026-07-15T15:38:34.450Z",
+          "discoveredAt": "2026-08-23T18:20:21.800Z",
           "confidence": 0.4,
           "rejected": true,
           "rejectionReason": "non-product-document",
@@ -770,7 +963,7 @@
       "tiiCode": "209",
       "homepage": "https://www.fubon.com/life/",
       "pagesChecked": 18,
-      "productsFound": 140,
+      "productsFound": 128,
       "pages": [
         {
           "url": "https://www.fubon.com/life/product/personal/oiu/",
@@ -874,13 +1067,13 @@
           "coverageWan": 0,
           "endAge": 100,
           "premiumMode": "ageBand",
-          "premiumChange": "公開來源提到費率或年齡級距；仍需正式費率表解析後才能試算。",
+          "premiumChange": "公開來源提到定期、費率或年齡級距；保費應依年齡或續保年齡調整，仍需正式費率表解析後才能精算。",
           "rateStatus": "missing",
           "rateUnitCoverage": 1000000,
           "rateSource": "https://www.fubon.com/life/product/personal/oiu/",
           "source": "public-discovery",
           "sourceUrl": "https://www.fubon.com/life/product/personal/oiu/",
-          "discoveredAt": "2026-07-15T15:38:41.628Z",
+          "discoveredAt": "2026-08-23T18:20:23.903Z",
           "confidence": 0.6,
           "rejected": false,
           "rejectionReason": "",
@@ -901,7 +1094,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -922,7 +1115,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -943,7 +1136,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -964,7 +1157,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -985,7 +1178,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1006,7 +1199,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1027,7 +1220,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1048,7 +1241,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/investing/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/investing/",
-          "discoveredAt": "2026-07-15T15:38:45.275Z",
+          "discoveredAt": "2026-08-23T18:20:25.706Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1069,7 +1262,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.385Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1090,7 +1283,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1111,7 +1304,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1132,7 +1325,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1156,7 +1349,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1177,7 +1370,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1198,7 +1391,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1219,7 +1412,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1240,7 +1433,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1261,7 +1454,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/",
-          "discoveredAt": "2026-07-15T15:38:46.386Z",
+          "discoveredAt": "2026-08-23T18:20:26.238Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1282,7 +1475,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1303,7 +1496,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1324,7 +1517,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1345,7 +1538,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1368,7 +1561,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1389,7 +1582,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1413,7 +1606,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1434,7 +1627,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1455,7 +1648,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1476,7 +1669,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1497,7 +1690,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1518,7 +1711,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1539,7 +1732,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/accident/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/accident/",
-          "discoveredAt": "2026-07-15T15:38:47.439Z",
+          "discoveredAt": "2026-08-23T18:20:26.837Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1560,7 +1753,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1581,7 +1774,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1608,7 +1801,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1633,7 +1826,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1654,7 +1847,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1678,7 +1871,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1702,7 +1895,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1723,7 +1916,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1744,7 +1937,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1765,7 +1958,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1786,7 +1979,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1807,7 +2000,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1828,7 +2021,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1849,7 +2042,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1870,11 +2063,32 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "主約；投保年齡：0~70歲 繳費年期 6年期 保障年期 終身 基本壽險保障 生存金 保險單紅利 專人服務 更多內容"
+        },
+        {
+          "code": "FEG",
+          "aliases": [],
+          "name": "美富豐盛外幣保險",
+          "insurer": "富邦人壽",
+          "category": "life",
+          "coverageWan": 0,
+          "endAge": 100,
+          "premiumMode": "ageBand",
+          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
+          "rateStatus": "missing",
+          "rateUnitCoverage": 1000000,
+          "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
+          "source": "public-product-list",
+          "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
+          "confidence": 0.95,
+          "rejected": false,
+          "rejectionReason": "",
+          "note": "主約；投保年齡：0歲~90歲 繳費年期 躉繳 保障年期 18年 基本壽險保障 外幣資產 滿期金 更多內容"
         },
         {
           "code": "ICK",
@@ -1891,7 +2105,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1914,7 +2128,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1935,7 +2149,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1956,7 +2170,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1977,32 +2191,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "主約；投保年齡：0歲~85歲 繳費年期 2年期 保障年期 終身 基本壽險保障 生存金 專人服務 更多內容"
-        },
-        {
-          "code": "FED",
-          "aliases": [],
-          "name": "美富豐沛外幣保險",
-          "insurer": "富邦人壽",
-          "category": "critical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "ageBand",
-          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；投保年齡：0 歲~90 歲 繳費年期 躉繳 保障年期 15年 基本壽險保障 外幣資產 滿期金 重大疾病 專人服務 更多內容"
         },
         {
           "code": "FEF",
@@ -2019,7 +2212,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2043,7 +2236,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2066,7 +2259,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2089,7 +2282,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2110,7 +2303,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2131,7 +2324,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2152,7 +2345,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2173,7 +2366,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2194,11 +2387,95 @@
           "rateSource": "https://www.fubon.com/life/product/personal/long-term-saving/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/long-term-saving/",
-          "discoveredAt": "2026-07-15T15:38:49.967Z",
+          "discoveredAt": "2026-08-23T18:20:27.755Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "主約；投保年齡：0歲~75歲 繳費年期 6年期 保障年期 終身 基本壽險保障 增值回饋分享金 生存金 專人服務 更多內容 TOP 客戶協助 客服中心 我要留言 保戶常見問題 金融友善服務 網站導覽與聲明 網站導覽 隱私權聲明"
+        },
+        {
+          "code": "XDZ",
+          "aliases": [],
+          "name": "分齡守護重大疾病暨特定傷病健康保險",
+          "insurer": "富邦人壽",
+          "category": "critical",
+          "coverageWan": 0,
+          "endAge": 90,
+          "premiumMode": "ageBand",
+          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
+          "rateStatus": "missing",
+          "rateUnitCoverage": 1000000,
+          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
+          "source": "public-product-list",
+          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
+          "confidence": 0.95,
+          "rejected": false,
+          "rejectionReason": "",
+          "note": "主約；投保年齡：20歲~70歲 繳費年期 同保險年期 保障年期 90歲屆滿 外溢回饋 重大疾病 特定傷病 更多內容"
+        },
+        {
+          "code": "LTQ",
+          "aliases": [],
+          "name": "連馨久久長期照顧終身健康保險",
+          "insurer": "富邦人壽",
+          "category": "medical",
+          "coverageWan": 0,
+          "endAge": 100,
+          "premiumMode": "ageBand",
+          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
+          "rateStatus": "missing",
+          "rateUnitCoverage": 1000000,
+          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
+          "source": "public-product-list",
+          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
+          "confidence": 0.95,
+          "rejected": false,
+          "rejectionReason": "",
+          "note": "主約；投保年齡：15歲~70歲 繳費年期 10年期、20年期、30年期 保障年期 終身 基本壽險保障 醫療保障 長期照護 豁免保費 失能扶助 外溢回饋 專人服務 更多內容"
+        },
+        {
+          "code": "LTT",
+          "aliases": [],
+          "name": "順馨久久長期照顧定期健康保險",
+          "insurer": "富邦人壽",
+          "category": "medical",
+          "coverageWan": 0,
+          "endAge": 85,
+          "premiumMode": "ageBand",
+          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
+          "rateStatus": "missing",
+          "rateUnitCoverage": 1000000,
+          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
+          "source": "public-product-list",
+          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
+          "confidence": 0.95,
+          "rejected": false,
+          "rejectionReason": "",
+          "note": "主約；投保年齡：15歲~65歲 繳費年期 10年期、20年期、30年期 保障年期 85歲屆滿 長期照護 豁免保費 失能扶助 外溢回饋 專人服務 更多內容"
+        },
+        {
+          "code": "LTU",
+          "aliases": [],
+          "name": "和馨久久長期照顧終身健康保險附約",
+          "insurer": "富邦人壽",
+          "category": "medical",
+          "coverageWan": 0,
+          "endAge": 100,
+          "premiumMode": "ageBand",
+          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
+          "rateStatus": "missing",
+          "rateUnitCoverage": 1000000,
+          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
+          "source": "public-product-list",
+          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
+          "confidence": 0.95,
+          "rejected": false,
+          "rejectionReason": "",
+          "note": "附約；投保年齡：15歲~60歲 繳費年期 同保險年期 保障年期 終身(至保險年齡屆滿99歲) 長期照護 豁免保費 外溢回饋 專人服務 更多內容"
         },
         {
           "code": "HAC1",
@@ -2221,11 +2498,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：0～65歲 繳費年期 10年期、20年期、30年期 保障年期 95歲屆滿或100歲屆滿 基本壽險保障 醫療保障 實支實付 外溢回饋 更多內容"
+          "note": "主約；投保年齡：0～65歲 繳費年期 10年期、20年期、30年期 保障年期 95歲屆滿或100歲屆滿 基本壽險保障 醫療保障 實支實付 外溢回饋 專人服務 更多內容"
         },
         {
           "code": "XDW",
@@ -2242,11 +2519,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：55歲~80歲 繳費年期 10年期、15年期、20年期 保障年期 同保險年期 外溢回饋 重大疾病 特定傷病 更多內容"
+          "note": "主約；投保年齡：55歲~80歲 繳費年期 10年期、15年期、20年期 保障年期 10年期、15年期、20年期 外溢回饋 重大疾病 特定傷病 專人服務 更多內容"
         },
         {
           "code": "XDV",
@@ -2263,11 +2540,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：55歲～80歲 繳費年期 同保險年期 保障年期 10年期、15年期、20年期 癌症保障 外溢回饋 重大疾病 特定傷病 更多內容"
+          "note": "主約；投保年齡：55歲～80歲 繳費年期 同保險年期 保障年期 10年期、15年期、20年期 癌症保障 外溢回饋 重大疾病 特定傷病 專人服務 更多內容"
         },
         {
           "code": "HJM",
@@ -2284,11 +2561,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：0歲~65歲 繳費年期 10年期、20年期 保障年期 終身 基本壽險保障 醫療保障 傷害醫療 豁免保費 外溢回饋 更多內容"
+          "note": "主約；投保年齡：0歲~65歲 繳費年期 10年期、20年期 保障年期 終身 基本壽險保障 醫療保障 傷害醫療 豁免保費 外溢回饋 專人服務 更多內容"
         },
         {
           "code": "XDX",
@@ -2305,11 +2582,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：55歲~80歲 繳費年期 同保障年期 保障年期 10 年期、15 年期、20 年期 外溢回饋 重大疾病 特定傷病 更多內容"
+          "note": "主約；投保年齡：55歲~80歲 繳費年期 同保障年期 保障年期 10 年期、15 年期、20 年期 外溢回饋 重大疾病 特定傷病 專人服務 更多內容"
         },
         {
           "code": "LTP",
@@ -2326,11 +2603,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：15足歲~65歲 繳費年期 10年期'、20年期、30年期 保障年期 終身 基本壽險保障 長期照護 外溢回饋 更多內容"
+          "note": "主約；投保年齡：15足歲~65歲 繳費年期 10年期、20年期、30年期 保障年期 終身 基本壽險保障 長期照護 外溢回饋 專人服務 更多內容"
         },
         {
           "code": "CLZ",
@@ -2347,11 +2624,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
-          "note": "主約；投保年齡：18足歲～60歲 繳費年期 10年期、20年期 保障年期 89歲屆滿 基本壽險保障 癌症保障 滿期金 豁免保費 外溢回饋 特定傷病 更多內容"
+          "note": "主約；投保年齡：18足歲～60歲 繳費年期 10年期、20年期 保障年期 89歲屆滿 基本壽險保障 癌症保障 滿期金 豁免保費 外溢回饋 特定傷病 專人服務 更多內容"
         },
         {
           "code": "EHD",
@@ -2368,7 +2645,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2389,7 +2666,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2410,7 +2687,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2431,7 +2708,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2452,7 +2729,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2473,7 +2750,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2494,7 +2771,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2515,7 +2792,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2536,7 +2813,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2557,7 +2834,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2578,7 +2855,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2599,7 +2876,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2620,7 +2897,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2641,7 +2918,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2662,7 +2939,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2685,7 +2962,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2706,7 +2983,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2727,7 +3004,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2748,7 +3025,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2769,7 +3046,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2792,7 +3069,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2813,7 +3090,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2837,7 +3114,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2858,7 +3135,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2879,7 +3156,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2903,7 +3180,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2924,7 +3201,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -2945,53 +3222,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "附約；投保年齡：0歲~65歲 繳費年期 同保險年期 保障年期 90歲屆滿 醫療保障 重大疾病 專人服務 更多內容"
-        },
-        {
-          "code": "LTK1",
-          "aliases": [],
-          "name": "連馨滿溢長期照顧終身健康保險",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "ageBand",
-          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；投保年齡：15歲~70歲 繳費年期 10年期、20年期、30年期 保障年期 終身 基本壽險保障 長期照護 豁免保費 失能扶助 外溢回饋 專人服務 更多內容"
-        },
-        {
-          "code": "LTM1",
-          "aliases": [],
-          "name": "順馨滿溢長期照顧定期健康保險",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 84,
-          "premiumMode": "ageBand",
-          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；投保年齡：15歲～65歲 繳費年期 10年期、20年期、30年期 保障年期 至保險年齡84歲屆滿 長期照護 豁免保費 失能扶助 外溢回饋 專人服務 更多內容"
         },
         {
           "code": "EHA",
@@ -3008,7 +3243,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3029,7 +3264,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3050,7 +3285,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3071,32 +3306,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "主約；投保年齡：55歲~80歲 繳費年期 10年期、15年期、20年期 保障年期 10年期、15年期、20年期 癌症保障 外溢回饋 專人服務 更多內容"
-        },
-        {
-          "code": "LAR1",
-          "aliases": [],
-          "name": "和馨長期照顧終身健康保險附約",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "ageBand",
-          "premiumChange": "公開商品頁列示為定期或年齡相關商品；正式保費仍需費率表。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/medical/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "附約；投保年齡：15歲~60歲 繳費年期 同保險年期 保障年期 終身(至保險年齡屆滿95歲) 長期照護 豁免保費 專人服務 更多內容"
         },
         {
           "code": "SWW",
@@ -3113,7 +3327,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3134,7 +3348,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3155,7 +3369,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3176,7 +3390,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3197,7 +3411,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3218,7 +3432,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3239,7 +3453,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3260,7 +3474,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3281,7 +3495,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3302,7 +3516,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3323,7 +3537,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3344,7 +3558,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3365,7 +3579,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3386,7 +3600,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3407,7 +3621,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3428,7 +3642,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3449,7 +3663,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3470,7 +3684,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3491,7 +3705,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3512,7 +3726,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3533,263 +3747,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/medical/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/medical/",
-          "discoveredAt": "2026-07-15T15:38:52.783Z",
+          "discoveredAt": "2026-08-23T18:20:30.024Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "附約；投保年齡：0歲~65歲 繳費年期 15年期、20年期 保障年期 終身 癌症保障 豁免保費 專人服務 更多內容 TOP 客戶協助 客服中心 我要留言 保戶常見問題 金融友善服務 網站導覽與聲明 網站導覽 隱私權聲明 法定傳染病"
-        },
-        {
-          "code": "PFT",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "critical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；重大疾病 特定傷病 更多內容"
-        },
-        {
-          "code": "PFJ",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；更多內容"
-        },
-        {
-          "code": "PAO",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PFG",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PFK",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PAI",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PAF",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PFD",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PFA",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "FPC",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；更多內容"
-        },
-        {
-          "code": "PFU",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
-        },
-        {
-          "code": "PFP",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；更多內容"
         },
         {
           "code": "XTY",
@@ -3806,32 +3768,11 @@
           "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
+          "discoveredAt": "2026-08-23T18:20:31.902Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
           "note": "附約；投保年齡：15足歲~65歲 繳費年期 10年期、20年、30年期、50歲滿期、55歲滿期、60歲滿期、65歲滿期 保障年期 同繳費年期 基本壽險保障 外溢回饋 專人服務 更多內容"
-        },
-        {
-          "code": "PFH",
-          "aliases": [],
-          "name": "保險單紅利",
-          "insurer": "富邦人壽",
-          "category": "medical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
-          "source": "public-product-list",
-          "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
-          "confidence": 0.95,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "主約；專人服務 更多內容"
         },
         {
           "code": "WPA",
@@ -3848,7 +3789,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/life-refund/",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/life-refund/",
-          "discoveredAt": "2026-07-15T15:38:56.131Z",
+          "discoveredAt": "2026-08-23T18:20:31.902Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -3860,19 +3801,9 @@
       "insurer": "三商美邦人壽",
       "tiiCode": "211",
       "homepage": "https://www.mli.com.tw/",
-      "pagesChecked": 11,
+      "pagesChecked": 2,
       "productsFound": 0,
       "pages": [
-        {
-          "url": "https://www.mli.com.tw/",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/robots.txt",
-          "status": 200,
-          "contentType": "text/plain"
-        },
         {
           "url": "https://www.mli.com.tw/sitemap.xml",
           "status": 200,
@@ -3882,70 +3813,15 @@
           "url": "https://www.mli.com.tw/sitemap_index.xml",
           "status": 404,
           "contentType": "text/html"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/home#",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/reimbursement-pension",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/spot-annuity",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/deferred-annuity",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/health-broken",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/health-exemption",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/travel",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
         }
       ],
       "errors": [
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/popularity",
+          "url": "https://www.mli.com.tw/",
           "message": "This operation was aborted"
         },
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/protection-regular",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/protection-lifetime",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/reimbursement-lifetime",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/health-hospitalization",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/health-cancer",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/accidental",
+          "url": "https://www.mli.com.tw/robots.txt",
           "message": "This operation was aborted"
         }
       ],
@@ -3966,7 +3842,7 @@
         {
           "url": "https://www.fglife.com.tw/robots.txt",
           "status": 200,
-          "contentType": "text/plain"
+          "contentType": "text/plain; charset=utf-8"
         },
         {
           "url": "https://www.fglife.com.tw/sitemap.xml",
@@ -4249,6 +4125,11 @@
           "contentType": "application/pdf"
         },
         {
+          "url": "https://my.tcb-life.com.tw/api/assets/b8d51e1a-b98e-4a4e-84d4-13b7bcb46a9f/PFLE_合作金庫人壽保單融資批註條款_橫式條款_20260817.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
           "url": "https://my.tcb-life.com.tw/api/assets/cf510c49-fc76-4eef-986f-9aa9a39a91ca/商品條款_合作金庫人壽真美傳家美元利率變動型終身壽險－定期給付型_UISL8.pdf",
           "status": 200,
           "contentType": "application/pdf"
@@ -4302,11 +4183,6 @@
           "url": "https://my.tcb-life.com.tw/file/26000069/TCB7677202603136929.pdf",
           "status": 200,
           "contentType": "application/pdf"
-        },
-        {
-          "url": "https://my.tcb-life.com.tw/file/316/2018-5678.pdf",
-          "status": 200,
-          "contentType": "application/pdf"
         }
       ],
       "errors": [],
@@ -4321,14 +4197,14 @@
           "category": "life",
           "coverageWan": 0,
           "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
+          "premiumMode": "ageBand",
+          "premiumChange": "公開來源提到定期、費率或年齡級距；保費應依年齡或續保年齡調整，仍需正式費率表解析後才能精算。",
           "rateStatus": "missing",
           "rateUnitCoverage": 1000000,
           "rateSource": "https://my.tcb-life.com.tw/api/assets/cf510c49-fc76-4eef-986f-9aa9a39a91ca/%E5%95%86%E5%93%81%E6%A2%9D%E6%AC%BE_%E5%90%88%E4%BD%9C%E9%87%91%E5%BA%AB%E4%BA%BA%E5%A3%BD%E7%9C%9F%E7%BE%8E%E5%82%B3%E5%AE%B6%E7%BE%8E%E5%85%83%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%EF%BC%8D%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B_UISL8.pdf",
           "source": "public-discovery",
           "sourceUrl": "https://my.tcb-life.com.tw/api/assets/cf510c49-fc76-4eef-986f-9aa9a39a91ca/%E5%95%86%E5%93%81%E6%A2%9D%E6%AC%BE_%E5%90%88%E4%BD%9C%E9%87%91%E5%BA%AB%E4%BA%BA%E5%A3%BD%E7%9C%9F%E7%BE%8E%E5%82%B3%E5%AE%B6%E7%BE%8E%E5%85%83%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%EF%BC%8D%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B_UISL8.pdf",
-          "discoveredAt": "2026-07-15T15:41:07.671Z",
+          "discoveredAt": "2026-08-23T18:21:56.615Z",
           "confidence": 0.55,
           "rejected": false,
           "rejectionReason": "",
@@ -4344,14 +4220,14 @@
           "category": "critical",
           "coverageWan": 0,
           "endAge": 100,
-          "premiumMode": "level",
-          "premiumChange": "需以正式條款與費率表為準。",
+          "premiumMode": "ageBand",
+          "premiumChange": "公開來源提到定期、費率或年齡級距；保費應依年齡或續保年齡調整，仍需正式費率表解析後才能精算。",
           "rateStatus": "missing",
           "rateUnitCoverage": 1000000,
           "rateSource": "https://my.tcb-life.com.tw/api/assets/3c516dd9-18a2-4970-80d7-2ef12d68530f/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%9A%A8%E9%99%84%E7%B4%84%E4%BF%9D%E9%9A%AA%E6%88%90%E6%9C%AC%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BE%E7%94%B3%E8%AB%8B11501.pdf",
           "source": "public-discovery",
           "sourceUrl": "https://my.tcb-life.com.tw/api/assets/3c516dd9-18a2-4970-80d7-2ef12d68530f/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%9A%A8%E9%99%84%E7%B4%84%E4%BF%9D%E9%9A%AA%E6%88%90%E6%9C%AC%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BE%E7%94%B3%E8%AB%8B11501.pdf",
-          "discoveredAt": "2026-07-15T15:41:10.620Z",
+          "discoveredAt": "2026-08-23T18:22:03.965Z",
           "confidence": 0.5,
           "rejected": false,
           "rejectionReason": "",
@@ -4825,9 +4701,14 @@
       "insurer": "安達人壽",
       "tiiCode": "270",
       "homepage": "https://life.chubb.com/tw-zh/",
-      "pagesChecked": 3,
+      "pagesChecked": 18,
       "productsFound": 0,
       "pages": [
+        {
+          "url": "https://life.chubb.com/tw-zh/",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
         {
           "url": "https://life.chubb.com/robots.txt",
           "status": 200,
@@ -4842,14 +4723,79 @@
           "url": "https://life.chubb.com/sitemap_index.xml",
           "status": 404,
           "contentType": "text/html;charset=utf-8"
-        }
-      ],
-      "errors": [
+        },
         {
-          "url": "https://life.chubb.com/tw-zh/",
-          "message": "This operation was aborted"
+          "url": "https://life.chubb.com/tw-zh/products.htm",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/life.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/protection/health-insurance.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/protection/participating-insurance.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/protection/senior-protection.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/protection/working-holiday.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/investing/universal-life.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/investing/variable-annuity.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/investing/prospectus.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/investing/investment-related.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/riders.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/discontinued/investment-products.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/discontinued/traditional-products.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
+        },
+        {
+          "url": "https://life.chubb.com/tw-zh/products/discontinued/riders.html",
+          "status": 200,
+          "contentType": "text/html;charset=utf-8"
         }
       ],
+      "errors": [],
       "products": []
     },
     {
