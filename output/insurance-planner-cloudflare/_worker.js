@@ -7,7 +7,8 @@ const CACHE_SECONDS = 60 * 60 * 24 * 7;
 const LIVE_CACHE_VERSION = "4";
 const SESSION_COOKIE = "jarvis_insurance_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
-const PASSWORD_ITERATIONS = 600_000;
+const PASSWORD_ITERATIONS = 100_000;
+const LEGACY_PASSWORD_ITERATIONS = 20_000;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_MAX_FAILURES = 8;
 const REGISTER_WINDOW_MS = 60 * 60 * 1000;
@@ -57,6 +58,9 @@ async function sha256(value) {
 }
 
 async function passwordHash(password, salt, iterations = PASSWORD_ITERATIONS) {
+  if (!Number.isInteger(iterations) || iterations < 1 || iterations > PASSWORD_ITERATIONS) {
+    throw new Error("invalid_password_iterations");
+  }
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(password),
@@ -71,6 +75,14 @@ async function passwordHash(password, salt, iterations = PASSWORD_ITERATIONS) {
     iterations,
   }, key, 256);
   return bytesToBase64Url(new Uint8Array(bits));
+}
+
+function storedPasswordIterations(value) {
+  const iterations = Number(value || LEGACY_PASSWORD_ITERATIONS);
+  if (!Number.isInteger(iterations) || iterations < 1 || iterations > PASSWORD_ITERATIONS) {
+    return LEGACY_PASSWORD_ITERATIONS;
+  }
+  return iterations;
 }
 
 function constantTimeEqual(left, right) {
@@ -816,17 +828,18 @@ async function loginAccount(request, env) {
       "SELECT id, username, display_name, password_hash, password_salt, password_iterations FROM users WHERE username = ?",
     ).bind(username).first()
     : null;
+  const storedIterations = storedPasswordIterations(row?.password_iterations);
   const candidate = await passwordHash(
     password,
     row?.password_salt || "jarvis-insurance-invalid-account",
-    Number(row?.password_iterations || PASSWORD_ITERATIONS),
+    storedIterations,
   );
   if (!row || !constantTimeEqual(candidate, row.password_hash)) {
     await recordRateLimitFailure(env, loginKey, LOGIN_WINDOW_MS);
     return privateJsonResponse({ error: "invalid_credentials", message: "帳號或密碼不正確" }, 401);
   }
   await clearRateLimit(env, loginKey);
-  if (Number(row.password_iterations || 0) < PASSWORD_ITERATIONS) {
+  if (storedIterations < PASSWORD_ITERATIONS || Number(row.password_iterations) !== storedIterations) {
     const upgradedSalt = randomToken(18);
     const upgradedHash = await passwordHash(password, upgradedSalt, PASSWORD_ITERATIONS);
     await env.DB.prepare(
@@ -962,7 +975,7 @@ async function deleteAccount(request, env) {
   const candidate = await passwordHash(
     password,
     row?.password_salt || "jarvis-insurance-invalid-account",
-    Number(row?.password_iterations || PASSWORD_ITERATIONS),
+    storedPasswordIterations(row?.password_iterations),
   );
   if (!row || !constantTimeEqual(candidate, row.password_hash)) {
     await recordRateLimitFailure(env, deleteKey, LOGIN_WINDOW_MS);
