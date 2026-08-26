@@ -299,6 +299,23 @@ def parse_iso_date(value: Any, fallback: datetime | None = None) -> datetime:
     return fallback or datetime.now()
 
 
+def flight_trip_day_options(source: dict[str, Any], radius: int = 2) -> list[int]:
+    selected = max(0, min(int(source.get("trip_days") or 0), 60))
+    if selected == 0:
+        return [0]
+    configured = source.get("trip_day_options")
+    values = configured if isinstance(configured, list) else range(selected - radius, selected + radius + 1)
+    options = {selected}
+    for value in values:
+        try:
+            days = int(value)
+        except (TypeError, ValueError):
+            continue
+        if 1 <= days <= 60:
+            options.add(days)
+    return sorted(options)
+
+
 def skyscanner_date_parts(value: datetime) -> dict[str, int]:
     return {"year": value.year, "month": value.month}
 
@@ -533,25 +550,50 @@ def get_serpapi_sampled_flight_candidates(
     offset = today.toordinal() % span
     outbound = start + timedelta(days=offset)
     trip_days = max(0, min(int(source.get("trip_days") or 0), 60))
-    sampled_source = dict(source)
-    sampled_source.update(
-        {
-            "type": "serpapi_google_flights",
-            "outbound_date": outbound.strftime("%Y-%m-%d"),
-            "return_date": (outbound + timedelta(days=trip_days)).strftime("%Y-%m-%d") if trip_days else "",
-            "flight_type": "1" if trip_days else "2",
-            "gl": str(source.get("market") or source.get("gl") or "TW").lower(),
-            "hl": str(source.get("locale") or source.get("hl") or "zh-TW").lower(),
-            "range_start": start.strftime("%Y-%m-%d"),
-            "range_end": (start + timedelta(days=horizon_days)).strftime("%Y-%m-%d"),
-            "travel_class": str(source.get("travel_class") or "1"),
-        }
-    )
-    candidates = get_google_flights_candidates(watch, sampled_source, file_config, timeout)
+    configured_trip_day_options = flight_trip_day_options(source)
+    alternative_trip_days = [days for days in configured_trip_day_options if days != trip_days]
+    if parse_bool(source.get("compare_all_trip_days"), False) or not alternative_trip_days:
+        trip_day_options = configured_trip_day_options
+    else:
+        rotating_alternative = alternative_trip_days[today.toordinal() % len(alternative_trip_days)]
+        trip_day_options = sorted({trip_days, rotating_alternative})
+    candidates: list[dict[str, Any]] = []
+    errors: list[str] = []
+    for days in trip_day_options:
+        sampled_source = dict(source)
+        sampled_source.update(
+            {
+                "type": "serpapi_google_flights",
+                "id": f"{source.get('id') or 'google-flights-sampled'}:{days}d",
+                "outbound_date": outbound.strftime("%Y-%m-%d"),
+                "return_date": (outbound + timedelta(days=days)).strftime("%Y-%m-%d") if days else "",
+                "trip_days": days,
+                "flight_type": "1" if days else "2",
+                "gl": str(source.get("market") or source.get("gl") or "TW").lower(),
+                "hl": str(source.get("locale") or source.get("hl") or "zh-TW").lower(),
+                "range_start": start.strftime("%Y-%m-%d"),
+                "range_end": (start + timedelta(days=horizon_days)).strftime("%Y-%m-%d"),
+                "travel_class": str(source.get("travel_class") or "1"),
+            }
+        )
+        try:
+            candidates.extend(get_google_flights_candidates(watch, sampled_source, file_config, timeout))
+        except Exception as exc:
+            errors.append(f"{days} days: {exc}")
+    if not candidates:
+        raise RuntimeError("; ".join(errors) or "Google Flights returned no trip-duration results")
+    selected_candidates = [item for item in candidates if int((item.get("raw") or {}).get("trip_days") or 0) == trip_days]
+    selected_best = min(selected_candidates, key=lambda item: float(item["price"])) if selected_candidates else None
     for candidate in candidates:
-        candidate["raw"]["provider"] = "serpapi_google_flights_sampled"
-        candidate["raw"]["sampled"] = True
-    return candidates
+        raw = candidate["raw"]
+        actual_days = int(raw.get("trip_days") or 0)
+        raw["provider"] = "serpapi_google_flights_sampled"
+        raw["sampled"] = True
+        raw["requested_trip_days"] = trip_days
+        raw["is_alternative_duration"] = actual_days != trip_days
+        raw["duration_savings"] = float(selected_best["price"]) - float(candidate["price"]) if selected_best else None
+        raw["comparison_cycle_days"] = len(alternative_trip_days)
+    return sorted(candidates, key=lambda item: float(item["price"]))
 
 
 def get_skyscanner_indicative_candidates(
@@ -573,6 +615,7 @@ def get_skyscanner_indicative_candidates(
     horizon_days = 365 if mode == "annual_low" else max(1, min(int(source.get("lookahead_days") or 30), 365))
     end = start + timedelta(days=horizon_days)
     trip_days = max(0, min(int(source.get("trip_days") or 0), 60))
+    trip_day_options = flight_trip_day_options(source)
     currency = str(source.get("currency") or watch.get("currency") or "TWD")
     query_legs: list[dict[str, Any]] = [
         {
@@ -585,13 +628,15 @@ def get_skyscanner_indicative_candidates(
         }
     ]
     if trip_days > 0:
+        minimum_trip_days = min(trip_day_options)
+        maximum_trip_days = max(trip_day_options)
         query_legs.append(
             {
                 "originPlace": {"queryPlace": {"iata": arrival}},
                 "destinationPlace": {"queryPlace": {"iata": departure}},
                 "dateRange": {
-                    "startDate": skyscanner_date_parts(start + timedelta(days=trip_days)),
-                    "endDate": skyscanner_date_parts(end + timedelta(days=trip_days)),
+                    "startDate": skyscanner_date_parts(start + timedelta(days=minimum_trip_days)),
+                    "endDate": skyscanner_date_parts(end + timedelta(days=maximum_trip_days)),
                 },
             }
         )
@@ -622,8 +667,10 @@ def get_skyscanner_indicative_candidates(
             if not return_date:
                 continue
             duration = (parse_iso_date(return_date) - parse_iso_date(outbound_date)).days
-            if duration != trip_days:
+            if duration not in trip_day_options:
                 continue
+        else:
+            duration = 0
         date_label = f"{outbound_date} - {return_date}" if return_date else outbound_date
         candidates.append(
             {
@@ -642,7 +689,9 @@ def get_skyscanner_indicative_candidates(
                     "mode": mode,
                     "departure_date": outbound_date,
                     "return_date": return_date,
-                    "trip_days": trip_days,
+                    "trip_days": duration,
+                    "requested_trip_days": trip_days,
+                    "is_alternative_duration": duration != trip_days,
                     "range_start": start_text,
                     "range_end": end_text,
                     "cached": True,
@@ -652,6 +701,12 @@ def get_skyscanner_indicative_candidates(
     candidates.sort(key=lambda item: float(item["price"]))
     if not candidates:
         raise RuntimeError("Skyscanner returned no matching indicative quotes")
+    selected_candidates = [item for item in candidates if int((item.get("raw") or {}).get("trip_days") or 0) == trip_days]
+    selected_best = min(selected_candidates, key=lambda item: float(item["price"])) if selected_candidates else None
+    for candidate in candidates:
+        candidate["raw"]["duration_savings"] = (
+            float(selected_best["price"]) - float(candidate["price"]) if selected_best else None
+        )
     range_low = float(candidates[0]["price"])
     for candidate in candidates:
         candidate["raw"]["range_low"] = range_low
@@ -796,6 +851,8 @@ def get_flight_year_average(
             values.append((float(result["price"]), "9999-current", result.get("raw") or {}))
     for price, observed_at, raw in values:
         departure_date = str(raw.get("departure_date") or "")
+        if raw.get("is_alternative_duration"):
+            continue
         if not departure_date.startswith(f"{year:04d}-"):
             continue
         previous = latest_by_date.get(departure_date)
@@ -914,6 +971,8 @@ def build_alert_message(
     strategy = str(watch.get("alert_strategy") or "")
     if alert_type == "target":
         label = "到價提醒"
+    elif alert_type == "duration_deal":
+        label = "其他天數低價"
     elif strategy == "annual_floor":
         label = "未來一年最低機票"
     else:
@@ -929,6 +988,16 @@ def build_alert_message(
         if raw.get("return_date"):
             date_text += f" 至 {raw['return_date']}"
         lines.append(f"日期：{date_text}")
+    requested_trip_days = int(raw.get("requested_trip_days") or raw.get("trip_days") or 0)
+    actual_trip_days = int(raw.get("trip_days") or 0)
+    if requested_trip_days and actual_trip_days:
+        if actual_trip_days != requested_trip_days:
+            lines.append(f"旅行天數：{actual_trip_days} 天（原選 {requested_trip_days} 天）")
+        else:
+            lines.append(f"旅行天數：{actual_trip_days} 天")
+    duration_savings = parse_price_number(raw.get("duration_savings"))
+    if duration_savings is not None and duration_savings > 0:
+        lines.append(f"比原行程省：{format_money(duration_savings, currency)}")
     if target_price is not None:
         lines.append(f"目標價：{format_money(target_price, currency)}")
     if year_low is not None and year_high is not None:
@@ -1069,6 +1138,44 @@ def process_watch(
                 alerts.append(message)
                 if not dry_run:
                     insert_alert(db, watch["id"], best["source_id"], "new_low", best_price, target_price, observed_at_text, message)
+        selected_duration_candidates = [
+            item for item in available
+            if not (item.get("raw") or {}).get("is_alternative_duration")
+        ]
+        selected_duration_best = min(selected_duration_candidates, key=lambda item: float(item["price"])) if selected_duration_candidates else None
+        duration_deals = [
+            item for item in available
+            if (item.get("raw") or {}).get("is_alternative_duration")
+            and selected_duration_best is not None
+            and float(item["price"]) < float(selected_duration_best["price"])
+        ]
+        duration_deal = min(duration_deals, key=lambda item: float(item["price"])) if duration_deals else None
+        if duration_deal and not alerts:
+            recent = get_recent_alert(db, watch["id"], "duration_deal", observed_at, cooldown_days)
+            if force_alert or recent is None:
+                message = build_alert_message(
+                    watch,
+                    duration_deal,
+                    "duration_deal",
+                    target_price,
+                    year_low,
+                    year_high,
+                    comparison_year,
+                    current_year_average,
+                    previous_year_average,
+                )
+                alerts.append(message)
+                if not dry_run:
+                    insert_alert(
+                        db,
+                        watch["id"],
+                        duration_deal["source_id"],
+                        "duration_deal",
+                        float(duration_deal["price"]),
+                        target_price,
+                        observed_at_text,
+                        message,
+                    )
     if alerts and not dry_run:
         db.commit()
 

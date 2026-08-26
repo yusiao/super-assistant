@@ -5,7 +5,9 @@ import io
 import json
 import tempfile
 import unittest
+import urllib.parse
 from contextlib import redirect_stdout
+from datetime import datetime
 from pathlib import Path
 
 
@@ -90,6 +92,7 @@ class PriceWatchTests(unittest.TestCase):
             self.assertEqual(source["departure_id"], "TPE")
             self.assertEqual(source["mode"], "annual_low")
             self.assertEqual(source["trip_days"], 5)
+            self.assertEqual(source["trip_day_options"], [3, 4, 5, 6, 7])
             self.assertEqual(source["travel_class"], "1")
             self.assertEqual(source["cabin_label"], "經濟艙")
             self.assertTrue(watch["alert_on_first_seen"])
@@ -169,6 +172,11 @@ class PriceWatchTests(unittest.TestCase):
                             "outboundLeg": {"departureDate": {"year": 2026, "month": 9, "day": 12}},
                             "inboundLeg": {"departureDate": {"year": 2026, "month": 9, "day": 20}},
                         },
+                        "four-days": {
+                            "minPrice": {"amount": "7000"},
+                            "outboundLeg": {"departureDate": {"year": 2026, "month": 9, "day": 12}},
+                            "inboundLeg": {"departureDate": {"year": 2026, "month": 9, "day": 16}},
+                        },
                     }
                 }
             }
@@ -192,10 +200,86 @@ class PriceWatchTests(unittest.TestCase):
             )
         finally:
             price_watch.post_json = original_post_json
-        self.assertEqual(len(candidates), 1)
-        self.assertEqual(candidates[0]["price"], 7800.0)
-        self.assertEqual(candidates[0]["raw"]["departure_date"], "2026-09-10")
-        self.assertEqual(candidates[0]["raw"]["return_date"], "2026-09-15")
+        self.assertEqual(len(candidates), 2)
+        alternative = candidates[0]
+        selected = candidates[1]
+        self.assertEqual(alternative["price"], 7000.0)
+        self.assertEqual(alternative["raw"]["trip_days"], 4)
+        self.assertTrue(alternative["raw"]["is_alternative_duration"])
+        self.assertEqual(alternative["raw"]["duration_savings"], 800.0)
+        self.assertEqual(selected["raw"]["departure_date"], "2026-09-10")
+        self.assertEqual(selected["raw"]["return_date"], "2026-09-15")
+
+    def test_sampled_flight_compares_nearby_trip_days(self) -> None:
+        original_fetch_json = price_watch.fetch_json
+
+        def fake_fetch_json(url: str, **kwargs):
+            params = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+            outbound = datetime.strptime(params["outbound_date"][0], "%Y-%m-%d")
+            return_date = datetime.strptime(params["return_date"][0], "%Y-%m-%d")
+            trip_days = (return_date - outbound).days
+            prices = {3: 9000, 4: 7000, 5: 8000, 6: 8500, 7: 9500}
+            return {"best_flights": [{"price": prices[trip_days]}]}
+
+        price_watch.fetch_json = fake_fetch_json
+        try:
+            watch = {"id": "flight-duration", "name": "TPE 到 NRT", "currency": "TWD"}
+            source = {
+                "id": "google-flights-sampled",
+                "type": "serpapi_google_flights_sampled",
+                "mode": "annual_low",
+                "departure_id": "TPE",
+                "arrival_id": "NRT",
+                "trip_days": 5,
+                "trip_day_options": [3, 4, 5, 6, 7],
+                "compare_all_trip_days": True,
+            }
+            candidates = price_watch.get_serpapi_sampled_flight_candidates(
+                watch,
+                source,
+                {"SERPAPI_API_KEY": "test"},
+                10,
+            )
+            rotating_candidates = price_watch.get_serpapi_sampled_flight_candidates(
+                watch,
+                {key: value for key, value in source.items() if key != "compare_all_trip_days"},
+                {"SERPAPI_API_KEY": "test"},
+                10,
+            )
+        finally:
+            price_watch.fetch_json = original_fetch_json
+        self.assertEqual(len(candidates), 5)
+        self.assertEqual(candidates[0]["raw"]["trip_days"], 4)
+        self.assertEqual(candidates[0]["raw"]["requested_trip_days"], 5)
+        self.assertEqual(candidates[0]["raw"]["duration_savings"], 1000.0)
+        self.assertEqual(len(rotating_candidates), 2)
+        self.assertIn(5, [item["raw"]["trip_days"] for item in rotating_candidates])
+        self.assertEqual(rotating_candidates[0]["raw"]["comparison_cycle_days"], 4)
+
+    def test_duration_deal_alert_explains_savings(self) -> None:
+        message = price_watch.build_alert_message(
+            {"name": "TPE 到 NRT", "alert_strategy": "target_or_new_low"},
+            {
+                "price": 7000,
+                "currency": "TWD",
+                "source_name": "Google Flights 抽樣",
+                "url": "https://example.com/flight",
+                "raw": {
+                    "departure_date": "2026-09-10",
+                    "return_date": "2026-09-14",
+                    "trip_days": 4,
+                    "requested_trip_days": 5,
+                    "duration_savings": 1000,
+                },
+            },
+            "duration_deal",
+            None,
+            7000,
+            12000,
+        )
+        self.assertIn("其他天數低價", message)
+        self.assertIn("4 天（原選 5 天）", message)
+        self.assertIn("比原行程省：NT$1,000", message)
 
     def test_flight_year_average_uses_latest_price_per_departure_date(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

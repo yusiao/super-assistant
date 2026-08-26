@@ -11,7 +11,7 @@
     <title>Jarvis Price Watch</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=12" />
   </head>
   <body>
     <main class="app-shell">
@@ -44,7 +44,7 @@
           </label>
           <div class="field-row">
             <label>
-              <span>目標價</span>
+              <span>追蹤目標價（選填）</span>
               <input name="targetPrice" inputmode="numeric" placeholder="16900" />
             </label>
             <label>
@@ -63,31 +63,51 @@
       <section class="panel" id="flightPanel" role="tabpanel">
         <form class="search-form" id="flightForm">
           <div class="mode-switch" aria-label="機票搜尋模式">
-            <button class="mode-button active" data-flight-mode="annual_low" type="button">全年最低</button>
+            <button class="mode-button active" data-flight-mode="annual_low" type="button">全年低價探索</button>
             <button class="mode-button" data-flight-mode="date_window" type="button">日期區間</button>
           </div>
           <div class="field-row">
             <label>
               <span>出發地</span>
-              <input name="departureId" list="departurePlaces" autocomplete="off" placeholder="台北 / TPE" required data-place-input="departure" />
-              <datalist id="departurePlaces"></datalist>
+              <div class="place-combobox">
+                <input name="departureId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="departure" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="departurePlaceOptions" />
+                <div class="place-options" id="departurePlaceOptions" role="listbox" hidden></div>
+              </div>
             </label>
             <label>
               <span>目的地</span>
-              <input name="arrivalId" list="arrivalPlaces" autocomplete="off" placeholder="東京 / TYO" required data-place-input="arrival" />
-              <datalist id="arrivalPlaces"></datalist>
+              <div class="place-combobox">
+                <input name="arrivalId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="arrival" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="arrivalPlaceOptions" />
+                <div class="place-options" id="arrivalPlaceOptions" role="listbox" hidden></div>
+              </div>
             </label>
           </div>
           <div class="field-row">
             <label>
-              <span>旅行天數</span>
+              <span>主要旅行天數</span>
               <input name="tripDays" type="number" inputmode="numeric" min="0" max="60" value="5" />
             </label>
             <label>
-              <span>目標價（選填）</span>
+              <span>追蹤目標價（選填）</span>
               <input name="targetPrice" inputmode="numeric" placeholder="8000" />
             </label>
           </div>
+          <fieldset class="filter-fieldset">
+            <legend>航空類型</legend>
+            <div class="segmented-filter">
+              <label><input type="radio" name="airlineType" value="all" checked /><span>全部</span></label>
+              <label><input type="radio" name="airlineType" value="low_cost" /><span>廉價航空</span></label>
+              <label><input type="radio" name="airlineType" value="full_service" /><span>傳統航空</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="filter-fieldset">
+            <legend>行程方式</legend>
+            <div class="segmented-filter">
+              <label><input type="radio" name="routeType" value="any" checked /><span>全部</span></label>
+              <label><input type="radio" name="routeType" value="nonstop" /><span>直達</span></label>
+              <label><input type="radio" name="routeType" value="connecting" /><span>轉乘</span></label>
+            </div>
+          </fieldset>
           <div class="window-only" id="windowFlightFields" hidden>
             <div class="field-row">
               <label>
@@ -124,7 +144,13 @@
               </select>
             </label>
           </div>
-          <button class="primary-button" id="flightSubmitButton" type="submit">找未來一年最低價</button>
+          <button class="primary-button" id="flightSubmitButton" type="submit">探索未來一年低價</button>
+          <div class="search-feedback" id="flightSearchFeedback" aria-live="polite" hidden>
+            <div class="progress-track" id="flightProgressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="flightProgressBar"></span>
+            </div>
+            <p id="flightProgressText"></p>
+          </div>
         </form>
       </section>
 
@@ -141,18 +167,33 @@
           <h2 id="resultsTitle">搜尋結果</h2>
           <span id="resultCount"></span>
         </div>
+        <p class="product-quality-notice" id="productQualityNotice" hidden></p>
         <div class="flight-year-stats" id="flightYearStats" hidden>
           <div class="year-stat">
-            <span id="currentYearLabel">該年平均</span>
+            <span id="currentYearLabel">該年抽樣均價</span>
             <strong id="currentYearAverage">尚無資料</strong>
             <small id="currentYearMeta"></small>
           </div>
           <div class="year-stat">
-            <span id="previousYearLabel">去年平均</span>
+            <span id="previousYearLabel">去年累積觀測均價</span>
             <strong id="previousYearAverage">尚無資料</strong>
             <small id="previousYearMeta"></small>
           </div>
         </div>
+        <section class="duration-overview" id="durationOverview" aria-label="其他旅行天數低價" hidden>
+          <div class="duration-overview-head">
+            <h3>其他天數更便宜</h3>
+            <span id="durationSummary"></span>
+          </div>
+          <div class="duration-list" id="durationList"></div>
+        </section>
+        <section class="cabin-overview" id="cabinOverview" aria-label="艙等最低價比較" hidden>
+          <div class="cabin-overview-head">
+            <h3>艙等價格一覽</h3>
+            <span>頁內即時比較</span>
+          </div>
+          <div class="cabin-price-grid" id="cabinPriceGrid"></div>
+        </section>
         <div class="result-list" id="resultList"></div>
       </section>
     </main>
@@ -182,6 +223,6 @@
       </div>
     </template>
 
-    <script src="./app.js" type="module"></script>
+    <script src="./app.js?v=12" type="module"></script>
   </body>
 </html>

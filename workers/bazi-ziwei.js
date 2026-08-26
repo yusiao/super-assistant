@@ -343,6 +343,17 @@ function evenlySpacedDates(startDate, endDate, limit = 4) {
   return [...new Set(Array.from({ length: count }, (_, index) => addDays(startDate, Math.round((totalDays * index) / (count - 1)))))];
 }
 
+function nearbyTripDayOptions(tripDays, radius = 2) {
+  const selected = Math.max(0, Math.min(Number(tripDays || 0), 60));
+  if (!selected) return [0];
+  const options = [];
+  for (let offset = -radius; offset <= radius; offset += 1) {
+    const days = selected + offset;
+    if (days >= 1 && days <= 60) options.push(days);
+  }
+  return [...new Set(options)];
+}
+
 async function serpApiSampledFlightSearch(payload, env) {
   const departureId = compact(payload.departureId, "", 80).toUpperCase();
   const arrivalId = compact(payload.arrivalId, "", 80).toUpperCase();
@@ -355,50 +366,51 @@ async function serpApiSampledFlightSearch(payload, env) {
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
   const currency = currencyLabel(payload.currency);
   const sampleDates = evenlySpacedDates(startDate, endDate, 4);
-  const searches = await Promise.allSettled(
-    sampleDates.flatMap((outboundDate) => FLIGHT_CABINS.map(async (cabin) => {
-      const returnDate = tripDays > 0 ? addDays(outboundDate, tripDays) : "";
-      const data = await serpApiSearch(
-        {
-          engine: "google_flights",
-          departure_id: departureId,
-          arrival_id: arrivalId,
-          outbound_date: outboundDate,
-          return_date: returnDate,
-          type: tripDays > 0 ? "1" : "2",
-          currency,
-          gl: compact(payload.market, "TW", 8).toLowerCase(),
-          hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
-          sort_by: "2",
-          travel_class: cabin.code,
-          stops: payload.routeType === "nonstop" ? "1" : "0",
-          show_hidden: payload.airlineType !== "all" || payload.routeType === "connecting" ? "true" : "false",
-        },
-        env,
-      );
-      const normalized = normalizeFlightResults(
-        data,
-        {
-          ...payload,
-          departureId,
-          arrivalId,
-          outboundDate,
-          returnDate,
-          travelClass: cabin.code,
-          cabinClass: cabin.key,
-          cabinLabel: cabin.label,
-        },
+  const searchBestFlight = async (outboundDate, cabin, days = tripDays) => {
+    const returnDate = days > 0 ? addDays(outboundDate, days) : "";
+    const data = await serpApiSearch(
+      {
+        engine: "google_flights",
+        departure_id: departureId,
+        arrival_id: arrivalId,
+        outbound_date: outboundDate,
+        return_date: returnDate,
+        type: days > 0 ? "1" : "2",
         currency,
-      );
-      const best = normalized.results[0];
-      return best ? { ...best, source: "Google Flights 抽樣", sampled: true } : null;
-    })),
+        gl: compact(payload.market, "TW", 8).toLowerCase(),
+        hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
+        sort_by: "2",
+        travel_class: cabin.code,
+        stops: payload.routeType === "nonstop" ? "1" : "0",
+        show_hidden: payload.airlineType !== "all" || payload.routeType === "connecting" ? "true" : "false",
+      },
+      env,
+    );
+    const normalized = normalizeFlightResults(
+      data,
+      {
+        ...payload,
+        departureId,
+        arrivalId,
+        outboundDate,
+        returnDate,
+        travelClass: cabin.code,
+        cabinClass: cabin.key,
+        cabinLabel: cabin.label,
+      },
+      currency,
+    );
+    const best = normalized.results[0];
+    return best ? { ...best, source: "Google Flights 抽樣", sampled: true } : null;
+  };
+  const searches = await Promise.allSettled(
+    sampleDates.map((outboundDate) => searchBestFlight(outboundDate, FLIGHT_CABINS[0])),
   );
-  const results = searches
+  const economyResults = searches
     .filter((result) => result.status === "fulfilled" && result.value)
     .map((result) => result.value)
     .sort((left, right) => left.price - right.price);
-  if (!results.length) {
+  if (!economyResults.length) {
     const rejected = searches.filter((result) => result.status === "rejected");
     if (rejected.length === searches.length) {
       const messages = rejected.map((result) => compact(result.reason?.message, "", 260)).filter(Boolean);
@@ -421,6 +433,7 @@ async function serpApiSampledFlightSearch(payload, env) {
         rangeEnd: endDate,
         cached: false,
         sampleDates,
+        durationAlternatives: [],
         cabinPrices: FLIGHT_CABINS.map((cabin) => ({ ...cabin, available: false, price: null, priceText: "", departureDate: "", returnDate: "", airline: "" })),
         samplingNotice: `目前找不到符合「${airlineLabel}・${routeLabel}」的航班，請放寬篩選或調整日期。`,
         yearStats: {
@@ -435,8 +448,39 @@ async function serpApiSampledFlightSearch(payload, env) {
       },
     };
   }
+  const comparisonReference = economyResults[0];
+  const cabinSearches = await Promise.allSettled(
+    FLIGHT_CABINS.slice(1).map((cabin) => searchBestFlight(comparisonReference.departureDate, cabin)),
+  );
+  const cabinResults = cabinSearches
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value);
+  const results = [...economyResults, ...cabinResults].sort((left, right) => left.price - right.price);
+  const alternativeDays = nearbyTripDayOptions(tripDays).filter((days) => days !== tripDays);
+  const durationSearches = tripDays > 0 && comparisonReference
+    ? await Promise.allSettled(alternativeDays.map(async (days) => {
+      const cabin = FLIGHT_CABINS.find((item) => item.code === comparisonReference.travelClass) || FLIGHT_CABINS[0];
+      const best = await searchBestFlight(comparisonReference.departureDate, cabin, days);
+      if (!best) return null;
+      const savings = comparisonReference.price - best.price;
+      return {
+        ...best,
+        source: "Google Flights 天數比較",
+        sampled: true,
+        requestedTripDays: tripDays,
+        isAlternativeDuration: true,
+        savings,
+        savingsText: savings > 0 ? formatPrice(savings, currency) : "",
+        isCheaper: savings > 0,
+      };
+    }))
+    : [];
+  const durationAlternatives = durationSearches
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value)
+    .sort((left, right) => left.price - right.price);
   const lowestPrice = results[0].price;
-  const yearlyQuotes = flightYearStats(results.filter((item) => item.cabinClass === "economy"));
+  const yearlyQuotes = flightYearStats(economyResults);
   const comparisonYear = Number(startDate.slice(0, 4));
   const previousYear = comparisonYear - 1;
   const historyKey = flightYearHistoryKey(departureId, arrivalId, tripDays, currency);
@@ -482,8 +526,10 @@ async function serpApiSampledFlightSearch(payload, env) {
       rangeEnd: endDate,
       cached: false,
       sampleDates,
+      selectedDurationBest: comparisonReference,
+      durationAlternatives,
       cabinPrices,
-      samplingNotice: `本次比較 ${sampleDates.length} 個代表出發日、3 種艙等，共 ${sampleDates.length * FLIGHT_CABINS.length} 次即時查價。`,
+      samplingNotice: `本次先比較 ${sampleDates.length} 個經濟艙出發日，再於最低價日期比較 3 種艙等與 ${durationAlternatives.length} 種鄰近旅行天數。`,
       yearStats,
     },
   };
@@ -535,6 +581,7 @@ async function skyscannerIndicativeSearch(payload, env) {
   const horizonDays = mode === "annual_low" ? 365 : Math.max(0, Math.min(Number(payload.lookaheadDays || 30), 365));
   const endDate = addDays(startDate, horizonDays);
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
+  const tripDayOptions = nearbyTripDayOptions(tripDays);
   const currency = currencyLabel(payload.currency);
   const queryLegs = [
     {
@@ -547,12 +594,14 @@ async function skyscannerIndicativeSearch(payload, env) {
     },
   ];
   if (tripDays > 0) {
+    const minimumTripDays = Math.min(...tripDayOptions);
+    const maximumTripDays = Math.max(...tripDayOptions);
     queryLegs.push({
       originPlace: { queryPlace: { iata: arrivalId } },
       destinationPlace: { queryPlace: { iata: departureId } },
       dateRange: {
-        startDate: dateParts(addDays(startDate, tripDays)),
-        endDate: dateParts(addDays(endDate, tripDays)),
+        startDate: dateParts(addDays(startDate, minimumTripDays)),
+        endDate: dateParts(addDays(endDate, maximumTripDays)),
       },
     });
   }
@@ -578,13 +627,14 @@ async function skyscannerIndicativeSearch(payload, env) {
     throw new Error(data.message || data.error || `Skyscanner request failed with HTTP ${response.status}.`);
   }
 
-  const results = quoteValues(data)
+  const allResults = quoteValues(data)
     .map((quote, index) => {
       const price = normalizeMoney(quote.minPrice?.amount || quote.price?.amount || quote.price);
       const departureDate = quoteLegDate(quote.outboundLeg || quote.outbound_leg);
       const returnDate = quoteLegDate(quote.inboundLeg || quote.inbound_leg);
       if (!price || !departureDate || departureDate < startDate || departureDate > endDate) return null;
-      if (tripDays > 0 && (!returnDate || daysBetween(departureDate, returnDate) !== tripDays)) return null;
+      const actualTripDays = returnDate ? daysBetween(departureDate, returnDate) : 0;
+      if (tripDays > 0 && (!returnDate || !tripDayOptions.includes(actualTripDays))) return null;
       const dateText = returnDate ? `${departureDate} - ${returnDate}` : departureDate;
       const path = returnDate
         ? `${departureDate.replaceAll("-", "").slice(2)}/${returnDate.replaceAll("-", "").slice(2)}`
@@ -600,11 +650,32 @@ async function skyscannerIndicativeSearch(payload, env) {
         link: `https://www.skyscanner.com.tw/transport/flights/${departureId.toLowerCase()}/${arrivalId.toLowerCase()}/${path}/`,
         departureDate,
         returnDate,
-        tripDays,
+        tripDays: actualTripDays,
+        requestedTripDays: tripDays,
+        isAlternativeDuration: actualTripDays !== tripDays,
         cached: true,
       };
     })
     .filter(Boolean)
+    .sort((left, right) => left.price - right.price);
+  const results = allResults.filter((item) => item.tripDays === tripDays);
+  const selectedDurationBest = results[0] || null;
+  const bestAlternativeByDays = new Map();
+  allResults
+    .filter((item) => item.tripDays !== tripDays)
+    .forEach((item) => {
+      if (!bestAlternativeByDays.has(item.tripDays)) bestAlternativeByDays.set(item.tripDays, item);
+    });
+  const durationAlternatives = [...bestAlternativeByDays.values()]
+    .map((item) => {
+      const savings = selectedDurationBest ? selectedDurationBest.price - item.price : 0;
+      return {
+        ...item,
+        savings,
+        savingsText: savings > 0 ? formatPrice(savings, currency) : "",
+        isCheaper: selectedDurationBest ? savings > 0 : true,
+      };
+    })
     .sort((left, right) => left.price - right.price);
   const lowestPrice = results.length ? results[0].price : null;
   const yearlyQuotes = flightYearStats(results);
@@ -641,6 +712,11 @@ async function skyscannerIndicativeSearch(payload, env) {
       rangeEnd: endDate,
       cached: true,
       cacheNotice: "Indicative prices may be up to 4 days old. Confirm live price before booking.",
+      selectedDurationBest,
+      durationAlternatives,
+      samplingNotice: durationAlternatives.length
+        ? `已同步比較 ${tripDayOptions.join("、")} 天行程。`
+        : `已搜尋 ${tripDays} 天行程，鄰近天數目前沒有可比較票價。`,
       yearStats,
     },
   };
@@ -1048,7 +1124,7 @@ function flightWatchFromPayload(payload, env) {
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
   const lookaheadDays = Math.max(1, Math.min(Number(payload.lookaheadDays || 30), 365));
   const modeLabel = mode === "annual_low" ? "未來一年低價探索" : `${startDate} 起 ${lookaheadDays} 天`;
-  const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${modeLabel}`, 140);
+  const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${modeLabel} · ${tripDays ? `${tripDays} 天為主` : "單程"}`, 140);
   const currency = currencyLabel(payload.currency);
   const travelClass = compact(payload.travelClass, "1", 4);
   const cabin = FLIGHT_CABINS.find((item) => item.code === travelClass) || FLIGHT_CABINS[0];
@@ -1066,6 +1142,7 @@ function flightWatchFromPayload(payload, env) {
     horizon_days: mode === "annual_low" ? 365 : lookaheadDays,
     lookahead_days: lookaheadDays,
     trip_days: tripDays,
+    trip_day_options: nearbyTripDayOptions(tripDays),
     currency,
     market: compact(payload.market, "TW", 8),
     locale: compact(payload.locale, "zh-TW", 12),

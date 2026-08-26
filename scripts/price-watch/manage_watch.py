@@ -103,10 +103,12 @@ def add_flight(args: argparse.Namespace) -> int:
     if args.mode == "date_window" and not args.start_date:
         raise RuntimeError("--start-date is required when --mode=date_window")
     mode_label = "未來一年最低" if args.mode == "annual_low" else f"{args.start_date} 起 {args.lookahead_days} 天"
-    default_name = f"{args.departure_id}->{args.arrival_id} {mode_label}"
+    trip_label = f"{args.trip_days} 天為主" if args.trip_days else "單程"
+    default_name = f"{args.departure_id}->{args.arrival_id} {mode_label} · {trip_label}"
     name = args.name or default_name
     watch_id = args.id or slugify(name)
     require_unique_id(data, watch_id)
+    trip_day_options = sorted({days for days in range(args.trip_days - 2, args.trip_days + 3) if 1 <= days <= 60}) if args.trip_days else [0]
 
     source: dict[str, Any] = {
         "type": "serpapi_google_flights_sampled",
@@ -119,6 +121,7 @@ def add_flight(args: argparse.Namespace) -> int:
         "horizon_days": 365 if args.mode == "annual_low" else args.lookahead_days,
         "lookahead_days": args.lookahead_days,
         "trip_days": args.trip_days,
+        "trip_day_options": trip_day_options,
         "currency": args.currency,
         "market": args.market,
         "locale": args.locale,
