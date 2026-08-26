@@ -18,6 +18,10 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: price-watch
+  cancel-in-progress: true
+
 jobs:
   run-price-watch:
     runs-on: [self-hosted, windows, a7-runner]
