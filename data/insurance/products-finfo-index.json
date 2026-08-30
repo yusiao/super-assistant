@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-23T18:24:15.426Z",
+  "generatedAt": "2026-08-30T20:28:30.567Z",
   "source": "finfo-index",
   "sourceNote": "由 Finfo robots.txt 指定之公開 sitemap 自動建立；商品詳細保障與費率仍以保險公司正式文件為準。",
   "sitemapUrl": "https://finfo.tw/sitemap.xml.gz",
@@ -512,6 +512,21 @@
       "sourceUrl": "https://finfo.tw/products/1HSCO-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%AF%A6%E7%8F%BE%E5%B9%B8%E7%A6%8F%E9%83%A8%E5%88%86%E8%B2%A0%E6%93%94%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14",
       "effectiveDate": "2024-09-14",
       "versionCount": 4,
+      "alternateProducts": []
+    },
+    {
+      "code": "1HSCO4C",
+      "name": "實現幸福部分負擔住院醫療健康保險附約更約權批註條款",
+      "insurer": "南山人壽",
+      "category": "medical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/1HSCO4C-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%AF%A6%E7%8F%BE%E5%B9%B8%E7%A6%8F%E9%83%A8%E5%88%86%E8%B2%A0%E6%93%94%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%9B%B4%E7%B4%84%E6%AC%8A%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BE-2026-04-25",
+      "effectiveDate": "2026-04-25",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -13615,6 +13630,36 @@
       "sourceUrl": "https://finfo.tw/products/DCT-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E7%A5%9D%E6%89%B6180%E5%A4%B1%E8%83%BD%E7%85%A7%E8%AD%B7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2018-09-14",
       "effectiveDate": "2018-09-14",
       "versionCount": 2,
+      "alternateProducts": []
+    },
+    {
+      "code": "DCTEA3",
+      "name": "債權債務範圍內受益人指定及其處分權批註條款A3",
+      "insurer": "南山人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/DCTEA3-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%82%B5%E6%AC%8A%E5%82%B5%E5%8B%99%E7%AF%84%E5%9C%8D%E5%85%A7%E5%8F%97%E7%9B%8A%E4%BA%BA%E6%8C%87%E5%AE%9A%E5%8F%8A%E5%85%B6%E8%99%95%E5%88%86%E6%AC%8A%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BEA3-2024-01-27",
+      "effectiveDate": "2024-01-27",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "DCTEB3",
+      "name": "債權債務範圍內受益人指定批註條款B3",
+      "insurer": "南山人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/DCTEB3-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%82%B5%E6%AC%8A%E5%82%B5%E5%8B%99%E7%AF%84%E5%9C%8D%E5%85%A7%E5%8F%97%E7%9B%8A%E4%BA%BA%E6%8C%87%E5%AE%9A%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BEB3-2024-01-27",
+      "effectiveDate": "2024-01-27",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
