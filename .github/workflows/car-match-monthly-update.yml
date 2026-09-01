@@ -20,6 +20,8 @@ jobs:
       CAR_MATCH_PRUNE: "true"
       CAR_MATCH_MIN_FETCHED_CARS: "120"
       CAR_MATCH_MIN_CATALOG_RETAIN_RATIO: "0.90"
+      CAR_MATCH_FETCH_ATTEMPTS: "3"
+      CAR_MATCH_RETRY_BASE_DELAY_MS: "1500"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +31,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Update Taiwan vehicle catalog
+      - name: Update Taiwan vehicle catalog (preserve current data if source is unavailable)
         run: node scripts/car-match/update-car-data.mjs --prune
 
       - name: Validate generated JavaScript

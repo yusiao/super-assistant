@@ -8,6 +8,9 @@ const DATA_PATH = new URL("../../car-match/data.js", import.meta.url);
 const U_CAR_INDEX_URL = "https://newcar.u-car.com.tw/newcar";
 const U_CAR_BASE_URL = "https://newcar.u-car.com.tw";
 const REQUEST_DELAY_MS = Number(process.env.CAR_MATCH_FETCH_DELAY_MS || 250);
+const REQUEST_TIMEOUT_MS = Number(process.env.CAR_MATCH_REQUEST_TIMEOUT_MS || 30000);
+const MAX_FETCH_ATTEMPTS = Number(process.env.CAR_MATCH_FETCH_ATTEMPTS || 3);
+const RETRY_BASE_DELAY_MS = Number(process.env.CAR_MATCH_RETRY_BASE_DELAY_MS || 1500);
 const MIN_FETCHED_CARS = Number(process.env.CAR_MATCH_MIN_FETCHED_CARS || 120);
 const MIN_CATALOG_RETAIN_RATIO = Number(process.env.CAR_MATCH_MIN_CATALOG_RETAIN_RATIO || 0.9);
 
@@ -37,12 +40,55 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 if (!Number.isFinite(MIN_CATALOG_RETAIN_RATIO) || MIN_CATALOG_RETAIN_RATIO <= 0 || MIN_CATALOG_RETAIN_RATIO > 1) {
   throw new Error("CAR_MATCH_MIN_CATALOG_RETAIN_RATIO must be a number greater than 0 and no more than 1.");
 }
+if (!Number.isFinite(REQUEST_TIMEOUT_MS) || REQUEST_TIMEOUT_MS <= 0 || !Number.isInteger(MAX_FETCH_ATTEMPTS) || MAX_FETCH_ATTEMPTS < 1 || !Number.isFinite(RETRY_BASE_DELAY_MS) || RETRY_BASE_DELAY_MS < 0) {
+  throw new Error("Catalog fetch timeout, retry attempts, and retry delay must be valid positive values.");
+}
 
 function getCatalogSafetyThreshold(currentCatalogCount) {
   return Math.max(
     MIN_FETCHED_CARS,
     Math.ceil(Number(currentCatalogCount || 0) * MIN_CATALOG_RETAIN_RATIO)
   );
+}
+
+class SourceHttpError extends Error {
+  constructor(url, response) {
+    super(`HTTP ${response.status} ${response.statusText}`);
+    this.name = "SourceHttpError";
+    this.url = url;
+    this.status = response.status;
+    this.retryAfter = response.headers?.get?.("retry-after") || "";
+  }
+}
+
+class SourceRequestError extends Error {
+  constructor(url, cause) {
+    super(`Request failed for ${url}: ${cause?.message || "unknown network error"}`);
+    this.name = "SourceRequestError";
+    this.url = url;
+    this.cause = cause;
+  }
+}
+
+function retryAfterDelayMs(value) {
+  if (!value) return 0;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? 0 : Math.max(0, timestamp - Date.now());
+}
+
+function isRetryableSourceError(error) {
+  return error instanceof SourceRequestError || (error instanceof SourceHttpError && [408, 425, 429, 500, 502, 503, 504].includes(error.status));
+}
+
+function isSourceUnavailable(error) {
+  return error instanceof SourceRequestError || (error instanceof SourceHttpError && [403, 408, 425, 429, 500, 502, 503, 504].includes(error.status));
+}
+
+function describeSourceError(error) {
+  if (error instanceof SourceHttpError) return `${error.status}${error.retryAfter ? ` (Retry-After: ${error.retryAfter})` : ""}`;
+  return error?.message || "unknown source error";
 }
 
 function decodeHtml(value = "") {
@@ -189,22 +235,38 @@ function normalizeCarShape(car) {
   };
 }
 
-async function fetchText(url) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+async function fetchText(url, request = fetch) {
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const response = await request(url, {
+        headers: sourceHeaders,
+        signal: controller.signal,
+        redirect: "follow"
+      });
+      if (!response.ok) throw new SourceHttpError(url, response);
+      return await response.text();
+    } catch (error) {
+      const sourceError = error instanceof SourceHttpError || error instanceof SourceRequestError
+        ? error
+        : new SourceRequestError(url, error);
+      if (!isRetryableSourceError(sourceError) || attempt === MAX_FETCH_ATTEMPTS) throw sourceError;
 
-  try {
-    const response = await fetch(url, {
-      headers: sourceHeaders,
-      signal: controller.signal,
-      redirect: "follow"
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
-    return await response.text();
-  } finally {
-    clearTimeout(timeout);
+      const retryAfter = sourceError instanceof SourceHttpError ? retryAfterDelayMs(sourceError.retryAfter) : 0;
+      const delay = Math.max(retryAfter, RETRY_BASE_DELAY_MS * (2 ** (attempt - 1)));
+      console.warn(`Temporary source error for ${url} (${describeSourceError(sourceError)}). Retrying in ${delay}ms (${attempt}/${MAX_FETCH_ATTEMPTS}).`);
+      await sleep(delay);
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+}
+
+function preserveCurrentCatalog(current, error, context = "catalog index") {
+  const reason = describeSourceError(error);
+  console.warn(`::warning title=Car catalog update skipped::U-CAR ${context} is temporarily unavailable (${reason}). Keeping the existing ${current.cars.length}-car catalog; no deployment was made.`);
+  console.log("Catalog update skipped safely; existing data remains published.");
 }
 
 async function loadCurrentData() {
@@ -388,7 +450,16 @@ async function main() {
   const current = await loadCurrentData();
   console.log(`Current catalog: ${current.cars.length} cars`);
 
-  const indexHtml = await fetchText(U_CAR_INDEX_URL);
+  let indexHtml;
+  try {
+    indexHtml = await fetchText(U_CAR_INDEX_URL);
+  } catch (error) {
+    if (isSourceUnavailable(error)) {
+      preserveCurrentCatalog(current, error, "catalog index");
+      return;
+    }
+    throw error;
+  }
   const brands = extractBrands(indexHtml);
   if (!brands.length) throw new Error("Could not extract U-CAR brand list.");
   console.log(`U-CAR brands: ${brands.length}`);
@@ -404,7 +475,7 @@ async function main() {
       fetchedCars.push(...cars);
       console.log(`[${index + 1}/${brands.length}] ${brand.name}: ${cars.length}`);
     } catch (error) {
-      failedBrands.push({ brand: brand.name, message: error.message });
+      failedBrands.push({ brand: brand.name, message: error.message, sourceUnavailable: isSourceUnavailable(error) });
       console.warn(`[${index + 1}/${brands.length}] ${brand.name}: failed - ${error.message}`);
     }
     await sleep(REQUEST_DELAY_MS);
@@ -414,6 +485,11 @@ async function main() {
     const model = car.name.slice(car.brand.length + 1);
     return [carKey(car.brand, model), car];
   })).values()];
+
+  if (failedBrands.length === brands.length && failedBrands.every(item => item.sourceUnavailable)) {
+    preserveCurrentCatalog(current, new SourceRequestError(U_CAR_INDEX_URL, new Error("all brand catalog requests were unavailable")), "brand catalogs");
+    return;
+  }
 
   const expectedMinimum = getCatalogSafetyThreshold(current.cars.length);
   if (uniqueFetched.length < expectedMinimum) {
@@ -481,11 +557,15 @@ export {
   brandSlug,
   extractBrands,
   extractCarsFromBrandPage,
+  fetchText,
   getCatalogSafetyThreshold,
+  isSourceUnavailable,
   mergeBrandProfiles,
   mergeCars,
   normalizeForKey,
   powerFromSource,
   priceFromText,
-  seatsFromSource
+  seatsFromSource,
+  SourceHttpError,
+  SourceRequestError
 };
