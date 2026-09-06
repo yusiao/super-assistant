@@ -138,7 +138,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/price-watch/Register
 
 ## GitHub Actions
 
-`.github/workflows/price-watch.yml` 預設每小時執行一次。
+`.github/workflows/price-watch.yml` 預設每天台灣時間 08:15 執行一次，並且同時間只保留最新的一次執行。
 
 需要在 GitHub Actions Secrets 設定：
 
