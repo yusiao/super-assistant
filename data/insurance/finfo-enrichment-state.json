@@ -1,46 +1,46 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-30T20:34:58.749Z",
+  "updatedAt": "2026-09-06T20:04:41.626Z",
   "detailLimit": 120,
   "statusRefreshLimit": 18,
   "attempts": {
     "XHB": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "discontinued",
       "error": ""
     },
     "MRE": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
       "error": ""
     },
     "XAN": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
       "error": ""
     },
     "CJ2": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
       "error": ""
     },
     "XCD": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
       "error": ""
     },
     "DCE": {
-      "attemptedAt": "2026-08-30T20:34:58.749Z",
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
@@ -1724,6 +1724,846 @@
       "found": true,
       "rateStatus": "ready",
       "saleStatus": "active",
+      "error": ""
+    },
+    "XDY": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "XDZ": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "POFE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PRFE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "BPFEB6": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "BPFEB7": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "BPFEB5": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "SER": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "BPFEB4": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "W5A": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WSD": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "JM": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AAHOP": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CLU": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HAA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "LTV": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "VSB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "1CGT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "1CPT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "1RAS": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "1STT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "KRLTC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "IJSA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "IJSB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "20G01": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "20G11": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "20G21": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "20G31": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CWB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CYB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "DS5": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PCC5": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "VSA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "VU20": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "JL": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "NTPW0101": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "NYCC1001": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "RAF": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "RV1": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WHK": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AAHSR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WS1": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "YP": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "A2A3": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "D3A": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "N3A": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "QGD": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "FLTC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "ARLPLN16": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "SDK": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "SDL": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WPH": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AHIRLB2": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AHIRLB3": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WRB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WO1": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "TCN": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "FMB": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "B93": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "CFP": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFQ": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFS": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFU": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CFV": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CV4": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PX5": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PHE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PHF": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "QVW": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WV4": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "SNA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "RK": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "AHIE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HSF": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "LPA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "NAG": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "RPE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WQ1": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "LTC4C": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HJJ": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "IS3CA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": false,
+      "rateStatus": "missing",
+      "saleStatus": "unknown",
+      "error": "unable to parse product slug"
+    },
+    "QNW": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "QPW": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CAR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "PD": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "ZR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "ZH7": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "P0A": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "WLA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AJG": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "ICH": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "OCE001": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "OCF001": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "AADDC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "ABDDC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "QJP": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "CAC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "IEC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "IKC": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "NGODCR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "NSEHI": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HSY": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HTA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "SDE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "1V": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "GE": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "GT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "GU": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HP": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HQ": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HR": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HT": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "discontinued",
+      "error": ""
+    },
+    "HV": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HW": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "HX": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "missing",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "I24I25": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "active",
+      "error": ""
+    },
+    "JA": {
+      "attemptedAt": "2026-09-06T20:04:41.626Z",
+      "found": true,
+      "rateStatus": "ready",
+      "saleStatus": "discontinued",
       "error": ""
     }
   }
