@@ -1000,8 +1000,8 @@
     "brand": "Audi",
     "name": "Audi RS Q8",
     "variant": "U-CAR new-car catalog",
-    "price": 781,
-    "priceLabel": "781 TWD 10k",
+    "price": 820,
+    "priceLabel": "820 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -1019,9 +1019,9 @@
     ],
     "tagline": "RS Q8: synced from Taiwan new-car catalog.",
     "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7112.jpg",
-    "url": "https://newcar.u-car.com.tw/audi/rs%20q8/7112/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/audi/rs%20q8/7112/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7279.jpg",
+    "url": "https://newcar.u-car.com.tw/audi/rs%20q8/7279/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/audi/rs%20q8/7279/overall",
     "source": "ucar"
   },
   {
@@ -1336,8 +1336,8 @@
     "brand": "BMW",
     "name": "BMW 2 Series Coupé",
     "variant": "U-CAR new-car catalog",
-    "price": 212,
-    "priceLabel": "212-306 TWD 10k",
+    "price": 217,
+    "priceLabel": "217-306 TWD 10k",
     "body": "sports",
     "power": "hybrid",
     "seats": 4,
@@ -1355,9 +1355,9 @@
     ],
     "tagline": "2 Series Coupé: synced from Taiwan new-car catalog.",
     "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6846.jpg",
-    "url": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/6846/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/6846/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7285.jpg",
+    "url": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/7285/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/bmw/2%20series%20coup%C3%A9/7285/overall",
     "source": "ucar"
   },
   {
@@ -3070,6 +3070,34 @@
   },
   {
     "brand": "Honda",
+    "name": "Honda ZR-V",
+    "variant": "U-CAR new-car catalog",
+    "price": 119.9,
+    "priceLabel": "119.9 TWD 10k",
+    "body": "suv",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "ZR-V: synced from Taiwan new-car catalog.",
+    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7284.jpg",
+    "url": "https://newcar.u-car.com.tw/honda/zr-v/7284/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/honda/zr-v/7284/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Honda",
     "name": "Honda Civic",
     "variant": "U-CAR new-car catalog",
     "price": 127.9,
@@ -3234,6 +3262,34 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7048.jpg",
     "url": "https://newcar.u-car.com.tw/hyundai/inster/7048/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/hyundai/inster/7048/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Hyundai",
+    "name": "Hyundai Kona Hybrid",
+    "variant": "U-CAR new-car catalog",
+    "price": 99,
+    "priceLabel": "99-110 TWD 10k",
+    "body": "suv",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Kona Hybrid: synced from Taiwan new-car catalog.",
+    "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7294.jpg",
+    "url": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7294/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7294/overall",
     "source": "ucar"
   },
   {
@@ -4612,8 +4668,8 @@
     "brand": "Lotus",
     "name": "Lotus Emira",
     "variant": "U-CAR new-car catalog",
-    "price": 585,
-    "priceLabel": "585-650 TWD 10k",
+    "price": 658,
+    "priceLabel": "658-708 TWD 10k",
     "body": "sports",
     "power": "gas",
     "seats": 2,
@@ -4631,9 +4687,9 @@
     ],
     "tagline": "Emira: synced from Taiwan new-car catalog.",
     "note": "跑車/跑房車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7088.jpg",
-    "url": "https://newcar.u-car.com.tw/lotus/emira/7088/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/lotus/emira/7088/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7277.jpg",
+    "url": "https://newcar.u-car.com.tw/lotus/emira/7277/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/lotus/emira/7277/overall",
     "source": "ucar"
   },
   {
@@ -5058,38 +5114,10 @@
   },
   {
     "brand": "Mazda",
-    "name": "Mazda Mazda3 四門",
-    "variant": "U-CAR new-car catalog",
-    "price": 88.8,
-    "priceLabel": "88.8-101.8 TWD 10k",
-    "body": "sedan",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "comfort",
-      "driving",
-      "design"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Mazda3 四門: synced from Taiwan new-car catalog.",
-    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7126.jpg",
-    "url": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7126/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7126/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Mazda",
     "name": "Mazda CX-30",
     "variant": "U-CAR new-car catalog",
-    "price": 89.8,
-    "priceLabel": "89.8-111.8 TWD 10k",
+    "price": 88.8,
+    "priceLabel": "88.8-108.8 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -5107,9 +5135,37 @@
     ],
     "tagline": "CX-30: synced from Taiwan new-car catalog.",
     "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7124.jpg",
-    "url": "https://newcar.u-car.com.tw/mazda/cx-30/7124/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-30/7124/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7286.jpg",
+    "url": "https://newcar.u-car.com.tw/mazda/cx-30/7286/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-30/7286/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Mazda",
+    "name": "Mazda Mazda3 四門",
+    "variant": "U-CAR new-car catalog",
+    "price": 88.8,
+    "priceLabel": "88.8-99.8 TWD 10k",
+    "body": "sedan",
+    "power": "gas",
+    "seats": 5,
+    "priorities": [
+      "comfort",
+      "driving",
+      "design"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Mazda3 四門: synced from Taiwan new-car catalog.",
+    "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7291.jpg",
+    "url": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7291/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mazda/mazda3%20%E5%9B%9B%E9%96%80/7291/overall",
     "source": "ucar"
   },
   {
@@ -5228,8 +5284,8 @@
     "brand": "Mazda",
     "name": "Mazda CX-90",
     "variant": "U-CAR new-car catalog",
-    "price": 179.9,
-    "priceLabel": "179.9-211.9 TWD 10k",
+    "price": 171.9,
+    "priceLabel": "171.9-201.9 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -5247,9 +5303,9 @@
     ],
     "tagline": "CX-90: synced from Taiwan new-car catalog.",
     "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6833.jpg",
-    "url": "https://newcar.u-car.com.tw/mazda/cx-90/6833/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-90/6833/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7280.jpg",
+    "url": "https://newcar.u-car.com.tw/mazda/cx-90/7280/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-90/7280/overall",
     "source": "ucar"
   },
   {
@@ -5842,34 +5898,6 @@
   },
   {
     "brand": "Mercedes-Benz",
-    "name": "Mercedes-Benz GLC",
-    "variant": "U-CAR new-car catalog",
-    "price": 274,
-    "priceLabel": "274-319 TWD 10k",
-    "body": "suv",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "space",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "GLC: synced from Taiwan new-car catalog.",
-    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7155.jpg",
-    "url": "https://newcar.u-car.com.tw/mercedes-benz/glc/7155/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc/7155/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz Mercedes-AMG GLA",
     "variant": "U-CAR new-car catalog",
     "price": 274,
@@ -5894,6 +5922,34 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7192.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20gla/7192/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20gla/7192/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "name": "Mercedes-Benz GLC",
+    "variant": "U-CAR new-car catalog",
+    "price": 276,
+    "priceLabel": "276-321 TWD 10k",
+    "body": "suv",
+    "power": "gas",
+    "seats": 5,
+    "priorities": [
+      "space",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "GLC: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7282.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/glc/7282/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc/7282/overall",
     "source": "ucar"
   },
   {
@@ -5928,8 +5984,8 @@
     "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz GLC Coupé",
     "variant": "U-CAR new-car catalog",
-    "price": 295,
-    "priceLabel": "295-336 TWD 10k",
+    "price": 297,
+    "priceLabel": "297-338 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -5947,9 +6003,9 @@
     ],
     "tagline": "GLC Coupé: synced from Taiwan new-car catalog.",
     "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7157.jpg",
-    "url": "https://newcar.u-car.com.tw/mercedes-benz/glc%20coup%C3%A9/7157/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc%20coup%C3%A9/7157/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7283.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/glc%20coup%C3%A9/7283/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc%20coup%C3%A9/7283/overall",
     "source": "ucar"
   },
   {
@@ -6206,34 +6262,6 @@
   },
   {
     "brand": "Mercedes-Benz",
-    "name": "Mercedes-Benz Mercedes-AMG GLC",
-    "variant": "U-CAR new-car catalog",
-    "price": 402,
-    "priceLabel": "402 TWD 10k",
-    "body": "suv",
-    "power": "hybrid",
-    "seats": 5,
-    "priorities": [
-      "economy",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Mercedes-AMG GLC: synced from Taiwan new-car catalog.",
-    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7156.jpg",
-    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc/7156/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc/7156/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz Mercedes-AMG C-Class Estate",
     "variant": "U-CAR new-car catalog",
     "price": 405,
@@ -6262,10 +6290,38 @@
   },
   {
     "brand": "Mercedes-Benz",
+    "name": "Mercedes-Benz Mercedes-AMG GLC",
+    "variant": "U-CAR new-car catalog",
+    "price": 416,
+    "priceLabel": "416 TWD 10k",
+    "body": "suv",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Mercedes-AMG GLC: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7296.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc/7296/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc/7296/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz Mercedes-AMG GLC Coupé",
     "variant": "U-CAR new-car catalog",
-    "price": 414,
-    "priceLabel": "414-624 TWD 10k",
+    "price": 429,
+    "priceLabel": "429 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -6283,9 +6339,9 @@
     ],
     "tagline": "Mercedes-AMG GLC Coupé: synced from Taiwan new-car catalog.",
     "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7158.jpg",
-    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc%20coup%C3%A9/7158/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc%20coup%C3%A9/7158/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7295.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc%20coup%C3%A9/7295/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-amg%20glc%20coup%C3%A9/7295/overall",
     "source": "ucar"
   },
   {
@@ -6766,34 +6822,6 @@
   },
   {
     "brand": "Mercedes-Benz",
-    "name": "Mercedes-Benz Mercedes-Maybach S-Class",
-    "variant": "U-CAR new-car catalog",
-    "price": 1166,
-    "priceLabel": "1166 TWD 10k",
-    "body": "sedan",
-    "power": "hybrid",
-    "seats": 5,
-    "priorities": [
-      "economy",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Mercedes-Maybach S-Class: synced from Taiwan new-car catalog.",
-    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7160.jpg",
-    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7160/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7160/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz Mercedes-Maybach SL",
     "variant": "U-CAR new-car catalog",
     "price": 1196,
@@ -6818,6 +6846,34 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7019.jpg",
     "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20sl/7019/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20sl/7019/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "name": "Mercedes-Benz Mercedes-Maybach S-Class",
+    "variant": "U-CAR new-car catalog",
+    "price": 1214,
+    "priceLabel": "1214 TWD 10k",
+    "body": "sedan",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Mercedes-Maybach S-Class: synced from Taiwan new-car catalog.",
+    "note": "豪華級距大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7278.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7278/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/mercedes-maybach%20s-class/7278/overall",
     "source": "ucar"
   },
   {
@@ -7160,8 +7216,8 @@
     "brand": "Mitsubishi",
     "name": "Mitsubishi Outlander",
     "variant": "U-CAR new-car catalog",
-    "price": 89.9,
-    "priceLabel": "89.9-108.9 TWD 10k",
+    "price": 116.9,
+    "priceLabel": "116.9-138.9 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -7179,9 +7235,9 @@
     ],
     "tagline": "Outlander: synced from Taiwan new-car catalog.",
     "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6825.jpg",
-    "url": "https://newcar.u-car.com.tw/mitsubishi/outlander/6825/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/outlander/6825/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7290.jpg",
+    "url": "https://newcar.u-car.com.tw/mitsubishi/outlander/7290/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/outlander/7290/overall",
     "source": "ucar"
   },
   {
@@ -7273,7 +7329,7 @@
     "name": "Nissan X-Trail",
     "variant": "U-CAR new-car catalog",
     "price": 99.9,
-    "priceLabel": "99.9-151.9 TWD 10k",
+    "priceLabel": "99.9-149.9 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -7291,9 +7347,9 @@
     ],
     "tagline": "X-Trail: synced from Taiwan new-car catalog.",
     "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7233.jpg",
-    "url": "https://newcar.u-car.com.tw/nissan/x-trail/7233/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/nissan/x-trail/7233/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7287.jpg",
+    "url": "https://newcar.u-car.com.tw/nissan/x-trail/7287/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/nissan/x-trail/7287/overall",
     "source": "ucar"
   },
   {
@@ -7524,8 +7580,8 @@
     "brand": "Peugeot",
     "name": "Peugeot 408",
     "variant": "U-CAR new-car catalog",
-    "price": 122.8,
-    "priceLabel": "122.8-159.8 TWD 10k",
+    "price": 123.8,
+    "priceLabel": "123.8-141.8 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -7543,9 +7599,9 @@
     ],
     "tagline": "408: synced from Taiwan new-car catalog.",
     "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6843.jpg",
-    "url": "https://newcar.u-car.com.tw/peugeot/408/6843/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/peugeot/408/6843/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7293.jpg",
+    "url": "https://newcar.u-car.com.tw/peugeot/408/7293/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/peugeot/408/7293/overall",
     "source": "ucar"
   },
   {
@@ -7798,6 +7854,34 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7133.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7133/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7133/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Porsche",
+    "name": "Porsche Cayenne Coupé Electric",
+    "variant": "U-CAR new-car catalog",
+    "price": 439,
+    "priceLabel": "439-779 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 5,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Cayenne Coupé Electric: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7189.jpg",
+    "url": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7189/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7189/overall",
     "source": "ucar"
   },
   {
@@ -8159,9 +8243,9 @@
     ],
     "tagline": "Fabia: synced from Taiwan new-car catalog.",
     "note": "一般級距小型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7101.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7101/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7101/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7273.jpg",
+    "url": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7273/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/fabia/7273/overall",
     "source": "ucar"
   },
   {
@@ -8187,9 +8271,9 @@
     ],
     "tagline": "Scala: synced from Taiwan new-car catalog.",
     "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7107.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7107/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7107/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7275.jpg",
+    "url": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7275/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/scala/7275/overall",
     "source": "ucar"
   },
   {
@@ -8215,9 +8299,9 @@
     ],
     "tagline": "Kamiq: synced from Taiwan new-car catalog.",
     "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7102.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7102/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7102/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7274.jpg",
+    "url": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7274/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/kamiq/7274/overall",
     "source": "ucar"
   },
   {
@@ -8253,7 +8337,7 @@
     "name": "Škoda Karoq",
     "variant": "U-CAR new-car catalog",
     "price": 119.8,
-    "priceLabel": "119.8-136.8 TWD 10k",
+    "priceLabel": "119.8 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -8271,9 +8355,9 @@
     ],
     "tagline": "Karoq: synced from Taiwan new-car catalog.",
     "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7103.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7103/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7103/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7276.jpg",
+    "url": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7276/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/karoq/7276/overall",
     "source": "ucar"
   },
   {
@@ -8386,62 +8470,6 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7104.jpg",
     "url": "https://newcar.u-car.com.tw/%C5%A1koda/kodiaq/7104/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/kodiaq/7104/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Škoda",
-    "name": "Škoda Enyaq",
-    "variant": "U-CAR new-car catalog",
-    "price": 163.8,
-    "priceLabel": "163.8 TWD 10k",
-    "body": "suv",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "space",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Enyaq: synced from Taiwan new-car catalog.",
-    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6694.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq/6694/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq/6694/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Škoda",
-    "name": "Škoda Enyaq Coupé",
-    "variant": "U-CAR new-car catalog",
-    "price": 171.8,
-    "priceLabel": "171.8-198.8 TWD 10k",
-    "body": "suv",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "space",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Enyaq Coupé: synced from Taiwan new-car catalog.",
-    "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6695.jpg",
-    "url": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq%20coup%C3%A9/6695/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/%C5%A1koda/enyaq%20coup%C3%A9/6695/overall",
     "source": "ucar"
   },
   {
@@ -8865,62 +8893,6 @@
     "source": "ucar"
   },
   {
-    "brand": "Tesla",
-    "name": "Tesla Model S",
-    "variant": "U-CAR new-car catalog",
-    "price": 324.99,
-    "priceLabel": "324.99-339.99 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 5,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Model S: synced from Taiwan new-car catalog.",
-    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6947.jpg",
-    "url": "https://newcar.u-car.com.tw/tesla/model%20s/6947/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/tesla/model%20s/6947/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Tesla",
-    "name": "Tesla Model X",
-    "variant": "U-CAR new-car catalog",
-    "price": 349.99,
-    "priceLabel": "349.99-370.99 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 5,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Model X: synced from Taiwan new-car catalog.",
-    "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6948.jpg",
-    "url": "https://newcar.u-car.com.tw/tesla/model%20x/6948/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/tesla/model%20x/6948/overall",
-    "source": "ucar"
-  },
-  {
     "brand": "Toyota",
     "name": "Toyota Town Ace",
     "variant": "U-CAR new-car catalog",
@@ -9286,11 +9258,11 @@
   },
   {
     "brand": "Toyota",
-    "name": "Toyota Crown",
+    "name": "Toyota Crown Crossover",
     "variant": "U-CAR new-car catalog",
     "price": 157,
-    "priceLabel": "157-210 TWD 10k",
-    "body": "sedan",
+    "priceLabel": "157-200 TWD 10k",
+    "body": "suv",
     "power": "hybrid",
     "seats": 5,
     "priorities": [
@@ -9305,11 +9277,11 @@
       "blue",
       "red"
     ],
-    "tagline": "Crown: synced from Taiwan new-car catalog.",
+    "tagline": "Crown Crossover: synced from Taiwan new-car catalog.",
     "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6640.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/crown/6640/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown/6640/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7288.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7288/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7288/overall",
     "source": "ucar"
   },
   {
@@ -9338,6 +9310,34 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7228.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/hilux/7228/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/hilux/7228/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Toyota",
+    "name": "Toyota Crown Sport",
+    "variant": "U-CAR new-car catalog",
+    "price": 175,
+    "priceLabel": "175-210 TWD 10k",
+    "body": "sedan",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Crown Sport: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7289.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/crown%20sport/7289/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20sport/7289/overall",
     "source": "ucar"
   },
   {
@@ -10294,6 +10294,34 @@
   },
   {
     "brand": "Volvo",
+    "name": "Volvo EX90",
+    "variant": "U-CAR new-car catalog",
+    "price": 295,
+    "priceLabel": "295-379 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 7,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "EX90: synced from Taiwan new-car catalog.",
+    "note": "豪華級距SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7297.jpg",
+    "url": "https://newcar.u-car.com.tw/volvo/ex90/7297/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/volvo/ex90/7297/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Volvo",
     "name": "Volvo XC90",
     "variant": "U-CAR new-car catalog",
     "price": 295.6,
@@ -10318,34 +10346,6 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_6995.jpg",
     "url": "https://newcar.u-car.com.tw/volvo/xc90/6995/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/volvo/xc90/6995/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Volvo",
-    "name": "Volvo EX90",
-    "variant": "U-CAR new-car catalog",
-    "price": 299,
-    "priceLabel": "299-383 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 7,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "EX90: synced from Taiwan new-car catalog.",
-    "note": "豪華級距SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7219.jpg",
-    "url": "https://newcar.u-car.com.tw/volvo/ex90/7219/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/volvo/ex90/7219/overall",
     "source": "ucar"
   }
 ].map(C);
@@ -11031,11 +11031,13 @@
   window.JARVIS_DATA_META = {
   "sourceName": "U-CAR new-car catalog",
   "sourceUrl": "https://newcar.u-car.com.tw/newcar",
-  "updatedAt": "2026-08-22T07:31:15.644Z",
+  "updatedAt": "2026-10-01T06:13:56.076Z",
   "updateCadence": "monthly",
   "fetchedBrands": 47,
   "fetchedCars": 369,
   "publishedCars": 369,
+  "minimumFetchedCars": 333,
+  "minimumCatalogRetainRatio": 0.9,
   "pruneMissing": true,
   "failedBrands": []
 };
