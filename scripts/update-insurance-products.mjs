@@ -86,8 +86,11 @@ function normalizeProduct(item) {
   const aliases = Array.isArray(item.aliases)
     ? item.aliases.map(normalizeCode).filter(Boolean)
     : [];
+  // The premiums API can expose either a selected-plan total or a per-coverage
+  // rate. Trust the explicit model from discovery; use the legacy text hint
+  // only for older feeds that do not carry a model yet.
   const inferredPlanTotal = item.ratePricingModel === "planTotal"
-    || String(item.premiumChange || "").includes("Finfo 公開 premiums API");
+    || (!item.ratePricingModel && String(item.premiumChange || "").includes("Finfo 公開 premiums API"));
   const rows = inferredPlanTotal ? planTotalRateRows(item) : [];
   const coverageWan = Math.max(0, Number(item.coverageWan || item.coverageInWan || 0));
   const planName = String(item.planName || item.plan || item.selectedPlan || "").trim();

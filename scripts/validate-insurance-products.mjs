@@ -141,6 +141,8 @@ for (const product of outputProducts) {
 const dce = outputByCode.get("DCE");
 assert(dce?.insurer === "全球人壽", "DCE did not resolve to the current Global Life product");
 assert(dce?.availableTerms?.length === 5, "DCE should expose five premium terms");
+assert(dce?.ratePricingModel === "coverageUnit", `DCE should retain per-coverage pricing, got ${dce?.ratePricingModel}`);
+assert(Number(dce?.rateUnitCoverage) === 10000, `DCE rate unit should be NT$10,000, got ${dce?.rateUnitCoverage}`);
 assertClose(premiumAt(dce?.termRateTablesByGender?.["20年期"]?.male, 35), 378, "DCE male age 35 20-year rate");
 assertClose(premiumAt(dce?.termRateTablesByGender?.["30年期"]?.male, 35), 306, "DCE male age 35 rate");
 assert(Number(dce?.annualPremium) === 6120, `DCE annual premium should be 6120, got ${dce?.annualPremium}`);

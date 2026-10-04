@@ -687,13 +687,18 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
   const driveRateTablesByGender = maxGenderRateRows(chosenTermRate.selectedTables)
     ? chosenTermRate.selectedTables
     : driveRate.result?.rateTablesByGender || {};
+  const rateUnitCoverageFromDrive = Number(driveRate.result?.rateUnitCoverage) || 0;
+  const preferDriveUnitRates = rateUnitCoverageFromDrive > 0
+    && Object.values(driveRateTablesByGender).some((rows) => Array.isArray(rows) && rows.length);
   const structuredRateTable = driveRate.result?.structuredRateTable || null;
-  const mergedRateTablesByGender = Object.keys(rateTablesByGender).length
-    ? rateTablesByGender
-    : driveRateTablesByGender;
-  const mergedRateTable = rateResult.rateTable.length
-    ? rateResult.rateTable
-    : (mergedRateTablesByGender.male || Object.values(mergedRateTablesByGender).find((rows) => rows?.length) || []);
+  const mergedRateTablesByGender = preferDriveUnitRates
+    ? driveRateTablesByGender
+    : Object.keys(rateTablesByGender).length
+      ? rateTablesByGender
+      : driveRateTablesByGender;
+  const mergedRateTable = mergedRateTablesByGender.male
+    || Object.values(mergedRateTablesByGender).find((rows) => rows?.length)
+    || [];
   const optionTerms = [
     optionResult.options?.hottest_combination?.term,
     ...(Array.isArray(optionResult.options?.term) ? optionResult.options.term : [optionResult.options?.term]),
@@ -730,13 +735,20 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
     });
   const structuredAnnualPremium = premiumFromStructuredRateTable(structuredRateTable, coverageWan, 1);
   const hasApiRates = Object.keys(rateTablesByGender).length > 0;
-  const ratePricingModel = hasApiRates
-    ? "planTotal"
-    : structuredRateTable
+  // A parsed rate table that states "per NT$10,000" or a similar unit is
+  // authoritative about the price unit, even when Finfo's premiums API also
+  // returns rows for the default coverage selection.
+  const ratePricingModel = rateUnitCoverageFromDrive > 0
+    ? "coverageUnit"
+    : hasApiRates
+      ? "planTotal"
+      : structuredRateTable
       ? "structured"
       : "coverageUnit";
-  const rateUnitCoverage = hasApiRates
-    ? Math.max(10000, coverageWan * 10000)
+  const rateUnitCoverage = rateUnitCoverageFromDrive > 0
+    ? rateUnitCoverageFromDrive
+    : hasApiRates
+      ? Math.max(10000, coverageWan * 10000)
     : Number(driveRate.result?.rateUnitCoverage) || 1000000;
   const hasDriveRate = Boolean(mergedRateTable.length || structuredRateTable);
   const ageRatedProduct = Boolean(mergedRateTable.length) || isAgeRatedProduct(`${parsed.fullName} ${text} ${optionSummary}`);
