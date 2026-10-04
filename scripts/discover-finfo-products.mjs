@@ -687,8 +687,16 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
   const driveRateTablesByGender = maxGenderRateRows(chosenTermRate.selectedTables)
     ? chosenTermRate.selectedTables
     : driveRate.result?.rateTablesByGender || {};
+  const coverageWan = parseCoverageWan({ name: parsed.fullName, options: optionResult.options });
   const rateUnitCoverageFromDrive = Number(driveRate.result?.rateUnitCoverage) || 0;
-  const preferDriveUnitRates = rateUnitCoverageFromDrive > 0
+  const hasDriveTermRates = maxTermRateRows(driveTermRateTablesByGender) > 0;
+  // The rate-PDF term table is a per-coverage rate table.  Some PDFs expose
+  // its rows correctly while their "per NT$10,000" heading is split in a way
+  // text extraction cannot read.  Keep that table authoritative instead of
+  // falling back to the API's default-plan total in that situation.
+  const inferredDriveUnitCoverage = rateUnitCoverageFromDrive
+    || (hasDriveTermRates && coverageWan > 0 ? 10000 : 0);
+  const preferDriveUnitRates = inferredDriveUnitCoverage > 0
     && Object.values(driveRateTablesByGender).some((rows) => Array.isArray(rows) && rows.length);
   const structuredRateTable = driveRate.result?.structuredRateTable || null;
   const mergedRateTablesByGender = preferDriveUnitRates
@@ -719,7 +727,6 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
     optionResult.options?.hottest_combination?.term,
     optionResult.options?.hottest_combination?.plan,
   ].filter(Boolean).join("；");
-  const coverageWan = parseCoverageWan({ name: parsed.fullName, options: optionResult.options });
   const planName = planNameFromOptions(optionResult.options);
   const coverageLabel = coverageLabelFromOptions({ options: optionResult.options, coverageWan });
   const planBenefitTables = knownPlanBenefitTables(parsed.code, planOptions);
@@ -738,15 +745,15 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
   // A parsed rate table that states "per NT$10,000" or a similar unit is
   // authoritative about the price unit, even when Finfo's premiums API also
   // returns rows for the default coverage selection.
-  const ratePricingModel = rateUnitCoverageFromDrive > 0
+  const ratePricingModel = inferredDriveUnitCoverage > 0
     ? "coverageUnit"
     : hasApiRates
       ? "planTotal"
       : structuredRateTable
       ? "structured"
       : "coverageUnit";
-  const rateUnitCoverage = rateUnitCoverageFromDrive > 0
-    ? rateUnitCoverageFromDrive
+  const rateUnitCoverage = inferredDriveUnitCoverage > 0
+    ? inferredDriveUnitCoverage
     : hasApiRates
       ? Math.max(10000, coverageWan * 10000)
     : Number(driveRate.result?.rateUnitCoverage) || 1000000;
@@ -789,7 +796,7 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
     premiumBands: premiumBandsWithUnits(mergedRateTable, coverageWan, rateUnitCoverage, ratePricingModel),
     rateStatus: hasDriveRate ? "ready" : "missing",
     ratePricingModel,
-    termRatePricingModel: Object.keys(driveTermRateTablesByGender).length ? "coverageUnit" : ratePricingModel,
+    termRatePricingModel: hasDriveTermRates ? "coverageUnit" : ratePricingModel,
     rateUnitCoverage,
     rateSource,
     rateTable: mergedRateTable,

@@ -329,11 +329,15 @@ def extract(path, code=""):
             structured = parse_coverage_occupation_table(table)
 
     text = "\n".join(all_text)
-    if "每萬元" in text:
+    # PDF text extraction often splits the unit label across lines or spaces
+    # (for example, "每萬\n元").  Normalize it before classifying the rate
+    # unit so a successfully parsed table cannot lose its pricing semantics.
+    compact_text = re.sub(r"\s+", "", text)
+    if "每萬元" in compact_text:
         rate_unit_coverage = 10000
-    elif "每千元" in text:
+    elif "每千元" in compact_text:
         rate_unit_coverage = 1000
-    elif "每百元" in text:
+    elif "每百元" in compact_text:
         rate_unit_coverage = 100
     else:
         rate_unit_coverage = None

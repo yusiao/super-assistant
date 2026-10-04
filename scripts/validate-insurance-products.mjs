@@ -118,10 +118,6 @@ for (const product of outputProducts) {
         `${code} is missing rate rows for ${plan}`);
     }
   }
-  const comesFromFinfoPremiumApi = String(product.premiumChange || "").includes("Finfo 公開 premiums API");
-  if (comesFromFinfoPremiumApi) {
-    assert(product.ratePricingModel === "planTotal", `${code} Finfo plan premium is missing planTotal pricing semantics`);
-  }
   if (product.ratePricingModel !== "planTotal") continue;
 
   const rows = product.rateTablesByGender?.male?.length
