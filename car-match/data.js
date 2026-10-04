@@ -298,34 +298,6 @@
   },
   {
     "brand": "Audi",
-    "name": "Audi A1 Sportback",
-    "variant": "U-CAR new-car catalog",
-    "price": 128.5,
-    "priceLabel": "128.5-152 TWD 10k",
-    "body": "hatch",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "city",
-      "design",
-      "value"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "A1 Sportback: synced from Taiwan new-car catalog.",
-    "note": "豪華級距小型轎車及掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7027.jpg",
-    "url": "https://newcar.u-car.com.tw/audi/a1%20sportback/7027/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/audi/a1%20sportback/7027/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Audi",
     "name": "Audi Q2",
     "variant": "U-CAR new-car catalog",
     "price": 139.9,
@@ -914,34 +886,6 @@
   },
   {
     "brand": "Audi",
-    "name": "Audi A7 Sportback",
-    "variant": "U-CAR new-car catalog",
-    "price": 372.5,
-    "priceLabel": "372.5-414.5 TWD 10k",
-    "body": "hatch",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "city",
-      "design",
-      "value"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "A7 Sportback: synced from Taiwan new-car catalog.",
-    "note": "豪華級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6519.jpg",
-    "url": "https://newcar.u-car.com.tw/audi/a7%20sportback/6519/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/audi/a7%20sportback/6519/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Audi",
     "name": "Audi Q8",
     "variant": "U-CAR new-car catalog",
     "price": 413,
@@ -1446,6 +1390,34 @@
   },
   {
     "brand": "BMW",
+    "name": "BMW iX3",
+    "variant": "U-CAR new-car catalog",
+    "price": 245,
+    "priceLabel": "245-312 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 5,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "iX3: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7299.jpg",
+    "url": "https://newcar.u-car.com.tw/bmw/ix3/7299/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/bmw/ix3/7299/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "BMW",
     "name": "BMW X3",
     "variant": "U-CAR new-car catalog",
     "price": 249,
@@ -1554,34 +1526,6 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7059.jpg",
     "url": "https://newcar.u-car.com.tw/bmw/i4/7059/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/bmw/i4/7059/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "BMW",
-    "name": "BMW iX3",
-    "variant": "U-CAR new-car catalog",
-    "price": 280,
-    "priceLabel": "280-325 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 5,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "iX3: synced from Taiwan new-car catalog.",
-    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7254.jpg",
-    "url": "https://newcar.u-car.com.tw/bmw/ix3/7254/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/bmw/ix3/7254/overall",
     "source": "ucar"
   },
   {
@@ -9090,6 +9034,34 @@
   },
   {
     "brand": "Toyota",
+    "name": "Toyota Camry",
+    "variant": "U-CAR new-car catalog",
+    "price": 100.9,
+    "priceLabel": "100.9-125 TWD 10k",
+    "body": "sedan",
+    "power": "hybrid",
+    "seats": 5,
+    "priorities": [
+      "economy",
+      "comfort",
+      "tech"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Camry: synced from Taiwan new-car catalog.",
+    "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7298.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/camry/7298/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/camry/7298/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Toyota",
     "name": "Toyota RAV4",
     "variant": "U-CAR new-car catalog",
     "price": 104,
@@ -9114,34 +9086,6 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7143.jpg",
     "url": "https://newcar.u-car.com.tw/toyota/rav4/7143/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/toyota/rav4/7143/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Toyota",
-    "name": "Toyota Camry",
-    "variant": "U-CAR new-car catalog",
-    "price": 110.9,
-    "priceLabel": "110.9-125 TWD 10k",
-    "body": "sedan",
-    "power": "hybrid",
-    "seats": 5,
-    "priorities": [
-      "economy",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Camry: synced from Taiwan new-car catalog.",
-    "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7268.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/camry/7268/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/camry/7268/overall",
     "source": "ucar"
   },
   {
@@ -11031,11 +10975,11 @@
   window.JARVIS_DATA_META = {
   "sourceName": "U-CAR new-car catalog",
   "sourceUrl": "https://newcar.u-car.com.tw/newcar",
-  "updatedAt": "2026-10-01T06:13:56.076Z",
+  "updatedAt": "2026-10-04T23:22:58.242Z",
   "updateCadence": "monthly",
   "fetchedBrands": 47,
-  "fetchedCars": 369,
-  "publishedCars": 369,
+  "fetchedCars": 367,
+  "publishedCars": 367,
   "minimumFetchedCars": 333,
   "minimumCatalogRetainRatio": 0.9,
   "pruneMissing": true,
