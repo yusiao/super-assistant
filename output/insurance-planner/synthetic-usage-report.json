@@ -1,7 +1,7 @@
 {
   "status": "ok",
-  "catalogUpdatedAt": "2026-08-22",
-  "generatedAt": "2026-08-22T07:01:58.134Z",
+  "catalogUpdatedAt": "2026-10-04",
+  "generatedAt": "2026-10-04T17:46:26.406Z",
   "totalUsers": 10000,
   "gender": {
     "male": 5000,
@@ -16,18 +16,14 @@
       "restrictedUsers": 0,
       "products": {
         "DCE": 2500,
-        "LM5": 2500,
-        "CJ2": 2500,
-        "XCD": 2500
+        "XHD": 2500,
+        "XAB": 2500
       },
       "terms": {
-        "DCE 30年期": 2500,
-        "LM5 20年期": 2500,
-        "CJ2 5年期": 2500,
-        "XCD 1年期": 2500
+        "DCE 30年期": 2500
       },
-      "averagePolicies": 4,
-      "averageAnnualPremium": 6678
+      "averagePolicies": 3,
+      "averageAnnualPremium": 8247
     },
     "26-40": {
       "users": 2500,
@@ -37,18 +33,14 @@
       "restrictedUsers": 0,
       "products": {
         "DCE": 2500,
-        "LM5": 2500,
-        "CJ2": 2500,
-        "XCD": 2500
+        "XHD": 2500,
+        "XAB": 2500
       },
       "terms": {
-        "DCE 30年期": 2500,
-        "LM5 20年期": 2500,
-        "CJ2 5年期": 2500,
-        "XCD 1年期": 2500
+        "DCE 30年期": 2500
       },
-      "averagePolicies": 4,
-      "averageAnnualPremium": 10608
+      "averagePolicies": 3,
+      "averageAnnualPremium": 14071
     },
     "41-65": {
       "users": 2500,
@@ -58,53 +50,67 @@
       "restrictedUsers": 0,
       "products": {
         "DCE": 2500,
-        "LM5": 2500,
-        "CJ2": 2500,
-        "XCD": 2500
+        "XHD": 2500,
+        "XAB": 2500
       },
       "terms": {
-        "CJ2 5年期": 2500,
-        "XCD 1年期": 2500,
-        "LM5 20年期": 2300,
         "DCE 30年期": 500,
         "DCE 25年期": 500,
         "DCE 20年期": 500,
         "DCE 15年期": 500,
-        "DCE 10年期": 500,
-        "LM5 15年期": 200
+        "DCE 10年期": 500
       },
-      "averagePolicies": 4,
-      "averageAnnualPremium": 26415
+      "averagePolicies": 3,
+      "averageAnnualPremium": 25218
     },
     "66+": {
       "users": 2500,
       "male": 1250,
       "female": 1250,
-      "usersWithPolicies": 1900,
-      "restrictedUsers": 600,
+      "usersWithPolicies": 2100,
+      "restrictedUsers": 400,
       "products": {
-        "LM5": 1900,
-        "MRE": 1000,
-        "XCD": 500
+        "TCA": 1400,
+        "LM5": 1000,
+        "R5D": 900,
+        "OLA6": 900,
+        "MRE": 600,
+        "XCD": 500,
+        "L6D": 500,
+        "XDD": 500,
+        "APB": 400,
+        "XHD": 400,
+        "XAB": 400,
+        "HXB": 400,
+        "HFA": 350,
+        "CSD": 200,
+        "N3A": 100,
+        "ICH": 100,
+        "NCRB": 50
       },
       "terms": {
-        "LM5 6年期": 900,
+        "TCA 6年期": 900,
+        "OLA6 20年期": 900,
         "LM5 10年期": 700,
         "XCD 1年期": 500,
-        "LM5 15年期": 300
+        "TCA 10年期": 500,
+        "APB 20年期": 400,
+        "LM5 15年期": 300,
+        "N3A 10年期": 100,
+        "NCRB 20年期": 50
       },
-      "averagePolicies": 1.36,
-      "averageAnnualPremium": 11627
+      "averagePolicies": 3.48,
+      "averageAnnualPremium": 73312
     }
   },
-  "restrictedUsers": 600,
-  "restrictedAgeRange": "85-90",
+  "restrictedUsers": 400,
+  "restrictedAgeRange": "87-90",
   "performance": {
-    "durationMs": 1475.6,
-    "usersPerSecond": 6777,
-    "payloadBytesP50": 1576,
-    "payloadBytesP95": 1588,
-    "payloadBytesMax": 1590
+    "durationMs": 4365.7,
+    "usersPerSecond": 2291,
+    "payloadBytesP50": 1213,
+    "payloadBytesP95": 1894,
+    "payloadBytesMax": 1921
   },
   "checks": {
     "exactGenderSplit": true,
