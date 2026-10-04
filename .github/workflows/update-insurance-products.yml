@@ -92,7 +92,12 @@ jobs:
           commit_message: "Update insurance product database"
           file_pattern: output/insurance-planner/products.json output/insurance-planner-cloudflare/products.json output/insurance-planner/synthetic-usage-report.json data/insurance/products-feed.json data/insurance/products-discovered.json data/insurance/discovery-report.json data/insurance/products-finfo-index.json data/insurance/finfo-index-report.json data/insurance/products-finfo-feed.json data/insurance/finfo-discovery-report.json data/insurance/finfo-enrichment-state.json data/insurance/catalog-monitor-state.json data/insurance/catalog-monitor-report.json data/insurance/catalog-monitor-summary.md
 
+      - name: Report missing Cloudflare deployment credentials
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' || secrets.CLOUDFLARE_ACCOUNT_ID == '' }}
+        run: echo "::warning::Cloudflare Pages deployment skipped because CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not configured in GitHub Actions secrets."
+
       - name: Deploy updated catalog to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
