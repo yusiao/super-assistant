@@ -689,13 +689,16 @@ async function discoverCode(code, indexedProduct = null, preferredProduct = null
     : driveRate.result?.rateTablesByGender || {};
   const coverageWan = parseCoverageWan({ name: parsed.fullName, options: optionResult.options });
   const rateUnitCoverageFromDrive = Number(driveRate.result?.rateUnitCoverage) || 0;
+  const driveTermLabels = Object.keys(driveTermRateTablesByGender);
   const hasDriveTermRates = maxTermRateRows(driveTermRateTablesByGender) > 0;
-  // The rate-PDF term table is a per-coverage rate table.  Some PDFs expose
-  // its rows correctly while their "per NT$10,000" heading is split in a way
-  // text extraction cannot read.  Keep that table authoritative instead of
-  // falling back to the API's default-plan total in that situation.
+  const hasMultipleDriveTerms = driveTermLabels.length > 1;
+  // A multi-term rate matrix is a per-coverage table. Some PDFs expose its
+  // rows correctly while their "per NT$10,000" heading is split in a way text
+  // extraction cannot read. A single-term table can instead be the selected
+  // coverage total, so it must retain the API pricing model unless the unit is
+  // explicit.
   const inferredDriveUnitCoverage = rateUnitCoverageFromDrive
-    || (hasDriveTermRates && coverageWan > 0 ? 10000 : 0);
+    || (hasMultipleDriveTerms && coverageWan > 0 ? 10000 : 0);
   const preferDriveUnitRates = inferredDriveUnitCoverage > 0
     && Object.values(driveRateTablesByGender).some((rows) => Array.isArray(rows) && rows.length);
   const structuredRateTable = driveRate.result?.structuredRateTable || null;
