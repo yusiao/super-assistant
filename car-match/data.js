@@ -5926,6 +5926,34 @@
   },
   {
     "brand": "Mercedes-Benz",
+    "name": "Mercedes-Benz GLC electric",
+    "variant": "U-CAR new-car catalog",
+    "price": 289,
+    "priceLabel": "289-333 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 5,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "GLC electric: synced from Taiwan new-car catalog.",
+    "note": "豪華中型小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7300.jpg",
+    "url": "https://newcar.u-car.com.tw/mercedes-benz/glc%20electric/7300/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mercedes-benz/glc%20electric/7300/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Mercedes-Benz",
     "name": "Mercedes-Benz GLC Coupé",
     "variant": "U-CAR new-car catalog",
     "price": 297,
@@ -10975,12 +11003,12 @@
   window.JARVIS_DATA_META = {
   "sourceName": "U-CAR new-car catalog",
   "sourceUrl": "https://newcar.u-car.com.tw/newcar",
-  "updatedAt": "2026-10-04T23:22:58.242Z",
+  "updatedAt": "2026-10-05T14:24:53.252Z",
   "updateCadence": "monthly",
   "fetchedBrands": 47,
-  "fetchedCars": 367,
-  "publishedCars": 367,
-  "minimumFetchedCars": 333,
+  "fetchedCars": 368,
+  "publishedCars": 368,
+  "minimumFetchedCars": 331,
   "minimumCatalogRetainRatio": 0.9,
   "pruneMissing": true,
   "failedBrands": []
