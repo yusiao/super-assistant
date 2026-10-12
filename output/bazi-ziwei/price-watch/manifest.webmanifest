@@ -1,7 +1,7 @@
 {
-  "name": "Jarvis Price Watch",
-  "short_name": "Jarvis 價格",
-  "description": "商品與機票價格搜尋、追蹤及 LINE 到價提醒",
+  "name": "航班助手",
+  "short_name": "航班助手",
+  "description": "航班搜尋、彈性天數比較與 LINE 低價追蹤",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",

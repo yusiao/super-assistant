@@ -1,12 +1,9 @@
 const state = {
-  activeType: "product",
-  activePanel: "productPanel",
-  lastProductQuery: "",
+  activePanel: "flightPanel",
   lastFlightPayload: null,
   flightMode: "annual_low",
   config: null,
   views: {
-    productPanel: { title: "商品結果", results: [], insights: null, searched: false, status: { text: "準備搜尋", kind: "ready" } },
     flightPanel: { title: "機票結果", results: [], insights: null, currency: "TWD", searched: false, status: { text: "準備搜尋", kind: "ready" } },
     savedPanel: { status: { text: "載入追蹤中", kind: "ready" } },
   },
@@ -20,7 +17,6 @@ const elements = {
   saveSettingsButton: document.querySelector("#saveSettingsButton"),
   statusStrip: document.querySelector("#statusStrip"),
   statusText: document.querySelector("#statusText"),
-  productForm: document.querySelector("#productForm"),
   flightForm: document.querySelector("#flightForm"),
   flightModeButtons: document.querySelectorAll("[data-flight-mode]"),
   windowFlightFields: document.querySelector("#windowFlightFields"),
@@ -47,7 +43,6 @@ const elements = {
   durationList: document.querySelector("#durationList"),
   cabinOverview: document.querySelector("#cabinOverview"),
   cabinPriceGrid: document.querySelector("#cabinPriceGrid"),
-  productQualityNotice: document.querySelector("#productQualityNotice"),
   savedList: document.querySelector("#savedList"),
   refreshSavedButton: document.querySelector("#refreshSavedButton"),
   emptyTemplate: document.querySelector("#emptyTemplate"),
@@ -403,16 +398,21 @@ function searchErrorMessage(error, fallback) {
   return fallback;
 }
 
-function localSaved() {
+function storedLocalWatches() {
   try {
-    return JSON.parse(localStorage.getItem("priceWatchLocalWatches") || "[]");
+    const watches = JSON.parse(localStorage.getItem("priceWatchLocalWatches") || "[]");
+    return Array.isArray(watches) ? watches.filter((watch) => watch && typeof watch === "object") : [];
   } catch {
     return [];
   }
 }
 
+function localSaved() {
+  return storedLocalWatches().filter((watch) => watch.type === "flight");
+}
+
 function saveLocalWatch(watch) {
-  const existing = localSaved().filter((item) => item.id !== watch.id);
+  const existing = storedLocalWatches().filter((item) => item.id !== watch.id);
   existing.push(watch);
   localStorage.setItem("priceWatchLocalWatches", JSON.stringify(existing));
 }
@@ -425,24 +425,9 @@ function resultCard(item) {
   const card = document.createElement("article");
   card.className = "result-card";
   const dateText = item.returnDate ? `${item.departureDate} - ${item.returnDate}` : item.departureDate || "";
-  const isFlight = item.type === "flight";
-  const meta = isFlight
-    ? `<p class="flight-meta">${escapeHtml(item.source || "航班")} ${dateText ? ` · ${escapeHtml(dateText)}` : ""}${item.tripDays ? ` · ${escapeHtml(item.tripDays)} 天` : ""}${item.sampled ? " · 抽樣價" : item.cached ? " · 探索價" : ""}</p>`
-    : `<p class="source-line">${escapeHtml(item.source || "來源")}</p>`;
-  const productImage = !isFlight && item.thumbnail
-    ? `<img class="product-thumbnail" src="${safeUrl(item.thumbnail)}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
-    : "";
-  const productFacts = !isFlight ? `
-    <div class="product-facts">
-      <span>${escapeHtml(item.priceKindLabel || "標示總價")}</span>
-      <span>${escapeHtml(item.conditionLabel || "商品狀態未標示")}</span>
-      ${Number.isFinite(Number(item.matchScore)) ? `<span>型號符合 ${escapeHtml(item.matchScore)}%</span>` : ""}
-    </div>
-  ` : "";
-  const actionClass = isFlight ? "action-row flight-actions" : item.trackable === false ? "action-row single" : "action-row";
   const trackButton = item.trackable === false ? "" : '<button class="track-button" type="button">追蹤</button>';
   const stopText = Number(item.stops || 0) === 0 ? "直達" : `${Number(item.stops)} 次轉乘`;
-  const flightDetails = isFlight ? `
+  const flightDetails = `
     <div class="flight-route" aria-label="航班詳情">
       <div class="flight-time"><strong>${escapeHtml(timeText(item.departure))}</strong><span>${escapeHtml(item.departureAirport || "出發")}</span></div>
       <div class="flight-journey"><span>${escapeHtml(durationText(item.duration))}</span><i></i><b>${escapeHtml(stopText)}</b></div>
@@ -453,35 +438,30 @@ function resultCard(item) {
       <span>${escapeHtml(item.cabinLabel || "經濟艙")}</span>
       <span>${escapeHtml(item.airlineTypeLabel || "航空類型未分類")}</span>
     </div>
-  ` : "";
+  `;
   const purchaseLabels = { official: "航空官網", skyscanner: "Skyscanner", trip: "Trip.com" };
   const purchaseActions = (item.purchaseLinks || []).map((link) => `
     <a class="purchase-link ${escapeHtml(link.kind)}" href="${safeUrl(link.url)}" target="_blank" rel="noopener noreferrer">
       ${escapeHtml(purchaseLabels[link.kind] || link.label || "購票")}
     </a>
   `).join("");
-  const actions = isFlight
-    ? `${purchaseActions}${trackButton}`
-    : `<a class="secondary-link" href="${safeUrl(item.link)}" target="_blank" rel="noreferrer">開啟</a>${trackButton}`;
-  card.classList.toggle("flight-result", isFlight);
+  card.classList.add("flight-result");
   card.innerHTML = `
     <div class="result-main">
       <div class="result-description">
-        ${productImage}
         <div>
           <h3>${escapeHtml(item.title || "搜尋結果")}</h3>
-          ${meta}
-          ${productFacts}
+          <p class="flight-meta">${escapeHtml(item.source || "航班")}${dateText ? ` · ${escapeHtml(dateText)}` : ""}${item.tripDays ? ` · ${escapeHtml(item.tripDays)} 天` : ""}${item.sampled ? " · 抽樣價" : item.cached ? " · 探索價" : ""}</p>
         </div>
       </div>
       <div class="price-block">
-        ${isFlight ? `<span class="cabin-tag">${escapeHtml(item.cabinLabel || "經濟艙")}</span>` : ""}
+        <span class="cabin-tag">${escapeHtml(item.cabinLabel || "經濟艙")}</span>
         <div class="price">${escapeHtml(item.priceText || money(item.price, item.currency))}</div>
       </div>
     </div>
     ${flightDetails}
-    <div class="${actionClass}">
-      ${actions}
+    <div class="action-row flight-actions">
+      ${purchaseActions}${trackButton}
     </div>
   `;
   card.querySelector(".track-button")?.addEventListener("click", () => trackResult(item));
@@ -542,18 +522,6 @@ function renderDurationAlternatives(insights, currency = "TWD") {
   elements.durationOverview.hidden = false;
 }
 
-function externalProductResult(query) {
-  return {
-    id: stableId("external-product", query),
-    type: "product",
-    title: `備用 Google Shopping：${query}`,
-    source: "外部備用搜尋",
-    priceText: "",
-    link: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`,
-    trackable: false,
-  };
-}
-
 function renderResults(title, results) {
   elements.resultsTitle.textContent = title;
   elements.resultCount.textContent = results.length ? `${results.length} 筆` : "";
@@ -563,18 +531,6 @@ function renderResults(title, results) {
     return;
   }
   results.forEach((item) => elements.resultList.append(resultCard(item)));
-}
-
-function renderProductQuality(insights) {
-  if (!insights) {
-    elements.productQualityNotice.hidden = true;
-    elements.productQualityNotice.textContent = "";
-    return;
-  }
-  const comparable = Number(insights.comparableResultCount || 0);
-  const raw = Number(insights.rawResultCount || 0);
-  elements.productQualityNotice.textContent = `${insights.notice || "結果已完成價格品質檢查"} 可比總價 ${comparable}／${raw} 筆。`;
-  elements.productQualityNotice.hidden = false;
 }
 
 function revealResults() {
@@ -617,15 +573,6 @@ function renderActiveView() {
     return;
   }
   elements.resultsZone.hidden = false;
-  if (panelId === "productPanel") {
-    elements.flightYearStats.hidden = true;
-    elements.durationOverview.hidden = true;
-    elements.cabinOverview.hidden = true;
-    renderProductQuality(view.insights);
-    renderResults(view.searched ? view.title : "商品搜尋結果", view.results);
-    return;
-  }
-  elements.productQualityNotice.hidden = true;
   renderFlightYearStats(view.insights?.yearStats, view.currency);
   renderDurationAlternatives(view.insights, view.currency);
   renderCabinOverview(view.insights?.cabinPrices, view.currency);
@@ -633,31 +580,17 @@ function renderActiveView() {
 }
 
 function watchFromResult(item) {
-  const targetInput = state.activeType === "flight"
-    ? elements.flightForm.elements.targetPrice
-    : elements.productForm.elements.targetPrice;
-  const targetPrice = targetInput.value || item.price;
-  if (item.type === "flight" && state.lastFlightPayload) {
-    const flight = state.lastFlightPayload;
-    const modeLabel = flight.flightMode === "annual_low" ? "未來一年低價探索" : `${flight.startDate} 起 ${flight.lookaheadDays} 天`;
-    return {
-      type: "flight",
-      id: stableId("flight", `${flight.departureId}-${flight.arrivalId}-${flight.flightMode}-${flight.startDate}-${flight.tripDays}-${item.travelClass || "1"}`),
-      name: `${flight.departureId} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
-      targetPrice,
-      ...flight,
-      travelClass: item.travelClass || "1",
-      cabinClass: item.cabinClass || "economy",
-      cabinLabel: item.cabinLabel || "經濟艙",
-    };
-  }
+  const flight = state.lastFlightPayload;
+  const modeLabel = flight.flightMode === "annual_low" ? "未來一年低價探索" : `${flight.startDate} 起 ${flight.lookaheadDays} 天`;
   return {
-    type: "product",
-    id: stableId("product", state.lastProductQuery || item.title),
-    name: state.lastProductQuery || item.title,
-    query: state.lastProductQuery || item.title,
-    targetPrice,
-    currency: item.currency || elements.productForm.elements.currency.value,
+    ...flight,
+    type: "flight",
+    id: stableId("flight", `${flight.departureId}-${flight.arrivalId}-${flight.flightMode}-${flight.startDate}-${flight.tripDays}-${item.travelClass || "1"}`),
+    name: `${flight.departureId} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
+    targetPrice: elements.flightForm.elements.targetPrice.value || item.price,
+    travelClass: item.travelClass || "1",
+    cabinClass: item.cabinClass || "economy",
+    cabinLabel: item.cabinLabel || "經濟艙",
   };
 }
 
@@ -681,54 +614,9 @@ async function trackResult(item) {
   }
 }
 
-async function searchProduct(event) {
-  event.preventDefault();
-  state.activeType = "product";
-  const data = formData(elements.productForm);
-  state.lastProductQuery = data.query.trim();
-  setPanelStatus("productPanel", "搜尋並檢查商品價格中");
-  try {
-    const response = await api("/api/price-watch/search", {
-      method: "POST",
-      body: JSON.stringify({
-        type: "product",
-        query: data.query,
-        currency: data.currency || "TWD",
-      }),
-    });
-    const view = state.views.productPanel;
-    view.results = response.results || [];
-    view.insights = response.insights || null;
-    view.searched = true;
-    view.title = "可比商品總價";
-    if (state.activePanel === "productPanel") {
-      renderActiveView();
-      revealResults();
-    }
-    const excluded = Number(response.insights?.excludedCount || 0);
-    setPanelStatus(
-      "productPanel",
-      view.results.length ? `搜尋完成，已排除 ${excluded} 筆不可靠價格` : response.insights?.notice || "沒有找到可比較的總價",
-      view.results.length ? "ready" : "error",
-    );
-  } catch (error) {
-    const view = state.views.productPanel;
-    view.results = error.status === 401 ? [] : [externalProductResult(state.lastProductQuery)];
-    view.insights = null;
-    view.searched = true;
-    view.title = "商品結果";
-    if (state.activePanel === "productPanel") {
-      renderActiveView();
-      revealResults();
-    }
-    setPanelStatus("productPanel", searchErrorMessage(error, "商品搜尋暫時失敗，請稍後再試。"), "error");
-  }
-}
-
 async function searchFlight(event) {
   event.preventDefault();
   if (elements.flightSubmitButton.disabled) return;
-  state.activeType = "flight";
   const data = formData(elements.flightForm);
   setFlightLoading(true);
   setPanelStatus("flightPanel", "正在解析出發地與目的地");
@@ -816,7 +704,7 @@ function savedItem(watch, origin) {
   item.innerHTML = `
     <div>
       <h3>${escapeHtml(watch.name || watch.id)}</h3>
-      <p>${escapeHtml(origin)} · ${escapeHtml(watch.type || "watch")} · 目標 ${escapeHtml(watch.target_price || watch.targetPrice || "-")}</p>
+      <p>${escapeHtml(origin)} · 航班 · 目標 ${escapeHtml(watch.target_price || watch.targetPrice || "-")}</p>
     </div>
   `;
   return item;
@@ -836,7 +724,7 @@ async function renderSaved() {
   if (token()) {
     try {
       const data = await api("/api/price-watch/watches");
-      (data.watches || []).forEach((watch) => nodes.push(savedItem(watch, "雲端")));
+      (data.watches || []).filter((watch) => watch?.type === "flight").forEach((watch) => nodes.push(savedItem(watch, "雲端")));
     } catch (error) {
       cloudError = error;
       nodes.push(savedError(error.status === 401 ? "同步金鑰無效，請到右上角設定更新。" : "雲端服務暫時無法連線，手機資料仍可使用。"));
@@ -858,8 +746,6 @@ async function renderSaved() {
 
 function switchPanel(panelId) {
   state.activePanel = panelId;
-  if (panelId === "productPanel") state.activeType = "product";
-  if (panelId === "flightPanel") state.activeType = "flight";
   document.querySelectorAll(".tab").forEach((tab) => {
     const isActive = tab.dataset.panel === panelId;
     tab.classList.toggle("active", isActive);
@@ -874,10 +760,8 @@ async function loadConfig() {
   try {
     state.config = await api("/api/price-watch/config", { headers: {} });
     const ready = state.config.hasSerpApi || state.config.hasSkyscanner;
-    setPanelStatus("productPanel", state.config.hasSerpApi ? "準備搜尋" : "尚未設定商品搜尋 API", state.config.hasSerpApi ? "ready" : "error");
     setPanelStatus("flightPanel", ready ? "準備搜尋" : "尚未設定機票搜尋 API", ready ? "ready" : "error");
   } catch {
-    setPanelStatus("productPanel", token() ? "準備搜尋" : "搜尋服務狀態暫時無法確認", token() ? "ready" : "error");
     setPanelStatus("flightPanel", token() ? "準備搜尋" : "搜尋服務狀態暫時無法確認", token() ? "ready" : "error");
   }
 }
@@ -888,7 +772,6 @@ function boot() {
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", () => switchPanel(tab.dataset.panel));
   });
-  elements.productForm.addEventListener("submit", searchProduct);
   elements.flightForm.addEventListener("submit", searchFlight);
   elements.flightModeButtons.forEach((button) => {
     button.addEventListener("click", () => setFlightMode(button.dataset.flightMode));
@@ -923,7 +806,7 @@ function boot() {
   setFlightMode("annual_low");
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=7").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=8").catch(() => {});
   }
 }
 

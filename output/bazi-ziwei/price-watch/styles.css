@@ -58,7 +58,7 @@ select {
   color: var(--accent);
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -135,7 +135,7 @@ h2 {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin: 16px 0 12px;
   padding: 4px;
@@ -520,21 +520,7 @@ select {
   font-weight: 800;
 }
 
-.product-quality-notice {
-  margin: 0 0 10px;
-  padding: 10px 12px;
-  border: 1px solid rgba(15, 124, 108, 0.24);
-  border-radius: 8px;
-  background: #edf6f4;
-  color: var(--accent-strong);
-  font-size: 12px;
-  font-weight: 750;
-  line-height: 1.5;
-}
 
-.product-quality-notice[hidden] {
-  display: none;
-}
 
 .flight-year-stats {
   display: grid;
@@ -752,32 +738,8 @@ select {
   min-width: 0;
 }
 
-.product-thumbnail {
-  width: 62px;
-  height: 62px;
-  flex: 0 0 62px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  object-fit: contain;
-}
 
-.product-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 7px;
-}
 
-.product-facts span {
-  padding: 3px 5px;
-  border-radius: 4px;
-  background: var(--soft);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 750;
-  line-height: 1.25;
-}
 
 .result-card h3,
 .saved-item h3 {
@@ -1008,11 +970,6 @@ select {
     left: auto;
   }
 
-  .product-thumbnail {
-    width: 54px;
-    height: 54px;
-    flex-basis: 54px;
-  }
 }
 
 @media (min-width: 620px) {

@@ -1,5 +1,5 @@
-const CACHE_NAME = "jarvis-price-watch-v12";
-const APP_SHELL = ["./", "./index.html", "./styles.css?v=12", "./app.js?v=12", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "flight-watch-v13";
+const APP_SHELL = ["./", "./index.html", "./styles.css?v=13", "./app.js?v=13", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -8,7 +8,7 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))),
+    caches.keys().then((keys) => Promise.all(keys.filter((key) => /^(jarvis-price-watch-|flight-watch-)/.test(key) && key !== CACHE_NAME).map((key) => caches.delete(key)))),
   );
   self.clients.claim();
 });

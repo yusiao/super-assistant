@@ -2,35 +2,6 @@
   "watches": [
     {
       "enabled": false,
-      "id": "sample-product",
-      "type": "product",
-      "name": "範例商品：請改成你想追蹤的商品",
-      "currency": "TWD",
-      "target_price": 18000,
-      "alert_on_new_low": true,
-      "alert_cooldown_days": 7,
-      "sources": [
-        {
-          "type": "html",
-          "id": "official-store",
-          "name": "官方商城",
-          "url": "https://example.com/product",
-          "price_regex": "NT\\$\\s*([\\d,]+)"
-        },
-        {
-          "type": "serpapi_google_shopping",
-          "id": "google-shopping",
-          "name": "Google Shopping",
-          "query": "請輸入商品型號",
-          "gl": "tw",
-          "hl": "zh-tw",
-          "currency": "TWD",
-          "limit": 8
-        }
-      ]
-    },
-    {
-      "enabled": false,
       "id": "sample-flight-tpe-tyo",
       "type": "flight",
       "name": "範例機票：台北到東京未來一年最低",

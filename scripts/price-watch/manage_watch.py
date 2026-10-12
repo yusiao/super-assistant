@@ -47,62 +47,12 @@ def require_unique_id(data: dict[str, Any], watch_id: str) -> None:
         raise RuntimeError(f"Watch id already exists: {watch_id}")
 
 
-def add_product(args: argparse.Namespace) -> int:
-    path = Path(args.config_path)
-    data = read_config(path)
-    watch_id = args.id or slugify(args.name)
-    require_unique_id(data, watch_id)
-
-    sources: list[dict[str, Any]] = []
-    if args.url:
-        source: dict[str, Any] = {
-            "type": "html",
-            "id": args.source_id or "product-page",
-            "name": args.source_name or "商品頁",
-            "url": args.url,
-        }
-        if args.price_regex:
-            source["price_regex"] = args.price_regex
-        sources.append(source)
-    if args.shopping_query:
-        sources.append(
-            {
-                "type": "serpapi_google_shopping",
-                "id": "google-shopping",
-                "name": "Google Shopping",
-                "query": args.shopping_query,
-                "gl": args.gl,
-                "hl": args.hl,
-                "currency": args.currency,
-                "limit": args.limit,
-            }
-        )
-    if not sources:
-        raise RuntimeError("Add at least --url or --shopping-query for a product watch.")
-
-    watch = {
-        "enabled": args.enabled,
-        "id": watch_id,
-        "type": "product",
-        "name": args.name,
-        "currency": args.currency,
-        "target_price": args.target_price,
-        "alert_on_new_low": True,
-        "alert_cooldown_days": args.cooldown_days,
-        "sources": sources,
-    }
-    data["watches"].append(watch)
-    write_config(path, data)
-    print(f"Added product watch: {watch_id}")
-    return 0
-
-
 def add_flight(args: argparse.Namespace) -> int:
     path = Path(args.config_path)
     data = read_config(path)
     if args.mode == "date_window" and not args.start_date:
         raise RuntimeError("--start-date is required when --mode=date_window")
-    mode_label = "未來一年最低" if args.mode == "annual_low" else f"{args.start_date} 起 {args.lookahead_days} 天"
+    mode_label = "未來一年低價探索" if args.mode == "annual_low" else f"{args.start_date} 起 {args.lookahead_days} 天"
     trip_label = f"{args.trip_days} 天為主" if args.trip_days else "單程"
     default_name = f"{args.departure_id}->{args.arrival_id} {mode_label} · {trip_label}"
     name = args.name or default_name
@@ -152,7 +102,7 @@ def add_flight(args: argparse.Namespace) -> int:
 
 def list_watches(args: argparse.Namespace) -> int:
     data = read_config(Path(args.config_path))
-    watches = [watch for watch in data.get("watches", []) if isinstance(watch, dict)]
+    watches = [watch for watch in data.get("watches", []) if isinstance(watch, dict) and watch.get("type") == "flight"]
     if not watches:
         print("No watches configured.")
         return 0
@@ -169,6 +119,8 @@ def set_enabled(args: argparse.Namespace, enabled: bool) -> int:
     watch = find_watch(data, args.id)
     if not watch:
         raise RuntimeError(f"Watch id not found: {args.id}")
+    if enabled and watch.get("type") != "flight":
+        raise RuntimeError("Only flight watches can be enabled.")
     watch["enabled"] = enabled
     write_config(path, data)
     print(f"{'Enabled' if enabled else 'Disabled'} watch: {args.id}")
@@ -179,23 +131,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-path", default=str(DEFAULT_CONFIG_PATH))
     subparsers = parser.add_subparsers(dest="command", required=True)
-
-    product = subparsers.add_parser("add-product")
-    product.add_argument("--id", default="")
-    product.add_argument("--name", required=True)
-    product.add_argument("--target-price", required=True, type=float)
-    product.add_argument("--currency", default="TWD")
-    product.add_argument("--url", default="")
-    product.add_argument("--source-id", default="")
-    product.add_argument("--source-name", default="")
-    product.add_argument("--price-regex", default="")
-    product.add_argument("--shopping-query", default="")
-    product.add_argument("--gl", default="tw")
-    product.add_argument("--hl", default="zh-tw")
-    product.add_argument("--limit", default=8, type=int)
-    product.add_argument("--cooldown-days", default=7, type=int)
-    product.add_argument("--enabled", action="store_true")
-    product.set_defaults(handler=add_product)
 
     flight = subparsers.add_parser("add-flight")
     flight.add_argument("--id", default="")

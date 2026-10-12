@@ -883,132 +883,6 @@ LIMIT 600`;
   return places;
 }
 
-const PRODUCT_INSTALLMENT_PATTERN = /(?:每月|月付|月繳|月租|分期|\/\s*月|per\s+month|monthly\s+payment|installment|\/[\s]*mo\b)/i;
-const PRODUCT_TRADE_IN_PATTERN = /(?:回收|收購|估價|換購價|折抵後|舊換新|退傭|trade[-\s]?in|buyback|cashback|sell\s+your)/i;
-const PRODUCT_USED_PATTERN = /(?:二手|中古|福利品|展示品|整新品|翻新品|拆封品|極新|近全新|九成新|used|pre[-\s]?owned|refurbished|renewed|open[-\s]?box)/i;
-const PRODUCT_ACCESSORY_PATTERN = /(?:保護殼|保護套|保護貼|鍵盤|觸控筆|充電器|轉接器|支架|case|cover|keyboard|pencil|stylus|charger|adapter|screen\s*protector)/i;
-const PRODUCT_STOP_WORDS = new Set(["apple", "the", "with", "wifi", "wi-fi", "版", "吋", "英吋"]);
-
-function normalizeProductText(value) {
-  return String(value || "")
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/(\d+)\s*(gb|tb)\b/g, "$1$2")
-    .replace(/(\d+)\s*g\b/g, "$1gb")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function productSearchTokens(query) {
-  return normalizeProductText(query)
-    .split(" ")
-    .filter((token) => token.length >= 2 && !PRODUCT_STOP_WORDS.has(token));
-}
-
-function productGenerationTokens(value) {
-  return productSearchTokens(value).filter((token) => /^(?:m\d+|a\d{1,3}|s\d{1,3}|gen\d+|mk\d+)$/i.test(token));
-}
-
-function productStorageTokens(value) {
-  return normalizeProductText(value).match(/\b\d+(?:gb|tb)\b/g) || [];
-}
-
-function productSizeTokens(value) {
-  return productSearchTokens(value).filter((token) => /^\d{1,2}$/.test(token));
-}
-
-function analyzeShoppingResult(item, query) {
-  const title = compact(item.title, "商品", 180);
-  const context = [title, item.source, item.seller, item.price, item.condition, item.snippet, ...(Array.isArray(item.extensions) ? item.extensions : [])]
-    .filter(Boolean)
-    .join(" ");
-  const normalizedTitle = normalizeProductText(title);
-  const queryTokens = productSearchTokens(query);
-  const matchedTokens = queryTokens.filter((token) => normalizedTitle.includes(token));
-  const tokenCoverage = queryTokens.length ? matchedTokens.length / queryTokens.length : 1;
-  const queryGenerations = productGenerationTokens(query);
-  const titleGenerations = productGenerationTokens(title);
-  const generationConflict = queryGenerations.length && titleGenerations.length
-    && !queryGenerations.some((token) => titleGenerations.includes(token));
-  const queryStorage = productStorageTokens(query);
-  const titleStorage = productStorageTokens(title);
-  const storageConflict = queryStorage.length && titleStorage.length
-    && !queryStorage.some((token) => titleStorage.includes(token));
-  const querySizes = productSizeTokens(query);
-  const titleSizes = productSizeTokens(title);
-  const sizeConflict = querySizes.length && titleSizes.length
-    && !querySizes.some((token) => titleSizes.includes(token));
-  const criticalSpecMissing = [queryGenerations, queryStorage, querySizes]
-    .some((tokens) => tokens.length && !tokens.some((token) => normalizedTitle.includes(token)));
-  const installment = PRODUCT_INSTALLMENT_PATTERN.test(context);
-  const tradeIn = PRODUCT_TRADE_IN_PATTERN.test(context);
-  const used = PRODUCT_USED_PATTERN.test(context);
-  const accessory = PRODUCT_ACCESSORY_PATTERN.test(context) && !PRODUCT_ACCESSORY_PATTERN.test(query);
-  const requestedUsed = PRODUCT_USED_PATTERN.test(query);
-  const reasons = [];
-  if (installment) reasons.push("installment");
-  if (tradeIn) reasons.push("trade_in");
-  if (used && !requestedUsed) reasons.push("used");
-  if (accessory) reasons.push("accessory");
-  if (generationConflict || storageConflict || sizeConflict || criticalSpecMissing || (queryTokens.length && tokenCoverage === 0) || (queryTokens.length >= 3 && tokenCoverage <= 0.6)) reasons.push("model_mismatch");
-  return {
-    comparable: reasons.length === 0,
-    reasons,
-    matchScore: Math.round(tokenCoverage * 100),
-    priceKind: installment ? "installment" : tradeIn ? "trade_in" : "total",
-    priceKindLabel: installment ? "月付／分期" : tradeIn ? "回收／折抵價" : "標示總價",
-    condition: used ? "used" : "unspecified",
-    conditionLabel: used ? "二手／整新品" : "新品狀態未標示",
-  };
-}
-
-function normalizeShoppingResults(data, currency, query) {
-  const rawItems = Array.isArray(data.shopping_results) ? data.shopping_results : [];
-  const analyzed = rawItems
-    .map((item) => {
-      const price = normalizeMoney(item.extracted_price || item.price);
-      if (!price) return null;
-      const quality = analyzeShoppingResult(item, query);
-      return {
-        id: safeId(`${item.source || item.seller || "shop"}-${item.title || ""}-${item.link || ""}`, "product"),
-        type: "product",
-        title: compact(item.title, "商品", 180),
-        source: compact(item.source || item.seller || "Google Shopping", "Google Shopping", 80),
-        price,
-        priceText: formatPrice(price, currency),
-        currency: currencyLabel(currency),
-        link: item.link || item.product_link || "",
-        thumbnail: item.thumbnail || "",
-        rating: item.rating || "",
-        reviews: item.reviews || "",
-        ...quality,
-      };
-    })
-    .filter(Boolean);
-  const results = analyzed
-    .filter((item) => item.comparable)
-    .sort((left, right) => left.price - right.price || right.matchScore - left.matchScore)
-    .slice(0, 20);
-  const excluded = analyzed.filter((item) => !item.comparable);
-  const exclusionCounts = excluded.reduce((counts, item) => {
-    item.reasons.forEach((reason) => { counts[reason] = (counts[reason] || 0) + 1; });
-    return counts;
-  }, {});
-  return {
-    results,
-    insights: {
-      rawResultCount: analyzed.length,
-      comparableResultCount: results.length,
-      excludedCount: excluded.length,
-      exclusionCounts,
-      notice: excluded.length
-        ? `已排除 ${excluded.length} 筆月付價、回收價、二手品、配件或明顯不同型號。`
-        : "結果依型號符合度與標示總價排序。",
-    },
-  };
-}
-
 function normalizeFlightResults(data, payload, currency) {
   const flights = [...(data.best_flights || []), ...(data.other_flights || [])];
   const route = `${payload.departureId || ""}-${payload.arrivalId || ""}`;
@@ -1088,34 +962,6 @@ function normalizeFlightResults(data, payload, currency) {
   };
 }
 
-function productWatchFromPayload(payload) {
-  const name = compact(payload.name || payload.query || payload.title, "商品追蹤", 120);
-  const query = compact(payload.query || name, name, 160);
-  const currency = currencyLabel(payload.currency);
-  return {
-    enabled: true,
-    id: safeId(payload.id || name, "product"),
-    type: "product",
-    name,
-    currency,
-    target_price: normalizeMoney(payload.targetPrice),
-    alert_on_new_low: true,
-    alert_cooldown_days: 7,
-    sources: [
-      {
-        type: "serpapi_google_shopping",
-        id: "google-shopping",
-        name: "Google Shopping",
-        query,
-        gl: compact(payload.gl, "tw", 8),
-        hl: compact(payload.hl, "zh-tw", 12),
-        currency,
-        limit: 8,
-      },
-    ],
-  };
-}
-
 function flightWatchFromPayload(payload, env) {
   const departureId = compact(payload.departureId, "", 8).toUpperCase();
   const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
@@ -1171,10 +1017,22 @@ function flightWatchFromPayload(payload, env) {
   };
 }
 
+const FLIGHT_SOURCE_TYPES = new Set([
+  "serpapi_google_flights",
+  "serpapi_google_flights_sampled",
+  "skyscanner_indicative_flights",
+]);
+
+function isFlightWatch(watch) {
+  return watch?.type === "flight" && Array.isArray(watch.sources) && watch.sources.length > 0
+    && watch.sources.every((source) => FLIGHT_SOURCE_TYPES.has(source?.type));
+}
+
 function validateWatch(watch) {
   if (!watch || typeof watch !== "object") throw new Error("watch is required.");
   if (!watch.id || !watch.name || !watch.type) throw new Error("watch id, name and type are required.");
   if (!Array.isArray(watch.sources) || !watch.sources.length) throw new Error("watch sources are required.");
+  if (!isFlightWatch(watch)) throw new Error("僅支援航班追蹤與航班資料來源。");
   return watch;
 }
 
@@ -1194,6 +1052,7 @@ async function writePriceWatches(env, watches) {
 async function handlePriceWatchConfig(request, env) {
   if (request.method !== "GET") return methodNotAllowed();
   return json(200, {
+    supportedTypes: ["flight"],
     hasSerpApi: Boolean(envValue(env, "SERPAPI_API_KEY")),
     hasSkyscanner: Boolean(envValue(env, "SKYSCANNER_API_KEY")),
     hasKv: Boolean(env.PRICE_WATCH_KV),
@@ -1207,34 +1066,14 @@ async function handlePriceWatchSearch(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (request.method !== "POST") return methodNotAllowed();
   if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
+  const payload = await request.json().catch(() => ({}));
+  const type = compact(payload.type, "flight", 20).toLowerCase();
+  if (type !== "flight") {
+    return json(type === "product" ? 410 : 400, { code: "flight_only", error: "目前僅提供航班搜尋。" });
+  }
   const rateLimited = await publicSearchRateLimit(request, env, "search");
   if (rateLimited) return rateLimited;
-
-  const payload = await request.json().catch(() => ({}));
-  const type = compact(payload.type, "product", 20).toLowerCase();
   const currency = currencyLabel(payload.currency);
-
-  if (type === "product") {
-    const query = compact(payload.query, "", 160);
-    if (!query) return json(400, { error: "query is required." });
-    const data = await serpApiSearch(
-      {
-        engine: "google_shopping",
-        q: query,
-        gl: compact(payload.gl, "tw", 8),
-        hl: compact(payload.hl, "zh-tw", 12),
-        currency,
-      },
-      env,
-    );
-    const normalized = normalizeShoppingResults(data, currency, query);
-    return json(200, {
-      type: "product",
-      query,
-      currency,
-      ...normalized,
-    });
-  }
 
   if (type === "flight") {
     const departureId = compact(payload.departureId, "", 8).toUpperCase();
@@ -1324,21 +1163,24 @@ async function handlePriceWatchWatches(request, env) {
   if (!(await hasPriceWatchAccess(request, env, false))) return priceWatchAuthError(env);
 
   if (request.method === "GET") {
-    return json(200, { watches: await readPriceWatches(env) });
+    return json(200, { watches: (await readPriceWatches(env)).filter(isFlightWatch) });
   }
 
   if (request.method !== "POST") return methodNotAllowed();
   const payload = await request.json().catch(() => ({}));
   let watch = payload.watch;
-  if (!watch && payload.type === "product") watch = productWatchFromPayload(payload);
   if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload, env);
-  watch = validateWatch(watch);
+  try {
+    watch = validateWatch(watch);
+  } catch (error) {
+    return json(400, { code: "flight_only", error: error.message });
+  }
 
   const watches = await readPriceWatches(env);
   const withoutExisting = watches.filter((item) => item.id !== watch.id);
   withoutExisting.push(watch);
   await writePriceWatches(env, withoutExisting);
-  return json(200, { ok: true, watch, watches: withoutExisting });
+  return json(200, { ok: true, watch, watches: withoutExisting.filter(isFlightWatch) });
 }
 
 function list(values, fallback, maxItems = 6) {

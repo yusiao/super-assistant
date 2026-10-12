@@ -10,7 +10,6 @@ import sqlite3
 import sys
 import urllib.parse
 import urllib.request
-import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -30,13 +29,6 @@ DEFAULT_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json;q=0.8,*/*;q=0.7",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
 }
-PRODUCT_INSTALLMENT_PATTERN = re.compile(r"(?:每月|月付|月繳|月租|分期|/\s*月|per\s+month|monthly\s+payment|installment|/\s*mo\b)", re.I)
-PRODUCT_TRADE_IN_PATTERN = re.compile(r"(?:回收|收購|估價|換購價|折抵後|舊換新|退傭|trade[-\s]?in|buyback|cashback|sell\s+your)", re.I)
-PRODUCT_USED_PATTERN = re.compile(r"(?:二手|中古|福利品|展示品|整新品|翻新品|拆封品|極新|近全新|九成新|used|pre[-\s]?owned|refurbished|renewed|open[-\s]?box)", re.I)
-PRODUCT_ACCESSORY_PATTERN = re.compile(r"(?:保護殼|保護套|保護貼|鍵盤|觸控筆|充電器|轉接器|支架|case|cover|keyboard|pencil|stylus|charger|adapter|screen\s*protector)", re.I)
-PRODUCT_STOP_WORDS = {"apple", "the", "with", "wifi", "wi-fi", "版", "吋", "英吋"}
-
-
 def read_env_file(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.exists():
@@ -120,85 +112,6 @@ def parse_price_number(value: Any) -> float | None:
     except ValueError:
         return None
     return price if price > 0 else None
-
-
-def normalize_product_text(value: Any) -> str:
-    text = unicodedata.normalize("NFKC", str(value or "")).casefold()
-    text = re.sub(r"(\d+)\s*(gb|tb)\b", r"\1\2", text)
-    text = re.sub(r"(\d+)\s*g\b", r"\1gb", text)
-    text = re.sub(r"[^\w]+", " ", text, flags=re.UNICODE)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def product_search_tokens(value: Any) -> list[str]:
-    return [
-        token
-        for token in normalize_product_text(value).split(" ")
-        if len(token) >= 2 and token not in PRODUCT_STOP_WORDS
-    ]
-
-
-def product_generation_tokens(value: Any) -> list[str]:
-    return [
-        token
-        for token in product_search_tokens(value)
-        if re.fullmatch(r"(?:m\d+|a\d{1,3}|s\d{1,3}|gen\d+|mk\d+)", token, re.I)
-    ]
-
-
-def product_storage_tokens(value: Any) -> list[str]:
-    return re.findall(r"\b\d+(?:gb|tb)\b", normalize_product_text(value), re.I)
-
-
-def product_size_tokens(value: Any) -> list[str]:
-    return [token for token in product_search_tokens(value) if re.fullmatch(r"\d{1,2}", token)]
-
-
-def analyze_shopping_item(item: dict[str, Any], query: str) -> dict[str, Any]:
-    title = str(item.get("title") or "")
-    extensions = item.get("extensions") if isinstance(item.get("extensions"), list) else []
-    context = " ".join(
-        str(value)
-        for value in [title, item.get("source"), item.get("seller"), item.get("price"), item.get("condition"), item.get("snippet"), *extensions]
-        if value
-    )
-    normalized_title = normalize_product_text(title)
-    query_tokens = product_search_tokens(query)
-    matched_tokens = [token for token in query_tokens if token in normalized_title]
-    token_coverage = len(matched_tokens) / len(query_tokens) if query_tokens else 1.0
-    query_generations = product_generation_tokens(query)
-    title_generations = product_generation_tokens(title)
-    generation_conflict = bool(
-        query_generations
-        and title_generations
-        and not any(token in title_generations for token in query_generations)
-    )
-    query_storage = product_storage_tokens(query)
-    title_storage = product_storage_tokens(title)
-    storage_conflict = bool(query_storage and title_storage and not any(token in title_storage for token in query_storage))
-    query_sizes = product_size_tokens(query)
-    title_sizes = product_size_tokens(title)
-    size_conflict = bool(query_sizes and title_sizes and not any(token in title_sizes for token in query_sizes))
-    critical_spec_missing = any(
-        tokens and not any(token in normalized_title for token in tokens)
-        for tokens in [query_generations, query_storage, query_sizes]
-    )
-    reasons: list[str] = []
-    if PRODUCT_INSTALLMENT_PATTERN.search(context):
-        reasons.append("installment")
-    if PRODUCT_TRADE_IN_PATTERN.search(context):
-        reasons.append("trade_in")
-    if PRODUCT_USED_PATTERN.search(context) and not PRODUCT_USED_PATTERN.search(query):
-        reasons.append("used")
-    if PRODUCT_ACCESSORY_PATTERN.search(context) and not PRODUCT_ACCESSORY_PATTERN.search(query):
-        reasons.append("accessory")
-    if generation_conflict or storage_conflict or size_conflict or critical_spec_missing or (query_tokens and token_coverage == 0) or (len(query_tokens) >= 3 and token_coverage <= 0.6):
-        reasons.append("model_mismatch")
-    return {
-        "comparable": not reasons,
-        "reasons": reasons,
-        "match_score": round(token_coverage * 100),
-    }
 
 
 def extract_price(content: str, price_regex: str = "") -> float | None:
@@ -369,95 +282,6 @@ def source_display_name(source: dict[str, Any], fallback_url: str = "") -> str:
         parsed = urllib.parse.urlparse(fallback_url)
         return parsed.netloc or fallback_url
     return str(source.get("type") or "source")
-
-
-def get_html_candidates(
-    watch: dict[str, Any],
-    source: dict[str, Any],
-    timeout: int,
-) -> list[dict[str, Any]]:
-    url = str(source.get("url") or watch.get("url") or "")
-    if not url:
-        raise RuntimeError("HTML source is missing url")
-    content = fetch_text(url, timeout=timeout)
-    unavailable_regex = str(source.get("unavailable_regex") or watch.get("unavailable_regex") or "")
-    available = not bool(unavailable_regex and re.search(unavailable_regex, content, re.S | re.I))
-    price_regex = str(source.get("price_regex") or watch.get("price_regex") or "")
-    price = extract_price(content, price_regex)
-    source_id = str(source.get("id") or slugify(source_display_name(source, url), "source"))
-    return [
-        {
-            "watch_id": watch["id"],
-            "item_type": watch.get("type", "product"),
-            "source_id": source_id,
-            "source_name": source_display_name(source, url),
-            "url": url,
-            "title": extract_title(content) or str(watch.get("name") or ""),
-            "price": price,
-            "currency": str(source.get("currency") or watch.get("currency") or "TWD"),
-            "available": available and price is not None,
-            "error": "" if price is not None else "price not found",
-            "raw": {},
-        }
-    ]
-
-
-def get_google_shopping_candidates(
-    watch: dict[str, Any],
-    source: dict[str, Any],
-    file_config: dict[str, str],
-    timeout: int,
-) -> list[dict[str, Any]]:
-    api_key = get_serpapi_key(source, file_config)
-    if not api_key:
-        raise RuntimeError("SERPAPI_API_KEY is required for serpapi_google_shopping")
-    query = str(source.get("query") or watch.get("query") or watch.get("name") or "")
-    if not query:
-        raise RuntimeError("Google Shopping source is missing query")
-    params = {
-        "engine": "google_shopping",
-        "q": query,
-        "api_key": api_key,
-        "gl": source.get("gl", "tw"),
-        "hl": source.get("hl", "zh-tw"),
-        "currency": source.get("currency") or watch.get("currency") or "TWD",
-    }
-    url = "https://serpapi.com/search.json?" + urllib.parse.urlencode(params)
-    data = fetch_json(url, timeout=timeout)
-    results = data.get("shopping_results") or []
-    limit = int(source.get("limit") or 10)
-    candidates: list[dict[str, Any]] = []
-    for item in results[: max(limit * 3, 30)]:
-        price = parse_price_number(item.get("extracted_price") or item.get("price"))
-        if price is None:
-            continue
-        quality = analyze_shopping_item(item, query)
-        if not quality["comparable"]:
-            continue
-        merchant = item.get("source") or item.get("seller") or "Google Shopping"
-        title = item.get("title") or watch.get("name") or query
-        link = item.get("link") or item.get("product_link") or ""
-        source_key = f"{merchant}|{title}|{link}"
-        candidates.append(
-            {
-                "watch_id": watch["id"],
-                "item_type": "product",
-                "source_id": f"{source.get('id') or 'google-shopping'}:{stable_id(source_key, 10)}",
-                "source_name": str(merchant),
-                "url": str(link),
-                "title": str(title),
-                "price": price,
-                "currency": str(source.get("currency") or watch.get("currency") or "TWD"),
-                "available": True,
-                "error": "",
-                "raw": {"provider": "serpapi_google_shopping", **quality},
-            }
-        )
-        if len(candidates) >= limit:
-            break
-    if not candidates:
-        raise RuntimeError("Google Shopping returned no comparable total-price results")
-    return sorted(candidates, key=lambda item: float(item["price"]))
 
 
 def get_google_flights_candidates(
@@ -719,11 +543,9 @@ def get_source_candidates(
     file_config: dict[str, str],
     timeout: int,
 ) -> list[dict[str, Any]]:
-    source_type = str(source.get("type") or "html").strip().lower()
-    if source_type in {"html", "url", "product_url"}:
-        return get_html_candidates(watch, source, timeout)
-    if source_type == "serpapi_google_shopping":
-        return get_google_shopping_candidates(watch, source, file_config, timeout)
+    if not is_flight_watch(watch):
+        raise RuntimeError("Only flight watches and flight sources are supported.")
+    source_type = str(source.get("type") or "").strip().lower()
     if source_type == "serpapi_google_flights":
         return get_google_flights_candidates(watch, source, file_config, timeout)
     if source_type == "serpapi_google_flights_sampled":
@@ -948,9 +770,28 @@ def normalize_watch(raw_watch: dict[str, Any]) -> dict[str, Any]:
     return watch
 
 
+FLIGHT_SOURCE_TYPES = {
+    "serpapi_google_flights",
+    "serpapi_google_flights_sampled",
+    "skyscanner_indicative_flights",
+}
+
+
+def is_flight_watch(watch: Any) -> bool:
+    return (
+        isinstance(watch, dict)
+        and watch.get("type") == "flight"
+        and isinstance(watch.get("sources"), list)
+        and bool(watch["sources"])
+        and all(isinstance(source, dict) and source.get("type") in FLIGHT_SOURCE_TYPES for source in watch["sources"])
+    )
+
+
 def merge_watches(local_watches: list[dict[str, Any]], remote_watches: list[dict[str, Any]]) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for watch in [*local_watches, *remote_watches]:
+        if not is_flight_watch(watch):
+            continue
         normalized = normalize_watch(watch)
         merged[normalized["id"]] = normalized
     return list(merged.values())
@@ -1023,6 +864,8 @@ def process_watch(
     force_alert: bool,
     dry_run: bool,
 ) -> dict[str, Any]:
+    if not is_flight_watch(watch):
+        raise RuntimeError("Only flight watches and flight sources are supported.")
     before_low, _ = get_year_range(db, watch["id"], observed_at)
     observed_at_text = observed_at.isoformat()
     results: list[dict[str, Any]] = []

@@ -6,7 +6,7 @@ import json
 import tempfile
 import unittest
 import urllib.parse
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 from datetime import datetime
 from pathlib import Path
 
@@ -35,32 +35,28 @@ class PriceWatchTests(unittest.TestCase):
         value = price_watch.extract_price('{"offers":{"price":"1299","priceCurrency":"TWD"}}')
         self.assertEqual(value, 1299.0)
 
-    def test_manage_watch_add_product(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            config_path = Path(tmpdir) / "price-watch-config.json"
-            args = manage_watch.build_parser().parse_args(
-                [
-                    "--config-path",
-                    str(config_path),
-                    "add-product",
-                    "--id",
-                    "ipad-test",
-                    "--name",
-                    "iPad Test",
-                    "--target-price",
-                    "10000",
-                    "--shopping-query",
-                    "iPad Test",
-                    "--enabled",
-                ]
-            )
-            with redirect_stdout(io.StringIO()):
-                self.assertEqual(args.handler(args), 0)
-            data = json.loads(config_path.read_text(encoding="utf-8"))
-            watch = data["watches"][0]
-            self.assertEqual(watch["id"], "ipad-test")
-            self.assertTrue(watch["enabled"])
-            self.assertEqual(watch["sources"][0]["type"], "serpapi_google_shopping")
+    def test_retired_product_command_is_rejected(self) -> None:
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            manage_watch.build_parser().parse_args(["add-product"])
+
+    def test_scheduled_watches_exclude_legacy_products_and_invalid_sources(self) -> None:
+        flight = {"id": "flight", "type": "flight", "sources": [{"type": "serpapi_google_flights_sampled"}]}
+        product = {"id": "product", "type": "product", "sources": [{"type": "serpapi_google_shopping"}]}
+        disguised = {**product, "id": "disguised", "type": "flight"}
+        actual = price_watch.merge_watches([product, disguised, flight], [product, {**flight, "name": "updated"}])
+        self.assertEqual([watch["id"] for watch in actual], ["flight"])
+        self.assertEqual(actual[0]["name"], "updated")
+        self.assertEqual(product["type"], "product")
+
+    def test_retired_sources_cannot_trigger_price_requests(self) -> None:
+        for source_type in ["html", "url", "product_url", "serpapi_google_shopping"]:
+            with self.subTest(source_type=source_type), self.assertRaises(RuntimeError):
+                price_watch.get_source_candidates(
+                    {"id": "legacy", "type": "product"},
+                    {"type": source_type, "url": "https://example.com/retired"},
+                    {},
+                    1,
+                )
 
     def test_manage_watch_add_annual_low_flight(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -130,31 +126,6 @@ class PriceWatchTests(unittest.TestCase):
             self.assertEqual(source["mode"], "date_window")
             self.assertEqual(source["start_date"], "2026-09-01")
             self.assertEqual(source["lookahead_days"], 30)
-
-    def test_google_shopping_filters_non_comparable_prices(self) -> None:
-        original_fetch_json = price_watch.fetch_json
-        price_watch.fetch_json = lambda *args, **kwargs: {
-            "shopping_results": [
-                {"title": "iPad Air M3 11 128GB", "source": "時代通訊 免卡分期", "extracted_price": 828, "price": "NT$828"},
-                {"title": "極新/保固內 iPad Air M3 11 128GB", "source": "二手平台", "extracted_price": 12000},
-                {"title": "Apple iPad A16 11 128GB", "source": "一般商城", "extracted_price": 10900},
-                {"title": "Apple iPad Air M3 13 128GB", "source": "一般商城", "extracted_price": 22900},
-                {"title": "Apple iPad Air M3 11 Wi-Fi", "source": "一般商城", "extracted_price": 5000},
-                {"title": "Apple iPad Air M3 11 128GB Wi-Fi", "source": "可靠商城", "extracted_price": 16900},
-            ]
-        }
-        try:
-            candidates = price_watch.get_google_shopping_candidates(
-                {"id": "ipad-air", "name": "iPad Air M3 11 128GB", "currency": "TWD"},
-                {"type": "serpapi_google_shopping", "query": "iPad Air M3 11 128GB", "limit": 8},
-                {"SERPAPI_API_KEY": "test"},
-                10,
-            )
-        finally:
-            price_watch.fetch_json = original_fetch_json
-        self.assertEqual(len(candidates), 1)
-        self.assertEqual(candidates[0]["price"], 16900.0)
-        self.assertEqual(candidates[0]["raw"]["match_score"], 100)
 
     def test_skyscanner_quote_filtering(self) -> None:
         original_post_json = price_watch.post_json

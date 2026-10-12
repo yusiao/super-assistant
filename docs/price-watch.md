@@ -1,15 +1,21 @@
-# Price Watch
+# 航班助手
 
-Jarvis Price Watch 是通用的商品 / 機票價格追蹤器。它會定時抓價格、寫入 SQLite 歷史資料、計算近一年最低到最高價格，並在到達目標價或創近一年新低時透過 LINE Messaging API 通知。
+航班助手專注於航班搜尋、彈性旅行天數比較與低價追蹤。它會定時抓價格、寫入 SQLite 歷史資料、計算近一年最低到最高價格，並在到達目標價或創近一年新低時透過 LINE Messaging API 通知。
+
+舊商品追蹤紀錄保留於儲存空間，但不顯示、不排程查價、不發 LINE 通知。商品搜尋 API 回傳 410；追蹤 API 與背景排程僅接受航班及航班資料來源，CLI 已移除 `add-product`。
+
+## 功能定位
+
+Google Flights 和 Skyscanner 都支援彈性日期與降價提醒。本工具的定位是繁體中文手機介面、鄰近旅行天數的價差整理，以及自訂條件的 LINE 通知。SerpApi Google Flights 是主要票價來源，並非獨立的航空公司完整庫存。
+
+「全年低價探索」是代表日期抽樣；當年均價是取得樣本的均價，去年均價僅來自已累積的歷史紀錄。資料不足時顯示尚無資料，不將抽樣最低價宣稱為全年市場最低價。每日背景排程不代表全天候即時監控。
 
 ## 支援來源
 
-- 商品頁 HTML：適合你已經知道商品網址的情境。
-- SerpApi Google Shopping：用商品名稱 / 型號搜尋多個賣場；搜尋頁與背景 LINE 監測都會排除月付／分期價、回收／折抵價、二手／整新品、配件與明顯不同型號，再從可比總價找最低價。
 - SerpApi Google Flights：私人版以代表日期抽樣搜尋，頁內顯示航班詳情，並比較經濟艙、豪華經濟艙與商務艙。
 - Skyscanner Indicative Prices：僅在已有商業合作金鑰時啟用，作為完整彈性日期來源。
 - SerpApi Google Flights：保留給固定日期即時搜尋與候選日期複查。
-- 手機網頁：部署後可從 `/price-watch/` 搜尋商品與機票，並加入追蹤。
+- 手機網頁：部署後可從 `/price-watch/` 搜尋航班，並加入追蹤。
 - 機場欄位：輸入 `T`、`TP`、`TPE` 這類英文字母時，使用全球 IATA 前綴索引搜尋所有符合機場；輸入繁體中文地名時使用地點搜尋。下拉顯示縮寫、繁體機場名、英文名與國家，結果很多時先顯示前 50 筆並提示繼續輸入縮寫。
 - 機票篩選：可選全部、廉價航空或傳統航空，以及全部、直達或轉乘。搜尋期間顯示分階段進度條與已等待秒數。
 - 購票連結：航班卡保留完整頁內資訊，另提供航空公司官網、Skyscanner、Trip.com 與追蹤按鈕；第三方網址會帶入出發地、目的地及日期。
@@ -42,7 +48,7 @@ Copy-Item scripts/price-watch/price-watch.env.example scripts/price-watch/price-
 - `LINE_CHANNEL_ACCESS_TOKEN`
 - `LINE_MODE=broadcast` 或 `LINE_MODE=push`
 - `LINE_TO`：只有 push 模式需要
-- `SERPAPI_API_KEY`：只有使用 Google Shopping / Google Flights provider 時需要
+- `SERPAPI_API_KEY`：只有使用 Google Flights provider 時需要
 - `SKYSCANNER_API_KEY`：選填；有商業合作金鑰時改用完整彈性日期搜尋
 
 編輯追蹤清單：
@@ -51,21 +57,9 @@ Copy-Item scripts/price-watch/price-watch.env.example scripts/price-watch/price-
 notepad scripts/price-watch/price-watch-config.json
 ```
 
-把範例 watch 的 `enabled` 改成 `true`，並調整商品網址、商品型號、機票日期、目標價。
+把範例 watch 的 `enabled` 改成 `true`，並調整出發地、目的地、機票日期與目標價。
 
 也可以用管理工具新增，不必手改 JSON。
-
-新增商品頁追蹤：
-
-```powershell
-& C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py add-product --enabled --id ipad-air-m3 --name "iPad Air M3 11 128GB Wi-Fi" --target-price 16900 --url "https://example.com/item" --price-regex 'NT\$\s*([\d,]+)'
-```
-
-新增多賣場商品搜尋：
-
-```powershell
-& C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py add-product --enabled --id ipad-air-m3-shopping --name "iPad Air M3 11 128GB Wi-Fi" --target-price 16900 --shopping-query "iPad Air M3 11 128GB Wi-Fi"
-```
 
 新增「未來一年最低」機票追蹤：
 
@@ -83,7 +77,7 @@ notepad scripts/price-watch/price-watch-config.json
 
 ```powershell
 & C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py list
-& C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py enable ipad-air-m3
+& C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py enable tpe-tyo-year-low
 & C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe scripts/price-watch/manage_watch.py disable ipad-air-m3
 ```
 
@@ -113,7 +107,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/price-watch/Invoke-P
 & C:\Users\Power\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe -m unittest scripts/price-watch/test_price_watch.py
 ```
 
-跑手機版商品 / 機票 / 追蹤流程與 390px、320px 版面檢查：
+跑手機版航班搜尋 / 追蹤流程與 390px、320px 版面檢查：
 
 ```powershell
 $env:CHROME_PATH='C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -163,7 +157,7 @@ Worker 需要設定：
 - `SERPAPI_API_KEY`
 - `SKYSCANNER_API_KEY`
 - `PRICE_WATCH_ACCESS_TOKEN`
-- `PRICE_WATCH_PUBLIC_SEARCH=true`：商品 / 機票搜尋可直接在手機使用；追蹤清單仍需 `PRICE_WATCH_ACCESS_TOKEN`
+- `PRICE_WATCH_PUBLIC_SEARCH=true`：航班搜尋可直接在手機使用；追蹤清單仍需 `PRICE_WATCH_ACCESS_TOKEN`
 - `PRICE_WATCH_PUBLIC_SEARCH_PER_MINUTE=4`
 - `PRICE_WATCH_PUBLIC_SEARCH_PER_DAY=30`
 
@@ -182,7 +176,7 @@ GitHub Actions 部署 Worker 需要另外設定：
 https://super-assistant.你的-workers-subdomain.workers.dev
 ```
 
-商品搜尋在後端尚未連線時會保留 Google Shopping 外部搜尋連結。機票搜尋則不再跳轉 Google Flights：Worker 成功回傳時直接在頁內顯示票價與航班詳情；查價失敗時提示稍後重試。歷史價格與 LINE 到價通知需要 Worker API。
+航班搜尋：Worker 成功回傳時直接在頁內顯示票價與航班詳情；查價失敗時提示稍後重試。歷史價格與 LINE 到價通知需要 Worker API。
 
 手機是主要使用介面：頁面支援 iPhone / Android 安全區、至少 44px 觸控目標、避免 iOS 表單自動縮放，並提供 Web App Manifest 與離線外殼，可從瀏覽器加入主畫面後以獨立 App 模式開啟。離線時只能開啟既有介面，搜尋即時價格仍需要網路。
 

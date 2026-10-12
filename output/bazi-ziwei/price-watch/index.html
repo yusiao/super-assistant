@@ -4,21 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#101820" />
-    <meta name="application-name" content="Jarvis Price Watch" />
+    <meta name="application-name" content="航班助手" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Jarvis 價格" />
-    <title>Jarvis Price Watch</title>
+    <meta name="apple-mobile-web-app-title" content="航班助手" />
+    <title>航班助手</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=12" />
+    <link rel="stylesheet" href="./styles.css?v=13" />
   </head>
   <body>
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Jarvis</p>
-          <h1>Price Watch</h1>
+          <p class="eyebrow">FLIGHT WATCH</p>
+          <h1>航班助手</h1>
         </div>
         <button class="icon-button" id="settingsButton" type="button" aria-label="設定同步金鑰">
           <span aria-hidden="true">⋮</span>
@@ -31,36 +31,11 @@
       </section>
 
       <nav class="tabs" aria-label="搜尋類型" role="tablist">
-        <button class="tab active" data-panel="productPanel" aria-controls="productPanel" aria-selected="true" role="tab" type="button">商品</button>
-        <button class="tab" data-panel="flightPanel" aria-controls="flightPanel" aria-selected="false" role="tab" type="button">機票</button>
-        <button class="tab" data-panel="savedPanel" aria-controls="savedPanel" aria-selected="false" role="tab" type="button">追蹤</button>
+        <button class="tab active" data-panel="flightPanel" aria-controls="flightPanel" aria-selected="true" role="tab" type="button">航班搜尋</button>
+        <button class="tab" data-panel="savedPanel" aria-controls="savedPanel" aria-selected="false" role="tab" type="button">航班追蹤</button>
       </nav>
 
-      <section class="panel active" id="productPanel" role="tabpanel">
-        <form class="search-form" id="productForm">
-          <label>
-            <span>商品或型號</span>
-            <input name="query" autocomplete="off" placeholder="iPad Air M3 11 128GB" required />
-          </label>
-          <div class="field-row">
-            <label>
-              <span>追蹤目標價（選填）</span>
-              <input name="targetPrice" inputmode="numeric" placeholder="16900" />
-            </label>
-            <label>
-              <span>幣別</span>
-              <select name="currency">
-                <option value="TWD">TWD</option>
-                <option value="USD">USD</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </label>
-          </div>
-          <button class="primary-button" type="submit">搜尋商品</button>
-        </form>
-      </section>
-
-      <section class="panel" id="flightPanel" role="tabpanel">
+      <section class="panel active" id="flightPanel" role="tabpanel">
         <form class="search-form" id="flightForm">
           <div class="mode-switch" aria-label="機票搜尋模式">
             <button class="mode-button active" data-flight-mode="annual_low" type="button">全年低價探索</button>
@@ -167,7 +142,6 @@
           <h2 id="resultsTitle">搜尋結果</h2>
           <span id="resultCount"></span>
         </div>
-        <p class="product-quality-notice" id="productQualityNotice" hidden></p>
         <div class="flight-year-stats" id="flightYearStats" hidden>
           <div class="year-stat">
             <span id="currentYearLabel">該年抽樣均價</span>
@@ -223,6 +197,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=12" type="module"></script>
+    <script src="./app.js?v=13" type="module"></script>
   </body>
 </html>
