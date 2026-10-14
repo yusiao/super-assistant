@@ -1,3 +1,6 @@
+import { validateFlightPreferences, hasFlightPreferences, matchesFlightPreferences, flightPreferenceKey,
+  makeJourneyPlans, searchCompleteJourney } from "./flight-planner.js";
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Price-Watch-Token",
@@ -200,6 +203,13 @@ function formatPrice(price, currency = "TWD") {
 async function serpApiSearch(params, env) {
   const apiKey = envValue(env, "SERPAPI_API_KEY");
   if (!apiKey) throw new Error("SERPAPI_API_KEY is not set.");
+  let cacheKey;
+  if (params.engine === "google_flights" && env.PRICE_WATCH_KV) {
+    const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(params)));
+    cacheKey = "price-watch:flight-query:v2:" + [...new Uint8Array(hash)].map((n) => n.toString(16).padStart(2, "0")).join("");
+    const cached = await env.PRICE_WATCH_KV.get(cacheKey, "json").catch(() => null);
+    if (cached?.data) return cached.data;
+  }
   const url = new URL("https://serpapi.com/search.json");
   Object.entries({ ...params, api_key: apiKey }).forEach(([key, value]) => {
     if (value !== undefined && value !== null && String(value).trim() !== "") {
@@ -218,6 +228,7 @@ async function serpApiSearch(params, env) {
     throw new Error(data.error || `SerpApi request failed with HTTP ${response.status}.`);
   }
   if (data.error) throw new Error(data.error);
+  if (cacheKey) await env.PRICE_WATCH_KV.put(cacheKey, JSON.stringify({ data }), { expirationTtl: 900 }).catch(() => {});
   return data;
 }
 
@@ -354,183 +365,85 @@ function nearbyTripDayOptions(tripDays, radius = 2) {
   return [...new Set(options)];
 }
 
-async function serpApiSampledFlightSearch(payload, env) {
-  const departureId = compact(payload.departureId, "", 80).toUpperCase();
-  const arrivalId = compact(payload.arrivalId, "", 80).toUpperCase();
-  const mode = compact(payload.flightMode, "annual_low", 24);
+async function serpApiSampledFlightSearch(input, env) {
+  const payload = validateFlightPreferences(input);
   const today = new Date().toISOString().slice(0, 10);
-  const requestedStartDate = mode === "annual_low" ? addDays(today, 14) : isoDate(payload.startDate, today);
-  const startDate = requestedStartDate < today ? today : requestedStartDate;
-  const horizonDays = mode === "annual_low" ? 351 : Math.max(0, Math.min(Number(payload.lookaheadDays || 30), 365));
-  const endDate = addDays(startDate, horizonDays);
-  const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
+  const mode = payload.flightMode || "annual_low";
+  const requestedStart = mode === "annual_low" ? addDays(today, 14) : payload.startDate;
+  const startDate = requestedStart < today ? today : requestedStart;
+  const tripAllowance = payload.journeyType === "multicity" ? payload.stopoverMaxNights + (payload.includeReturn ? payload.destinationMaxNights : 0) + 2 : payload.tripDays;
+  const endDate = mode === "annual_low" ? addDays(today, 330 - tripAllowance) : addDays(requestedStart, payload.lookaheadDays);
+  if (endDate < today) { const error = new Error("搜尋日期區間已過期，請更新日期。"); error.status = 400; throw error; }
   const currency = currencyLabel(payload.currency);
-  const sampleDates = evenlySpacedDates(startDate, endDate, 4);
-  const searchBestFlight = async (outboundDate, cabin, days = tripDays) => {
-    const returnDate = days > 0 ? addDays(outboundDate, days) : "";
-    const data = await serpApiSearch(
-      {
-        engine: "google_flights",
-        departure_id: departureId,
-        arrival_id: arrivalId,
-        outbound_date: outboundDate,
-        return_date: returnDate,
-        type: days > 0 ? "1" : "2",
-        currency,
-        gl: compact(payload.market, "TW", 8).toLowerCase(),
-        hl: compact(payload.locale, "zh-TW", 12).toLowerCase(),
-        sort_by: "2",
-        travel_class: cabin.code,
-        stops: payload.routeType === "nonstop" ? "1" : "0",
-        show_hidden: payload.airlineType !== "all" || payload.routeType === "connecting" ? "true" : "false",
-      },
-      env,
-    );
-    const normalized = normalizeFlightResults(
-      data,
-      {
-        ...payload,
-        departureId,
-        arrivalId,
-        outboundDate,
-        returnDate,
-        travelClass: cabin.code,
-        cabinClass: cabin.key,
-        cabinLabel: cabin.label,
-      },
-      currency,
-    );
-    const best = normalized.results[0];
-    return best ? { ...best, source: "Google Flights 抽樣", sampled: true } : null;
+  payload.currency = currency;
+  const tracking = payload.trackingSample === true;
+  const multi = payload.journeyType === "multicity";
+  const plans = multi || tracking || payload.comparisonPlan
+    ? makeJourneyPlans(payload, startDate, endDate, tracking)
+    : evenlySpacedDates(startDate, endDate, 3).map((date) => ({ date, nights: 0, destinationNights: 0 }));
+  let queryCount = 0;
+  const search = (params) => {
+    if (queryCount >= 24) throw new Error("本次查詢數量已達上限。");
+    queryCount += 1;
+    return serpApiSearch(params, env);
   };
-  const searches = await Promise.allSettled(
-    sampleDates.map((outboundDate) => searchBestFlight(outboundDate, FLIGHT_CABINS[0])),
-  );
-  const economyResults = searches
-    .filter((result) => result.status === "fulfilled" && result.value)
-    .map((result) => result.value)
-    .sort((left, right) => left.price - right.price);
-  if (!economyResults.length) {
-    const rejected = searches.filter((result) => result.status === "rejected");
-    if (rejected.length === searches.length) {
-      const messages = rejected.map((result) => compact(result.reason?.message, "", 260)).filter(Boolean);
-      const quotaError = messages.find((message) => /quota|searches|plan|credit|limit/i.test(message));
-      const timeoutError = messages.find((message) => /timeout|aborted|signal/i.test(message));
-      throw new Error(quotaError || timeoutError || messages[0] || "Flight provider returned no results.");
-    }
-    const comparisonYear = Number(startDate.slice(0, 4));
-    const airlineLabel = payload.airlineType === "low_cost" ? "廉價航空" : payload.airlineType === "full_service" ? "傳統航空" : "全部航空";
-    const routeLabel = payload.routeType === "nonstop" ? "直達" : payload.routeType === "connecting" ? "轉乘" : "全部行程";
-    return {
-      mode,
-      startDate,
-      endDate,
-      tripDays,
-      results: [],
-      insights: {
-        lowestPrice: null,
-        rangeStart: startDate,
-        rangeEnd: endDate,
-        cached: false,
-        sampleDates,
-        durationAlternatives: [],
-        cabinPrices: FLIGHT_CABINS.map((cabin) => ({ ...cabin, available: false, price: null, priceText: "", departureDate: "", returnDate: "", airline: "" })),
-        samplingNotice: `目前找不到符合「${airlineLabel}・${routeLabel}」的航班，請放寬篩選或調整日期。`,
-        yearStats: {
-          year: comparisonYear,
-          average: null,
-          sampleCount: 0,
-          previousYear: comparisonYear - 1,
-          previousAverage: null,
-          previousSampleCount: 0,
-          basis: "no_matching_quotes",
-        },
-      },
-    };
-  }
-  const comparisonReference = economyResults[0];
-  const cabinSearches = await Promise.allSettled(
-    FLIGHT_CABINS.slice(1).map((cabin) => searchBestFlight(comparisonReference.departureDate, cabin)),
-  );
-  const cabinResults = cabinSearches
-    .filter((result) => result.status === "fulfilled" && result.value)
-    .map((result) => result.value);
-  const results = [...economyResults, ...cabinResults].sort((left, right) => left.price - right.price);
-  const alternativeDays = nearbyTripDayOptions(tripDays).filter((days) => days !== tripDays);
-  const durationSearches = tripDays > 0 && comparisonReference
-    ? await Promise.allSettled(alternativeDays.map(async (days) => {
-      const cabin = FLIGHT_CABINS.find((item) => item.code === comparisonReference.travelClass) || FLIGHT_CABINS[0];
-      const best = await searchBestFlight(comparisonReference.departureDate, cabin, days);
-      if (!best) return null;
-      const savings = comparisonReference.price - best.price;
-      return {
-        ...best,
-        source: "Google Flights 天數比較",
-        sampled: true,
-        requestedTripDays: tripDays,
-        isAlternativeDuration: true,
-        savings,
-        savingsText: savings > 0 ? formatPrice(savings, currency) : "",
-        isCheaper: savings > 0,
-      };
-    }))
-    : [];
-  const durationAlternatives = durationSearches
-    .filter((result) => result.status === "fulfilled" && result.value)
-    .map((result) => result.value)
-    .sort((left, right) => left.price - right.price);
-  const lowestPrice = results[0].price;
+  const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
+  const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan)) => {
+    const result = await searchCompleteJourney({ ...payload, tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
+    if (result && !multi) result.purchaseLinks = flightPurchaseLinks({ ...payload, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
+    if (result && multi) result.purchaseLinks.push({ kind: "google", label: "Google Flights 多城市", url: result.link });
+    return result;
+  };
+  const searches = await Promise.allSettled(plans.map((plan) => run(plan, primaryCabin)));
+  const economyResults = searches.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value).sort((a, b) => a.price - b.price);
+  const failed = searches.filter((result) => result.status === "rejected");
+  if (!economyResults.length && failed.length) throw failed[0].reason;
+  const reference = economyResults[0];
+  const cabinSearches = reference && !tracking
+    ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true))) : [];
+  const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value).map((r) => r.value);
+  let alternatives = !multi && payload.tripDays > 0 && reference && payload.compareDurations !== false
+    ? nearbyTripDayOptions(payload.tripDays, 2).filter((days) => days !== payload.tripDays) : [];
+  if (tracking && alternatives.length) alternatives = [alternatives[Math.floor(Date.now() / 86400000) % alternatives.length]];
+  const durationSearches = await Promise.allSettled(alternatives.map(async (days) => {
+    const result = await run(reference.plan, primaryCabin, days);
+    if (!result) return null;
+    const savings = reference.price - result.price;
+    return { ...result, requestedTripDays: payload.tripDays, isAlternativeDuration: true, savings,
+      savingsText: savings > 0 ? formatPrice(savings, currency) : "", isCheaper: savings > 0 };
+  }));
+  const durationAlternatives = durationSearches.filter((r) => r.status === "fulfilled" && r.value).map((r) => r.value).sort((a, b) => a.price - b.price);
+  const cabinPrices = FLIGHT_CABINS.map((cabin, index) => {
+    const best = cabin.code === primaryCabin.code ? reference : cabinResults.find((r) => r.travelClass === cabin.code);
+    return { ...cabin, label: best?.cabinLabel || cabin.label, available: Boolean(best), status: best ? "available" : cabinSearches[index - 1]?.status === "rejected" ? "failed" : "no_quote",
+      price: best?.price ?? null, priceText: best?.priceText || "", departureDate: best?.departureDate || "", returnDate: best?.returnDate || "",
+      airline: best?.airline || "", legs: best?.legs || [], purchaseLinks: best?.purchaseLinks || [],
+      comparisonBasis: "same_dates_not_same_flights" };
+  });
+  if (reference && !tracking) reference.cabinPrices = cabinPrices;
   const yearlyQuotes = flightYearStats(economyResults);
   const comparisonYear = Number(startDate.slice(0, 4));
-  const previousYear = comparisonYear - 1;
-  const historyKey = flightYearHistoryKey(departureId, arrivalId, tripDays, currency);
+  const scope = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(flightPreferenceKey(payload)
+    + JSON.stringify([payload.journeyType, payload.stopoverId, payload.stopoverMinNights, payload.stopoverMaxNights,
+      payload.includeReturn, payload.destinationMinNights, payload.destinationMaxNights, primaryCabin.code])));
+  const suffix = [...new Uint8Array(scope)].map((v) => v.toString(16).padStart(2, "0")).join("");
+  const historyKey = flightYearHistoryKey(payload.departureId, payload.arrivalId, multi ? "multi" : payload.tripDays, currency) + ":" + suffix;
   const history = await readFlightYearHistory(env, historyKey);
-  const currentStats = yearlyQuotes[String(comparisonYear)] || null;
-  const previousRecords = history.filter((record) => Number(record.travelYear) === previousYear);
-  const yearStats = {
-    year: comparisonYear,
-    average: currentStats?.average ?? null,
-    minimum: currentStats?.minimum ?? null,
-    maximum: currentStats?.maximum ?? null,
-    sampleCount: currentStats?.sampleCount ?? 0,
-    previousYear,
-    previousAverage: average(previousRecords.map((record) => record.average)),
-    previousMinimum: minimum(previousRecords.map((record) => record.minimum)),
-    previousMaximum: maximum(previousRecords.map((record) => record.maximum)),
-    previousSampleCount: previousRecords.length,
-    basis: "sampled_departure_quotes",
-  };
+  const current = yearlyQuotes[String(comparisonYear)];
+  const previous = history.filter((record) => Number(record.travelYear) === comparisonYear - 1);
   await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
-  const cabinPrices = FLIGHT_CABINS.map((cabin) => {
-    const options = results.filter((item) => item.travelClass === cabin.code);
-    const best = options[0] || null;
-    return {
-      ...cabin,
-      available: Boolean(best),
-      price: best?.price ?? null,
-      priceText: best?.priceText || "",
-      departureDate: best?.departureDate || "",
-      returnDate: best?.returnDate || "",
-      airline: best?.airline || "",
-    };
-  });
-  return {
-    mode,
-    startDate,
-    endDate,
-    tripDays,
-    results: results.map((item) => ({ ...item, isRangeLow: item.price === lowestPrice })),
-    insights: {
-      lowestPrice,
-      rangeStart: startDate,
-      rangeEnd: endDate,
-      cached: false,
-      sampleDates,
-      selectedDurationBest: comparisonReference,
-      durationAlternatives,
-      cabinPrices,
-      samplingNotice: `本次先比較 ${sampleDates.length} 個經濟艙出發日，再於最低價日期比較 3 種艙等與 ${durationAlternatives.length} 種鄰近旅行天數。`,
-      yearStats,
+  const failureCount = failed.length + cabinSearches.filter((r) => r.status === "rejected").length + durationSearches.filter((r) => r.status === "rejected").length;
+  return { mode, startDate, endDate, tripDays: payload.tripDays, results: [...economyResults, ...(tracking ? durationAlternatives : [])].map((item, index) => ({ ...item, isRangeLow: index === 0 })),
+    insights: { lowestPrice: reference?.price ?? null, rangeStart: startDate, rangeEnd: endDate, sampleDates: plans.map((p) => p.date),
+      searchedPlans: plans, queryCount, partial: failureCount > 0, failedQueries: failureCount,
+      selectedDurationBest: reference || null, durationAlternatives, cabinPrices: tracking ? [] : cabinPrices,
+      samplingNotice: economyResults.length
+        ? `已比較 ${plans.length} 個${multi ? "出發日與停留組合" : "出發日"}，完整行程報價；同日期艙等可能為不同航班，非全年最低保證。${failureCount ? "部分查詢失敗，結果不完整。" : ""}`
+        : "本次抽樣沒有符合所有條件的完整行程，請調整日期或篩選。",
+      yearStats: { year: comparisonYear, average: current?.average ?? null, minimum: current?.minimum ?? null, maximum: current?.maximum ?? null,
+        sampleCount: current?.sampleCount || 0, previousYear: comparisonYear - 1, previousAverage: average(previous.map((r) => r.average)),
+        previousMinimum: minimum(previous.map((r) => r.minimum)), previousMaximum: maximum(previous.map((r) => r.maximum)),
+        previousSampleCount: previous.length, basis: "filtered_complete_itinerary_samples" },
     },
   };
 }
@@ -902,6 +815,9 @@ function normalizeFlightResults(data, payload, currency) {
         arrivalTime: compact(flight.arrival_airport?.time, "", 30),
         duration: Number(flight.duration || 0),
         airplane: compact(flight.airplane, "", 80),
+        operatingAirlineCode: compact(flight.operating_airline_code, "", 2).toUpperCase(),
+        operatingAirline: compact(typeof flight.operating_airline === "string" ? flight.operating_airline : flight.operating_airline?.name, "", 100),
+        travelClass: compact(flight.travel_class, "未提供", 40),
       }));
       const stopCount = Math.max(0, segments.length - 1);
       const allLowCost = Boolean(segments.length) && segments.every(isLowCostSegment);
@@ -936,6 +852,8 @@ function normalizeFlightResults(data, payload, currency) {
         airlineType,
         airlineTypeLabel: airlineType === "low_cost" ? "廉價航空" : airlineType === "mixed" ? "混合航空" : "傳統航空",
         purchaseLinks,
+        departureToken: typeof item.departure_token === "string" ? item.departure_token : "",
+        upgradeEligibility: { status: "unknown", label: "里程升等待確認", reason: "需確認訂位艙等、票價規則與升等名額。" },
       };
     })
     .filter(Boolean)
@@ -946,7 +864,7 @@ function normalizeFlightResults(data, payload, currency) {
       if (airlineType === "full_service" && item.airlineType !== "full_service") return false;
       if (routeType === "nonstop" && item.stops !== 0) return false;
       if (routeType === "connecting" && item.stops === 0) return false;
-      return true;
+      return matchesFlightPreferences(item, payload);
     })
     .sort((left, right) => left.price - right.price)
     .slice(0, 20);
@@ -963,12 +881,13 @@ function normalizeFlightResults(data, payload, currency) {
 }
 
 function flightWatchFromPayload(payload, env) {
+  payload = validateFlightPreferences(payload);
   const departureId = compact(payload.departureId, "", 8).toUpperCase();
   const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
   const mode = compact(payload.flightMode, "annual_low", 24);
   const startDate = isoDate(payload.startDate, "");
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
-  const lookaheadDays = Math.max(1, Math.min(Number(payload.lookaheadDays || 30), 365));
+  const lookaheadDays = payload.lookaheadDays;
   const modeLabel = mode === "annual_low" ? "未來一年低價探索" : `${startDate} 起 ${lookaheadDays} 天`;
   const name = compact(payload.name, `${departureId} 到 ${arrivalId} ${modeLabel} · ${tripDays ? `${tripDays} 天為主` : "單程"}`, 140);
   const currency = currencyLabel(payload.currency);
@@ -976,7 +895,7 @@ function flightWatchFromPayload(payload, env) {
   const cabin = FLIGHT_CABINS.find((item) => item.code === travelClass) || FLIGHT_CABINS[0];
   const airlineType = ["all", "low_cost", "full_service"].includes(payload.airlineType) ? payload.airlineType : "all";
   const routeType = ["any", "nonstop", "connecting"].includes(payload.routeType) ? payload.routeType : "any";
-  const useSkyscanner = Boolean(envValue(env, "SKYSCANNER_API_KEY"));
+  const useSkyscanner = !envValue(env, "SERPAPI_API_KEY") && !hasFlightPreferences(payload) && Boolean(envValue(env, "SKYSCANNER_API_KEY"));
   const source = {
     type: useSkyscanner ? "skyscanner_indicative_flights" : "serpapi_google_flights_sampled",
     id: useSkyscanner ? "skyscanner-indicative" : "google-flights-sampled",
@@ -1001,6 +920,7 @@ function flightWatchFromPayload(payload, env) {
     include_airlines: airlineType === "low_cost" ? [...LOW_COST_AIRLINE_CODES].join(",") : "",
     exclude_airlines: airlineType === "full_service" ? [...LOW_COST_AIRLINE_CODES].join(",") : "",
     check_interval_hours: useSkyscanner ? 12 : 24,
+    ...(!useSkyscanner ? { planner: payload } : {}),
   };
   return {
     enabled: true,
@@ -1066,11 +986,14 @@ async function handlePriceWatchSearch(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (request.method !== "POST") return methodNotAllowed();
   if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
-  const payload = await request.json().catch(() => ({}));
+  let payload = await request.json().catch(() => ({}));
   const type = compact(payload.type, "flight", 20).toLowerCase();
   if (type !== "flight") {
     return json(type === "product" ? 410 : 400, { code: "flight_only", error: "目前僅提供航班搜尋。" });
   }
+  try { payload = validateFlightPreferences(payload); }
+  catch (error) { return json(400, { code: "invalid_flight_preferences", error: error.message }); }
+  if (payload.trackingSample === true && !(await hasValidPriceWatchToken(request, env))) return priceWatchAuthError(env);
   const rateLimited = await publicSearchRateLimit(request, env, "search");
   if (rateLimited) return rateLimited;
   const currency = currencyLabel(payload.currency);
@@ -1084,9 +1007,11 @@ async function handlePriceWatchSearch(request, env) {
       return json(400, { error: "departureId, arrivalId and a valid startDate for date_window are required." });
     }
     if (flightMode === "annual_low" || flightMode === "date_window") {
-      const flexibleSearch = envValue(env, "SKYSCANNER_API_KEY")
-        ? skyscannerIndicativeSearch
-        : serpApiSampledFlightSearch;
+      if (!envValue(env, "SERPAPI_API_KEY") && hasFlightPreferences(payload)) {
+        return json(503, { error: "進階行程與篩選需要 SerpApi，目前尚未連線。" });
+      }
+      const flexibleSearch = envValue(env, "SERPAPI_API_KEY") || !envValue(env, "SKYSCANNER_API_KEY")
+        ? serpApiSampledFlightSearch : skyscannerIndicativeSearch;
       return json(200, {
         type: "flight",
         currency,
@@ -1121,6 +1046,7 @@ async function handlePriceWatchSearch(request, env) {
 }
 
 function priceWatchSearchErrorResponse(error) {
+  if (error?.status === 400) return json(400, { code: "invalid_flight_preferences", error: error.message });
   const message = safeErrorMessage(error?.message || "");
   if (/quota|searches|plan|credit|limit/i.test(message)) {
     return json(429, { code: "provider_quota", error: "SerpApi 查詢額度目前不足，請稍後再試或升級方案。" });
@@ -1169,8 +1095,8 @@ async function handlePriceWatchWatches(request, env) {
   if (request.method !== "POST") return methodNotAllowed();
   const payload = await request.json().catch(() => ({}));
   let watch = payload.watch;
-  if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload, env);
   try {
+    if (!watch && payload.type === "flight") watch = flightWatchFromPayload(payload, env);
     watch = validateWatch(watch);
   } catch (error) {
     return json(400, { code: "flight_only", error: error.message });

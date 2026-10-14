@@ -154,7 +154,7 @@ function placeMatches(place, query) {
 }
 
 function closePlaceOptions(input) {
-  const list = input.dataset.placeInput === "arrival" ? elements.arrivalPlaces : elements.departurePlaces;
+  const list = document.getElementById(input.getAttribute("aria-controls"));
   clearTimeout(placeSearchTimers.get(input.dataset.placeInput));
   input.dataset.optionsClosed = "true";
   list.hidden = true;
@@ -170,7 +170,7 @@ function selectPlace(input, place) {
 }
 
 function renderPlaceOptions(input, places, message = "", loading = false) {
-  const list = input.dataset.placeInput === "arrival" ? elements.arrivalPlaces : elements.departurePlaces;
+  const list = document.getElementById(input.getAttribute("aria-controls"));
   list.hidden = true;
   list.replaceChildren();
   const query = input.value.trim();
@@ -258,7 +258,7 @@ function schedulePlaceSearch(input) {
 }
 
 function movePlaceSelection(input, direction) {
-  const list = input.dataset.placeInput === "arrival" ? elements.arrivalPlaces : elements.departurePlaces;
+  const list = document.getElementById(input.getAttribute("aria-controls"));
   const options = [...list.querySelectorAll(".place-option")];
   if (!options.length) return;
   const stateForInput = placeOptionState.get(input) || { places: [], activeIndex: -1 };
@@ -355,14 +355,9 @@ function setFlightLoading(loading) {
   elements.flightSubmitButton.textContent = "搜尋中…";
   const update = () => {
     const progress = Math.min(92, 8 + elapsed * 3.2);
-    const stage = elapsed < 3
-      ? "解析機場"
-      : elapsed < 9
-        ? "搜尋代表日期"
-        : elapsed < 19
-          ? "比較三種艙等"
-          : "整理最低票價";
-    setFlightFeedback(`${stage} · 已等待 ${elapsed} 秒`, "loading", progress);
+    setFlightFeedback(`查詢完整航班與艙等 · 已等待 ${elapsed} 秒`, "loading", progress);
+    elements.flightProgressTrack.removeAttribute("aria-valuenow");
+    elements.flightProgressTrack.setAttribute("aria-valuetext", "查詢中，尚未取得完成比例");
     elapsed += 1;
   };
   update();
@@ -427,7 +422,7 @@ function resultCard(item) {
   const dateText = item.returnDate ? `${item.departureDate} - ${item.returnDate}` : item.departureDate || "";
   const trackButton = item.trackable === false ? "" : '<button class="track-button" type="button">追蹤</button>';
   const stopText = Number(item.stops || 0) === 0 ? "直達" : `${Number(item.stops)} 次轉乘`;
-  const flightDetails = `
+  const flightDetails = item.legs?.length > 1 ? `<div class="flight-facts"><span>${item.legs.length} 段旅程</span><span>累計飛行 ${escapeHtml(durationText(item.duration))}</span><span>${item.stops} 次途中轉機</span></div>` : `
     <div class="flight-route" aria-label="航班詳情">
       <div class="flight-time"><strong>${escapeHtml(timeText(item.departure))}</strong><span>${escapeHtml(item.departureAirport || "出發")}</span></div>
       <div class="flight-journey"><span>${escapeHtml(durationText(item.duration))}</span><i></i><b>${escapeHtml(stopText)}</b></div>
@@ -439,7 +434,7 @@ function resultCard(item) {
       <span>${escapeHtml(item.airlineTypeLabel || "航空類型未分類")}</span>
     </div>
   `;
-  const purchaseLabels = { official: "航空官網", skyscanner: "Skyscanner", trip: "Trip.com" };
+  const purchaseLabels = { skyscanner: "Skyscanner", trip: "Trip.com" };
   const purchaseActions = (item.purchaseLinks || []).map((link) => `
     <a class="purchase-link ${escapeHtml(link.kind)}" href="${safeUrl(link.url)}" target="_blank" rel="noopener noreferrer">
       ${escapeHtml(purchaseLabels[link.kind] || link.label || "購票")}
@@ -460,12 +455,87 @@ function resultCard(item) {
       </div>
     </div>
     ${flightDetails}
+    ${journeyDetails(item)}
+    <div class="cabin-comparison">${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
+    <p class="upgrade-status">里程升等：待確認票種與各航段升等名額</p>
     <div class="action-row flight-actions">
-      ${purchaseActions}${trackButton}
+      ${purchaseActions}${!item.cabinPrices ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
     </div>
   `;
   card.querySelector(".track-button")?.addEventListener("click", () => trackResult(item));
+  card.querySelector(".compare-button")?.addEventListener("click", (event) => compareCabins(item, card, event.currentTarget));
   return card;
+}
+
+function journeyDetails(item) {
+  if (!item.legs?.length) return "";
+  const rows = item.legs.map((leg, index) => `
+    <section class="journey-leg">
+      <h4>${index + 1}. ${escapeHtml(leg.departureAirport)} → ${escapeHtml(leg.arrivalAirport)} <small>${escapeHtml(leg.departureDate)}</small></h4>
+      ${(leg.segments || []).map((segment) => `<div class="segment-row">
+        <strong>${escapeHtml(segment.departureAirport)} ${escapeHtml(timeText(segment.departureTime))} → ${escapeHtml(segment.arrivalAirport)} ${escapeHtml(timeText(segment.arrivalTime))}</strong>
+        <span>${escapeHtml(segment.flightNumber)} · ${escapeHtml(segment.airline)} · ${escapeHtml(segment.airplane || "機型未提供")}</span>
+        <span>${escapeHtml(segment.departureTime)} → ${escapeHtml(segment.arrivalTime)} · ${escapeHtml(segment.travelClass || "艙等未提供")}</span>
+      </div>`).join("")}
+      ${item.journeyType === "multicity" && index === 0 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.stopoverNights)} 晚</p>` : ""}
+      ${item.destinationNights != null && index === 1 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.destinationNights)} 晚</p>` : ""}
+    </section>`).join("");
+  const codes = new Set((item.segments || []).map((s) => s.flightNumber?.slice(0, 2)));
+  const rules = [
+    ["BR", "長榮升等規則", "https://www.evaair.com/zh-tw/customer-services/faq/detail.html?FaqCategories=Award-Program"],
+    ["CI", "華航升等規則", "https://www.china-airlines.com/au/zh/member/miles/redeem/cabin-upgrade.html"],
+  ].filter(([code]) => codes.has(code)).map(([, label, url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`).join(" · ");
+  return `<details class="journey-details" ${item.journeyType === "multicity" ? "open" : ""}><summary>${item.legs.length} 段旅程・航班與機型</summary>${rows}<p class="fare-note">全行程報價；行李、分開開票及改退規則以購票頁為準。機型可能異動。${rules}</p></details>`;
+}
+
+function cabinComparisonHtml(prices, currency) {
+  if (!prices?.length) return "";
+  return `<dl class="inline-cabins">${prices.map((cabin) => `<div><dt>${escapeHtml(cabin.label)}</dt><dd>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</dd></div>`).join("")}</dl><small class="fare-note">同日期不同艙等最低報價，航班可能不同</small>`;
+}
+
+async function compareCabins(item, card, button) {
+  button.disabled = true;
+  button.textContent = "比較中…";
+  const original = item.searchPayload || state.lastFlightPayload;
+  try {
+    const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
+      ...original, type: "flight", flightMode: "date_window", startDate: item.departureDate, lookaheadDays: 0,
+      compareDurations: false, comparisonPlan: item.plan,
+    }) });
+    const prices = response.insights?.cabinPrices;
+    if (!response.results?.length) throw new Error("目前未取得相同日期的完整行程報價。");
+    item.cabinPrices = prices;
+    card.querySelector(".cabin-comparison").innerHTML = cabinComparisonHtml(prices, item.currency);
+    button.remove();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "重試艙等比較";
+    setPanelStatus("flightPanel", searchErrorMessage(error, "艙等比較失敗，請稍後重試。"), "error");
+  }
+}
+
+function setupJourneyFields() {
+  const aircraft = ["737 MAX", "737", "747", "777", "787", "A320", "A321", "A330", "A350", "A380", "ATR", "DHC-8"];
+  const airlines = [["BR", "長榮"], ["CI", "華航"], ["JX", "星宇"], ["IT", "台灣虎航"], ["TR", "酷航"], ["MM", "樂桃"],
+    ["CX", "國泰"], ["UO", "香港快運"], ["JL", "日本航空"], ["NH", "全日空"], ["KE", "大韓航空"], ["SQ", "新加坡航空"]];
+  document.querySelector("#aircraftChoices").innerHTML = aircraft.map((model) => `<label class="check-option"><input type="checkbox" name="excludedAircraft" value="${model}" /><span>${model}</span></label>`).join("");
+  document.querySelector("#airlineChoices").innerHTML = airlines.map(([code, name]) => `<label class="check-option"><input type="checkbox" name="excludedAirlines" value="${code}" /><span>${name} ${code}</span></label>`).join("");
+  const update = () => {
+    const form = elements.flightForm;
+    const multi = form.elements.journeyType.value === "multicity";
+    form.elements.departureId.closest("label").querySelector("span").textContent = multi ? "出發地 A" : "出發地";
+    form.elements.arrivalId.closest("label").querySelector("span").textContent = multi ? "目的地 C" : "目的地";
+    const stopover = document.querySelector("#stopoverFields");
+    stopover.hidden = !multi;
+    stopover.disabled = !multi;
+    document.querySelector("#tripDaysField").hidden = multi;
+    form.elements.tripDays.disabled = multi;
+    const destination = document.querySelector("#destinationStayFields");
+    destination.hidden = !multi || !form.elements.includeReturn.checked;
+    destination.disabled = destination.hidden;
+  };
+  document.querySelectorAll('[name="journeyType"], [name="includeReturn"]').forEach((input) => input.addEventListener("change", update));
+  update();
 }
 
 function renderCabinOverview(prices, currency = "TWD") {
@@ -479,7 +549,7 @@ function renderCabinOverview(prices, currency = "TWD") {
     tile.className = `cabin-price ${cabin.available ? "" : "unavailable"}`.trim();
     tile.innerHTML = `
       <span>${escapeHtml(cabin.label)}</span>
-      <strong>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : "查無票價"}</strong>
+      <strong>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</strong>
       <small>${cabin.departureDate ? `${escapeHtml(cabin.departureDate)} · ${escapeHtml(cabin.airline || "航班")}` : "目前樣本無結果"}</small>
     `;
     elements.cabinPriceGrid.append(tile);
@@ -580,13 +650,15 @@ function renderActiveView() {
 }
 
 function watchFromResult(item) {
-  const flight = state.lastFlightPayload;
+  const flight = item.searchPayload || state.lastFlightPayload;
   const modeLabel = flight.flightMode === "annual_low" ? "未來一年低價探索" : `${flight.startDate} 起 ${flight.lookaheadDays} 天`;
   return {
     ...flight,
     type: "flight",
-    id: stableId("flight", `${flight.departureId}-${flight.arrivalId}-${flight.flightMode}-${flight.startDate}-${flight.tripDays}-${item.travelClass || "1"}`),
-    name: `${flight.departureId} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
+    id: stableId("flight", JSON.stringify({ ...flight, targetPrice: undefined, travelClass: item.travelClass || "1" })),
+    name: flight.journeyType === "multicity"
+      ? `${flight.departureId} → ${flight.stopoverId}（${flight.stopoverMinNights}–${flight.stopoverMaxNights} 晚）→ ${flight.arrivalId}${flight.includeReturn ? ` → ${flight.departureId}` : ""} · ${item.cabinLabel || "經濟艙"}`
+      : `${flight.departureId} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
     targetPrice: elements.flightForm.elements.targetPrice.value || item.price,
     travelClass: item.travelClass || "1",
     cabinClass: item.cabinClass || "economy",
@@ -625,6 +697,8 @@ async function searchFlight(event) {
       resolvePlaceCode(elements.flightForm.elements.departureId),
       resolvePlaceCode(elements.flightForm.elements.arrivalId),
     ]);
+    const multi = data.journeyType === "multicity";
+    const stopoverId = multi ? await resolvePlaceCode(elements.flightForm.elements.stopoverId) : "";
     if (!/^[A-Z]{3}$/.test(departureId) || !/^[A-Z]{3}$/.test(arrivalId)) {
       throw new Error("請輸入至少兩個字，或從機場建議中選擇");
     }
@@ -641,6 +715,20 @@ async function searchFlight(event) {
       currency: data.currency || "TWD",
       market: data.market || "TW",
       locale: "zh-TW",
+      journeyType: multi ? "multicity" : "simple",
+      stopoverId,
+      stopoverMinNights: Number(data.stopoverMinNights || 2),
+      stopoverMaxNights: Number(data.stopoverMaxNights || 5),
+      includeReturn: data.includeReturn === "on",
+      destinationMinNights: Number(data.destinationMinNights || 3),
+      destinationMaxNights: Number(data.destinationMaxNights || 7),
+      excludedAirlines: [...new FormData(elements.flightForm).getAll("excludedAirlines"), ...String(data.otherExcludedAirlines || "").split(/[,，\s]+/).filter(Boolean)].map((code) => code.toUpperCase()),
+      excludedAircraft: [...new FormData(elements.flightForm).getAll("excludedAircraft"), ...String(data.otherExcludedAircraft || "").split(/[,，]+/).map((model) => model.trim()).filter(Boolean)],
+      allowUnknownAircraft: data.allowUnknownAircraft === "on",
+      departureTimeFrom: data.departureTimeFrom,
+      departureTimeTo: data.departureTimeTo,
+      arrivalTimeFrom: data.arrivalTimeFrom,
+      arrivalTimeTo: data.arrivalTimeTo,
     };
     setPanelStatus("flightPanel", state.flightMode === "annual_low" ? "探索未來一年代表日期" : "搜尋日期區間票價");
     const response = await api("/api/price-watch/search", {
@@ -651,11 +739,11 @@ async function searchFlight(event) {
       }),
     });
     const view = state.views.flightPanel;
-    view.results = response.results || [];
+    view.results = (response.results || []).map((item) => ({ ...item, searchPayload: structuredClone(state.lastFlightPayload) }));
     view.insights = response.insights || null;
     view.currency = response.currency || data.currency || "TWD";
     view.searched = true;
-    view.title = state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
+    view.title = multi ? "多城市完整行程" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
@@ -767,6 +855,7 @@ async function loadConfig() {
 }
 
 function boot() {
+  setupJourneyFields();
   elements.accessTokenInput.value = token();
   elements.apiBaseInput.value = apiBase();
   document.querySelectorAll(".tab").forEach((tab) => {
@@ -806,7 +895,7 @@ function boot() {
   setFlightMode("annual_low");
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=8").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=9").catch(() => {});
   }
 }
 

@@ -366,6 +366,8 @@ def get_serpapi_sampled_flight_candidates(
     file_config: dict[str, str],
     timeout: int,
 ) -> list[dict[str, Any]]:
+    if source.get("planner") or get_config_value(file_config, "PRICE_WATCH_REMOTE_URL", ""):
+        return get_planned_flight_candidates(watch, source, file_config, timeout)
     mode = str(source.get("mode") or "annual_low")
     today = datetime.now()
     start = today + timedelta(days=14) if mode == "annual_low" else parse_iso_date(source.get("start_date"), today)
@@ -417,6 +419,55 @@ def get_serpapi_sampled_flight_candidates(
         raw["is_alternative_duration"] = actual_days != trip_days
         raw["duration_savings"] = float(selected_best["price"]) - float(candidate["price"]) if selected_best else None
         raw["comparison_cycle_days"] = len(alternative_trip_days)
+    return sorted(candidates, key=lambda item: float(item["price"]))
+
+
+def get_planned_flight_candidates(
+    watch: dict[str, Any], source: dict[str, Any], file_config: dict[str, str], timeout: int,
+) -> list[dict[str, Any]]:
+    remote_url = get_config_value(file_config, "PRICE_WATCH_REMOTE_URL", "")
+    access_token = get_config_value(file_config, "PRICE_WATCH_ACCESS_TOKEN", "")
+    if not remote_url or not access_token:
+        raise RuntimeError("Flight planner requires PRICE_WATCH_REMOTE_URL and PRICE_WATCH_ACCESS_TOKEN")
+    parsed = urllib.parse.urlsplit(remote_url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise RuntimeError("Flight planner requires an HTTPS remote URL")
+    endpoint = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "/api/price-watch/search", "", ""))
+    planner = source.get("planner") or {
+        "flightMode": source.get("mode", "annual_low"),
+        "departureId": source.get("departure_id"), "arrivalId": source.get("arrival_id"),
+        "startDate": source.get("start_date", ""), "lookaheadDays": source.get("lookahead_days", 30),
+        "tripDays": source.get("trip_days", 5), "travelClass": source.get("travel_class", "1"),
+        "airlineType": source.get("airline_type", "all"), "routeType": source.get("route_type", "any"),
+        "excludedAirlines": [code for code in str(source.get("exclude_airlines") or "").split(",") if code],
+        "currency": source.get("currency") or watch.get("currency", "TWD"),
+        "market": source.get("market", "TW"), "locale": source.get("locale", "zh-TW"),
+    }
+    payload = {**planner, "type": "flight", "trackingSample": True}
+    payload.pop("comparisonPlan", None)
+    data = post_json(endpoint, payload, {"X-Price-Watch-Token": access_token}, timeout=max(timeout, 180))
+    candidates = []
+    for item in data.get("results", []):
+        price = parse_price_number(item.get("price"))
+        if price is None or not item.get("itineraryComplete"):
+            continue
+        candidates.append({
+            "watch_id": watch["id"], "item_type": "flight", "source_id": str(source.get("id") or "flight-planner"),
+            "source_name": "完整行程抽樣", "url": str(item.get("link") or ""), "title": str(watch.get("name") or item.get("title") or ""),
+            "price": price, "currency": item.get("currency") or watch.get("currency", "TWD"), "available": True, "error": "",
+            "raw": {"provider": "serpapi_google_flights_sampled", "sampled": True,
+                "departure_date": item.get("departureDate"), "return_date": item.get("returnDate"),
+                "trip_days": item.get("tripDays", 0), "requested_trip_days": planner.get("tripDays", 0),
+                "is_alternative_duration": item.get("isAlternativeDuration", False), "duration_savings": item.get("savings"),
+                "travel_class": item.get("travelClass", "1"), "cabin_label": item.get("cabinLabel", "經濟艙"),
+                "range_start": data.get("startDate"), "range_end": data.get("endDate"),
+                "stopover_nights": item.get("stopoverNights"), "destination_nights": item.get("destinationNights"),
+                "legs": [{"from": leg.get("departureAirport"), "to": leg.get("arrivalAirport"),
+                    "departure": leg.get("departure"), "arrival": leg.get("arrival")} for leg in item.get("legs", [])],
+            },
+        })
+    if not candidates:
+        raise RuntimeError("No complete itinerary matched the saved flight preferences")
     return sorted(candidates, key=lambda item: float(item["price"]))
 
 
@@ -815,15 +866,21 @@ def build_alert_message(
     elif alert_type == "duration_deal":
         label = "其他天數低價"
     elif strategy == "annual_floor":
-        label = "未來一年最低機票"
+        label = "機票觀測低價"
     else:
-        label = "一年新低提醒"
+        label = "觀測新低提醒"
     lines = [
-        f"Jarvis {label}",
+        f"航班助手 {label}",
         f"項目：{watch.get('name')}",
         f"目前最低：{format_money(best['price'], currency)}（{best['source_name']}）",
     ]
     raw = best.get("raw") if isinstance(best.get("raw"), dict) else {}
+    for leg in raw.get("legs") or []:
+        lines.append(f"航段：{leg.get('from')} → {leg.get('to')} {leg.get('departure')} / 抵達 {leg.get('arrival')}")
+    if raw.get("stopover_nights") is not None:
+        lines.append(f"途中停留：{raw['stopover_nights']} 晚")
+    if raw.get("destination_nights") is not None:
+        lines.append(f"目的地停留：{raw['destination_nights']} 晚")
     if raw.get("departure_date"):
         date_text = str(raw["departure_date"])
         if raw.get("return_date"):
@@ -850,6 +907,8 @@ def build_alert_message(
         lines.append(f"{comparison_year - 1} 平均：{previous_text}")
     if raw.get("cached"):
         lines.append("提醒：這是探索快取價，購買前請開啟連結確認即時票價。")
+    if raw.get("sampled"):
+        lines.append("此為符合篩選的抽樣報價，非全年最低保證；里程升等需另外確認。")
     if best.get("url"):
         lines.append(f"連結：{best['url']}")
     return "\n".join(lines)

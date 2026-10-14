@@ -59,6 +59,7 @@ jobs:
             price-watch-state-
 
       - name: Validate price watch configuration
+        if: github.event_name != 'push'
         run: |
           $required = @(
             "PRICE_WATCH_ACCESS_TOKEN",
@@ -70,11 +71,13 @@ jobs:
             throw "Missing required GitHub Actions secrets: $($missing -join ', ')"
           }
 
+      - name: Test flight tracking
+        run: python -m unittest discover -s scripts/price-watch -p test_price_watch.py
+
       - name: Run price watch
+        if: github.event_name != 'push'
         run: |
-          if ("${{ github.event_name }}" -eq "push") {
-            python scripts/price-watch/price_watch.py --dry-run --skip-line
-          } elseif ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
             python scripts/price-watch/price_watch.py --force
           } else {
             python scripts/price-watch/price_watch.py

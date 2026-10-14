@@ -11,7 +11,7 @@
     <title>航班助手</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=13" />
+    <link rel="stylesheet" href="./styles.css?v=14" />
   </head>
   <body>
     <main class="app-shell">
@@ -37,6 +37,13 @@
 
       <section class="panel active" id="flightPanel" role="tabpanel">
         <form class="search-form" id="flightForm">
+          <fieldset class="filter-fieldset">
+            <legend>旅程</legend>
+            <div class="segmented-filter journey-filter">
+              <label><input type="radio" name="journeyType" value="simple" checked /><span>來回／單程</span></label>
+              <label><input type="radio" name="journeyType" value="multicity" /><span>多城市停留</span></label>
+            </div>
+          </fieldset>
           <div class="mode-switch" aria-label="機票搜尋模式">
             <button class="mode-button active" data-flight-mode="annual_low" type="button">全年低價探索</button>
             <button class="mode-button" data-flight-mode="date_window" type="button">日期區間</button>
@@ -57,9 +64,31 @@
               </div>
             </label>
           </div>
-          <div class="field-row">
+          <fieldset id="stopoverFields" class="stopover-fields" hidden disabled>
+            <legend>途中停留 B 地</legend>
             <label>
-              <span>主要旅行天數</span>
+              <span>停留機場</span>
+              <div class="place-combobox">
+                <input name="stopoverId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="stopover" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stopoverPlaceOptions" />
+                <div class="place-options" id="stopoverPlaceOptions" role="listbox" hidden></div>
+              </div>
+            </label>
+            <div class="field-row">
+              <label><span>B 地最少住幾晚</span><input name="stopoverMinNights" type="number" min="1" max="30" value="2" required /></label>
+              <label><span>B 地最多住幾晚</span><input name="stopoverMaxNights" type="number" min="1" max="30" value="5" required /></label>
+            </div>
+            <label class="check-option"><input type="checkbox" name="includeReturn" /><span>從目的地 C 返回出發地 A</span></label>
+            <fieldset id="destinationStayFields" hidden disabled>
+              <legend>目的地 C 地停留</legend>
+              <div class="field-row">
+                <label><span>C 地最少住幾晚</span><input name="destinationMinNights" type="number" min="1" max="30" value="3" required /></label>
+                <label><span>C 地最多住幾晚</span><input name="destinationMaxNights" type="number" min="1" max="30" value="7" required /></label>
+              </div>
+            </fieldset>
+          </fieldset>
+          <div class="field-row">
+            <label id="tripDaysField">
+              <span>旅行天數（單程填 0）</span>
               <input name="tripDays" type="number" inputmode="numeric" min="0" max="60" value="5" />
             </label>
             <label>
@@ -75,6 +104,29 @@
               <label><input type="radio" name="airlineType" value="full_service" /><span>傳統航空</span></label>
             </div>
           </fieldset>
+          <details class="advanced-filters">
+            <summary>機型、航空公司與起降時間</summary>
+            <fieldset>
+              <legend>不搭的機型</legend>
+              <div class="check-grid" id="aircraftChoices"></div>
+              <label><span>其他排除機型（逗號分隔）</span><input name="otherExcludedAircraft" placeholder="A220, E190" autocomplete="off" /></label>
+              <label class="check-option"><input name="allowUnknownAircraft" type="checkbox" /><span>仍接受未提供機型的航班</span></label>
+            </fieldset>
+            <fieldset>
+              <legend>不搭的航空公司</legend>
+              <div class="check-grid" id="airlineChoices"></div>
+              <label><span>其他航空公司代碼（逗號分隔）</span><input name="otherExcludedAirlines" placeholder="UA, BA, LH" autocomplete="off" /></label>
+            </fieldset>
+            <fieldset>
+              <legend>每段旅程起訖時間（當地時間）</legend>
+              <div class="field-row">
+                <label><span>起飛從</span><input type="time" name="departureTimeFrom" /></label>
+                <label><span>起飛至</span><input type="time" name="departureTimeTo" /></label>
+                <label><span>抵達從</span><input type="time" name="arrivalTimeFrom" /></label>
+                <label><span>抵達至</span><input type="time" name="arrivalTimeTo" /></label>
+              </div>
+            </fieldset>
+          </details>
           <fieldset class="filter-fieldset">
             <legend>行程方式</legend>
             <div class="segmented-filter">
@@ -92,6 +144,7 @@
               <label>
                 <span>往後搜尋</span>
                 <select name="lookaheadDays">
+                  <option value="0">僅當天</option>
                   <option value="7">7 天</option>
                   <option value="14">14 天</option>
                   <option value="30" selected>30 天</option>
@@ -164,7 +217,7 @@
         <section class="cabin-overview" id="cabinOverview" aria-label="艙等最低價比較" hidden>
           <div class="cabin-overview-head">
             <h3>艙等價格一覽</h3>
-            <span>頁內即時比較</span>
+            <span>同日期最低報價・航班可能不同</span>
           </div>
           <div class="cabin-price-grid" id="cabinPriceGrid"></div>
         </section>
@@ -197,6 +250,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=13" type="module"></script>
+    <script src="./app.js?v=14" type="module"></script>
   </body>
 </html>

@@ -3,9 +3,11 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import os
 import tempfile
 import unittest
 import urllib.parse
+from unittest.mock import patch
 from contextlib import redirect_stdout, redirect_stderr
 from datetime import datetime
 from pathlib import Path
@@ -27,6 +29,33 @@ manage_watch = load_module("manage_watch", "manage_watch.py")
 
 
 class PriceWatchTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.environment = patch.dict(os.environ, {"PRICE_WATCH_REMOTE_URL": "", "PRICE_WATCH_ACCESS_TOKEN": ""})
+        self.environment.start()
+        self.addCleanup(self.environment.stop)
+
+    def test_planner_tracking_preserves_filters_and_ignores_incomplete_quotes(self) -> None:
+        planner = {"departureId": "TPE", "arrivalId": "LAX", "stopoverId": "NRT", "journeyType": "multicity",
+                   "excludedAircraft": ["737 MAX"], "excludedAirlines": ["CI"], "departureTimeFrom": "08:30"}
+        config = {"PRICE_WATCH_REMOTE_URL": "https://example.com/api/price-watch/watches", "PRICE_WATCH_ACCESS_TOKEN": "test"}
+        quoted = {"price": 10000, "currency": "TWD", "itineraryComplete": True, "stopoverNights": 3,
+                  "legs": [{"departureAirport": "TPE", "arrivalAirport": "NRT", "departure": "2027-01-01 09:00"}]}
+        with patch.object(price_watch, "post_json", return_value={"results": [{"price": 1}, quoted]}) as request:
+            results = price_watch.get_planned_flight_candidates({"id": "test"}, {"planner": planner}, config, 1)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["price"], 10000)
+        self.assertEqual(results[0]["raw"]["stopover_nights"], 3)
+        sent = request.call_args.args[1]
+        self.assertEqual(sent["excludedAircraft"], ["737 MAX"])
+        self.assertEqual(sent["departureTimeFrom"], "08:30")
+        self.assertTrue(sent["trackingSample"])
+        self.assertEqual(request.call_args.args[0], "https://example.com/api/price-watch/search")
+        self.assertEqual(planner.get("trackingSample"), None)
+
+    def test_planner_cannot_silently_fall_back_without_remote_credentials(self) -> None:
+        with self.assertRaises(RuntimeError):
+            price_watch.get_planned_flight_candidates({"id": "test"}, {"planner": {}}, {}, 1)
+
     def test_extract_price_from_twd_text(self) -> None:
         value = price_watch.extract_price("<html><body>售價 NT$18,900</body></html>")
         self.assertEqual(value, 18900.0)

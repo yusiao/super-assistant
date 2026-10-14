@@ -12,6 +12,44 @@
   --shadow: 0 18px 48px rgba(16, 24, 32, 0.12);
 }
 
+[hidden] { display: none !important; }
+.journey-filter { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.stopover-fields, .advanced-filters fieldset, #destinationStayFields {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.stopover-fields { display: grid; gap: 12px; }
+.stopover-fields legend, .advanced-filters legend, #destinationStayFields legend { font-size: 14px; font-weight: 700; }
+.advanced-filters { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.advanced-filters summary, .journey-details summary { padding: 14px 0; cursor: pointer; font-size: 14px; font-weight: 700; }
+.advanced-filters fieldset { display: grid; gap: 12px; }
+.check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+.check-option { display: flex; align-items: center; gap: 8px; min-height: 44px; min-width: 0; cursor: pointer; }
+.check-option input { flex: 0 0 18px; width: 18px; height: 18px; min-height: 18px; padding: 0; accent-color: var(--accent); }
+.check-option span { font-size: 13px; overflow-wrap: anywhere; }
+.journey-leg { padding: 10px 0; border-top: 1px solid var(--line); }
+.journey-leg h4 { margin: 0 0 8px; font-size: 14px; }
+.journey-leg h4 small { color: var(--muted); font-weight: 500; }
+.segment-row { display: grid; gap: 5px; margin: 8px 0 12px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.segment-row span { color: var(--muted); }
+.stay-label { margin: 8px 0 0; color: var(--accent-strong); font-size: 13px; font-weight: 700; }
+.fare-note, .upgrade-status { display: block; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.upgrade-status { margin: 12px 0 0; }
+.inline-cabins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 12px 0 4px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); gap: 8px; }
+.inline-cabins dt { font-size: 11px; color: var(--muted); }
+.inline-cabins dd { margin: 5px 0 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.compare-button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); cursor: pointer; }
+.compare-button:disabled { opacity: .6; cursor: wait; }
+.search-feedback.loading .progress-track span { width: 35% !important; animation: flight-search-progress 1.4s ease-in-out infinite alternate; }
+@keyframes flight-search-progress { from { transform: translateX(0); } to { transform: translateX(185%); } }
+@media (prefers-reduced-motion: reduce) { .search-feedback.loading .progress-track span { animation: none; } }
+@media (max-width: 359px) {
+  #windowFlightFields .field-row, .advanced-filters .field-row { grid-template-columns: minmax(0, 1fr); }
+}
+
 * {
   box-sizing: border-box;
 }
