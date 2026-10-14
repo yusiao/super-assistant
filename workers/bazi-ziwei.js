@@ -402,13 +402,13 @@ async function serpApiSampledFlightSearch(input, env) {
   const cabinSearches = reference && !tracking
     ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true))) : [];
   const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value).map((r) => r.value);
-  let alternatives = !multi && payload.tripDays > 0 && reference && payload.compareDurations !== false
+  let alternatives = !multi && payload.tripDays > 0 && (reference || tracking) && payload.compareDurations !== false
     ? nearbyTripDayOptions(payload.tripDays, 2).filter((days) => days !== payload.tripDays) : [];
   if (tracking && alternatives.length) alternatives = [alternatives[Math.floor(Date.now() / 86400000) % alternatives.length]];
   const durationSearches = await Promise.allSettled(alternatives.map(async (days) => {
-    const result = await run(reference.plan, primaryCabin, days);
+    const result = await run(reference?.plan || plans[0], primaryCabin, days);
     if (!result) return null;
-    const savings = reference.price - result.price;
+    const savings = reference ? reference.price - result.price : null;
     return { ...result, requestedTripDays: payload.tripDays, isAlternativeDuration: true, savings,
       savingsText: savings > 0 ? formatPrice(savings, currency) : "", isCheaper: savings > 0 };
   }));

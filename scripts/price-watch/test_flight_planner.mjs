@@ -160,3 +160,18 @@ test("flexible combinations remain bounded and date windows do not drift after e
   try { assert.equal((await h.request({ ...base, startDate: "2020-01-01" })).status, 400); assert.equal(h.calls.length, 0); }
   finally { h.restore(); }
 });
+
+test("tracking still checks nearby duration when the requested duration has no flights", async () => {
+  const h = harness((data, params) => {
+    const days = (Date.parse(params.return_date) - Date.parse(params.outbound_date)) / 86400000;
+    return days === 5 ? { best_flights: [] } : data;
+  });
+  try {
+    const { data } = await h.request({ ...base, tripDays: 5, compareDurations: true, trackingSample: true });
+    assert.equal(data.results.length, 1);
+    assert.notEqual(data.results[0].tripDays, 5);
+    assert.equal(data.results[0].isAlternativeDuration, true);
+    assert.equal(data.results[0].savings, null);
+    assert.equal(data.results[0].itineraryComplete, true);
+  } finally { h.restore(); }
+});
