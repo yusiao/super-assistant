@@ -128,6 +128,7 @@ const placeSearchTimers = new Map();
 const placeOptionState = new WeakMap();
 let flightSearchTimer = null;
 const POPULAR_PLACES = [
+  { iataCode: "TPE,TSA", name: "台北全部機場", city: "台北", englishName: "Taipei", country: "台灣", group: true, subtitle: "桃園 TPE · 松山 TSA" },
   { iataCode: "TPE", name: "臺灣桃園國際機場", city: "台北", country: "台灣" },
   { iataCode: "TSA", name: "台北松山機場", city: "台北", country: "台灣" },
   { iataCode: "KHH", name: "高雄國際機場", city: "高雄", country: "台灣" },
@@ -143,14 +144,14 @@ const POPULAR_PLACES = [
   { iataCode: "LHR", name: "倫敦希斯洛機場", city: "倫敦", country: "英國" },
   { iataCode: "CDG", name: "巴黎夏爾·戴高樂機場", city: "巴黎", country: "法國" },
   { iataCode: "SYD", name: "雪梨金斯福德·史密斯機場", city: "雪梨", country: "澳洲" },
-].map((place) => ({ ...place, subtitle: `${place.city} · ${place.country}` }));
+].map((place) => ({ ...place, subtitle: place.subtitle || `${place.city} · ${place.country}` }));
 
 function placeMatches(place, query) {
-  const needle = String(query || "").trim().toLocaleLowerCase("zh-Hant");
+  const needle = String(query || "").trim().replaceAll("臺", "台").toLocaleLowerCase("zh-Hant");
   if (!needle) return true;
   if (/^[a-z]{1,3}$/.test(needle)) return String(place.iataCode || "").toLowerCase().startsWith(needle);
-  return [place.iataCode, place.name, place.city, place.country]
-    .some((value) => String(value || "").toLocaleLowerCase("zh-Hant").includes(needle));
+  return [place.iataCode, place.name, place.city, place.country, place.englishName]
+    .some((value) => String(value || "").replaceAll("臺", "台").toLocaleLowerCase("zh-Hant").includes(needle));
 }
 
 function closePlaceOptions(input) {
@@ -163,7 +164,7 @@ function closePlaceOptions(input) {
 }
 
 function selectPlace(input, place) {
-  input.value = `${place.iataCode} · ${place.name}`;
+  input.value = place.group ? place.name : `${place.iataCode} · ${place.name}`;
   input.dataset.iata = place.iataCode;
   input.dataset.placeName = place.name;
   closePlaceOptions(input);
@@ -176,7 +177,9 @@ function renderPlaceOptions(input, places, message = "", loading = false) {
   const query = input.value.trim();
   const isIataPrefix = /^[A-Za-z]{1,3}$/.test(query);
   const uniquePlaces = [...new Map(places.map((place) => [place.iataCode, place])).values()]
+    .filter((place) => !place.group || input.dataset.placeInput === "departure")
     .sort((left, right) => {
+      if (!isIataPrefix && Boolean(left.group) !== Boolean(right.group)) return left.group ? -1 : 1;
       if (isIataPrefix) return left.iataCode.localeCompare(right.iataCode);
       return 0;
     });
@@ -204,7 +207,7 @@ function renderPlaceOptions(input, places, message = "", loading = false) {
       option.setAttribute("role", "option");
       option.dataset.iata = place.iataCode;
       option.innerHTML = `
-        <span class="place-option-main"><strong>${escapeHtml(place.iataCode)}</strong><span>${escapeHtml(place.name)}</span></span>
+        <span class="place-option-main"><strong>${escapeHtml(place.group ? "全部" : place.iataCode)}</strong><span>${escapeHtml(place.name)}</span></span>
         <small>${escapeHtml(place.subtitle || [place.city, place.country].filter(Boolean).join(" · "))}</small>
       `;
       option.addEventListener("pointerdown", (event) => event.preventDefault());
@@ -230,7 +233,7 @@ function schedulePlaceSearch(input) {
   input.dataset.iata = "";
   input.dataset.placeName = "";
   const query = input.value.trim();
-  const localMatches = POPULAR_PLACES.filter((place) => placeMatches(place, query));
+  const localMatches = POPULAR_PLACES.filter((place) => (!place.group || key === "departure") && placeMatches(place, query));
   renderPlaceOptions(input, localMatches, query ? "搜尋全球機場中" : "輸入城市、機場或英文縮寫", Boolean(query));
   if (!query) return;
   placeSearchTimers.set(
@@ -287,6 +290,7 @@ function placeInputKeydown(event) {
 
 function selectedPlaceCode(input) {
   if (input.dataset.iata) return input.dataset.iata;
+  if (input.dataset.placeInput === "departure" && /^(?:TPE,TSA|TSA,TPE)(?:$|\s|·)/i.test(input.value.trim())) return "TPE,TSA";
   const match = input.value.trim().toUpperCase().match(/^([A-Z]{3})(?:\b|\s|·)/);
   return match ? match[1] : "";
 }
@@ -296,6 +300,10 @@ async function resolvePlaceCode(input) {
   if (directCode) return directCode;
   const query = input.value.trim();
   if (!query) return "";
+  if (input.dataset.placeInput === "departure" && /^(?:台北|臺北|taipei|台北全部機場|臺北全部機場)$/i.test(query)) {
+    selectPlace(input, POPULAR_PLACES[0]);
+    return "TPE,TSA";
+  }
   const stateForInput = placeOptionState.get(input) || { places: [] };
   let places = stateForInput.places || [];
   if (!places.length) {
@@ -456,6 +464,7 @@ function resultCard(item) {
     </div>
     ${flightDetails}
     ${journeyDetails(item)}
+    ${item.differentReturnAirport ? `<p class="airport-change">去回不同機場：${escapeHtml(item.departureAirport)} 出發，${escapeHtml(item.legs.at(-1).arrivalAirport)} 返回</p>` : ""}
     <div class="cabin-comparison">${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
     <p class="upgrade-status">里程升等：待確認票種與各航段升等名額</p>
     <div class="action-row flight-actions">
@@ -490,7 +499,7 @@ function journeyDetails(item) {
 
 function cabinComparisonHtml(prices, currency) {
   if (!prices?.length) return "";
-  return `<dl class="inline-cabins">${prices.map((cabin) => `<div><dt>${escapeHtml(cabin.label)}</dt><dd>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</dd></div>`).join("")}</dl><small class="fare-note">同日期不同艙等最低報價，航班可能不同</small>`;
+  return `<dl class="inline-cabins">${prices.map((cabin) => `<div><dt>${escapeHtml(cabin.label)}</dt><dd>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</dd>${cabin.legs?.[0] ? `<small>${escapeHtml(cabin.legs[0].departureAirport)} 出發</small>` : ""}</div>`).join("")}</dl><small class="fare-note">同日期不同艙等最低報價，航班與機場可能不同</small>`;
 }
 
 async function compareCabins(item, card, button) {
@@ -550,7 +559,7 @@ function renderCabinOverview(prices, currency = "TWD") {
     tile.innerHTML = `
       <span>${escapeHtml(cabin.label)}</span>
       <strong>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</strong>
-      <small>${cabin.departureDate ? `${escapeHtml(cabin.departureDate)} · ${escapeHtml(cabin.airline || "航班")}` : "目前樣本無結果"}</small>
+      <small>${cabin.departureDate ? `${escapeHtml(cabin.departureDate)} · ${escapeHtml(cabin.legs?.[0]?.departureAirport || "")} ${escapeHtml(cabin.airline || "航班")}` : "目前樣本無結果"}</small>
     `;
     elements.cabinPriceGrid.append(tile);
   });
@@ -651,14 +660,15 @@ function renderActiveView() {
 
 function watchFromResult(item) {
   const flight = item.searchPayload || state.lastFlightPayload;
+  const originLabel = flight.departureId === "TPE,TSA" ? "台北全部機場（TPE／TSA）" : flight.departureId;
   const modeLabel = flight.flightMode === "annual_low" ? "未來一年低價探索" : `${flight.startDate} 起 ${flight.lookaheadDays} 天`;
   return {
     ...flight,
     type: "flight",
     id: stableId("flight", JSON.stringify({ ...flight, targetPrice: undefined, travelClass: item.travelClass || "1" })),
     name: flight.journeyType === "multicity"
-      ? `${flight.departureId} → ${flight.stopoverId}（${flight.stopoverMinNights}–${flight.stopoverMaxNights} 晚）→ ${flight.arrivalId}${flight.includeReturn ? ` → ${flight.departureId}` : ""} · ${item.cabinLabel || "經濟艙"}`
-      : `${flight.departureId} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
+      ? `${originLabel} → ${flight.stopoverId}（${flight.stopoverMinNights}–${flight.stopoverMaxNights} 晚）→ ${flight.arrivalId}${flight.includeReturn ? ` → ${originLabel}` : ""} · ${item.cabinLabel || "經濟艙"}`
+      : `${originLabel} 到 ${flight.arrivalId} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天為主` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
     targetPrice: elements.flightForm.elements.targetPrice.value || item.price,
     travelClass: item.travelClass || "1",
     cabinClass: item.cabinClass || "economy",
@@ -699,7 +709,7 @@ async function searchFlight(event) {
     ]);
     const multi = data.journeyType === "multicity";
     const stopoverId = multi ? await resolvePlaceCode(elements.flightForm.elements.stopoverId) : "";
-    if (!/^[A-Z]{3}$/.test(departureId) || !/^[A-Z]{3}$/.test(arrivalId)) {
+    if (!(departureId === "TPE,TSA" || /^[A-Z]{3}$/.test(departureId)) || !/^[A-Z]{3}$/.test(arrivalId)) {
       throw new Error("請輸入至少兩個字，或從機場建議中選擇");
     }
     state.lastFlightPayload = {
@@ -856,6 +866,7 @@ async function loadConfig() {
 
 function boot() {
   setupJourneyFields();
+  if (!elements.flightForm.elements.departureId.value) selectPlace(elements.flightForm.elements.departureId, POPULAR_PLACES[0]);
   elements.accessTokenInput.value = token();
   elements.apiBaseInput.value = apiBase();
   document.querySelectorAll(".tab").forEach((tab) => {
@@ -895,7 +906,7 @@ function boot() {
   setFlightMode("annual_low");
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=9").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=10").catch(() => {});
   }
 }
 

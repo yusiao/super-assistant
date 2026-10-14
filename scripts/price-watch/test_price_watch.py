@@ -35,7 +35,7 @@ class PriceWatchTests(unittest.TestCase):
         self.addCleanup(self.environment.stop)
 
     def test_planner_tracking_preserves_filters_and_ignores_incomplete_quotes(self) -> None:
-        planner = {"departureId": "TPE", "arrivalId": "LAX", "stopoverId": "NRT", "journeyType": "multicity",
+        planner = {"departureId": "TPE,TSA", "arrivalId": "LAX", "stopoverId": "NRT", "journeyType": "multicity",
                    "excludedAircraft": ["737 MAX"], "excludedAirlines": ["CI"], "departureTimeFrom": "08:30"}
         config = {"PRICE_WATCH_REMOTE_URL": "https://example.com/api/price-watch/watches", "PRICE_WATCH_ACCESS_TOKEN": "test"}
         quoted = {"price": 10000, "currency": "TWD", "itineraryComplete": True, "stopoverNights": 3,
@@ -46,6 +46,7 @@ class PriceWatchTests(unittest.TestCase):
         self.assertEqual(results[0]["price"], 10000)
         self.assertEqual(results[0]["raw"]["stopover_nights"], 3)
         sent = request.call_args.args[1]
+        self.assertEqual(sent["departureId"], "TPE,TSA")
         self.assertEqual(sent["excludedAircraft"], ["737 MAX"])
         self.assertEqual(sent["departureTimeFrom"], "08:30")
         self.assertTrue(sent["trackingSample"])

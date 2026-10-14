@@ -390,7 +390,12 @@ async function serpApiSampledFlightSearch(input, env) {
   const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
   const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan)) => {
     const result = await searchCompleteJourney({ ...payload, tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
-    if (result && !multi) result.purchaseLinks = flightPurchaseLinks({ ...payload, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
+    if (result && !multi && !result.differentReturnAirport) result.purchaseLinks = flightPurchaseLinks({ ...payload,
+      departureId: result.departureAirport, arrivalId: result.arrivalAirport, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
+    if (result && !multi && result.differentReturnAirport) result.purchaseLinks.push(
+      { kind: "google", label: "Google Flights 實際行程", url: result.link },
+      { kind: "custom", label: "Skyscanner（自訂行程）", url: "https://www.skyscanner.com.tw/transport/flights/" },
+    );
     if (result && multi) result.purchaseLinks.push({ kind: "google", label: "Google Flights 多城市", url: result.link });
     return result;
   };
@@ -823,7 +828,9 @@ function normalizeFlightResults(data, payload, currency) {
       const allLowCost = Boolean(segments.length) && segments.every(isLowCostSegment);
       const anyLowCost = segments.some(isLowCostSegment);
       const airlineType = allLowCost ? "low_cost" : anyLowCost ? "mixed" : "full_service";
-      const purchaseLinks = flightPurchaseLinks(payload, airline, segments);
+      const purchaseLinks = flightPurchaseLinks({ ...payload,
+        departureId: firstFlight.departure_airport?.id || payload.departureId,
+        arrivalId: lastFlight.arrival_airport?.id || payload.arrivalId }, airline, segments);
       return {
         id: safeId(`${route}-${airline}-${item.price}-${index}`, "flight"),
         type: "flight",

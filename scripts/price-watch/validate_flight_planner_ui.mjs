@@ -30,7 +30,7 @@ globalThis.fetch = async (url) => {
   return Response.json({ best_flights: [{ price: 12000 * Number(p.travel_class) + index * 1000, total_duration: 180,
     departure_token: index < legs.length - 1 ? String(index + 1) : undefined,
     flights: [{ airline: "長榮航空", flight_number: "BR 198", airplane: "Boeing 787-9", travel_class: p.travel_class === "1" ? "Economy" : "Business",
-      departure_airport: { id: leg.departure_id, time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id, time: `${leg.date} 13:00` }, duration: 180 }],
+      departure_airport: { id: leg.departure_id.split(",").at(-1), time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
   }] });
 };
 let lastSearch;
@@ -66,7 +66,10 @@ try {
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/`);
   await page.evaluate(() => localStorage.setItem("priceWatchAccessToken", "test-ui"));
-  await page.locator('[name="departureId"]').fill("TPE");
+  assert.equal(await page.locator('[name="departureId"]').inputValue(), "台北全部機場");
+  await page.locator('[name="departureId"]').fill("台北");
+  await page.locator('#departurePlaceOptions [data-iata="TPE,TSA"]').click();
+  assert.equal(await page.locator('[name="departureId"]').getAttribute("data-iata"), "TPE,TSA");
   await page.locator('[name="arrivalId"]').fill("LAX");
   await page.locator('[name="journeyType"][value="multicity"]').check({ force: true });
   await page.locator('[name="stopoverId"]').fill("NRT");
@@ -98,11 +101,13 @@ try {
   await page.waitForFunction(() => !document.querySelector("#flightSubmitButton").disabled);
   assert.deepEqual(lastSearch.excludedAircraft, ["737 MAX"]);
   assert.equal(lastSearch.stopoverId, "NRT");
+  assert.equal(lastSearch.departureId, "TPE,TSA");
   assert.equal(lastSearch.includeReturn, true);
   assert.equal(lastSearch.departureTimeFrom, "08:30");
   assert.equal(await page.locator(".result-card").first().locator(".journey-leg").count(), 3);
   assert.equal(await page.locator(".result-card").first().locator(".inline-cabins dd").count(), 3);
   assert.match(await page.locator(".result-card").first().innerText(), /里程升等：待確認/);
+  assert.match(await page.locator(".result-card").first().innerText(), /TSA 出發，TPE 返回/);
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await page.locator(".result-card").first().scrollIntoViewIfNeeded();
@@ -116,10 +121,16 @@ try {
   await page.locator("#statusText").filter({ hasText: "已加入雲端追蹤" }).waitFor();
   const saved = records.get("price-watch:watches").watches[0].sources[0].planner;
   assert.equal(saved.stopoverId, "NRT");
+  assert.equal(saved.departureId, "TPE,TSA");
   assert.deepEqual(saved.excludedAircraft, ["737 MAX"]);
   await page.locator('[name="journeyType"][value="simple"]').check({ force: true });
   assert.equal(await page.locator('[name="stopoverId"]').isDisabled(), true);
   assert.equal(await page.locator('[name="tripDays"]').isDisabled(), false);
+  await page.locator('[name="departureId"]').fill("TSA");
+  await page.locator('[name="departureId"]').press("Escape");
+  await page.locator("#flightForm").evaluate((form) => form.requestSubmit());
+  await page.waitForFunction(() => !document.querySelector("#flightSubmitButton").disabled);
+  assert.equal(lastSearch.departureId, "TSA", "A single-airport choice remains available");
   assert.deepEqual(errors, []);
   console.log("Mobile/desktop 320/390/1280: form, multi-city results, cabin comparisons, exclusions, tracking and mode switching passed; zero real API calls.");
 } finally {

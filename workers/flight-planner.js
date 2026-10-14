@@ -23,9 +23,10 @@ export function validateFlightPreferences(input) {
   const payload = { ...input };
   for (const key of ["departureId", "arrivalId", ...(payload.journeyType === "multicity" ? ["stopoverId"] : [])]) {
     payload[key] = String(payload[key] || "").trim().toUpperCase();
-    if (!/^[A-Z]{3}$/.test(payload[key])) invalid("請選擇有效的三碼機場。");
+    if (key === "departureId" && payload[key] === "TSA,TPE") payload[key] = "TPE,TSA";
+    if (!/^[A-Z]{3}$/.test(payload[key]) && !(key === "departureId" && payload[key] === "TPE,TSA")) invalid("請選擇有效機場，或台北全部機場。");
   }
-  if (payload.departureId === payload.arrivalId) invalid("出發地與目的地不可相同。");
+  if (payload.departureId.split(",").includes(payload.arrivalId)) invalid("出發地與目的地不可相同。");
   payload.journeyType = payload.journeyType === "multicity" ? "multicity" : "simple";
   if (payload.flightMode === "date_window" && !validDate(payload.startDate)) invalid("請選擇有效的最早出發日。");
   payload.lookaheadDays = integer(payload.lookaheadDays, 30, 0, 365, "搜尋範圍");
@@ -46,7 +47,7 @@ export function validateFlightPreferences(input) {
     if (payload[key] && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(payload[key])) invalid("起降時間格式錯誤。");
   }
   if (payload.journeyType === "multicity") {
-    if ([payload.departureId, payload.arrivalId].includes(payload.stopoverId)) invalid("停留城市須與出發地、目的地不同。");
+    if ([...payload.departureId.split(","), payload.arrivalId].includes(payload.stopoverId)) invalid("停留城市須與出發地、目的地不同。");
     payload.stopoverMinNights = integer(payload.stopoverMinNights, 2, 1, 30, "停留夜數");
     payload.stopoverMaxNights = integer(payload.stopoverMaxNights, 5, payload.stopoverMinNights, 30, "停留夜數上限");
     payload.includeReturn = payload.includeReturn === true;
@@ -67,7 +68,7 @@ export function validateFlightPreferences(input) {
 }
 
 export function hasFlightPreferences(p) {
-  return p.journeyType === "multicity" || p.excludedAirlines?.length || p.excludedAircraft?.length
+  return p.departureId?.includes(",") || p.journeyType === "multicity" || p.excludedAirlines?.length || p.excludedAircraft?.length
     || p.departureTimeFrom || p.departureTimeTo || p.arrivalTimeFrom || p.arrivalTimeTo
     || p.airlineType !== "all" || p.routeType !== "any";
 }
@@ -189,7 +190,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     const candidates = normalize(data, { ...p, departureId: legs[i].departure_id, arrivalId: legs[i].arrival_id,
       outboundDate: legs[i].date, returnDate: "", travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label }, p.currency || "TWD").results;
     best = candidates.find((item) => {
-      if (item.departureAirport !== legs[i].departure_id || item.arrivalAirport !== legs[i].arrival_id) return false;
+      if (!legs[i].departure_id.split(",").includes(item.departureAirport) || !legs[i].arrival_id.split(",").includes(item.arrivalAirport)) return false;
       if (item.departure.slice(0, 10) !== legs[i].date || !validDate(item.arrival.slice(0, 10))) return false;
       if (i < legs.length - 1 && !item.departureToken) return false;
       if (!selected.length) return true;
@@ -215,10 +216,11 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const requestedCabin = { "1": /^(economy|經濟艙)$/i, "2": /premium economy|豪華經濟|豪經/i, "3": /business|商務|商務艙/i }[cabin.code];
   const mixedCabin = allSegments.some((segment) => segment.travelClass && segment.travelClass !== "未提供" && !requestedCabin.test(segment.travelClass));
   const returnDate = legs.length > 1 && (!multi || p.includeReturn) ? legs.at(-1).date : "";
-  const route = multi ? [p.departureId, p.stopoverId, p.arrivalId, ...(p.includeReturn ? [p.departureId] : [])].join(" → ") : `${p.departureId} → ${p.arrivalId}`;
+  const route = multi ? [first.departureAirport, ...selected.map((leg) => leg.arrivalAirport)].join(" → ") : `${first.departureAirport} → ${first.arrivalAirport}`;
+  const differentReturnAirport = Boolean(returnDate) && selected.at(-1).arrivalAirport !== first.departureAirport;
   const duration = selected.reduce((total, item) => total + item.duration, 0);
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
-    title: route, price: best.price, priceText: best.priceText, departureToken: undefined,
+    title: route, price: best.price, priceText: best.priceText, departureToken: undefined, differentReturnAirport,
     departureDate: plan.date, returnDate, tripDays: returnDate ? dateDifference(plan.date, returnDate) : 0,
     journeyType: multi ? "multicity" : "simple", itineraryComplete: true, legs: selected.map(({ departureToken, ...leg }) => leg),
     segments: allSegments, duration, stops: selected.reduce((total, item) => total + item.stops, 0),
@@ -230,7 +232,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     purchaseLinks: multi
       ? [...new Map(selected.flatMap((leg) => leg.purchaseLinks.filter((link) => link.kind === "official")).map((link) => [link.url, link])).values()]
       : first.purchaseLinks.filter((link) => link.kind === "official"),
-    link: `https://www.google.com/travel/flights?q=${encodeURIComponent(legs.map((leg) => `${leg.departure_id} ${leg.arrival_id} ${leg.date}`).join(" "))}`,
+    link: `https://www.google.com/travel/flights?q=${encodeURIComponent(selected.map((leg) => `${leg.departureAirport} ${leg.arrivalAirport} ${leg.departureDate}`).join(" "))}`,
     upgradeEligibility: { status: "unknown", label: "里程升等待確認", reason: "未取得訂位艙等、票價規則與各航段升等名額。" },
   };
 }

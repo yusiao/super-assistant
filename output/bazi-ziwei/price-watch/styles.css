@@ -38,8 +38,10 @@
 .stay-label { margin: 8px 0 0; color: var(--accent-strong); font-size: 13px; font-weight: 700; }
 .fare-note, .upgrade-status { display: block; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .upgrade-status { margin: 12px 0 0; }
+.airport-change { color: var(--danger); font-size: 13px; font-weight: 700; line-height: 1.6; }
 .inline-cabins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 12px 0 4px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); gap: 8px; }
 .inline-cabins dt { font-size: 11px; color: var(--muted); }
+.inline-cabins small { font-size: 11px; color: var(--muted); }
 .inline-cabins dd { margin: 5px 0 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
 .compare-button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); cursor: pointer; }
 .compare-button:disabled { opacity: .6; cursor: wait; }

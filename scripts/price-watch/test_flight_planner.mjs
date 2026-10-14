@@ -28,7 +28,7 @@ function harness(change = (data) => data) {
     const data = { best_flights: [{ price: Number(params.travel_class) * 9000 + index * 1000, total_duration: 180,
       departure_token: index < legs.length - 1 ? `leg-${index + 1}` : undefined,
       flights: [{ airline: "EVA Air", flight_number: "BR 100", airplane: "Boeing 787-9", travel_class: params.travel_class === "1" ? "Economy" : "Business",
-        departure_airport: { id: leg.departure_id, time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id, time: `${leg.date} 13:00` }, duration: 180 }],
+        departure_airport: { id: leg.departure_id.split(",")[0], time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
     }] };
     return Response.json(change(data, params, index));
   };
@@ -54,6 +54,61 @@ test("validates dates, airports, ranges and exclusion codes before paid calls", 
 test("airline include/exclude parameters never conflict", () => {
   const p = validateFlightPreferences({ ...base, airlineType: "low_cost", excludedAirlines: ["IT"] });
   assert.deepEqual(providerFlightFilters(p, new Set(["IT", "TR"])), { stops: "0", show_hidden: "true", include_airlines: "TR" });
+});
+
+test("Taipei group sends one combined query and accepts the cheaper Songshan result", async () => {
+  const h = harness((data, params, index) => {
+    if (index === 0) {
+      const cheaper = structuredClone(data.best_flights[0]);
+      cheaper.price -= 1000;
+      cheaper.flights[0].departure_airport.id = "TSA";
+      data.best_flights.push(cheaper);
+    }
+    return data;
+  });
+  try {
+    const { status, data } = await h.request({ ...base, departureId: "TSA,TPE" });
+    assert.equal(status, 200);
+    assert.equal(data.results[0].departureAirport, "TSA");
+    assert.equal(data.results[0].price, 8000);
+    assert.match(data.results[0].title, /^TSA/);
+    assert.equal(h.calls.length, 3);
+    assert.ok(h.calls.every((p) => p.departure_id === "TPE,TSA"));
+    const link = data.results[0].purchaseLinks.find((link) => link.kind === "skyscanner");
+    assert.match(link.url, /\/tsa\/nrt\//);
+    const saved = await h.request({ ...base, departureId: "TPE,TSA" }, "watches");
+    assert.equal(saved.data.watch.sources[0].planner.departureId, "TPE,TSA");
+  } finally { h.restore(); }
+});
+
+test("Taipei group supports different return airports without misleading purchase links", async () => {
+  const h = harness((data, params, index) => {
+    if (index === 0) data.best_flights[0].flights[0].departure_airport.id = "TSA";
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...base, departureId: "TPE,TSA", tripDays: 5 });
+    assert.equal(data.results[0].differentReturnAirport, true);
+    assert.equal(data.results[0].legs[1].arrivalAirport, "TPE");
+    assert.ok(data.results[0].purchaseLinks.every((link) => !link.url.includes("/tsa/nrt/")));
+    assert.ok(data.results[0].purchaseLinks.some((link) => link.kind === "google"));
+    const multiResult = await h.request({ ...multi, departureId: "TPE,TSA", includeReturn: true, destinationMinNights: 3, destinationMaxNights: 3 });
+    assert.equal(multiResult.data.results[0].legs[2].arrivalAirport, "TPE");
+    assert.match(multiResult.data.results[0].title, /^TSA → NRT → LAX → TPE$/);
+    assert.equal(JSON.parse(h.calls.find((p) => p.type === "3").multi_city_json)[0].departure_id, "TPE,TSA");
+  } finally { h.restore(); }
+});
+
+test("Taipei group rejects overlapping airports, unrelated groups and wrong-airport results", async () => {
+  const h = harness((data) => { data.best_flights[0].flights[0].departure_airport.id = "KHH"; return data; });
+  try {
+    for (const payload of [{ ...base, departureId: "TPE,TSA", arrivalId: "TSA" },
+      { ...multi, departureId: "TPE,TSA", stopoverId: "TPE" }, { ...base, departureId: "TPE,KHH" }]) {
+      assert.equal((await h.request(payload)).status, 400);
+    }
+    assert.equal(h.calls.length, 0);
+    assert.equal((await h.request({ ...base, departureId: "TPE,TSA" })).data.results.length, 0);
+  } finally { h.restore(); }
 });
 
 test("filters every connection's aircraft and carrier; unknown aircraft are opt-in", () => {
