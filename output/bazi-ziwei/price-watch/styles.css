@@ -13,6 +13,8 @@
 }
 
 [hidden] { display: none !important; }
+.place-more { width: 100%; min-height: 44px; padding: 12px; border: 0; background: var(--soft); color: var(--accent-strong); cursor: pointer; }
+#fixedFlightFields input { min-width: 0; max-width: 100%; }
 .journey-filter { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 .stopover-fields, .advanced-filters fieldset, #destinationStayFields {
   min-width: 0;
@@ -49,7 +51,7 @@
 @keyframes flight-search-progress { from { transform: translateX(0); } to { transform: translateX(185%); } }
 @media (prefers-reduced-motion: reduce) { .search-feedback.loading .progress-track span { animation: none; } }
 @media (max-width: 359px) {
-  #windowFlightFields .field-row, .advanced-filters .field-row { grid-template-columns: minmax(0, 1fr); }
+  #windowFlightFields .field-row, #fixedFlightFields, .advanced-filters .field-row { grid-template-columns: minmax(0, 1fr); }
 }
 
 * {

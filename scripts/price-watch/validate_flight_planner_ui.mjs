@@ -131,8 +131,70 @@ try {
   await page.locator("#flightForm").evaluate((form) => form.requestSubmit());
   await page.waitForFunction(() => !document.querySelector("#flightSubmitButton").disabled);
   assert.equal(lastSearch.departureId, "TSA", "A single-airport choice remains available");
+  // The complete catalog is local: type the same prefix in both cases, then paginate.
+  await page.locator('[name="arrivalId"]').fill("t");
+  await page.locator('#arrivalPlaceOptions .place-more').waitFor();
+  const lowerCodes = await page.locator('#arrivalPlaceOptions .place-option').evaluateAll((buttons) => buttons.map((button) => button.dataset.iata));
+  assert.equal(lowerCodes.length, 50);
+  await page.locator('[name="arrivalId"]').fill("T");
+  await page.locator('#arrivalPlaceOptions .place-more').waitFor();
+  assert.deepEqual(await page.locator('#arrivalPlaceOptions .place-option').evaluateAll((buttons) => buttons.map((button) => button.dataset.iata)), lowerCodes);
+  await page.locator('#arrivalPlaceOptions .place-more').click();
+  assert.equal(await page.locator('#arrivalPlaceOptions .place-option').count(), 100);
+  await page.locator('[name="departureId"]').fill("lOnDoN");
+  await page.locator('#departurePlaceOptions [data-iata="LCY,LGW,LHR,LTN,SEN,STN"]').click();
+  await page.locator('[name="arrivalId"]').fill("巴黎");
+  await page.locator('#arrivalPlaceOptions [data-iata="CDG,ORY"]').click();
+  const fixedDate = addDateDays(new Date().toISOString().slice(0, 10), 24);
+  const fixedReturn = addDateDays(fixedDate, 5);
+  for (const mode of ["departure", "return", "both"]) {
+    await page.locator('[name="dateConstraint"]').selectOption(mode);
+    if (mode !== "return") await page.locator('[name="fixedDepartureDate"]').fill(fixedDate);
+    if (mode !== "departure") await page.locator('[name="fixedReturnDate"]').fill(fixedReturn);
+    assert.equal(await page.locator('#flexibleModeSwitch').isVisible(), false);
+    if (mode === "both") assert.equal(await page.locator('[name="tripDays"]').isDisabled(), true);
+    const responsePromise = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+    await page.locator('#flightForm').evaluate((form) => form.requestSubmit());
+    const response = await (await responsePromise).json();
+    await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
+    assert.ok(response.results.length, mode);
+    assert.equal(lastSearch.departureId, "LCY,LGW,LHR,LTN,SEN,STN");
+    assert.equal(lastSearch.arrivalId, "CDG,ORY");
+    assert.equal(lastSearch.dateConstraint, mode);
+    const results = [...response.results, ...response.insights.durationAlternatives];
+    assert.ok(results.every((r) => mode === "return" || r.departureDate === fixedDate));
+    assert.ok(results.every((r) => mode === "departure" || r.returnDate === fixedReturn));
+    if (mode === "both") assert.equal(response.insights.durationAlternatives.length, 0);
+  }
+  await page.locator('.track-button').first().click();
+  await page.locator('#statusText').filter({ hasText: '已加入雲端追蹤' }).waitFor();
+  const fixedWatch = records.get('price-watch:watches').watches.at(-1).sources[0].planner;
+  assert.equal(fixedWatch.fixedDepartureDate, fixedDate);
+  assert.equal(fixedWatch.fixedReturnDate, fixedReturn);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('[name="dateConstraint"]').scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-fixed-dates-${width}.png`) });
+  }
+  await page.locator('[name="dateConstraint"]').selectOption('flexible');
+  await page.locator('[name="departureId"]').fill('tPe');
+  await page.locator('[name="arrivalId"]').fill('nrT');
+  const mixedCaseResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+  await page.locator('#flightForm').evaluate((form) => form.requestSubmit());
+  await mixedCaseResponse;
+  await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
+  assert.equal(lastSearch.departureId, 'TPE');
+  assert.equal(lastSearch.arrivalId, 'NRT');
+  assert.equal(lastSearch.lookaheadDays, 30);
+  await page.locator('[name="lookaheadDays"]').selectOption('0');
+  const oneDayResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+  await page.locator('#flightForm').evaluate((form) => form.requestSubmit());
+  await oneDayResponse;
+  await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
+  assert.equal(lastSearch.lookaheadDays, 0, 'Only this date must not silently become 30 days');
   assert.deepEqual(errors, []);
-  console.log("Mobile/desktop 320/390/1280: form, multi-city results, cabin comparisons, exclusions, tracking and mode switching passed; zero real API calls.");
+  console.log("Mobile/desktop 320/390/1280: global airport groups, case-insensitive input, pagination, fixed departure/return/both, tracking, multi-city, cabins and filters passed; zero real API calls.");
 } finally {
   globalThis.fetch = originalFetch;
   if (browser) await browser.close();

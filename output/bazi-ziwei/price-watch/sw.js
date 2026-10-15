@@ -1,5 +1,5 @@
-const CACHE_NAME = "flight-watch-v15";
-const APP_SHELL = ["./", "./index.html", "./styles.css?v=15", "./app.js?v=15", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "flight-watch-v16";
+const APP_SHELL = ["./", "./index.html", "./styles.css?v=16", "./app.js?v=16", "./airports.js?v=16", "./airports-data.json?v=16", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

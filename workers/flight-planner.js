@@ -1,3 +1,5 @@
+import { normalizeAirportCodes } from "../output/bazi-ziwei/price-watch/airports.js";
+
 const DAY = 86400000;
 export const addDateDays = (date, days) => new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY).toISOString().slice(0, 10);
 const dateDifference = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / DAY);
@@ -22,15 +24,29 @@ function integer(value, fallback, min, max, label) {
 export function validateFlightPreferences(input) {
   const payload = { ...input };
   for (const key of ["departureId", "arrivalId", ...(payload.journeyType === "multicity" ? ["stopoverId"] : [])]) {
-    payload[key] = String(payload[key] || "").trim().toUpperCase();
-    if (key === "departureId" && payload[key] === "TSA,TPE") payload[key] = "TPE,TSA";
-    if (!/^[A-Z]{3}$/.test(payload[key]) && !(key === "departureId" && payload[key] === "TPE,TSA")) invalid("請選擇有效機場，或台北全部機場。");
+    payload[key] = normalizeAirportCodes(payload[key]);
+    if (!payload[key]) invalid("請選擇有效機場或城市機場組合（最多 6 個）。");
   }
-  if (payload.departureId.split(",").includes(payload.arrivalId)) invalid("出發地與目的地不可相同。");
+  const overlaps = (a, b) => a.split(",").some((code) => b.split(",").includes(code));
+  if (overlaps(payload.departureId, payload.arrivalId)) invalid("出發地與目的地不可相同。");
   payload.journeyType = payload.journeyType === "multicity" ? "multicity" : "simple";
-  if (payload.flightMode === "date_window" && !validDate(payload.startDate)) invalid("請選擇有效的最早出發日。");
+  payload.dateConstraint = payload.dateConstraint || "flexible";
+  if (!["flexible", "departure", "return", "both"].includes(payload.dateConstraint)) invalid("日期條件不正確。");
+  if (payload.dateConstraint === "flexible" && payload.flightMode === "date_window" && !validDate(payload.startDate)) invalid("請選擇有效的最早出發日。");
   payload.lookaheadDays = integer(payload.lookaheadDays, 30, 0, 365, "搜尋範圍");
   payload.tripDays = integer(payload.tripDays, 5, 0, 60, "旅行天數");
+  for (const [key, modes] of [["fixedDepartureDate", ["departure", "both"]], ["fixedReturnDate", ["return", "both"]]]) {
+    payload[key] = modes.includes(payload.dateConstraint) ? payload[key] : "";
+    if (modes.includes(payload.dateConstraint) && !validDate(payload[key])) invalid(key === "fixedDepartureDate" ? "請選擇有效的固定出發日。" : "請選擇有效的固定回程起飛日。");
+    if (payload[key] && payload[key] < new Date().toISOString().slice(0, 10)) invalid("固定日期已過期，請更新日期。");
+  }
+  if (payload.dateConstraint === "both") {
+    const days = dateDifference(payload.fixedDepartureDate, payload.fixedReturnDate);
+    if (days < 1 || days > 60) invalid("回程起飛日須晚於出發日，且行程不超過 60 天。");
+    if (payload.journeyType === "simple") payload.tripDays = days;
+    payload.compareDurations = false;
+  }
+  if (payload.fixedReturnDate && (payload.journeyType === "multicity" ? payload.includeReturn !== true : payload.tripDays === 0)) invalid("固定回程日需要來回行程。");
   payload.travelClass = ["1", "2", "3"].includes(String(payload.travelClass)) ? String(payload.travelClass) : "1";
   payload.airlineType = ["all", "low_cost", "full_service"].includes(payload.airlineType) ? payload.airlineType : "all";
   payload.routeType = ["any", "nonstop", "connecting"].includes(payload.routeType) ? payload.routeType : "any";
@@ -47,7 +63,7 @@ export function validateFlightPreferences(input) {
     if (payload[key] && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(payload[key])) invalid("起降時間格式錯誤。");
   }
   if (payload.journeyType === "multicity") {
-    if ([...payload.departureId.split(","), payload.arrivalId].includes(payload.stopoverId)) invalid("停留城市須與出發地、目的地不同。");
+    if (overlaps(payload.departureId, payload.stopoverId) || overlaps(payload.arrivalId, payload.stopoverId)) invalid("停留城市須與出發地、目的地不同。");
     payload.stopoverMinNights = integer(payload.stopoverMinNights, 2, 1, 30, "停留夜數");
     payload.stopoverMaxNights = integer(payload.stopoverMaxNights, 5, payload.stopoverMinNights, 30, "停留夜數上限");
     payload.includeReturn = payload.includeReturn === true;
@@ -56,7 +72,7 @@ export function validateFlightPreferences(input) {
   }
   if (payload.comparisonPlan) {
     const plan = payload.comparisonPlan;
-    if (!validDate(plan.date) || plan.date !== payload.startDate) invalid("艙等比較日期不正確。");
+    if (!validDate(plan.date) || plan.date !== payload.startDate || (payload.fixedDepartureDate && plan.date !== payload.fixedDepartureDate)) invalid("艙等比較日期不正確。");
     for (const key of ["secondDate", "thirdDate"]) {
       if (plan[key] && (!validDate(plan[key]) || dateDifference(plan.date, plan[key]) < 1 || dateDifference(plan.date, plan[key]) > 65)) invalid("多城市比較日期不正確。");
     }
@@ -68,7 +84,7 @@ export function validateFlightPreferences(input) {
 }
 
 export function hasFlightPreferences(p) {
-  return p.departureId?.includes(",") || p.journeyType === "multicity" || p.excludedAirlines?.length || p.excludedAircraft?.length
+  return p.departureId?.includes(",") || p.arrivalId?.includes(",") || p.dateConstraint !== "flexible" || p.journeyType === "multicity" || p.excludedAirlines?.length || p.excludedAircraft?.length
     || p.departureTimeFrom || p.departureTimeTo || p.arrivalTimeFrom || p.arrivalTimeTo
     || p.airlineType !== "all" || p.routeType !== "any";
 }
@@ -139,34 +155,56 @@ export function flightPreferenceKey(p) {
 export function makeJourneyPlans(p, startDate, endDate, tracking = false) {
   if (p.comparisonPlan && !tracking) return [p.comparisonPlan];
   const multi = p.journeyType === "multicity";
+  const anchor = (plan) => {
+    if (p.fixedReturnDate && multi) return { ...plan, date: p.fixedDepartureDate || addDateDays(p.fixedReturnDate, -plan.nights - plan.destinationNights), thirdDate: p.fixedReturnDate };
+    return plan;
+  };
   const dates = [startDate, endDate].filter((date, index, all) => all.indexOf(date) === index);
   const stays = multi ? [...new Set([p.stopoverMinNights, p.stopoverMaxNights])] : [0];
   const plans = [];
   for (const date of dates) {
     for (const nights of stays) {
       const destinations = multi && p.includeReturn ? [...new Set([p.destinationMinNights, p.destinationMaxNights])] : [0];
-      for (const destinationNights of destinations) plans.push({ date, nights, destinationNights });
+      for (const destinationNights of destinations) plans.push(anchor({ date, nights, destinationNights }));
     }
   }
   if (tracking) {
     const day = Math.floor(Date.now() / DAY);
     const offset = day % (dateDifference(startDate, endDate) + 1);
-    return [{ date: addDateDays(startDate, offset), nights: multi ? p.stopoverMinNights + day % (p.stopoverMaxNights - p.stopoverMinNights + 1) : 0,
-      destinationNights: multi && p.includeReturn ? p.destinationMinNights + Math.floor(day / (p.stopoverMaxNights - p.stopoverMinNights + 1)) % (p.destinationMaxNights - p.destinationMinNights + 1) : 0 }];
+    return [anchor({ date: addDateDays(startDate, offset), nights: multi ? p.stopoverMinNights + day % (p.stopoverMaxNights - p.stopoverMinNights + 1) : 0,
+      destinationNights: multi && p.includeReturn ? p.destinationMinNights + Math.floor(day / (p.stopoverMaxNights - p.stopoverMinNights + 1)) % (p.destinationMaxNights - p.destinationMinNights + 1) : 0 })];
   }
   if (plans.length <= 4) return plans;
   return [0, Math.round((plans.length - 1) / 3), Math.round((plans.length - 1) * 2 / 3), plans.length - 1].map((index) => plans[index]);
 }
 
+export function flightDateRange(p, today) {
+  if (p.fixedDepartureDate) return { startDate: p.fixedDepartureDate, endDate: p.fixedDepartureDate };
+  if (p.fixedReturnDate) {
+    const days = p.journeyType === "multicity" ? p.stopoverMinNights + p.destinationMinNights : p.tripDays;
+    const date = addDateDays(p.fixedReturnDate, -days);
+    if (date < today) invalid("固定回程日與旅行天數會使出發日落在過去，請縮短天數。");
+    return { startDate: date, endDate: date };
+  }
+  const annual = p.flightMode !== "date_window";
+  const requestedStart = annual ? addDateDays(today, 14) : p.startDate;
+  const allowance = p.journeyType === "multicity" ? p.stopoverMaxNights + (p.includeReturn ? p.destinationMaxNights : 0) + 2 : p.tripDays;
+  const endDate = annual ? addDateDays(today, 330 - allowance) : addDateDays(requestedStart, p.lookaheadDays);
+  if (endDate < today) invalid("搜尋日期區間已過期，請更新日期。");
+  return { startDate: requestedStart < today ? today : requestedStart, endDate };
+}
+
 // Follow selection tokens: each quote is a whole itinerary total, never a sum of leg totals.
 export async function searchCompleteJourney(p, plan, cabin, search, normalize, lowCostCodes, retry = false) {
   const multi = p.journeyType === "multicity";
+  if (plan.date < new Date().toISOString().slice(0, 10) || (p.fixedDepartureDate && plan.date !== p.fixedDepartureDate)) return null;
   const legs = multi
     ? [{ departure_id: p.departureId, arrival_id: p.stopoverId, date: plan.date },
       { departure_id: p.stopoverId, arrival_id: p.arrivalId, date: plan.secondDate || addDateDays(plan.date, plan.nights) }]
     : [{ departure_id: p.departureId, arrival_id: p.arrivalId, date: plan.date }];
-  if (multi && p.includeReturn) legs.push({ departure_id: p.arrivalId, arrival_id: p.departureId, date: plan.thirdDate || addDateDays(legs[1].date, plan.destinationNights) });
-  if (!multi && p.tripDays > 0) legs.push({ departure_id: p.arrivalId, arrival_id: p.departureId, date: addDateDays(plan.date, p.tripDays) });
+  if (multi && p.includeReturn) legs.push({ departure_id: p.arrivalId, arrival_id: p.departureId, date: p.fixedReturnDate || plan.thirdDate || addDateDays(legs[1].date, plan.destinationNights) });
+  if (!multi && p.tripDays > 0) legs.push({ departure_id: p.arrivalId, arrival_id: p.departureId, date: p.fixedReturnDate || addDateDays(plan.date, p.tripDays) });
+  if (legs.some((leg, i) => i > 0 && leg.date <= legs[i - 1].date)) return null;
   const filters = providerFlightFilters(p, lowCostCodes);
   const params = { engine: "google_flights", currency: p.currency || "TWD", hl: (p.locale || "zh-TW").toLowerCase(),
     gl: (p.market || "TW").toLowerCase(), travel_class: cabin.code, sort_by: "2", ...filters,
@@ -203,8 +241,13 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     if (!best) return null;
     if (multi && !p.lockDates && i < legs.length - 1) {
       const nextDate = addDateDays(best.arrival.slice(0, 10), i === 0 ? plan.nights : plan.destinationNights);
-      if (nextDate !== legs[i + 1].date) {
+      if (nextDate !== legs[i + 1].date && !(i === 1 && p.fixedDepartureDate && p.fixedReturnDate)) {
         if (retry >= 2) return null;
+        if (i === 1 && p.fixedReturnDate) {
+          const offset = dateDifference(nextDate, p.fixedReturnDate);
+          const date = addDateDays(plan.date, offset);
+          return searchCompleteJourney(p, { ...plan, date, secondDate: addDateDays(legs[1].date, offset), thirdDate: p.fixedReturnDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1);
+        }
         return searchCompleteJourney(p, { ...plan, [i === 0 ? "secondDate" : "thirdDate"]: nextDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1);
       }
     }
@@ -218,9 +261,11 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const returnDate = legs.length > 1 && (!multi || p.includeReturn) ? legs.at(-1).date : "";
   const route = multi ? [first.departureAirport, ...selected.map((leg) => leg.arrivalAirport)].join(" → ") : `${first.departureAirport} → ${first.arrivalAirport}`;
   const differentReturnAirport = Boolean(returnDate) && selected.at(-1).arrivalAirport !== first.departureAirport;
+  const airportChanges = selected.slice(1).flatMap((leg, index) => selected[index].arrivalAirport === leg.departureAirport ? []
+    : [{ arrivalAirport: selected[index].arrivalAirport, departureAirport: leg.departureAirport }]);
   const duration = selected.reduce((total, item) => total + item.duration, 0);
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
-    title: route, price: best.price, priceText: best.priceText, departureToken: undefined, differentReturnAirport,
+    title: route, price: best.price, priceText: best.priceText, departureToken: undefined, differentReturnAirport, airportChanges,
     departureDate: plan.date, returnDate, tripDays: returnDate ? dateDifference(plan.date, returnDate) : 0,
     journeyType: multi ? "multicity" : "simple", itineraryComplete: true, legs: selected.map(({ departureToken, ...leg }) => leg),
     segments: allSegments, duration, stops: selected.reduce((total, item) => total + item.stops, 0),

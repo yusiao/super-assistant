@@ -11,7 +11,7 @@
     <title>航班助手</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=15" />
+    <link rel="stylesheet" href="./styles.css?v=16" />
   </head>
   <body>
     <main class="app-shell">
@@ -44,7 +44,20 @@
               <label><input type="radio" name="journeyType" value="multicity" /><span>多城市停留</span></label>
             </div>
           </fieldset>
-          <div class="mode-switch" aria-label="機票搜尋模式">
+          <label>
+            <span>日期條件</span>
+            <select name="dateConstraint">
+              <option value="flexible">彈性日期</option>
+              <option value="departure">固定出發日</option>
+              <option value="return">固定回程日</option>
+              <option value="both">固定去回日期</option>
+            </select>
+          </label>
+          <div class="field-row" id="fixedFlightFields" hidden>
+            <label id="fixedDepartureField" hidden><span>出發起飛日（當地）</span><input name="fixedDepartureDate" type="date" disabled /></label>
+            <label id="fixedReturnField" hidden><span>回程起飛日（當地）</span><input name="fixedReturnDate" type="date" disabled /></label>
+          </div>
+          <div class="mode-switch" id="flexibleModeSwitch" aria-label="機票搜尋模式">
             <button class="mode-button active" data-flight-mode="annual_low" type="button">全年低價探索</button>
             <button class="mode-button" data-flight-mode="date_window" type="button">日期區間</button>
           </div>
@@ -52,14 +65,14 @@
             <label>
               <span>出發地</span>
               <div class="place-combobox">
-                <input name="departureId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="departure" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="departurePlaceOptions" />
+                <input name="departureId" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="輸入兩字即可" required data-place-input="departure" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="departurePlaceOptions" />
                 <div class="place-options" id="departurePlaceOptions" role="listbox" hidden></div>
               </div>
             </label>
             <label>
               <span>目的地</span>
               <div class="place-combobox">
-                <input name="arrivalId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="arrival" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="arrivalPlaceOptions" />
+                <input name="arrivalId" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="輸入兩字即可" required data-place-input="arrival" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="arrivalPlaceOptions" />
                 <div class="place-options" id="arrivalPlaceOptions" role="listbox" hidden></div>
               </div>
             </label>
@@ -69,7 +82,7 @@
             <label>
               <span>停留機場</span>
               <div class="place-combobox">
-                <input name="stopoverId" autocomplete="off" placeholder="輸入兩字即可" required data-place-input="stopover" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stopoverPlaceOptions" />
+                <input name="stopoverId" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="輸入兩字即可" required data-place-input="stopover" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stopoverPlaceOptions" />
                 <div class="place-options" id="stopoverPlaceOptions" role="listbox" hidden></div>
               </div>
             </label>
@@ -250,6 +263,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=15" type="module"></script>
+    <script src="./app.js?v=16" type="module"></script>
   </body>
 </html>

@@ -1,5 +1,9 @@
 import { validateFlightPreferences, hasFlightPreferences, matchesFlightPreferences, flightPreferenceKey,
-  makeJourneyPlans, searchCompleteJourney } from "./flight-planner.js";
+  makeJourneyPlans, searchCompleteJourney, flightDateRange, addDateDays } from "./flight-planner.js";
+import airportData from "../output/bazi-ziwei/price-watch/airports-data.json" with { type: "json" };
+import { buildAirportDirectory, searchAirports } from "../output/bazi-ziwei/price-watch/airports.js";
+
+const AIRPORT_DIRECTORY = buildAirportDirectory(airportData.airports);
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -369,11 +373,7 @@ async function serpApiSampledFlightSearch(input, env) {
   const payload = validateFlightPreferences(input);
   const today = new Date().toISOString().slice(0, 10);
   const mode = payload.flightMode || "annual_low";
-  const requestedStart = mode === "annual_low" ? addDays(today, 14) : payload.startDate;
-  const startDate = requestedStart < today ? today : requestedStart;
-  const tripAllowance = payload.journeyType === "multicity" ? payload.stopoverMaxNights + (payload.includeReturn ? payload.destinationMaxNights : 0) + 2 : payload.tripDays;
-  const endDate = mode === "annual_low" ? addDays(today, 330 - tripAllowance) : addDays(requestedStart, payload.lookaheadDays);
-  if (endDate < today) { const error = new Error("搜尋日期區間已過期，請更新日期。"); error.status = 400; throw error; }
+  const { startDate, endDate } = flightDateRange(payload, today);
   const currency = currencyLabel(payload.currency);
   payload.currency = currency;
   const tracking = payload.trackingSample === true;
@@ -390,9 +390,9 @@ async function serpApiSampledFlightSearch(input, env) {
   const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
   const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan)) => {
     const result = await searchCompleteJourney({ ...payload, tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
-    if (result && !multi && !result.differentReturnAirport) result.purchaseLinks = flightPurchaseLinks({ ...payload,
+    if (result && !multi && !result.differentReturnAirport && !result.airportChanges.length) result.purchaseLinks = flightPurchaseLinks({ ...payload,
       departureId: result.departureAirport, arrivalId: result.arrivalAirport, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
-    if (result && !multi && result.differentReturnAirport) result.purchaseLinks.push(
+    if (result && !multi && (result.differentReturnAirport || result.airportChanges.length)) result.purchaseLinks.push(
       { kind: "google", label: "Google Flights 實際行程", url: result.link },
       { kind: "custom", label: "Skyscanner（自訂行程）", url: "https://www.skyscanner.com.tw/transport/flights/" },
     );
@@ -411,7 +411,8 @@ async function serpApiSampledFlightSearch(input, env) {
     ? nearbyTripDayOptions(payload.tripDays, 2).filter((days) => days !== payload.tripDays) : [];
   if (tracking && alternatives.length) alternatives = [alternatives[Math.floor(Date.now() / 86400000) % alternatives.length]];
   const durationSearches = await Promise.allSettled(alternatives.map(async (days) => {
-    const result = await run(reference?.plan || plans[0], primaryCabin, days);
+    const plan = reference?.plan || plans[0];
+    const result = await run(payload.fixedReturnDate ? { ...plan, date: addDateDays(payload.fixedReturnDate, -days) } : plan, primaryCabin, days);
     if (!result) return null;
     const savings = reference ? reference.price - result.price : null;
     return { ...result, requestedTripDays: payload.tripDays, isAlternativeDuration: true, savings,
@@ -491,8 +492,8 @@ async function recordFlightYearHistory(env, key, records, stats, observedDate) {
 async function skyscannerIndicativeSearch(payload, env) {
   const apiKey = envValue(env, "SKYSCANNER_API_KEY");
   if (!apiKey) throw new Error("SKYSCANNER_API_KEY is not set.");
-  const departureId = compact(payload.departureId, "", 8).toUpperCase();
-  const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+  const departureId = payload.departureId;
+  const arrivalId = payload.arrivalId;
   const mode = compact(payload.flightMode, "annual_low", 24);
   const today = new Date().toISOString().slice(0, 10);
   const startDate = mode === "annual_low" ? today : isoDate(payload.startDate, today);
@@ -889,8 +890,8 @@ function normalizeFlightResults(data, payload, currency) {
 
 function flightWatchFromPayload(payload, env) {
   payload = validateFlightPreferences(payload);
-  const departureId = compact(payload.departureId, "", 8).toUpperCase();
-  const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+  const departureId = payload.departureId;
+  const arrivalId = payload.arrivalId;
   const mode = compact(payload.flightMode, "annual_low", 24);
   const startDate = isoDate(payload.startDate, "");
   const tripDays = Math.max(0, Math.min(Number(payload.tripDays || 0), 60));
@@ -931,7 +932,7 @@ function flightWatchFromPayload(payload, env) {
   };
   return {
     enabled: true,
-    id: safeId(payload.id || `${departureId}-${arrivalId}-${mode}-${startDate}-${tripDays}-${cabin.key}`, "flight"),
+    id: safeId(payload.id || `${departureId}-${arrivalId}-${payload.dateConstraint}-${payload.fixedDepartureDate}-${payload.fixedReturnDate}-${mode}-${startDate}-${tripDays}-${cabin.key}`, "flight"),
     type: "flight",
     name: name.endsWith(cabin.label) ? name : `${name} ${cabin.label}`,
     currency,
@@ -1006,14 +1007,14 @@ async function handlePriceWatchSearch(request, env) {
   const currency = currencyLabel(payload.currency);
 
   if (type === "flight") {
-    const departureId = compact(payload.departureId, "", 8).toUpperCase();
-    const arrivalId = compact(payload.arrivalId, "", 8).toUpperCase();
+    const departureId = payload.departureId;
+    const arrivalId = payload.arrivalId;
     const flightMode = compact(payload.flightMode, "annual_low", 24);
     const startDate = isoDate(payload.startDate, "");
-    if (!departureId || !arrivalId || (flightMode === "date_window" && !startDate)) {
+    if (!departureId || !arrivalId || (payload.dateConstraint === "flexible" && flightMode === "date_window" && !startDate)) {
       return json(400, { error: "departureId, arrivalId and a valid startDate for date_window are required." });
     }
-    if (flightMode === "annual_low" || flightMode === "date_window") {
+    if (flightMode === "annual_low" || flightMode === "date_window" || payload.dateConstraint !== "flexible") {
       if (!envValue(env, "SERPAPI_API_KEY") && hasFlightPreferences(payload)) {
         return json(503, { error: "進階行程與篩選需要 SerpApi，目前尚未連線。" });
       }
@@ -1070,6 +1071,9 @@ async function handlePriceWatchPlaces(request, env) {
   if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
   const payload = await request.json().catch(() => ({}));
   const query = compact(payload.query, "", 80);
+  if (!query) return json(200, { places: [], source: "global_directory", count: 0 });
+  const directory = searchAirports(AIRPORT_DIRECTORY, query);
+  if (directory.length) return json(200, { places: directory.map(({ searchText, prefixText, ...place }) => place), source: "global_directory", count: directory.length });
   const isIataPrefix = /^[A-Za-z]{1,3}$/.test(query);
   let places;
   let source = "autocomplete";

@@ -36,7 +36,8 @@ class PriceWatchTests(unittest.TestCase):
 
     def test_planner_tracking_preserves_filters_and_ignores_incomplete_quotes(self) -> None:
         planner = {"departureId": "TPE,TSA", "arrivalId": "LAX", "stopoverId": "NRT", "journeyType": "multicity",
-                   "excludedAircraft": ["737 MAX"], "excludedAirlines": ["CI"], "departureTimeFrom": "08:30"}
+                   "excludedAircraft": ["737 MAX"], "excludedAirlines": ["CI"], "departureTimeFrom": "08:30",
+                   "dateConstraint": "both", "fixedDepartureDate": "2027-01-01", "fixedReturnDate": "2027-01-08"}
         config = {"PRICE_WATCH_REMOTE_URL": "https://example.com/api/price-watch/watches", "PRICE_WATCH_ACCESS_TOKEN": "test"}
         quoted = {"price": 10000, "currency": "TWD", "itineraryComplete": True, "stopoverNights": 3,
                   "legs": [{"departureAirport": "TPE", "arrivalAirport": "NRT", "departure": "2027-01-01 09:00"}]}
@@ -49,6 +50,9 @@ class PriceWatchTests(unittest.TestCase):
         self.assertEqual(sent["departureId"], "TPE,TSA")
         self.assertEqual(sent["excludedAircraft"], ["737 MAX"])
         self.assertEqual(sent["departureTimeFrom"], "08:30")
+        self.assertEqual(sent["dateConstraint"], "both")
+        self.assertEqual(sent["fixedDepartureDate"], "2027-01-01")
+        self.assertEqual(sent["fixedReturnDate"], "2027-01-08")
         self.assertTrue(sent["trackingSample"])
         self.assertEqual(request.call_args.args[0], "https://example.com/api/price-watch/search")
         self.assertEqual(planner.get("trackingSample"), None)

@@ -3,6 +3,8 @@ import test from "node:test";
 import { timingSafeEqual } from "node:crypto";
 import worker from "../../workers/bazi-ziwei.js";
 import { addDateDays, validateFlightPreferences, providerFlightFilters, matchesFlightPreferences, makeJourneyPlans } from "../../workers/flight-planner.js";
+import airportData from "../../output/bazi-ziwei/price-watch/airports-data.json" with { type: "json" };
+import { buildAirportDirectory, searchAirports, normalizeAirportCodes } from "../../output/bazi-ziwei/price-watch/airports.js";
 
 crypto.subtle.timingSafeEqual = timingSafeEqual;
 const date = addDateDays(new Date().toISOString().slice(0, 10), 20);
@@ -99,15 +101,131 @@ test("Taipei group supports different return airports without misleading purchas
   } finally { h.restore(); }
 });
 
-test("Taipei group rejects overlapping airports, unrelated groups and wrong-airport results", async () => {
+test("airport groups reject overlap, malformed codes and wrong-airport results", async () => {
   const h = harness((data) => { data.best_flights[0].flights[0].departure_airport.id = "KHH"; return data; });
   try {
     for (const payload of [{ ...base, departureId: "TPE,TSA", arrivalId: "TSA" },
-      { ...multi, departureId: "TPE,TSA", stopoverId: "TPE" }, { ...base, departureId: "TPE,KHH" }]) {
+      { ...multi, departureId: "TPE,TSA", stopoverId: "TPE" }, { ...base, departureId: "TPE,not-an-airport" },
+      { ...base, departureId: "JFK,LGA,EWR", arrivalId: "LAX,JFK" }, { ...multi, stopoverId: "NRT,LAX" },
+      { ...base, arrivalId: "LHR,LGW,LTN,LCY,STN,SEN,CDG" }]) {
       assert.equal((await h.request(payload)).status, 400);
     }
     assert.equal(h.calls.length, 0);
     assert.equal((await h.request({ ...base, departureId: "TPE,TSA" })).data.results.length, 0);
+  } finally { h.restore(); }
+});
+
+test("global airport directory supports case, countries, city groups and accents without paid calls", async () => {
+  const directory = buildAirportDirectory(airportData.airports);
+  assert.ok(airportData.airports.length > 8000);
+  for (const code of ["lHr", "cDg", "Nrt", "cPt", "SYD", "sCl", "jFk"]) {
+    assert.equal(searchAirports(directory, code)[0].iataCode, code.toUpperCase());
+  }
+  assert.deepEqual(searchAirports(directory, "t").map((a) => a.iataCode), searchAirports(directory, "T").map((a) => a.iataCode));
+  for (const [query, codes] of [["東京", "HND,NRT"], ["LoNDoN", "LCY,LGW,LHR,LTN,SEN,STN"], ["巴黎", "CDG,ORY"], ["New York", "EWR,JFK,LGA"]]) {
+    assert.ok(searchAirports(directory, query).some((a) => a.group && a.iataCode === codes), query);
+  }
+  assert.ok(searchAirports(directory, "巴西").some((a) => a.iataCode === "GRU"));
+  assert.ok(searchAirports(directory, "zürich").some((a) => a.iataCode === "ZRH"));
+  assert.equal(normalizeAirportCodes(" tsA, tpe,TSA "), "TPE,TSA");
+  assert.equal(normalizeAirportCodes("TPE,foo!"), "");
+  const h = harness();
+  try {
+    const result = await h.request({ query: "Paris" }, "places");
+    assert.equal(result.status, 200);
+    assert.ok(result.data.places.some((a) => a.iataCode === "CDG,ORY"));
+    assert.equal(h.calls.length, 0);
+  } finally { h.restore(); }
+});
+
+test("international airport groups work in all three roles and persist without truncation", async () => {
+  const h = harness();
+  try {
+    const payload = { ...multi, departureId: "stn, lhr, LGW,lcY,ltn,sen", stopoverId: "hNd,nRt", arrivalId: "jfk,ewr,lga" };
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.ok(data.results.length);
+    const legs = JSON.parse(h.calls[0].multi_city_json);
+    assert.equal(legs[0].departure_id, "LCY,LGW,LHR,LTN,SEN,STN");
+    assert.equal(legs[0].arrival_id, "HND,NRT");
+    assert.equal(legs[1].arrival_id, "EWR,JFK,LGA");
+    const saved = await h.request(payload, "watches");
+    assert.equal(saved.data.watch.sources[0].departure_id, "LCY,LGW,LHR,LTN,SEN,STN");
+    assert.equal(saved.data.watch.sources[0].planner.stopoverId, "HND,NRT");
+  } finally { h.restore(); }
+});
+
+test("fixed departure preserves departure across cabins, duration alternatives and tracking", async () => {
+  const h = harness();
+  try {
+    const payload = { ...base, startDate: "", dateConstraint: "departure", fixedDepartureDate: date, tripDays: 5, compareDurations: true };
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.ok(data.results.length);
+    assert.equal(data.insights.durationAlternatives.length, 4);
+    assert.ok(h.calls.every((p) => p.outbound_date === date));
+    assert.ok(new Set(h.calls.map((p) => p.return_date)).size > 1);
+    const saved = await h.request(payload, "watches");
+    assert.equal(saved.data.watch.sources[0].planner.fixedDepartureDate, date);
+    const tracked = await h.request({ ...saved.data.watch.sources[0].planner, trackingSample: true });
+    assert.ok(tracked.data.results.every((r) => r.departureDate === date));
+  } finally { h.restore(); }
+});
+
+test("fixed return varies outbound only and both dates disable duration changes", async () => {
+  const h = harness();
+  try {
+    const returnDate = addDateDays(date, 5);
+    const { status, data } = await h.request({ ...base, dateConstraint: "return", fixedReturnDate: returnDate, tripDays: 5, compareDurations: true });
+    assert.equal(status, 200);
+    assert.equal(data.results[0].departureDate, date);
+    assert.equal(data.insights.durationAlternatives.length, 4);
+    assert.ok(h.calls.every((p) => p.return_date === returnDate));
+    assert.ok(new Set(h.calls.map((p) => p.outbound_date)).size > 1);
+    const both = await h.request({ ...base, dateConstraint: "both", fixedDepartureDate: date, fixedReturnDate: returnDate, tripDays: 0, compareDurations: true });
+    assert.equal(both.data.tripDays, 5);
+    assert.equal(both.data.results[0].returnDate, returnDate);
+    assert.deepEqual(both.data.insights.durationAlternatives, []);
+  } finally { h.restore(); }
+});
+
+test("invalid, expired or one-way return constraints never spend provider quota", async () => {
+  const h = harness();
+  try {
+    for (const payload of [
+      { ...base, dateConstraint: "departure", fixedDepartureDate: "2026-02-30" },
+      { ...base, dateConstraint: "departure", fixedDepartureDate: "2020-01-01" },
+      { ...base, dateConstraint: "both", fixedDepartureDate: date, fixedReturnDate: date },
+      { ...base, dateConstraint: "return", fixedReturnDate: date },
+      { ...multi, dateConstraint: "return", fixedReturnDate: date },
+      { ...base, dateConstraint: "return", fixedReturnDate: addDateDays(new Date().toISOString().slice(0, 10), 1), tripDays: 5 },
+    ]) assert.equal((await h.request(payload)).status, 400);
+    assert.equal(h.calls.length, 0);
+  } finally { h.restore(); }
+});
+
+test("multi-city fixed return preserves last takeoff date and moves departure for overnight arrivals", async () => {
+  const h = harness((data, params, index) => {
+    if (index < 2) {
+      const leg = JSON.parse(params.multi_city_json)[index];
+      data.best_flights[0].flights[0].arrival_airport.time = `${addDateDays(leg.date, 1)} 06:00`;
+    }
+    return data;
+  });
+  try {
+    const returnDate = addDateDays(date, 7);
+    const payload = { ...multi, dateConstraint: "return", fixedReturnDate: returnDate, includeReturn: true, destinationMinNights: 3, destinationMaxNights: 3 };
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.ok(data.results.length);
+    assert.equal(data.results[0].returnDate, returnDate);
+    assert.equal(data.results[0].departureDate, date);
+    assert.equal(data.results[0].stopoverNights, 2);
+    assert.equal(data.results[0].destinationNights, 3);
+    assert.ok(h.calls.every((p) => JSON.parse(p.multi_city_json).at(-1).date === returnDate));
+    const both = await h.request({ ...payload, dateConstraint: "both", fixedDepartureDate: date });
+    assert.equal(both.data.results[0].departureDate, date);
+    assert.equal(both.data.results[0].returnDate, returnDate);
   } finally { h.restore(); }
 });
 
