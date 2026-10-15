@@ -563,7 +563,7 @@ async function compareCabins(item, card, button) {
 function setupJourneyFields() {
   const aircraft = ["737 MAX", "737", "747", "777", "787", "A320", "A321", "A330", "A350", "A380", "ATR", "DHC-8"];
   const airlines = [["BR", "長榮"], ["CI", "華航"], ["JX", "星宇"], ["IT", "台灣虎航"], ["TR", "酷航"], ["MM", "樂桃"],
-    ["CX", "國泰"], ["UO", "香港快運"], ["JL", "日本航空"], ["NH", "全日空"], ["KE", "大韓航空"], ["SQ", "新加坡航空"]];
+    ["CX", "國泰"], ["UO", "香港快運"], ["MU", "中國東方航空"], ["JL", "日本航空"], ["NH", "全日空"], ["KE", "大韓航空"], ["SQ", "新加坡航空"]];
   document.querySelector("#aircraftChoices").innerHTML = aircraft.map((model) => `<label class="check-option"><input type="checkbox" name="excludedAircraft" value="${model}" /><span>${model}</span></label>`).join("");
   document.querySelector("#airlineChoices").innerHTML = airlines.map(([code, name]) => `<label class="check-option"><input type="checkbox" name="excludedAirlines" value="${code}" /><span>${name} ${code}</span></label>`).join("");
   const update = () => {
@@ -1013,7 +1013,7 @@ function boot() {
   setFlightMode("annual_low");
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=13").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=14").catch(() => {});
   }
 }
 

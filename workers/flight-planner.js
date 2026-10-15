@@ -161,6 +161,7 @@ const airlineNames = {
   BR: /eva air|長榮/i, CI: /china airlines|中華航空|華航/i, JX: /starlux|星宇/i,
   IT: /tigerair taiwan|台灣虎航|臺灣虎航/i, TR: /scoot|酷航/i, MM: /peach|樂桃/i,
   CX: /cathay|國泰/i, UO: /hk express|hong kong express|香港快運/i,
+  MU: /china eastern|中國東方航空|中国东方航空|東航|东航/i,
   JL: /japan airlines|日本航空/i, NH: /all nippon|^ana$|全日空/i, KE: /korean air|大韓/i,
   SQ: /singapore airlines|新加坡航空/i, UA: /united airlines|聯合航空/i, BA: /british airways|英國航空/i, LH: /lufthansa|漢莎/i,
 };

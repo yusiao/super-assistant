@@ -90,6 +90,7 @@ try {
   await page.locator('.advanced-filters summary').click();
   await page.locator('[name="excludedAircraft"][value="737 MAX"]').check();
   await page.locator('[name="excludedAirlines"][value="CI"]').check();
+  await page.getByLabel('中國東方航空 MU', { exact: true }).check();
   await page.locator('.leg-schedules summary').click();
   await page.locator('[data-leg-role="outbound"] [data-window-field="departureTimeFrom"]').fill("08:30");
   await page.locator('[data-leg-role="outbound"] [data-window-field="departureTimeTo"]').fill("18:00");
@@ -110,6 +111,7 @@ try {
   await page.locator(".journey-details").first().waitFor();
   await page.waitForFunction(() => !document.querySelector("#flightSubmitButton").disabled);
   assert.deepEqual(lastSearch.excludedAircraft, ["737 MAX"]);
+  assert.deepEqual(lastSearch.excludedAirlines, ["CI", "MU"]);
   assert.equal(lastSearch.stopoverId, "NRT");
   assert.equal(lastSearch.departureId, "TPE,TSA");
   assert.equal(lastSearch.includeReturn, true);

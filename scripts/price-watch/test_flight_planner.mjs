@@ -258,6 +258,30 @@ test("filters every connection's aircraft and carrier; unknown aircraft are opt-
   assert.equal(matchesFlightPreferences({ segments: [{ ...segment, airplane: "" }] }, { ...p, allowUnknownAircraft: true }), true);
 });
 
+test("China Eastern is searchable by default and excluded by code or localized operating name", async () => {
+  const h = harness((data) => {
+    data.best_flights[0].flights[0].airline = "China Eastern";
+    data.best_flights[0].flights[0].flight_number = "MU 5008";
+    return data;
+  });
+  try {
+    for (const airlineType of ["all", "full_service"]) {
+      const { data } = await h.request({ ...base, airlineType });
+      assert.ok(data.results.length);
+      assert.equal(data.results[0].segments[0].flightNumber, "MU 5008");
+    }
+    const { data } = await h.request({ ...base, excludedAirlines: ["MU"] });
+    assert.equal(data.results.length, 0);
+    assert.ok(h.calls.some((params) => params.exclude_airlines?.split(",").includes("MU")));
+    const preferences = validateFlightPreferences({ ...base, excludedAirlines: ["MU"] });
+    for (const name of ["China Eastern Airlines", "中國東方航空", "中国东方航空", "東航", "东航"]) {
+      assert.equal(matchesFlightPreferences({ segments: [{ airline: name }] }, preferences), false);
+      assert.equal(matchesFlightPreferences({ segments: [{ flightNumber: "BR 123", operatingAirline: name }] }, preferences), false);
+    }
+    assert.equal(matchesFlightPreferences({ segments: [{ airline: "China Airlines", flightNumber: "CI 123" }] }, preferences), true);
+  } finally { h.restore(); }
+});
+
 test("time windows enforce exact local minutes, including overnight windows", () => {
   const p = validateFlightPreferences({ ...base, departureTimeFrom: "22:30", departureTimeTo: "06:00", arrivalTimeFrom: "08:00", arrivalTimeTo: "10:15" });
   const item = (dep, arr) => ({ segments: [{ departureTime: `${date} ${dep}`, arrivalTime: `${date} ${arr}` }] });
