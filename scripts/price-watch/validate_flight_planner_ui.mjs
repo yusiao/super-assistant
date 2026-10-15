@@ -40,7 +40,7 @@ globalThis.fetch = async (url) => {
     first.flight_number = "MU 5616";
     first.airline = "中國東方航空";
     first.arrival_airport = { id: "PVG", time: `${leg.date} 12:00` };
-    second.flight_number = "MU 5005";
+    second.flight_number = p.multi_city_json ? "MU 5007" : "MU 5005";
     second.airline = "中國東方航空";
     second.departure_airport = { id: "PVG", time: `${leg.date} 15:00` };
     second.arrival_airport.time = `${leg.date} 17:00`;
@@ -306,6 +306,14 @@ try {
   assert.equal(exampleResult.results[0].departureDate, '2027-01-06');
   assert.equal(exampleResult.results[1].departureDate, '2027-01-05');
   assert.deepEqual(lastSearch.legTimeWindows, exampleTrip.legTimeWindows);
+  assert.ok(exampleResult.results.every((r) => r.separateTickets && r.price === r.legs.reduce((sum, leg) => sum + leg.price, 0)));
+  assert.match(await page.locator('.result-card').first().innerText(), /分開購票組合，非一張聯程票/);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.locator('.result-card').first().scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-separate-${browserName}-${width}.png`) });
+  }
   const legQuote = page.locator('.result-card').first().locator('[data-leg-cabins="2"]');
   const quoteResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
   await legQuote.click();
@@ -319,6 +327,7 @@ try {
   await page.locator('.track-button').first().click();
   await page.locator('#statusText').filter({ hasText: '已加入雲端追蹤' }).waitFor();
   const exampleWatch = records.get('price-watch:watches').watches.at(-1).sources[0].planner;
+  assert.equal(exampleWatch.ticketMode, 'separate');
   assert.deepEqual(exampleWatch.legTimeWindows[2].flightNumbers, ['MU5616', 'MU5005']);
   assert.equal(exampleWatch.legTimeWindows[0].departureDateAlternative, '2027-01-06');
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.copiedTripLink = value; } } }));

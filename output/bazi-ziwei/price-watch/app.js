@@ -494,15 +494,17 @@ function resultCard(item) {
         </div>
       </div>
       <div class="price-block">
+        ${item.separateTickets ? '<span class="fare-note">分開購票合計</span>' : ""}
         <span class="cabin-tag">${escapeHtml(item.cabinLabel || "經濟艙")}</span>
         <div class="price">${escapeHtml(item.priceText || money(item.price, item.currency))}</div>
       </div>
     </div>
     ${flightDetails}
+    ${item.separateTickets ? '<p class="airport-change">分開購票組合，非一張聯程票。各段需分別購買；票價、行李與改退規則分開計算，跨票段不保證轉機保障。</p>' : ""}
     ${journeyDetails(item)}
     ${item.differentReturnAirport ? `<p class="airport-change">去回不同機場：${escapeHtml(item.departureAirport)} 出發，${escapeHtml(item.legs.at(-1).arrivalAirport)} 返回</p>` : ""}
     ${(item.airportChanges || []).map((change) => `<p class="airport-change">停留期間需自行更換機場：${escapeHtml(change.arrivalAirport)} → ${escapeHtml(change.departureAirport)}</p>`).join("")}
-    <div class="cabin-comparison">${item.legs?.length > 1 && item.cabinPrices ? '<p class="fare-note">整趟行程艙等總價</p>' : ""}${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
+    <div class="cabin-comparison">${item.legs?.length > 1 && item.cabinPrices ? `<p class="fare-note">${item.separateTickets ? "分開購票艙等加總" : "整趟行程艙等總價"}</p>` : ""}${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
     <p class="upgrade-status">里程升等：待確認票種與各航段升等名額</p>
     <div class="action-row flight-actions">
       ${purchaseActions}${!item.cabinPrices ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
@@ -526,6 +528,7 @@ function journeyDetails(item) {
       </div>`).join("")}
       ${item.journeyType === "multicity" && index === 0 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.stopoverNights)} 晚</p>` : ""}
       ${item.destinationNights != null && index === 1 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.destinationNights)} 晚</p>` : ""}
+      ${item.separateTickets ? `<p class="stay-label">此段 ${escapeHtml(leg.priceText || money(leg.price, item.currency))}</p><div class="action-row">${(leg.purchaseLinks || []).map((link) => `<a class="purchase-link" href="${safeUrl(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label || "此段購票")}</a>`).join("")}</div>` : ""}
       <button type="button" class="compare-button" data-leg-cabins="${index}">查此段艙等</button>
       <div class="leg-cabin-quotes" aria-live="polite"></div>
     </section>`).join("");
@@ -534,7 +537,7 @@ function journeyDetails(item) {
     ["BR", "長榮升等規則", "https://www.evaair.com/zh-tw/customer-services/faq/detail.html?FaqCategories=Award-Program"],
     ["CI", "華航升等規則", "https://www.china-airlines.com/au/zh/member/miles/redeem/cabin-upgrade.html"],
   ].filter(([code]) => codes.has(code)).map(([, label, url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`).join(" · ");
-  return `<details class="journey-details" ${item.journeyType === "multicity" ? "open" : ""}><summary>${item.legs.length} 段旅程・航班與機型</summary>${rows}<p class="fare-note">全行程報價；行李、分開開票及改退規則以購票頁為準。機型可能異動。${rules}</p></details>`;
+  return `<details class="journey-details" ${item.journeyType === "multicity" ? "open" : ""}><summary>${item.legs.length} 段旅程・航班與機型</summary>${rows}<p class="fare-note">${item.separateTickets ? "各段獨立報價加總，須分別確認可購買。" : "全行程報價；"}行李、開票及改退規則以購票頁為準。機型可能異動。${rules}</p></details>`;
 }
 
 function cabinComparisonHtml(prices, currency) {
@@ -656,11 +659,12 @@ async function compareCabins(item, card, button) {
     const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
       ...original, type: "flight", flightMode: "date_window", startDate: item.departureDate, lookaheadDays: 0,
       tripDays: item.tripDays, compareDurations: false, comparisonPlan: item.plan,
+      ticketMode: item.separateTickets ? "separate" : "auto",
     }) });
     const prices = response.insights?.cabinPrices;
     if (!response.results?.length) throw new Error("目前未取得相同日期的完整行程報價。");
     item.cabinPrices = prices;
-    card.querySelector(".cabin-comparison").innerHTML = `${item.legs?.length > 1 ? '<p class="fare-note">整趟行程艙等總價</p>' : ""}${cabinComparisonHtml(prices, item.currency)}`;
+    card.querySelector(".cabin-comparison").innerHTML = `${item.legs?.length > 1 ? `<p class="fare-note">${item.separateTickets ? "分開購票艙等加總" : "整趟行程艙等總價"}</p>` : ""}${cabinComparisonHtml(prices, item.currency)}`;
     button.remove();
   } catch (error) {
     button.disabled = false;
@@ -740,6 +744,7 @@ function renderCabinOverview(prices, currency = "TWD") {
     tile.className = `cabin-price ${cabin.available ? "" : "unavailable"}`.trim();
     tile.innerHTML = `
       <span>${escapeHtml(cabin.label)}</span>
+      ${cabin.separateTickets ? '<small>分開購票合計</small>' : ""}
       <strong>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</strong>
       <small>${cabin.departureDate ? `${escapeHtml(cabin.departureDate)} · ${escapeHtml(cabin.legs?.[0]?.departureAirport || "")} ${escapeHtml(cabin.airline || "航班")}` : "目前樣本無結果"}</small>
     `;
@@ -841,7 +846,7 @@ function renderActiveView() {
 }
 
 function watchFromResult(item) {
-  const flight = item.searchPayload || state.lastFlightPayload;
+  const flight = { ...(item.searchPayload || state.lastFlightPayload), ...(item.separateTickets ? { ticketMode: "separate" } : {}) };
   const placeLabel = (code) => airportDirectory.find((place) => place.group && place.iataCode === code)?.name || code;
   const originLabel = placeLabel(flight.departureId);
   const arrivalLabel = placeLabel(flight.arrivalId);
@@ -851,7 +856,7 @@ function watchFromResult(item) {
     type: "flight",
     id: stableId("flight", JSON.stringify({ ...flight, targetPrice: undefined, travelClass: item.travelClass || "1" })),
     name: flight.journeyType === "multicity"
-      ? `${originLabel} → ${placeLabel(flight.stopoverId)}（${flight.stopoverMinNights}–${flight.stopoverMaxNights} 晚）→ ${arrivalLabel}${flight.includeReturn ? ` → ${originLabel}` : ""} · ${modeLabel} · ${item.cabinLabel || "經濟艙"}`
+      ? `${originLabel} → ${placeLabel(flight.stopoverId)}（${flight.stopoverMinNights}–${flight.stopoverMaxNights} 晚）→ ${arrivalLabel}${flight.includeReturn ? ` → ${originLabel}` : ""} · ${modeLabel} · ${item.cabinLabel || "經濟艙"}${item.separateTickets ? " · 分開購票" : ""}`
       : `${originLabel} 到 ${arrivalLabel} ${modeLabel} · ${flight.tripDays ? `${flight.tripDays} 天${flight.dateConstraint === "both" ? "" : "為主"}` : "單程"} · ${item.cabinLabel || "經濟艙"}`,
     targetPrice: elements.flightForm.elements.targetPrice.value || item.price,
     travelClass: item.travelClass || "1",
@@ -1131,7 +1136,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=16").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=17").catch(() => {});
   }
 }
 

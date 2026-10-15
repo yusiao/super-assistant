@@ -453,9 +453,10 @@ def get_planned_flight_candidates(
             continue
         candidates.append({
             "watch_id": watch["id"], "item_type": "flight", "source_id": str(source.get("id") or "flight-planner"),
-            "source_name": "完整行程抽樣", "url": str(item.get("link") or ""), "title": str(watch.get("name") or item.get("title") or ""),
+            "source_name": "分開購票加總" if item.get("separateTickets") else "完整行程抽樣", "url": str(item.get("link") or ""), "title": str(watch.get("name") or item.get("title") or ""),
             "price": price, "currency": item.get("currency") or watch.get("currency", "TWD"), "available": True, "error": "",
             "raw": {"provider": "serpapi_google_flights_sampled", "sampled": True,
+                "separate_tickets": bool(item.get("separateTickets")),
                 "departure_date": item.get("departureDate"), "return_date": item.get("returnDate"),
                 "trip_days": item.get("tripDays", 0), "requested_trip_days": planner.get("tripDays", 0),
                 "is_alternative_duration": item.get("isAlternativeDuration", False), "duration_savings": item.get("savings"),
@@ -463,7 +464,8 @@ def get_planned_flight_candidates(
                 "range_start": data.get("startDate"), "range_end": data.get("endDate"),
                 "stopover_nights": item.get("stopoverNights"), "destination_nights": item.get("destinationNights"),
                 "legs": [{"from": leg.get("departureAirport"), "to": leg.get("arrivalAirport"),
-                    "departure": leg.get("departure"), "arrival": leg.get("arrival")} for leg in item.get("legs", [])],
+                    "departure": leg.get("departure"), "arrival": leg.get("arrival"), "price": leg.get("price"),
+                    "purchase_url": next((link.get("url") for link in leg.get("purchaseLinks", []) if link.get("url")), "")} for leg in item.get("legs", [])],
             },
         })
     if not candidates:
@@ -875,8 +877,14 @@ def build_alert_message(
         f"目前最低：{format_money(best['price'], currency)}（{best['source_name']}）",
     ]
     raw = best.get("raw") if isinstance(best.get("raw"), dict) else {}
+    if raw.get("separate_tickets"):
+        lines.append("分開購票加總，非一張聯程票；各段須分別確認票價、行李、改退與跨票段轉機保障。")
     for leg in raw.get("legs") or []:
         lines.append(f"航段：{leg.get('from')} → {leg.get('to')} {leg.get('departure')} / 抵達 {leg.get('arrival')}")
+        if raw.get("separate_tickets") and leg.get("price") is not None:
+            lines.append(f"此段：{format_money(leg['price'], currency)}")
+            if leg.get("purchase_url"):
+                lines.append(f"此段購票：{leg['purchase_url']}")
     if raw.get("stopover_nights") is not None:
         lines.append(f"途中停留：{raw['stopover_nights']} 晚")
     if raw.get("destination_nights") is not None:

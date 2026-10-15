@@ -64,6 +64,23 @@ class PriceWatchTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             price_watch.get_planned_flight_candidates({"id": "test"}, {"planner": {}}, {}, 1)
 
+    def test_separate_ticket_tracking_and_alert_preserve_price_basis(self) -> None:
+        config = {"PRICE_WATCH_REMOTE_URL": "https://example.com/api/price-watch/watches", "PRICE_WATCH_ACCESS_TOKEN": "test"}
+        quoted = {"price": 18000, "currency": "TWD", "itineraryComplete": True, "separateTickets": True,
+                  "legs": [{"departureAirport": "TPE", "arrivalAirport": "PVG", "departure": "2027-01-05 09:00",
+                            "arrival": "2027-01-05 11:00", "price": 8000, "purchaseLinks": [{"url": "https://example.com/ticket"}]}]}
+        with patch.object(price_watch, "post_json", return_value={"results": [quoted]}) as request:
+            results = price_watch.get_planned_flight_candidates({"id": "test"}, {"planner": {"ticketMode": "separate"}}, config, 1)
+        self.assertEqual(request.call_args.args[1]["ticketMode"], "separate")
+        best = results[0]
+        self.assertEqual(best["source_name"], "分開購票加總")
+        self.assertTrue(best["raw"]["separate_tickets"])
+        self.assertEqual(best["raw"]["legs"][0]["price"], 8000)
+        message = price_watch.build_alert_message({"name": "Trip"}, best, "target", 18000, None, None)
+        self.assertIn("非一張聯程票", message)
+        self.assertIn("https://example.com/ticket", message)
+        self.assertIn("8,000", message)
+
     def test_extract_price_from_twd_text(self) -> None:
         value = price_watch.extract_price("<html><body>售價 NT$18,900</body></html>")
         self.assertEqual(value, 18900.0)

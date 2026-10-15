@@ -90,6 +90,7 @@ function validateLegWindows(p) {
 
 export function validateFlightPreferences(input) {
   const payload = { ...input };
+  payload.ticketMode = payload.ticketMode === "separate" ? "separate" : "auto";
   for (const key of ["departureId", "arrivalId", ...(payload.journeyType === "multicity" ? ["stopoverId"] : [])]) {
     payload[key] = normalizeAirportCodes(payload[key]);
     if (!payload[key]) invalid("請選擇有效機場或城市機場組合（最多 6 個）。");
@@ -307,9 +308,10 @@ export function flightDateRange(p, today) {
   return { startDate: requestedStart < today ? today : requestedStart, endDate };
 }
 
-// Follow selection tokens: each quote is a whole itinerary total, never a sum of leg totals.
+// Selection-token quotes use the final whole-trip price; independent tickets explicitly sum leg quotes.
 export async function searchCompleteJourney(p, plan, cabin, search, normalize, lowCostCodes, retry = false) {
   const multi = p.journeyType === "multicity";
+  const separate = multi && p.ticketMode === "separate";
   if (plan.date < new Date().toISOString().slice(0, 10) || (p.fixedDepartureDate && plan.date !== p.fixedDepartureDate)) return null;
   const legs = multi
     ? [{ departure_id: p.departureId, arrival_id: p.stopoverId, date: plan.date },
@@ -363,21 +365,36 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   };
   let best;
   for (let i = 0; i < legs.length; i += 1) {
-    const data = await search(params);
+    let query = params;
+    if (separate) {
+      const singleFilters = { ...legFilters[i] };
+      if (carriers[i]) { delete singleFilters.exclude_airlines; singleFilters.include_airlines = carriers[i]; }
+      query = { engine: params.engine, currency: params.currency, hl: params.hl, gl: params.gl,
+        travel_class: cabin.code, sort_by: "2", ...singleFilters, type: "2",
+        departure_id: legs[i].departure_id, arrival_id: legs[i].arrival_id, outbound_date: legs[i].date };
+    }
+    const data = await search(query);
     const preferences = legPreferences(p, i);
     const candidates = normalize(data, { ...preferences, arrivalDate: "", departureId: legs[i].departure_id, arrivalId: legs[i].arrival_id,
       outboundDate: legs[i].date, returnDate: "", travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label }, p.currency || "TWD").results;
     const airportCandidates = candidates.filter((item) => {
       if (!legs[i].departure_id.split(",").includes(item.departureAirport) || !legs[i].arrival_id.split(",").includes(item.arrivalAirport)) return false;
       if (item.departure.slice(0, 10) !== legs[i].date || !validDate(item.arrival.slice(0, 10))) return false;
-      if (i < legs.length - 1 && !item.departureToken) return false;
+      if (!separate && i < legs.length - 1 && !item.departureToken) return false;
       return true;
     });
     const datedCandidates = airportCandidates.filter((item) => !preferences.arrivalDate || item.arrival.slice(0, 10) === preferences.arrivalDate);
     if (!datedCandidates.length && airportCandidates.length && preferences.arrivalDate) {
       return shiftDeparture(i, dateDifference(airportCandidates[0].arrival.slice(0, 10), preferences.arrivalDate));
     }
-    best = datedCandidates.find((item) => {
+    // Prefer candidates compatible with the next pinned day before selecting a cheap overnight flight.
+    const nextPinned = multi && i < legs.length - 1 && (p.lockDates || pinnedDeparture(i + 1));
+    const forwardCandidates = nextPinned ? datedCandidates.filter((item) => {
+      const nights = dateDifference(item.arrival.slice(0, 10), legs[i + 1].date);
+      return nights >= (i === 0 ? p.stopoverMinNights : p.destinationMinNights)
+        && nights <= (i === 0 ? p.stopoverMaxNights : p.destinationMaxNights);
+    }) : datedCandidates;
+    best = (forwardCandidates.length ? forwardCandidates : datedCandidates).find((item) => {
       if (!selected.length) return true;
       const previous = selected.at(-1);
       const nights = dateDifference(previous.arrival.slice(0, 10), item.departure.slice(0, 10));
@@ -405,7 +422,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
       }
     }
     selected.push(best);
-    params.departure_token = best.departureToken;
+    if (!separate) params.departure_token = best.departureToken;
   }
   const first = selected[0];
   const allSegments = selected.flatMap((item, legIndex) => item.segments.map((segment) => ({ ...segment, legIndex })));
@@ -417,14 +434,17 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const airportChanges = selected.slice(1).flatMap((leg, index) => selected[index].arrivalAirport === leg.departureAirport ? []
     : [{ arrivalAirport: selected[index].arrivalAirport, departureAirport: leg.departureAirport }]);
   const duration = selected.reduce((total, item) => total + item.duration, 0);
+  const price = separate ? selected.reduce((total, item) => total + item.price, 0) : best.price;
+  const priceText = separate ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
-    title: route, price: best.price, priceText: best.priceText, departureToken: undefined, differentReturnAirport, airportChanges,
+    title: route, price, priceText, departureToken: undefined, differentReturnAirport, airportChanges,
+    separateTickets: separate, priceBasis: separate ? "separate_ticket_sum" : "whole_itinerary_quote",
     departureDate: plan.date, returnDate, tripDays: returnDate ? dateDifference(plan.date, returnDate) : 0,
     journeyType: multi ? "multicity" : "simple", itineraryComplete: true, legs: selected.map(({ departureToken, ...leg }) => leg),
     segments: allSegments, duration, stops: selected.reduce((total, item) => total + item.stops, 0),
     travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: mixedCabin ? `${cabin.label}（含其他艙等）` : cabin.label, mixedCabin,
     airline: [...new Set(allSegments.map((s) => s.airline))].join(" / "),
-    plan, sampled: true, source: "Google Flights 完整行程抽樣",
+    plan, sampled: true, source: separate ? "Google Flights 分開購票組合" : "Google Flights 完整行程抽樣",
     stopoverNights: multi ? dateDifference(selected[0].arrival.slice(0, 10), selected[1].departure.slice(0, 10)) : null,
     destinationNights: multi && p.includeReturn ? dateDifference(selected[1].arrival.slice(0, 10), selected[2].departure.slice(0, 10)) : null,
     purchaseLinks: multi

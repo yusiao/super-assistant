@@ -561,10 +561,107 @@ test("return-leg exclusion cannot produce a matching round trip", async () => {
   } finally { h.restore(); }
 });
 
-test("missing next-leg tokens and incomplete itineraries never appear as complete", async () => {
+test("missing selection tokens fall back to explicitly priced independent tickets", async () => {
   const h = harness((data) => { delete data.best_flights[0].departure_token; return data; });
-  try { assert.equal((await h.request(multi)).data.results.length, 0); }
+  try {
+    const { data } = await h.request(multi);
+    assert.equal(data.results.length, 1);
+    assert.equal(data.results[0].separateTickets, true);
+    assert.equal(data.results[0].priceBasis, "separate_ticket_sum");
+    assert.equal(data.results[0].price, 18000);
+    assert.ok(data.results[0].legs.every((leg) => leg.purchaseLinks.length));
+  }
   finally { h.restore(); }
+});
+
+test("independent fallback never totals an incomplete journey or hides provider failure", async () => {
+  for (const fail of [false, true]) {
+    const h = harness((data, params) => {
+      if (fail) throw new Error("Provider unavailable");
+      if (params.type === "3" || params.departure_id === "NRT") return { best_flights: [] };
+      return data;
+    });
+    try {
+      const { status, data } = await h.request(multi);
+      if (fail) {
+        assert.notEqual(status, 200);
+        assert.ok(h.calls.every((p) => p.type === "3"));
+      } else {
+        assert.equal(status, 200);
+        assert.deepEqual(data.results, []);
+      }
+    } finally { h.restore(); }
+  }
+});
+
+test("automatic separate-ticket fallback preserves both departure dates, deadline, fixed flights and cabin sums", async () => {
+  const payload = { ...multi, departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB", includeReturn: true,
+    stopoverMinNights: 3, stopoverMaxNights: 4, destinationMinNights: 7, destinationMaxNights: 7,
+    legTimeWindows: [
+      { departureDate: "2027-01-05", departureDateAlternative: "2027-01-06" },
+      { departureDate: "2027-01-09", arrivalDate: "2027-01-09", arrivalTimeTo: "19:30" },
+      { departureDate: "2027-01-16", flightNumbers: "MU5616, MU5005" },
+    ] };
+  const h = harness((data, params, index) => {
+    if (params.type === "3" && index === 2) return { best_flights: [] };
+    const item = data.best_flights[0];
+    const flight = item.flights[0];
+    const departure = flight.departure_airport.id;
+    if (departure === "TPE" && flight.departure_airport.time.startsWith("2027-01-05")) item.price += 1500;
+    if (departure === "TPE" && flight.departure_airport.time.startsWith("2027-01-06")) {
+      const overnight = structuredClone(item);
+      overnight.price = 1;
+      overnight.flights[0].arrival_airport.time = "2027-01-07 06:00";
+      data.best_flights.unshift(overnight);
+    }
+    if (departure === "PVG") {
+      flight.arrival_airport.time = "2027-01-09 19:30";
+      const late = structuredClone(item);
+      late.price = 1;
+      late.flights[0].arrival_airport.time = "2027-01-09 19:31";
+      data.best_flights.unshift(late);
+    }
+    if (departure === "HRB") {
+      const onward = structuredClone(flight);
+      flight.flight_number = "MU 5616";
+      flight.airline = "China Eastern";
+      flight.arrival_airport = { id: "PVG", time: "2027-01-16 12:00" };
+      onward.flight_number = "MU 5005";
+      onward.airline = "China Eastern";
+      onward.departure_airport = { id: "PVG", time: "2027-01-16 15:00" };
+      onward.arrival_airport.time = "2027-01-16 17:00";
+      item.flights.push(onward);
+      const wrong = structuredClone(item);
+      wrong.price = 1;
+      wrong.flights[1].flight_number = "MU 5007";
+      data.best_flights.unshift(wrong);
+    }
+    return data;
+  });
+  try {
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.deepEqual(data.results.map((r) => r.departureDate), ["2027-01-06", "2027-01-05"]);
+    for (const result of data.results) {
+      assert.equal(result.separateTickets, true);
+      assert.equal(result.itineraryComplete, true);
+      assert.equal(result.legs.length, 3);
+      assert.equal(result.price, result.legs.reduce((sum, leg) => sum + leg.price, 0));
+      assert.equal(result.legs[1].arrival, "2027-01-09 19:30");
+      assert.deepEqual(result.legs[2].segments.map((s) => s.flightNumber), ["MU 5616", "MU 5005"]);
+    }
+    assert.equal(data.results[0].price, 27000);
+    assert.ok(data.insights.cabinPrices.every((c) => c.available && c.separateTickets && c.price === c.legs.reduce((sum, leg) => sum + leg.price, 0)));
+    assert.ok(h.calls.length <= 24);
+    assert.equal(h.calls.filter((p) => p.type === "2" && p.departure_id === "HRB" && p.travel_class === "1").length, 1);
+    const saved = await h.request({ ...payload, ticketMode: "separate" }, "watches");
+    const planner = saved.data.watch.sources[0].planner;
+    assert.equal(planner.ticketMode, "separate");
+    const before = h.calls.length;
+    const tracked = await h.request({ ...planner, trackingSample: true });
+    assert.equal(tracked.data.results[0].separateTickets, true);
+    assert.ok(h.calls.slice(before).every((p) => p.type === "2"));
+  } finally { h.restore(); }
 });
 
 test("saved tracking preserves every preference and only authenticates tracking samples", async () => {
