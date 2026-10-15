@@ -138,6 +138,26 @@ test("global airport directory supports case, countries, city groups and accents
   } finally { h.restore(); }
 });
 
+test("global catalog preserves Traditional Chinese primary names and English search aliases", async () => {
+  const directory = buildAirportDirectory(airportData.airports);
+  assert.ok(directory.filter((a) => !a.group && /\p{Script=Han}/u.test(a.name)).length > 4600);
+  for (const [code, name] of [["LAX", "洛杉磯國際機場"], ["KHH", "高雄國際機場"], ["SYD", "雪梨金斯福德·史密斯機場"], ["TLL", "塔林機場"]]) {
+    const place = searchAirports(directory, code.toLowerCase())[0];
+    assert.equal(place.name, name);
+    assert.notEqual(place.englishName, place.name);
+    assert.ok(place.subtitle.includes(place.englishName));
+    assert.ok(searchAirports(directory, place.englishName.toLowerCase()).some((a) => a.iataCode === code));
+    assert.ok(searchAirports(directory, name).some((a) => a.iataCode === code));
+  }
+  assert.equal(buildAirportDirectory([["ZZZ", "Untranslated Airport", "Example City", "US", "US-CA", 0]])[0].name, "Untranslated Airport");
+  const h = harness();
+  try {
+    const { data } = await h.request({ query: "lax" }, "places");
+    assert.equal(data.places[0].name, "洛杉磯國際機場");
+    assert.equal(h.calls.length, 0);
+  } finally { h.restore(); }
+});
+
 test("international airport groups work in all three roles and persist without truncation", async () => {
   const h = harness();
   try {
@@ -245,6 +265,133 @@ test("time windows enforce exact local minutes, including overnight windows", ()
   assert.equal(matchesFlightPreferences(item("05:00", "10:16"), p), false);
   assert.equal(matchesFlightPreferences(item("10:00", "09:00"), p), false);
   assert.equal(providerFlightFilters(p, new Set()).outbound_times, "0,23,8,10");
+});
+
+test("per-leg dates reject malformed, same-day reversed windows and conflicting fixed dates before paid calls", async () => {
+  const h = harness();
+  try {
+    for (const payload of [
+      { ...base, legTimeWindows: [{} , {}] },
+      { ...base, legTimeWindows: [{ arrivalDate: "2026-02-30" }] },
+      { ...base, legTimeWindows: [{ arrivalDate: date, arrivalTimeFrom: "23:00", arrivalTimeTo: "02:00" }] },
+      { ...base, legTimeWindows: [{ departureTimeFrom: "24:00" }] },
+      { ...base, dateConstraint: "departure", fixedDepartureDate: date, legTimeWindows: [{ departureDate: addDateDays(date, 1) }] },
+    ]) assert.equal((await h.request(payload)).status, 400);
+    assert.equal(h.calls.length, 0);
+  } finally { h.restore(); }
+});
+
+test("one-way arrival day and minute range find an overnight departure without changing arrival", async () => {
+  const h = harness((data, params) => {
+    data.best_flights[0].flights[0].arrival_airport.time = `${addDateDays(params.outbound_date, 1)} 06:15`;
+    return data;
+  });
+  try {
+    const payload = { ...base, flightMode: "annual_low", legTimeWindows: [{ arrivalDate: date, arrivalTimeFrom: "06:15", arrivalTimeTo: "06:15" }] };
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.equal(data.results[0].departureDate, addDateDays(date, -1));
+    assert.equal(data.results[0].arrival, `${date} 06:15`);
+    assert.ok(data.insights.cabinPrices.every((c) => !c.available || c.legs[0].arrival === `${date} 06:15`));
+    const saved = await h.request(payload, "watches");
+    assert.equal(saved.data.watch.sources[0].planner.legTimeWindows[0].arrivalDate, date);
+    const tracked = await h.request({ ...saved.data.watch.sources[0].planner, trackingSample: true });
+    assert.equal(tracked.data.results[0].arrival, `${date} 06:15`);
+  } finally { h.restore(); }
+});
+
+test("a cheaper wrong-day flight is excluded without discarding a matching same-day flight", async () => {
+  const h = harness((data) => {
+    const wrong = structuredClone(data.best_flights[0]);
+    wrong.price = 100;
+    wrong.flights[0].arrival_airport.time = `${addDateDays(date, 1)} 13:00`;
+    data.best_flights.unshift(wrong);
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...base, legTimeWindows: [{ departureDate: date, arrivalDate: date, arrivalTimeFrom: "12:30", arrivalTimeTo: "14:00" }] });
+    assert.equal(data.results[0].price, 9000);
+    assert.equal(data.results[0].arrival, `${date} 13:00`);
+  } finally { h.restore(); }
+});
+
+test("round trip uses independent outbound and return day/time windows", async () => {
+  const back = addDateDays(date, 5);
+  const h = harness((data, params, index) => {
+    if (index === 1) {
+      data.best_flights[0].flights[0].departure_airport.time = `${params.return_date} 18:30`;
+      data.best_flights[0].flights[0].arrival_airport.time = `${params.return_date} 22:15`;
+    }
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...base, tripDays: 5, legTimeWindows: [
+      { departureDate: date, departureTimeFrom: "08:30", departureTimeTo: "10:00", arrivalDate: date, arrivalTimeTo: "14:00" },
+      { departureDate: back, departureTimeFrom: "18:30", departureTimeTo: "20:00", arrivalDate: back, arrivalTimeFrom: "21:00", arrivalTimeTo: "22:15" },
+    ] });
+    assert.equal(data.results[0].legs[1].departure, `${back} 18:30`);
+    assert.ok(h.calls.every((p) => p.outbound_times === "8,10,0,14" && p.return_times === "18,20,21,22"));
+  } finally { h.restore(); }
+});
+
+test("return arrival date is not mistaken for the return takeoff date", async () => {
+  const h = harness((data, params, index) => {
+    if (index === 1) data.best_flights[0].flights[0].arrival_airport.time = `${addDateDays(params.return_date, 1)} 06:00`;
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...base, tripDays: 5, dateConstraint: "departure", fixedDepartureDate: date,
+      legTimeWindows: [{}, { arrivalDate: addDateDays(date, 6), arrivalTimeTo: "08:00" }] });
+    assert.equal(data.results[0].departureDate, date);
+    assert.equal(data.results[0].returnDate, addDateDays(date, 5));
+    assert.equal(data.results[0].legs[1].arrival, `${addDateDays(date, 6)} 06:00`);
+    assert.deepEqual(data.insights.durationAlternatives, []);
+  } finally { h.restore(); }
+});
+
+test("multi-city applies distinct windows to all three legs including overnight arrivals", async () => {
+  const days = [date, addDateDays(date, 3), addDateDays(date, 7)];
+  const h = harness((data, params, index) => {
+    const leg = JSON.parse(params.multi_city_json)[index];
+    data.best_flights[0].flights[0].departure_airport.time = `${leg.date} ${["09:00", "18:00", "22:00"][index]}`;
+    data.best_flights[0].flights[0].arrival_airport.time = `${addDateDays(leg.date, 1)} ${["06:00", "04:00", "08:00"][index]}`;
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...multi, includeReturn: true, destinationMinNights: 3, destinationMaxNights: 3,
+      legTimeWindows: days.map((departureDate, i) => ({ departureDate, arrivalDate: addDateDays(departureDate, 1),
+        departureTimeFrom: ["09:00", "18:00", "22:00"][i], departureTimeTo: ["10:00", "20:00", "23:00"][i], arrivalTimeTo: ["07:00", "05:00", "09:00"][i] })) });
+    assert.equal(data.results[0].legs.length, 3);
+    assert.equal(data.results[0].stopoverNights, 2);
+    assert.equal(data.results[0].destinationNights, 3);
+    assert.deepEqual(JSON.parse(h.calls[0].multi_city_json).map((leg) => leg.times), ["9,10,0,7", "18,20,0,5", "22,23,0,9"]);
+    assert.equal(data.results[0].legs[2].arrival, `${addDateDays(date, 8)} 08:00`);
+  } finally { h.restore(); }
+});
+
+test("fixed middle-leg day anchors a flexible first leg including overnight travel", async () => {
+  const h = harness((data, params, index) => {
+    if (index === 0) {
+      const leg = JSON.parse(params.multi_city_json)[0];
+      data.best_flights[0].flights[0].arrival_airport.time = `${addDateDays(leg.date, 1)} 06:00`;
+    }
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...multi, flightMode: "annual_low", legTimeWindows: [{}, { departureDate: addDateDays(date, 3), departureTimeFrom: "08:00", departureTimeTo: "10:00" }] });
+    assert.equal(data.results[0].departureDate, date);
+    assert.equal(data.results[0].legs[1].departureDate, addDateDays(date, 3));
+    assert.equal(data.results[0].stopoverNights, 2);
+  } finally { h.restore(); }
+});
+
+test("incompatible fixed departure and arrival days produce no substitute dates", async () => {
+  const h = harness();
+  try {
+    const { data } = await h.request({ ...base, legTimeWindows: [{ departureDate: date, arrivalDate: addDateDays(date, 1) }] });
+    assert.deepEqual(data.results, []);
+    assert.equal(h.calls.length, 1);
+  } finally { h.restore(); }
 });
 
 test("multi-city uses whole-trip final quote, includes all legs and economy default", async () => {

@@ -11,7 +11,7 @@
     <title>航班助手</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=16" />
+    <link rel="stylesheet" href="./styles.css?v=18" />
   </head>
   <body>
     <main class="app-shell">
@@ -40,7 +40,8 @@
           <fieldset class="filter-fieldset">
             <legend>旅程</legend>
             <div class="segmented-filter journey-filter">
-              <label><input type="radio" name="journeyType" value="simple" checked /><span>來回／單程</span></label>
+              <label><input type="radio" name="journeyType" value="simple" checked /><span>來回</span></label>
+              <label><input type="radio" name="journeyType" value="oneway" /><span>單程</span></label>
               <label><input type="radio" name="journeyType" value="multicity" /><span>多城市停留</span></label>
             </div>
           </fieldset>
@@ -101,14 +102,18 @@
           </fieldset>
           <div class="field-row">
             <label id="tripDaysField">
-              <span>旅行天數（單程填 0）</span>
-              <input name="tripDays" type="number" inputmode="numeric" min="0" max="60" value="5" />
+              <span>旅行天數</span>
+              <input name="tripDays" type="number" inputmode="numeric" min="1" max="60" value="5" />
             </label>
             <label>
               <span>追蹤目標價（選填）</span>
               <input name="targetPrice" inputmode="numeric" placeholder="8000" />
             </label>
           </div>
+          <details class="leg-schedules">
+            <summary>各段出發／抵達日期與時段（當地時間）</summary>
+            <div id="legScheduleFields"></div>
+          </details>
           <fieldset class="filter-fieldset">
             <legend>航空類型</legend>
             <div class="segmented-filter">
@@ -118,7 +123,7 @@
             </div>
           </fieldset>
           <details class="advanced-filters">
-            <summary>機型、航空公司與起降時間</summary>
+            <summary>機型與航空公司</summary>
             <fieldset>
               <legend>不搭的機型</legend>
               <div class="check-grid" id="aircraftChoices"></div>
@@ -129,15 +134,6 @@
               <legend>不搭的航空公司</legend>
               <div class="check-grid" id="airlineChoices"></div>
               <label><span>其他航空公司代碼（逗號分隔）</span><input name="otherExcludedAirlines" placeholder="UA, BA, LH" autocomplete="off" /></label>
-            </fieldset>
-            <fieldset>
-              <legend>每段旅程起訖時間（當地時間）</legend>
-              <div class="field-row">
-                <label><span>起飛從</span><input type="time" name="departureTimeFrom" /></label>
-                <label><span>起飛至</span><input type="time" name="departureTimeTo" /></label>
-                <label><span>抵達從</span><input type="time" name="arrivalTimeFrom" /></label>
-                <label><span>抵達至</span><input type="time" name="arrivalTimeTo" /></label>
-              </div>
             </fieldset>
           </details>
           <fieldset class="filter-fieldset">
@@ -263,6 +259,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=16" type="module"></script>
+    <script src="./app.js?v=18" type="module"></script>
   </body>
 </html>

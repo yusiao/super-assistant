@@ -71,6 +71,15 @@ try {
   await page.locator('#departurePlaceOptions [data-iata="TPE,TSA"]').click();
   assert.equal(await page.locator('[name="departureId"]').getAttribute("data-iata"), "TPE,TSA");
   await page.locator('[name="arrivalId"]').fill("LAX");
+  await page.locator('#arrivalPlaceOptions [data-iata="LAX"]').waitFor();
+  assert.equal(await page.locator('#arrivalPlaceOptions [data-iata="LAX"] .place-option-main > span').innerText(), "洛杉磯國際機場");
+  await page.locator('#arrivalPlaceOptions [data-iata="LAX"]').click();
+  assert.equal(await page.locator('[name="arrivalId"]').inputValue(), "LAX · 洛杉磯國際機場");
+  await page.locator('[name="arrivalId"]').fill("tll");
+  await page.locator('#arrivalPlaceOptions [data-iata="TLL"]').waitFor();
+  assert.equal(await page.locator('#arrivalPlaceOptions [data-iata="TLL"] .place-option-main > span').innerText(), "塔林機場");
+  await page.screenshot({ path: join(root, 'tmp/flight-airports-zh-mobile.png') });
+  await page.locator('[name="arrivalId"]').fill("LAX");
   await page.locator('[name="journeyType"][value="multicity"]').check({ force: true });
   await page.locator('[name="stopoverId"]').fill("NRT");
   await page.locator('[name="stopoverId"]').press("Escape");
@@ -81,8 +90,9 @@ try {
   await page.locator('.advanced-filters summary').click();
   await page.locator('[name="excludedAircraft"][value="737 MAX"]').check();
   await page.locator('[name="excludedAirlines"][value="CI"]').check();
-  await page.locator('[name="departureTimeFrom"]').fill("08:30");
-  await page.locator('[name="departureTimeTo"]').fill("18:00");
+  await page.locator('.leg-schedules summary').click();
+  await page.locator('[data-leg-role="outbound"] [data-window-field="departureTimeFrom"]').fill("08:30");
+  await page.locator('[data-leg-role="outbound"] [data-window-field="departureTimeTo"]').fill("18:00");
   await page.locator('[data-flight-mode="date_window"]').click();
   await page.locator('[name="startDate"]').fill(addDateDays(new Date().toISOString().slice(0, 10), 20));
   await mkdir(join(root, "tmp"), { recursive: true });
@@ -103,7 +113,7 @@ try {
   assert.equal(lastSearch.stopoverId, "NRT");
   assert.equal(lastSearch.departureId, "TPE,TSA");
   assert.equal(lastSearch.includeReturn, true);
-  assert.equal(lastSearch.departureTimeFrom, "08:30");
+  assert.equal(lastSearch.legTimeWindows[0].departureTimeFrom, "08:30");
   assert.equal(await page.locator(".result-card").first().locator(".journey-leg").count(), 3);
   assert.equal(await page.locator(".result-card").first().locator(".inline-cabins dd").count(), 3);
   assert.match(await page.locator(".result-card").first().innerText(), /里程升等：待確認/);
@@ -123,6 +133,7 @@ try {
   assert.equal(saved.stopoverId, "NRT");
   assert.equal(saved.departureId, "TPE,TSA");
   assert.deepEqual(saved.excludedAircraft, ["737 MAX"]);
+  assert.equal(saved.legTimeWindows[0].departureTimeFrom, "08:30");
   await page.locator('[name="journeyType"][value="simple"]').check({ force: true });
   assert.equal(await page.locator('[name="stopoverId"]').isDisabled(), true);
   assert.equal(await page.locator('[name="tripDays"]').isDisabled(), false);
@@ -193,6 +204,60 @@ try {
   await oneDayResponse;
   await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
   assert.equal(lastSearch.lookaheadDays, 0, 'Only this date must not silently become 30 days');
+  // Each journey mode exposes only its own legs and preserves exact calendar/time windows.
+  await page.locator('[name="journeyType"][value="oneway"]').check({ force: true });
+  assert.equal(await page.locator('[data-leg-role]').count(), 1);
+  assert.equal(await page.locator('[name="tripDays"]').isDisabled(), true);
+  assert.equal(await page.locator('[name="dateConstraint"] option[value="return"]').evaluate((option) => option.disabled), true);
+  await page.locator('[data-leg-role="outbound"] [data-window-field="arrivalDate"]').fill(fixedDate);
+  await page.locator('[data-leg-role="outbound"] [data-window-field="arrivalTimeFrom"]').fill('12:00');
+  await page.locator('[data-leg-role="outbound"] [data-window-field="arrivalTimeTo"]').fill('13:00');
+  const submit = async () => {
+    const pending = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+    await page.locator('#flightForm').evaluate((form) => form.requestSubmit());
+    const response = await (await pending).json();
+    await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
+    return response;
+  };
+  const oneWay = await submit();
+  assert.equal(lastSearch.tripDays, 0);
+  assert.equal(lastSearch.legTimeWindows.length, 1);
+  assert.equal(oneWay.results[0].legs.length, 1);
+  assert.equal(oneWay.results[0].arrival, `${fixedDate} 13:00`);
+  await page.locator('[name="journeyType"][value="simple"]').check({ force: true });
+  assert.equal(await page.locator('[data-leg-role]').count(), 2);
+  await page.locator('[data-leg-role="return"] [data-window-field="arrivalDate"]').fill(fixedReturn);
+  await page.locator('[data-leg-role="return"] [data-window-field="arrivalTimeFrom"]').fill('13:00');
+  await page.locator('[data-leg-role="return"] [data-window-field="arrivalTimeTo"]').fill('14:30');
+  const roundTrip = await submit();
+  assert.equal(roundTrip.results[0].legs[1].arrival, `${fixedReturn} 13:00`);
+  assert.equal(lastSearch.legTimeWindows[1].arrivalTimeTo, '14:30');
+  await page.locator('[name="journeyType"][value="multicity"]').check({ force: true });
+  await page.locator('[name="arrivalId"]').fill('LAX');
+  await page.locator('[name="arrivalId"]').press('Escape');
+  assert.equal(await page.locator('[data-leg-role]').count(), 3);
+  await page.locator('[data-leg-role="onward"] [data-window-field="departureDate"]').fill(addDateDays(fixedDate, 2));
+  await page.locator('[data-leg-role="onward"] [data-window-field="departureTimeFrom"]').fill('09:00');
+  await page.locator('[data-leg-role="onward"] [data-window-field="departureTimeTo"]').fill('10:30');
+  const cityTrip = await submit();
+  assert.equal(cityTrip.results[0].legs.length, 3);
+  assert.equal(cityTrip.results[0].legs[1].departureDate, addDateDays(fixedDate, 2));
+  assert.equal(cityTrip.results[0].legs[2].arrival, `${fixedReturn} 13:00`);
+  await page.locator('.track-button').first().click();
+  await page.locator('#statusText').filter({ hasText: '已加入雲端追蹤' }).waitFor();
+  const timedWatch = records.get('price-watch:watches').watches.at(-1).sources[0].planner;
+  assert.equal(timedWatch.legTimeWindows[1].departureTimeTo, '10:30');
+  assert.equal(timedWatch.legTimeWindows[2].arrivalDate, fixedReturn);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('.leg-schedules summary').scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    if (width === 320) {
+      const timeWidth = await page.locator('.leg-schedules input[type="time"]').first().evaluate((input) => input.getBoundingClientRect().width);
+      assert.ok(timeWidth >= 200, 'Narrow phones must stack time fields to keep the full native time visible');
+    }
+    await page.screenshot({ path: join(root, `tmp/flight-leg-windows-${width}.png`) });
+  }
   assert.deepEqual(errors, []);
   console.log("Mobile/desktop 320/390/1280: global airport groups, case-insensitive input, pagination, fixed departure/return/both, tracking, multi-city, cabins and filters passed; zero real API calls.");
 } finally {

@@ -23,6 +23,9 @@ Google Flights 和 Skyscanner 都支援彈性日期與降價提醒。本工具�
 
 ## 多城市與條件篩選
 
+- 行程類型分為「來回」「單程」「多城市停留」。展開「各段出發／抵達日期與時段（當地時間）」可為去程、下一城市、回程分別設定出發日期、出發時間上下限、抵達日期及抵達時間上下限；各欄可留空。日期與時間皆依該機場當地時間，不統一換算為台灣時間。
+- `legTimeWindows` 按旅程段落順序保存 `departureDate`、`departureTimeFrom`、`departureTimeTo`、`arrivalDate`、`arrivalTimeFrom`、`arrivalTimeTo`，時間精確到分鐘且包含端點。指定同一天時結束時間不可早於開始時間；未指定日期的時窗仍允許跨午夜。抵達日期不會被當作必須同日起飛，跨日航班會調整查詢日期並核對實際抵達日；最多三次調整，仍受單次 24 次來源查詢上限約束。沒有符合條件的候選時不替換成其他日期。
+- 逐段指定日曆日期後暫停鄰近旅行天數建議，以保留固定日期；只指定時段則仍可比較其他天數。艙等比較與追蹤均保留逐段條件，上方固定日期與逐段起飛日期衝突時會要求修正。
 - 新搜尋預設出發地為「台北全部機場」，同一次 SerpApi 查詢傳送 `TPE,TSA`，同時涵蓋桃園與松山；也可單選任一機場。全球機場在出發、目的地與途中停留三個欄位皆可選擇；東京、倫敦、巴黎、紐約等提供城市機場組合，選單列出所含機場。其他同國家行政區及同城市、有定期航班的機場依目錄分組，最多 6 個，不跨同名城市誤合併。
 - 結果、艙等比較與 LINE 行程保留實際機場。去回不同機場、停留期間需要換機場均另外警示，購票連結不偽裝成同機場來回。新追蹤保存多機場條件；既有單機場追蹤不會自動變更。
 - 日期條件可選彈性、固定出發、固定回程或固定去回。固定日期指起飛機場當地日期，回程起飛日不等於抵達家的日期。一般來回以旅行天數為主並比較正負 2 天：固定出發僅變動回程，固定回程僅變動出發；去回皆固定則推導天數且停用其他天數建議。單程不能設定固定回程。
@@ -51,6 +54,8 @@ node scripts/price-watch/validate_flight_planner_ui.mjs
 資料規格：[SerpApi Google Flights API](https://serpapi.com/google-flights-api)。升等限制參考 [長榮獎勵常見問答](https://www.evaair.com/zh-tw/customer-services/faq/detail.html?FaqCategories=Award-Program) 與 [華航座艙升等](https://www.china-airlines.com/au/zh/member/miles/redeem/cabin-upgrade.html)。
 
 機場來源：[OurAirports 公開資料](https://ourairports.com/data/)（Public Domain），移除已關閉機場與非三碼 IATA 紀錄。使用 PowerShell 7 執行 `scripts/price-watch/update_airports.ps1` 更新隨網站部署的 `airports-data.json`。機場存在不代表查詢日期一定有航班；票價與可售行程仍由查價來源提供。繁中別名與都會區機場組合定義在 `airports.js`，新資料載入後可以離線篩選，無須每次消耗 SerpApi 額度。
+
+繁中名稱另存於 `airports-zh.js`，目前包含 4,692 筆 [Wikidata 中文標籤](https://www.wikidata.org/wiki/Wikidata:Data_access)（CC0），以 OpenCC 轉為繁體。顯示優先序為既有繁中名稱、繁中資料、英文原名；英文保留於副標與搜尋別名。對照表不受 OurAirports 英文目錄更新覆蓋。更新工具為 `scripts/price-watch/update_airport_translations.mjs`，需在暫存目錄提供 OpenCC 的 UMD 檔 `tmp/opencc-full.cjs`；OpenCC 不隨網頁載入。相同代碼若在最佳語系存在多個不同名稱，產生器略過該歧義，不自行猜測。
 
 ## 主要檔案
 

@@ -1,5 +1,5 @@
 import { validateFlightPreferences, hasFlightPreferences, matchesFlightPreferences, flightPreferenceKey,
-  makeJourneyPlans, searchCompleteJourney, flightDateRange, addDateDays } from "./flight-planner.js";
+  makeJourneyPlans, searchCompleteJourney, flightDateRange, addDateDays, hasLegDates } from "./flight-planner.js";
 import airportData from "../output/bazi-ziwei/price-watch/airports-data.json" with { type: "json" };
 import { buildAirportDirectory, searchAirports } from "../output/bazi-ziwei/price-watch/airports.js";
 
@@ -378,7 +378,7 @@ async function serpApiSampledFlightSearch(input, env) {
   payload.currency = currency;
   const tracking = payload.trackingSample === true;
   const multi = payload.journeyType === "multicity";
-  const plans = multi || tracking || payload.comparisonPlan
+  const plans = multi || tracking || payload.comparisonPlan || hasLegDates(payload)
     ? makeJourneyPlans(payload, startDate, endDate, tracking)
     : evenlySpacedDates(startDate, endDate, 3).map((date) => ({ date, nights: 0, destinationNights: 0 }));
   let queryCount = 0;
@@ -1011,7 +1011,7 @@ async function handlePriceWatchSearch(request, env) {
     const arrivalId = payload.arrivalId;
     const flightMode = compact(payload.flightMode, "annual_low", 24);
     const startDate = isoDate(payload.startDate, "");
-    if (!departureId || !arrivalId || (payload.dateConstraint === "flexible" && flightMode === "date_window" && !startDate)) {
+    if (!departureId || !arrivalId || (payload.dateConstraint === "flexible" && !hasLegDates(payload) && flightMode === "date_window" && !startDate)) {
       return json(400, { error: "departureId, arrivalId and a valid startDate for date_window are required." });
     }
     if (flightMode === "annual_low" || flightMode === "date_window" || payload.dateConstraint !== "flexible") {

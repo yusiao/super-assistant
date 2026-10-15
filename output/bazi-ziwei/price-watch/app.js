@@ -1,4 +1,4 @@
-import { buildAirportDirectory, searchAirports, normalizeAirportCodes } from "./airports.js?v=16";
+import { buildAirportDirectory, searchAirports, normalizeAirportCodes } from "./airports.js?v=17";
 
 const state = {
   activePanel: "flightPanel",
@@ -368,7 +368,7 @@ async function resolvePlaceCode(input) {
 }
 
 function flightSubmitLabel() {
-  if (elements.flightForm.elements.dateConstraint.value !== "flexible") return "搜尋指定日期";
+  if (elements.flightForm.elements.dateConstraint.value !== "flexible" || readLegWindows().some((w) => w.departureDate || w.arrivalDate)) return "搜尋指定日期與時段";
   return state.flightMode === "date_window" ? "搜尋日期區間" : "探索未來一年低價";
 }
 
@@ -580,9 +580,38 @@ function setupJourneyFields() {
     destination.hidden = !multi || !form.elements.includeReturn.checked;
     destination.disabled = destination.hidden;
     updateDateFields();
+    renderLegWindows();
   };
   document.querySelectorAll('[name="journeyType"], [name="includeReturn"]').forEach((input) => input.addEventListener("change", update));
   update();
+}
+
+const legWindowDrafts = new Map();
+function readLegWindows() {
+  return [...document.querySelectorAll("[data-leg-role]")].map((fieldset) => Object.fromEntries(
+    [...fieldset.querySelectorAll("[data-window-field]")].filter((input) => input.value).map((input) => [input.dataset.windowField, input.value]),
+  ));
+}
+
+function renderLegWindows() {
+  const current = readLegWindows();
+  document.querySelectorAll("[data-leg-role]").forEach((fieldset, index) => legWindowDrafts.set(fieldset.dataset.legRole, current[index]));
+  const form = elements.flightForm;
+  const multi = form.elements.journeyType.value === "multicity";
+  const roles = multi ? [["outbound", "第 1 段：出發地 A → 停留地 B"], ["onward", "第 2 段：停留地 B → 目的地 C"],
+    ...(form.elements.includeReturn.checked ? [["return", "第 3 段：目的地 C → 出發地 A"]] : [])]
+    : [["outbound", "去程：出發地 → 目的地"], ...(form.elements.journeyType.value === "oneway" ? [] : [["return", "回程：目的地 → 出發地"]])];
+  document.querySelector("#legScheduleFields").innerHTML = roles.map(([role, label]) => {
+    const values = legWindowDrafts.get(role) || {};
+    return `<fieldset data-leg-role="${role}"><legend>${label}</legend>${[["departure", "出發"], ["arrival", "抵達"]].map(([key, title]) => `
+      <div class="leg-event-grid">
+        <label class="leg-event-date"><span>${title}日期（選填）</span><input type="date" data-window-field="${key}Date" value="${escapeHtml(values[`${key}Date`] || "")}" /></label>
+        <label><span>${title}從</span><input type="time" data-window-field="${key}TimeFrom" value="${escapeHtml(values[`${key}TimeFrom`] || "")}" /></label>
+        <label><span>${title}至</span><input type="time" data-window-field="${key}TimeTo" value="${escapeHtml(values[`${key}TimeTo`] || "")}" /></label>
+      </div>`).join("")}</fieldset>`;
+  }).join("");
+  document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
+  updateDateFields();
 }
 
 function renderCabinOverview(prices, currency = "TWD") {
@@ -748,19 +777,22 @@ async function searchFlight(event) {
       resolvePlaceCode(elements.flightForm.elements.arrivalId),
     ]);
     const multi = data.journeyType === "multicity";
+    const legTimeWindows = readLegWindows();
+    const hasLegDates = legTimeWindows.some((w) => w.departureDate || w.arrivalDate);
     const stopoverId = multi ? await resolvePlaceCode(elements.flightForm.elements.stopoverId) : "";
     if (!normalizeAirportCodes(departureId) || !normalizeAirportCodes(arrivalId) || (multi && !normalizeAirportCodes(stopoverId))) {
       throw new Error("請輸入至少兩個字，或從機場建議中選擇");
     }
     state.lastFlightPayload = {
-      flightMode: data.dateConstraint === "flexible" ? state.flightMode : "date_window",
+      flightMode: data.dateConstraint === "flexible" && !hasLegDates ? state.flightMode : "date_window",
+      legTimeWindows,
       dateConstraint: data.dateConstraint,
       fixedDepartureDate: data.fixedDepartureDate || "",
       fixedReturnDate: data.fixedReturnDate || "",
       departureId,
       arrivalId,
       startDate: state.flightMode === "date_window" ? data.startDate : "",
-      tripDays: !multi && data.dateConstraint === "both" ? Math.round((Date.parse(data.fixedReturnDate) - Date.parse(data.fixedDepartureDate)) / 86400000) : Number(data.tripDays || 0),
+      tripDays: data.journeyType === "oneway" ? 0 : !multi && data.dateConstraint === "both" ? Math.round((Date.parse(data.fixedReturnDate) - Date.parse(data.fixedDepartureDate)) / 86400000) : Number(data.tripDays || 0),
       lookaheadDays: Number(data.lookaheadDays ?? 30),
       targetPrice: data.targetPrice,
       airlineType: data.airlineType || "all",
@@ -783,7 +815,7 @@ async function searchFlight(event) {
       arrivalTimeFrom: data.arrivalTimeFrom,
       arrivalTimeTo: data.arrivalTimeTo,
     };
-    setPanelStatus("flightPanel", data.dateConstraint !== "flexible" ? "搜尋指定日期票價" : state.flightMode === "annual_low" ? "探索未來一年代表日期" : "搜尋日期區間票價");
+    setPanelStatus("flightPanel", data.dateConstraint !== "flexible" || hasLegDates ? "搜尋指定日期與時段票價" : state.flightMode === "annual_low" ? "探索未來一年代表日期" : "搜尋日期區間票價");
     const response = await api("/api/price-watch/search", {
       method: "POST",
       body: JSON.stringify({
@@ -796,7 +828,7 @@ async function searchFlight(event) {
     view.insights = response.insights || null;
     view.currency = response.currency || data.currency || "TWD";
     view.searched = true;
-    view.title = multi ? "多城市完整行程" : data.dateConstraint !== "flexible" ? "指定日期票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
+    view.title = multi ? "多城市完整行程" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
@@ -837,11 +869,15 @@ function setFlightMode(mode) {
 }
 
 function dateConstraintLabel(flight) {
-  return [flight.fixedDepartureDate ? `${flight.fixedDepartureDate} 出發` : "", flight.fixedReturnDate ? `${flight.fixedReturnDate} 回程起飛` : ""].filter(Boolean).join(" · ");
+  return [flight.fixedDepartureDate ? `${flight.fixedDepartureDate} 出發` : "", flight.fixedReturnDate ? `${flight.fixedReturnDate} 回程起飛` : "",
+    ...(flight.legTimeWindows || []).flatMap((w, index) => [w.departureDate ? `第${index + 1}段 ${w.departureDate} 出發` : "", w.arrivalDate ? `第${index + 1}段 ${w.arrivalDate} 抵達` : ""])].filter(Boolean).join(" · ");
 }
 
 function updateDateFields() {
   const form = elements.flightForm;
+  const oneway = form.elements.journeyType.value === "oneway";
+  for (const option of form.elements.dateConstraint.options) option.disabled = oneway && ["return", "both"].includes(option.value);
+  if (oneway && ["return", "both"].includes(form.elements.dateConstraint.value)) form.elements.dateConstraint.value = "flexible";
   const constraint = form.elements.dateConstraint.value;
   const flexible = constraint === "flexible";
   document.querySelector("#flexibleModeSwitch").hidden = !flexible;
@@ -851,11 +887,11 @@ function updateDateFields() {
     form.elements[key].disabled = !show;
     form.elements[key].required = show;
   }
-  form.elements.tripDays.disabled = form.elements.journeyType.value === "multicity" || constraint === "both";
+  form.elements.tripDays.disabled = form.elements.journeyType.value !== "simple" || constraint === "both";
   document.querySelector("#tripDaysField").hidden = form.elements.tripDays.disabled;
   const isWindow = flexible && state.flightMode === "date_window";
   elements.windowFlightFields.hidden = !isWindow;
-  elements.flightForm.elements.startDate.required = isWindow;
+  elements.flightForm.elements.startDate.required = isWindow && !readLegWindows().some((w) => w.departureDate || w.arrivalDate);
   if (!elements.flightSubmitButton.disabled) elements.flightSubmitButton.textContent = flightSubmitLabel();
 }
 
@@ -977,7 +1013,7 @@ function boot() {
   setFlightMode("annual_low");
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=11").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=13").catch(() => {});
   }
 }
 

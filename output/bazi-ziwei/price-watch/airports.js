@@ -1,3 +1,5 @@
+import AIRPORT_ZH from "./airports-zh.js?v=17";
+
 // Metro areas intentionally include their established passenger airports, not every nearby airfield.
 const METROS = [
   ["台北", "Taipei", "TPE,TSA"], ["東京", "Tokyo", "HND,NRT"], ["大阪", "Osaka", "ITM,KIX,UKB"],
@@ -39,6 +41,7 @@ const METROS = [
   ["奈洛比", "Nairobi", "NBO,WIL"], ["卡薩布蘭卡", "Casablanca", "CMN"], ["馬爾地夫 馬列", "Maldives Male", "MLE"],
 ];
 const AIRPORT_NAMES = {
+  KHH: "高雄國際機場", LAX: "洛杉磯國際機場", SYD: "雪梨金斯福德·史密斯機場",
   TPE: "臺灣桃園國際機場", TSA: "台北松山機場", HND: "東京羽田機場", NRT: "東京成田機場", KIX: "關西國際機場", ITM: "大阪伊丹機場", UKB: "神戶機場",
   ICN: "仁川國際機場", GMP: "金浦國際機場", BKK: "蘇凡納布機場", DMK: "廊曼機場", SIN: "新加坡樟宜機場", HKG: "香港國際機場",
   LHR: "倫敦希斯洛機場", LGW: "倫敦蓋威克機場", LCY: "倫敦城市機場", LTN: "倫敦魯頓機場", STN: "倫敦史坦斯特機場", SEN: "倫敦紹森德機場",
@@ -60,7 +63,7 @@ export function buildAirportDirectory(rows) {
   const countries = new Map();
   const airports = rows.map(([iataCode, englishName, englishCity, countryCode, region, scheduled]) => {
     if (!countries.has(countryCode)) countries.set(countryCode, regions.of(countryCode) || countryCode);
-    return { iataCode, name: englishName, englishName, city: englishCity, englishCity, country: countries.get(countryCode), englishCountry: englishRegions.of(countryCode), countryCode, region, scheduled };
+    return { iataCode, name: AIRPORT_NAMES[iataCode] || AIRPORT_ZH[iataCode] || englishName, englishName, city: englishCity, englishCity, country: countries.get(countryCode), englishCountry: englishRegions.of(countryCode), countryCode, region, scheduled };
   });
   const byCode = new Map(airports.map((a) => [a.iataCode, a]));
   const groups = [];
@@ -71,7 +74,7 @@ export function buildAirportDirectory(rows) {
     members.forEach((a) => {
       a.city = city;
       a.aliases = `${aliases} ${englishCity}`;
-      a.name = AIRPORT_NAMES[a.iataCode] || `${city} · ${a.englishName}`;
+      a.name = AIRPORT_NAMES[a.iataCode] || AIRPORT_ZH[a.iataCode] || `${city} · ${a.englishName}`;
       assigned.add(a.iataCode);
     });
     if (members.length > 1) groups.push({ iataCode: normalizeAirportCodes(members.map((a) => a.iataCode).join(",")), name: `${city}全部機場`, city, englishName: englishCity,
