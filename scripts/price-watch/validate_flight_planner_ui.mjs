@@ -12,7 +12,8 @@ const root = resolve(import.meta.dirname, "../..");
 const modules = resolve(dirname(process.execPath), "../node_modules");
 const pkg = JSON.parse(await readFile(join(modules, "playwright/package.json"), "utf8"));
 const require = createRequire(join(modules, `.pnpm/playwright@${pkg.version}/node_modules/playwright/package.json`));
-const { chromium } = require("playwright");
+const { chromium, webkit } = require("playwright");
+const browserName = process.env.FLIGHT_TEST_BROWSER || "chromium";
 const records = new Map();
 const env = { PRICE_WATCH_PUBLIC_SEARCH: "true", PRICE_WATCH_ACCESS_TOKEN: "test-ui", SERPAPI_API_KEY: "test", PRICE_WATCH_PUBLIC_SEARCH_PER_MINUTE: "100",
   PRICE_WATCH_KV: { async get(key) { return records.get(key) || null; }, async put(key, value) { records.set(key, JSON.parse(value)); } } };
@@ -27,11 +28,25 @@ globalThis.fetch = async (url) => {
   const index = Number(p.departure_token || 0);
   const leg = legs[index];
   if (!leg) return Response.json({ suggestions: [] });
-  return Response.json({ best_flights: [{ price: 12000 * Number(p.travel_class) + index * 1000, total_duration: 180,
+  const data = { best_flights: [{ price: 12000 * Number(p.travel_class) + index * 1000, total_duration: 180,
     departure_token: index < legs.length - 1 ? String(index + 1) : undefined,
     flights: [{ airline: "長榮航空", flight_number: "BR 198", airplane: "Boeing 787-9", travel_class: p.travel_class === "1" ? "Economy" : "Business",
       departure_airport: { id: leg.departure_id.split(",").at(-1), time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
-  }] });
+  }] };
+  if (legs[0].date === "2027-01-05") data.best_flights[0].price += 1500;
+  if (leg.departure_id === "HRB") {
+    const first = data.best_flights[0].flights[0];
+    const second = structuredClone(first);
+    first.flight_number = "MU 5616";
+    first.airline = "中國東方航空";
+    first.arrival_airport = { id: "PVG", time: `${leg.date} 12:00` };
+    second.flight_number = "MU 5005";
+    second.airline = "中國東方航空";
+    second.departure_airport = { id: "PVG", time: `${leg.date} 15:00` };
+    second.arrival_airport.time = `${leg.date} 17:00`;
+    data.best_flights[0].flights.push(second);
+  }
+  return Response.json(data);
 };
 let lastSearch;
 const server = createServer(async (req, res) => {
@@ -59,8 +74,8 @@ const server = createServer(async (req, res) => {
 await new Promise((done) => server.listen(0, "127.0.0.1", done));
 let browser;
 try {
-  browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", headless: true });
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
+  browser = browserName === "webkit" ? await webkit.launch({ headless: true }) : await chromium.launch({ executablePath: process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", headless: true });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block", isMobile: browserName === "webkit", hasTouch: true });
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -126,7 +141,7 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${width}px results overflow`);
     await page.screenshot({ path: join(root, `tmp/flight-planner-results-${width}.png`) });
   }
-  const comparison = page.locator(".compare-button").first();
+  const comparison = page.locator(".compare-button:not([data-leg-cabins])").first();
   await comparison.click();
   await page.waitForFunction(() => document.querySelectorAll(".inline-cabins").length === 2);
   await page.locator(".track-button").first().click();
@@ -260,8 +275,56 @@ try {
     }
     await page.screenshot({ path: join(root, `tmp/flight-leg-windows-${width}.png`) });
   }
+  const exampleTrip = { journeyType: "multicity", includeReturn: true, dateConstraint: "flexible", departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB",
+    stopoverMinNights: 3, stopoverMaxNights: 4, destinationMinNights: 7, destinationMaxNights: 7, airlineType: "all", routeType: "any",
+    legTimeWindows: [{ departureDate: "2027-01-05", departureDateAlternative: "2027-01-06" },
+      { departureDate: "2027-01-09", arrivalDate: "2027-01-09", arrivalTimeTo: "19:30" },
+      { departureDate: "2027-01-16", flightNumbers: "MU5616, MU5005" }] };
+  await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/#trip=${encodeURIComponent(JSON.stringify(exampleTrip))}`);
+  await page.locator('#statusText').filter({ hasText: '行程已帶入' }).waitFor();
+  assert.equal(await page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]').inputValue(), 'MU5616, MU5005');
+  for (const width of [320, 360, 375, 390, 430, 600, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('.leg-schedules summary').scrollIntoViewIfNeeded();
+    const overflow = await page.locator('.leg-schedules input').evaluateAll((inputs) => inputs.filter((input) => {
+      const box = input.getBoundingClientRect();
+      const parent = input.closest('label').getBoundingClientRect();
+      return box.right > innerWidth + 1 || box.left < 0 || box.width > parent.width + 1;
+    }).map((input) => input.outerHTML));
+    assert.deepEqual(overflow, [], `${browserName} ${width}px date/time/airline fields overflow`);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-trip-${browserName}-${width}.png`) });
+  }
+  const exampleResult = await submit();
+  assert.equal(exampleResult.results[0].departureDate, '2027-01-06');
+  assert.equal(exampleResult.results[1].departureDate, '2027-01-05');
+  assert.deepEqual(lastSearch.legTimeWindows, exampleTrip.legTimeWindows);
+  const legQuote = page.locator('.result-card').first().locator('[data-leg-cabins="2"]');
+  const quoteResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+  await legQuote.click();
+  const quoted = await (await quoteResponse).json();
+  await legQuote.filter({ hasText: '重新查此段艙等' }).waitFor();
+  assert.equal(lastSearch.tripDays, 0);
+  assert.equal(lastSearch.departureId, 'HRB');
+  assert.equal(lastSearch.legTimeWindows[0].flightNumbers, 'MU5616, MU5005');
+  assert.ok(quoted.insights.cabinPrices.every((cabin) => cabin.available));
+  assert.match(await page.locator('.leg-cabin-quotes').filter({ hasText: '單段另購報價' }).innerText(), /經濟艙[\s\S]*商務艙/);
+  await page.locator('.track-button').first().click();
+  await page.locator('#statusText').filter({ hasText: '已加入雲端追蹤' }).waitFor();
+  const exampleWatch = records.get('price-watch:watches').watches.at(-1).sources[0].planner;
+  assert.deepEqual(exampleWatch.legTimeWindows[2].flightNumbers, ['MU5616', 'MU5005']);
+  assert.equal(exampleWatch.legTimeWindows[0].departureDateAlternative, '2027-01-06');
+  await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.copiedTripLink = value; } } }));
+  await page.locator('#copyTripLinkButton').click();
+  const copied = await page.evaluate(() => window.copiedTripLink);
+  const shared = JSON.parse(decodeURIComponent(new URL(copied).hash.slice(6)));
+  assert.equal(shared.legTimeWindows[2].flightNumbers, 'MU5616, MU5005');
+  assert.equal(shared.legTimeWindows[0].departureDateAlternative, '2027-01-06');
+  assert.equal(copied.includes('test-ui'), false, 'Share links must never include the access token');
+  await page.reload();
+  await page.waitForFunction(() => document.querySelector('[data-leg-role="return"] [data-window-field="flightNumbers"]')?.value === 'MU5616, MU5005');
   assert.deepEqual(errors, []);
-  console.log("Mobile/desktop 320/390/1280: global airport groups, case-insensitive input, pagination, fixed departure/return/both, tracking, multi-city, cabins and filters passed; zero real API calls.");
+  console.log(`${browserName}: 320/360/375/390/430/600/1280px, two departure dates, ordered return flights, per-leg cabins, share links, tracking and existing flows passed; zero real API calls.`);
 } finally {
   globalThis.fetch = originalFetch;
   if (browser) await browser.close();

@@ -16,13 +16,19 @@
 .place-more { width: 100%; min-height: 44px; padding: 12px; border: 0; background: var(--soft); color: var(--accent-strong); cursor: pointer; }
 #fixedFlightFields input { min-width: 0; max-width: 100%; }
 .journey-filter { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-.leg-schedules { border-block: 1px solid var(--line); }
+.leg-schedules { border-block: 1px solid var(--line); min-width: 0; max-width: 100%; }
 .leg-schedules summary { padding: 14px 0; cursor: pointer; font-size: 14px; font-weight: 700; }
 .leg-schedules fieldset { margin: 12px 0; padding: 12px 0; border: 0; border-top: 1px solid var(--line); min-width: 0; }
-.leg-schedules legend { font-size: 14px; font-weight: 700; }
+.leg-schedules legend { font-size: 14px; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; }
+.leg-schedules label, #legScheduleFields, .leg-event-grid { min-width: 0; max-width: 100%; }
+.leg-schedules input { display: block; width: 100%; min-width: 0; max-width: 100%; }
+.leg-schedules input[type="date"], .leg-schedules input[type="time"] { appearance: none; -webkit-appearance: none; min-height: 48px; }
+.leg-schedules input::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+.leg-carrier-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; min-width: 0; }
+.leg-cabin-quotes { min-width: 0; }
 .leg-event-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
-@media (max-width: 480px) {
-  .leg-event-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 619px) {
+  .leg-event-grid, .leg-carrier-grid { grid-template-columns: minmax(0, 1fr); }
   .leg-event-date { grid-column: 1 / -1; }
 }
 .stopover-fields, .advanced-filters fieldset, #destinationStayFields {
@@ -217,6 +223,7 @@ h2 {
 
 .search-form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 14px;
   border: 1px solid var(--line);

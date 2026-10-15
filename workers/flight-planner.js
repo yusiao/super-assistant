@@ -24,12 +24,38 @@ function integer(value, fallback, min, max, label) {
 export const hasLegDates = (p) => Array.isArray(p.legTimeWindows) && p.legTimeWindows.some((w) => w?.departureDate || w?.arrivalDate);
 const legPreferences = (p, index) => ({ ...p, ...Object.fromEntries(Object.entries(p.legTimeWindows?.[index] || {}).filter(([, value]) => value)) });
 
+function normalizedFlightNumber(value) {
+  const match = String(value || "").toUpperCase().replace(/[\s-]/g, "").match(/^([A-Z][A-Z0-9]|[0-9][A-Z])(\d{1,4})([A-Z]?)$/);
+  return match ? `${match[1]}${Number(match[2])}${match[3]}` : "";
+}
+
 function validateLegWindows(p) {
   const count = p.journeyType === "multicity" ? (p.includeReturn ? 3 : 2) : (p.tripDays > 0 ? 2 : 1);
   if (p.legTimeWindows !== undefined && (!Array.isArray(p.legTimeWindows) || p.legTimeWindows.length > count)) invalid("各段日期時段與旅程段數不符。");
   p.legTimeWindows = (p.legTimeWindows || []).map((window, index) => {
     if (!window || typeof window !== "object" || Array.isArray(window)) invalid("各段日期時段格式錯誤。");
     const result = {};
+    if (window.departureDateAlternative) {
+      const alternate = String(window.departureDateAlternative);
+      if (index !== 0 || !window.departureDate || !validDate(alternate) || alternate < new Date().toISOString().slice(0, 10)) invalid("另一出發日須為首段的有效未來日期，並填入原出發日。");
+      if (p.fixedDepartureDate) invalid("比較兩個出發日請將上方日期條件改為彈性日期。");
+      if (alternate !== window.departureDate) result.departureDateAlternative = alternate;
+    }
+    if (window.airline) {
+      const raw = String(window.airline).trim();
+      const code = /^(?:[A-Z][A-Z0-9]|[0-9][A-Z])$/i.test(raw) ? raw.toUpperCase()
+        : Object.keys(airlineNames).find((key) => airlineNames[key].test(raw));
+      if (!code) invalid(`第 ${index + 1} 段航空公司無法辨識，請輸入兩碼 IATA 代碼。`);
+      result.airline = code;
+    }
+    if (window.flightNumbers) {
+      const values = Array.isArray(window.flightNumbers) ? window.flightNumbers : String(window.flightNumbers).split(/[,，、;；\n]+/);
+      result.flightNumbers = values.map(normalizedFlightNumber);
+      if (!result.flightNumbers.length || result.flightNumbers.length > 6 || result.flightNumbers.some((number) => !number)) invalid(`第 ${index + 1} 段航班號碼格式錯誤，最多 6 班並以逗號分隔。`);
+      if (result.airline && result.flightNumbers.some((number) => result.airline !== number.slice(0, 2))) invalid(`第 ${index + 1} 段航空公司與航班代碼衝突。`);
+    }
+    const carriers = [result.airline, ...(result.flightNumbers || []).map((number) => number.slice(0, 2))].filter(Boolean);
+    if (carriers.some((carrier) => p.excludedAirlines.includes(carrier))) invalid(`第 ${index + 1} 段指定的航空公司也被勾選為不搭。`);
     for (const event of ["departure", "arrival"]) {
       const date = String(window[`${event}Date`] || "");
       const from = String(window[`${event}TimeFrom`] || "");
@@ -45,13 +71,19 @@ function validateLegWindows(p) {
   for (const [index, key] of [[0, "fixedDepartureDate"], ...(count > 1 && (p.journeyType !== "multicity" || p.includeReturn) ? [[count - 1, "fixedReturnDate"]] : [])]) {
     const date = p.legTimeWindows[index]?.departureDate;
     if (date && p[key] && date !== p[key]) invalid("各段出發日期與上方固定日期衝突。");
-    if (date) p[key] = date;
+    if (date && !p.legTimeWindows[index]?.departureDateAlternative) p[key] = date;
   }
   if (p.fixedDepartureDate && p.fixedReturnDate) {
     const days = dateDifference(p.fixedDepartureDate, p.fixedReturnDate);
     if (days < 1 || days > 60) invalid("回程須晚於出發，且行程不超過 60 天。");
     if (p.journeyType !== "multicity") p.tripDays = days;
     p.compareDurations = false;
+  }
+  if (p.legTimeWindows[0]?.departureDateAlternative && p.fixedReturnDate) {
+    if ([p.legTimeWindows[0].departureDate, p.legTimeWindows[0].departureDateAlternative].some((date) => {
+      const days = dateDifference(date, p.fixedReturnDate);
+      return days < 1 || days > 60;
+    })) invalid("兩個出發日皆須早於回程日，且行程不超過 60 天。");
   }
   if (hasLegDates(p)) p.compareDurations = false;
 }
@@ -168,6 +200,15 @@ const airlineNames = {
 export function matchesFlightPreferences(item, p) {
   const segments = item.segments || [];
   if (!segments.length) return false;
+  if (p.airline && segments.some((segment) => {
+    const code = normalizedFlightNumber(segment.flightNumber).slice(0, 2);
+    return code ? code !== p.airline : !airlineNames[p.airline]?.test(segment.airline || "");
+  })) return false;
+  if (p.flightNumbers?.length) {
+    let next = 0;
+    for (const segment of segments) if (normalizedFlightNumber(segment.flightNumber) === p.flightNumbers[next]) next += 1;
+    if (next !== p.flightNumbers.length) return false;
+  }
   const excluded = new Set(p.excludedAirlines || []);
   if (segments.some((s) => {
     const code = String(s.flightNumber || "").match(/^([A-Z0-9]{2})\s*\d/)?.[1];
@@ -179,7 +220,7 @@ export function matchesFlightPreferences(item, p) {
     if (!model) return !p.allowUnknownAircraft;
     return p.excludedAircraft.some((excludedModel) => model.includes(aircraftKey(excludedModel)));
   })) return false;
-  return (!p.departureDate || segments[0].departureTime?.slice(0, 10) === p.departureDate)
+  return (!p.departureDate || [p.departureDate, p.departureDateAlternative].filter(Boolean).includes(segments[0].departureTime?.slice(0, 10)))
     && (!p.arrivalDate || segments.at(-1).arrivalTime?.slice(0, 10) === p.arrivalDate)
     && withinTime(segments[0].departureTime, p.departureTimeFrom, p.departureTimeTo)
     && withinTime(segments.at(-1).arrivalTime, p.arrivalTimeFrom, p.arrivalTimeTo);
@@ -194,6 +235,19 @@ export function flightPreferenceKey(p) {
 
 export function makeJourneyPlans(p, startDate, endDate, tracking = false) {
   if (p.comparisonPlan && !tracking) return [p.comparisonPlan];
+  const alternate = p.legTimeWindows?.[0]?.departureDateAlternative;
+  if (alternate) {
+    const dates = [p.legTimeWindows[0].departureDate, alternate].sort();
+    const selected = tracking ? [dates[Math.floor(Date.now() / DAY) % dates.length]] : dates;
+    const perDate = selected.map((date) => {
+      const first = { ...p.legTimeWindows[0], departureDate: date };
+      delete first.departureDateAlternative;
+      const exact = { ...p, fixedDepartureDate: date, legTimeWindows: [first, ...p.legTimeWindows.slice(1)] };
+      return makeJourneyPlans(exact, date, date, tracking);
+    });
+    // Round-robin keeps both requested departure dates in the bounded candidate set.
+    return Array.from({ length: Math.max(...perDate.map((plans) => plans.length)) }, (_, i) => perDate.map((plans) => plans[i]).filter(Boolean)).flat().slice(0, 4);
+  }
   const multi = p.journeyType === "multicity";
   const anchor = (plan) => {
     if (p.fixedReturnDate && multi) plan = { ...plan, date: p.fixedDepartureDate || addDateDays(p.fixedReturnDate, -plan.nights - plan.destinationNights), thirdDate: p.fixedReturnDate };
@@ -224,11 +278,16 @@ export function makeJourneyPlans(p, startDate, endDate, tracking = false) {
     return [anchor({ date: addDateDays(startDate, offset), nights: multi ? p.stopoverMinNights + day % (p.stopoverMaxNights - p.stopoverMinNights + 1) : 0,
       destinationNights: multi && p.includeReturn ? p.destinationMinNights + Math.floor(day / (p.stopoverMaxNights - p.stopoverMinNights + 1)) % (p.destinationMaxNights - p.destinationMinNights + 1) : 0 })];
   }
-  if (plans.length <= 4) return plans;
-  return [0, Math.round((plans.length - 1) / 3), Math.round((plans.length - 1) * 2 / 3), plans.length - 1].map((index) => plans[index]);
+  const unique = [...new Map(plans.map((plan) => [JSON.stringify([plan.date, plan.secondDate || plan.nights, plan.thirdDate || plan.destinationNights, plan.returnDate]), plan])).values()];
+  if (unique.length <= 4) return unique;
+  return [0, Math.round((unique.length - 1) / 3), Math.round((unique.length - 1) * 2 / 3), unique.length - 1].map((index) => unique[index]);
 }
 
 export function flightDateRange(p, today) {
+  if (p.legTimeWindows?.[0]?.departureDateAlternative) {
+    const dates = [p.legTimeWindows[0].departureDate, p.legTimeWindows[0].departureDateAlternative].sort();
+    return { startDate: dates[0], endDate: dates[1] };
+  }
   if (p.fixedDepartureDate) return { startDate: p.fixedDepartureDate, endDate: p.fixedDepartureDate };
   if (p.fixedReturnDate) {
     const days = p.journeyType === "multicity" ? p.stopoverMinNights + p.destinationMinNights : p.tripDays;
@@ -260,7 +319,20 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   if (!multi && p.tripDays > 0) legs.push({ departure_id: p.arrivalId, arrival_id: p.departureId, date: p.fixedReturnDate || plan.returnDate || addDateDays(plan.date, p.tripDays) });
   if (legs.some((leg, i) => i > 0 && leg.date <= legs[i - 1].date)) return null;
   const legFilters = legs.map((_, index) => providerFlightFilters(legPreferences(p, index), lowCostCodes));
-  const filters = legFilters[0];
+  const filters = { ...legFilters[0] };
+  const carriers = legs.map((_, index) => {
+    const window = p.legTimeWindows?.[index];
+    return window?.airline;
+  });
+  const requiredCarriers = [...carriers, ...(p.legTimeWindows || []).flatMap((window) => (window.flightNumbers || []).map((number) => number.slice(0, 2)))];
+  for (const carrier of requiredCarriers.filter(Boolean)) {
+    if ((p.airlineType === "low_cost" && !lowCostCodes.has(carrier)) || (p.airlineType === "full_service" && lowCostCodes.has(carrier))) invalid("指定航空公司與航空類型條件衝突，請改選全部或調整指定航空公司。");
+  }
+  // The provider's carrier filter is journey-wide. A union is safe only when every leg is constrained.
+  if (carriers.every(Boolean)) {
+    delete filters.exclude_airlines;
+    filters.include_airlines = [...new Set(carriers)].join(",");
+  }
   const params = { engine: "google_flights", currency: p.currency || "TWD", hl: (p.locale || "zh-TW").toLowerCase(),
     gl: (p.market || "TW").toLowerCase(), travel_class: cabin.code, sort_by: "2", ...filters,
     type: multi ? "3" : legs.length === 2 ? "1" : "2" };

@@ -38,7 +38,8 @@ class PriceWatchTests(unittest.TestCase):
         planner = {"departureId": "TPE,TSA", "arrivalId": "LAX", "stopoverId": "NRT", "journeyType": "multicity",
                    "excludedAircraft": ["737 MAX"], "excludedAirlines": ["CI"], "departureTimeFrom": "08:30",
                    "dateConstraint": "both", "fixedDepartureDate": "2027-01-01", "fixedReturnDate": "2027-01-08",
-                   "legTimeWindows": [{"arrivalDate": "2027-01-02", "arrivalTimeFrom": "06:00", "arrivalTimeTo": "09:30"}]}
+                   "legTimeWindows": [{"arrivalDate": "2027-01-02", "arrivalTimeFrom": "06:00", "arrivalTimeTo": "09:30"},
+                                      {"airline": "MU", "flightNumbers": ["MU5616", "MU5005"]}]}
         config = {"PRICE_WATCH_REMOTE_URL": "https://example.com/api/price-watch/watches", "PRICE_WATCH_ACCESS_TOKEN": "test"}
         quoted = {"price": 10000, "currency": "TWD", "itineraryComplete": True, "stopoverNights": 3,
                   "legs": [{"departureAirport": "TPE", "arrivalAirport": "NRT", "departure": "2027-01-01 09:00"}]}

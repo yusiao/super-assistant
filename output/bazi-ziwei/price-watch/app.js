@@ -502,14 +502,15 @@ function resultCard(item) {
     ${journeyDetails(item)}
     ${item.differentReturnAirport ? `<p class="airport-change">去回不同機場：${escapeHtml(item.departureAirport)} 出發，${escapeHtml(item.legs.at(-1).arrivalAirport)} 返回</p>` : ""}
     ${(item.airportChanges || []).map((change) => `<p class="airport-change">停留期間需自行更換機場：${escapeHtml(change.arrivalAirport)} → ${escapeHtml(change.departureAirport)}</p>`).join("")}
-    <div class="cabin-comparison">${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
+    <div class="cabin-comparison">${item.legs?.length > 1 && item.cabinPrices ? '<p class="fare-note">整趟行程艙等總價</p>' : ""}${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
     <p class="upgrade-status">里程升等：待確認票種與各航段升等名額</p>
     <div class="action-row flight-actions">
       ${purchaseActions}${!item.cabinPrices ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
     </div>
   `;
   card.querySelector(".track-button")?.addEventListener("click", () => trackResult(item));
-  card.querySelector(".compare-button")?.addEventListener("click", (event) => compareCabins(item, card, event.currentTarget));
+  card.querySelector(".compare-button:not([data-leg-cabins])")?.addEventListener("click", (event) => compareCabins(item, card, event.currentTarget));
+  card.querySelectorAll("[data-leg-cabins]").forEach((button) => button.addEventListener("click", () => compareLegCabins(item, Number(button.dataset.legCabins), button)));
   return card;
 }
 
@@ -525,6 +526,8 @@ function journeyDetails(item) {
       </div>`).join("")}
       ${item.journeyType === "multicity" && index === 0 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.stopoverNights)} 晚</p>` : ""}
       ${item.destinationNights != null && index === 1 ? `<p class="stay-label">${escapeHtml(leg.arrivalAirport)} 停留 ${escapeHtml(item.destinationNights)} 晚</p>` : ""}
+      <button type="button" class="compare-button" data-leg-cabins="${index}">查此段艙等</button>
+      <div class="leg-cabin-quotes" aria-live="polite"></div>
     </section>`).join("");
   const codes = new Set((item.segments || []).map((s) => s.flightNumber?.slice(0, 2)));
   const rules = [
@@ -536,7 +539,80 @@ function journeyDetails(item) {
 
 function cabinComparisonHtml(prices, currency) {
   if (!prices?.length) return "";
-  return `<dl class="inline-cabins">${prices.map((cabin) => `<div><dt>${escapeHtml(cabin.label)}</dt><dd>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</dd>${cabin.legs?.[0] ? `<small>${escapeHtml(cabin.legs[0].departureAirport)} 出發</small>` : ""}</div>`).join("")}</dl><small class="fare-note">同日期不同艙等最低報價，航班與機場可能不同</small>`;
+  return `<dl class="inline-cabins">${prices.map((cabin) => `<div><dt>${escapeHtml(cabin.label)}</dt><dd>${cabin.available ? escapeHtml(cabin.priceText || money(cabin.price, currency)) : cabin.status === "failed" ? "查詢失敗" : "未取得報價"}</dd>${cabin.legs?.[0] ? `<small>${escapeHtml(cabin.legs[0].departureAirport)} 出發</small>` : ""}</div>`).join("")}</dl><small class="fare-note">同日期、符合條件的艙等報價；未鎖定班號的航班可能不同</small>`;
+}
+
+async function compareLegCabins(item, index, button) {
+  const original = item.searchPayload || state.lastFlightPayload;
+  const leg = item.legs[index];
+  const window = { ...(original.legTimeWindows?.[index] || {}), departureDate: leg.departureDate };
+  delete window.departureDateAlternative;
+  const quotes = button.nextElementSibling;
+  button.disabled = true;
+  button.textContent = "查詢中…";
+  try {
+    const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
+      ...original, type: "flight", journeyType: "simple", includeReturn: false, tripDays: 0, compareDurations: false,
+      departureId: leg.departureAirport, arrivalId: leg.arrivalAirport, dateConstraint: "departure",
+      fixedDepartureDate: leg.departureDate, fixedReturnDate: "", flightMode: "date_window", startDate: leg.departureDate,
+      lookaheadDays: 0, comparisonPlan: undefined, legTimeWindows: [window],
+    }) });
+    quotes.innerHTML = `<p class="fare-note">單段另購報價，不可相加視為聯程總價</p>${cabinComparisonHtml(response.insights?.cabinPrices, item.currency)}`;
+    button.textContent = "重新查此段艙等";
+  } catch (error) {
+    quotes.textContent = searchErrorMessage(error, "此段艙等暫時無法查詢。");
+    button.textContent = "重試此段艙等";
+  } finally { button.disabled = false; }
+}
+
+const tripLinkFields = ["journeyType", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "routeType", "currency", "market"];
+function applyTripFromLink() {
+  if (!location.hash.startsWith("#trip=")) return;
+  try {
+    if (location.hash.length > 12000) throw new Error();
+    const trip = JSON.parse(decodeURIComponent(location.hash.slice(6)));
+    const form = elements.flightForm;
+    if (!trip || !Array.isArray(trip.legTimeWindows) || trip.legTimeWindows.length > 3) throw new Error();
+    for (const key of tripLinkFields) if (trip[key] !== undefined) {
+      if (key === "includeReturn") form.elements[key].checked = trip[key] === true;
+      else form.elements[key].value = String(trip[key]).slice(0, 100);
+    }
+    for (const key of ["excludedAirlines", "excludedAircraft"]) {
+      const selected = Array.isArray(trip[key]) ? trip[key] : [];
+      form.querySelectorAll(`[name="${key}"]`).forEach((input) => { input.checked = selected.includes(input.value); });
+    }
+    for (const key of ["otherExcludedAirlines", "otherExcludedAircraft"]) form.elements[key].value = String(trip[key] || "").slice(0, 500);
+    form.elements.allowUnknownAircraft.checked = trip.allowUnknownAircraft === true;
+    if (!["simple", "oneway", "multicity"].includes(form.elements.journeyType.value)) throw new Error();
+    for (const key of ["departureId", "stopoverId", "arrivalId"]) if (trip[key]) {
+      const code = normalizeAirportCodes(trip[key]);
+      if (!code) throw new Error();
+      selectPlace(form.elements[key], airportDirectory.find((place) => place.iataCode === code) || { iataCode: code, name: code });
+    }
+    form.querySelector('[name="journeyType"]:checked').dispatchEvent(new Event("change"));
+    document.querySelectorAll("[data-leg-role]").forEach((fieldset, index) => {
+      const window = trip.legTimeWindows[index] || {};
+      fieldset.querySelectorAll("[data-window-field]").forEach((input) => { input.value = String(window[input.dataset.windowField] || "").slice(0, 100); });
+    });
+    setFlightMode(trip.flightMode === "date_window" ? "date_window" : "annual_low");
+    document.querySelector(".leg-schedules").open = true;
+    setStatus("行程已帶入，請確認後搜尋");
+  } catch { setStatus("行程連結格式不正確，請重新填寫條件", "error"); }
+}
+
+async function copyTripLink() {
+  const form = elements.flightForm;
+  const trip = Object.fromEntries(tripLinkFields.map((key) => [key, key === "includeReturn" ? form.elements[key].checked : form.elements[key].value]));
+  for (const key of ["departureId", "arrivalId", "stopoverId"]) trip[key] = selectedPlaceCode(form.elements[key]);
+  trip.flightMode = state.flightMode;
+  trip.legTimeWindows = readLegWindows();
+  for (const key of ["excludedAirlines", "excludedAircraft"]) trip[key] = [...form.querySelectorAll(`[name="${key}"]:checked`)].map((input) => input.value);
+  for (const key of ["otherExcludedAirlines", "otherExcludedAircraft"]) trip[key] = form.elements[key].value;
+  trip.allowUnknownAircraft = form.elements.allowUnknownAircraft.checked;
+  const url = new URL(location.href);
+  url.hash = `trip=${encodeURIComponent(JSON.stringify(trip))}`;
+  try { await navigator.clipboard.writeText(url.href); setStatus("行程連結已複製（不含同步金鑰）"); }
+  catch { setStatus("無法複製，請允許瀏覽器使用剪貼簿", "error"); }
 }
 
 async function compareCabins(item, card, button) {
@@ -551,7 +627,7 @@ async function compareCabins(item, card, button) {
     const prices = response.insights?.cabinPrices;
     if (!response.results?.length) throw new Error("目前未取得相同日期的完整行程報價。");
     item.cabinPrices = prices;
-    card.querySelector(".cabin-comparison").innerHTML = cabinComparisonHtml(prices, item.currency);
+    card.querySelector(".cabin-comparison").innerHTML = `${item.legs?.length > 1 ? '<p class="fare-note">整趟行程艙等總價</p>' : ""}${cabinComparisonHtml(prices, item.currency)}`;
     button.remove();
   } catch (error) {
     button.disabled = false;
@@ -566,6 +642,7 @@ function setupJourneyFields() {
     ["CX", "國泰"], ["UO", "香港快運"], ["MU", "中國東方航空"], ["JL", "日本航空"], ["NH", "全日空"], ["KE", "大韓航空"], ["SQ", "新加坡航空"]];
   document.querySelector("#aircraftChoices").innerHTML = aircraft.map((model) => `<label class="check-option"><input type="checkbox" name="excludedAircraft" value="${model}" /><span>${model}</span></label>`).join("");
   document.querySelector("#airlineChoices").innerHTML = airlines.map(([code, name]) => `<label class="check-option"><input type="checkbox" name="excludedAirlines" value="${code}" /><span>${name} ${code}</span></label>`).join("");
+  document.querySelector("#airlineSuggestions").innerHTML = airlines.map(([code, name]) => `<option value="${code}">${name}</option>`).join("");
   const update = () => {
     const form = elements.flightForm;
     const multi = form.elements.journeyType.value === "multicity";
@@ -608,7 +685,11 @@ function renderLegWindows() {
         <label class="leg-event-date"><span>${title}日期（選填）</span><input type="date" data-window-field="${key}Date" value="${escapeHtml(values[`${key}Date`] || "")}" /></label>
         <label><span>${title}從</span><input type="time" data-window-field="${key}TimeFrom" value="${escapeHtml(values[`${key}TimeFrom`] || "")}" /></label>
         <label><span>${title}至</span><input type="time" data-window-field="${key}TimeTo" value="${escapeHtml(values[`${key}TimeTo`] || "")}" /></label>
-      </div>`).join("")}</fieldset>`;
+      </div>${key === "departure" && role === "outbound" ? `<label><span>另一出發日（擇低價，選填）</span><input type="date" data-window-field="departureDateAlternative" value="${escapeHtml(values.departureDateAlternative || "")}" /></label>` : ""}`).join("")}
+      <div class="leg-carrier-grid">
+        <label><span>指定航空公司（選填）</span><input list="airlineSuggestions" data-window-field="airline" placeholder="MU／中國東方航空" value="${escapeHtml(values.airline || "")}" maxlength="80" /></label>
+        <label><span>必搭班號（依序，逗號分隔，選填）</span><input data-window-field="flightNumbers" placeholder="MU5616, MU5005" value="${escapeHtml(String(values.flightNumbers || ""))}" maxlength="100" autocapitalize="characters" spellcheck="false" /></label>
+      </div></fieldset>`;
   }).join("");
   document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
   updateDateFields();
@@ -870,7 +951,7 @@ function setFlightMode(mode) {
 
 function dateConstraintLabel(flight) {
   return [flight.fixedDepartureDate ? `${flight.fixedDepartureDate} 出發` : "", flight.fixedReturnDate ? `${flight.fixedReturnDate} 回程起飛` : "",
-    ...(flight.legTimeWindows || []).flatMap((w, index) => [w.departureDate ? `第${index + 1}段 ${w.departureDate} 出發` : "", w.arrivalDate ? `第${index + 1}段 ${w.arrivalDate} 抵達` : ""])].filter(Boolean).join(" · ");
+    ...(flight.legTimeWindows || []).flatMap((w, index) => [w.departureDate ? `第${index + 1}段 ${w.departureDate}${w.departureDateAlternative ? ` 或 ${w.departureDateAlternative}` : ""} 出發` : "", w.arrivalDate ? `第${index + 1}段 ${w.arrivalDate} 抵達` : "", w.airline || "", String(w.flightNumbers || "")])].filter(Boolean).join(" · ");
 }
 
 function updateDateFields() {
@@ -1011,9 +1092,12 @@ function boot() {
   renderActiveView();
   renderSaved();
   setFlightMode("annual_low");
+  applyTripFromLink();
+  window.addEventListener("hashchange", applyTripFromLink);
+  document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=14").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=15").catch(() => {});
   }
 }
 

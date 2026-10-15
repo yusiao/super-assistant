@@ -11,7 +11,7 @@
     <title>航班助手</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css?v=18" />
+    <link rel="stylesheet" href="./styles.css?v=20" />
   </head>
   <body>
     <main class="app-shell">
@@ -113,6 +113,7 @@
           <details class="leg-schedules">
             <summary>各段出發／抵達日期與時段（當地時間）</summary>
             <div id="legScheduleFields"></div>
+            <datalist id="airlineSuggestions"></datalist>
           </details>
           <fieldset class="filter-fieldset">
             <legend>航空類型</legend>
@@ -182,6 +183,7 @@
             </label>
           </div>
           <button class="primary-button" id="flightSubmitButton" type="submit">探索未來一年低價</button>
+          <button class="ghost-button" id="copyTripLinkButton" type="button">複製行程連結</button>
           <div class="search-feedback" id="flightSearchFeedback" aria-live="polite" hidden>
             <div class="progress-track" id="flightProgressTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
               <span id="flightProgressBar"></span>
@@ -259,6 +261,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=19" type="module"></script>
+    <script src="./app.js?v=20" type="module"></script>
   </body>
 </html>

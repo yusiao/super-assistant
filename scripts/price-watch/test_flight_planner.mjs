@@ -282,6 +282,94 @@ test("China Eastern is searchable by default and excluded by code or localized o
   } finally { h.restore(); }
 });
 
+test("per-leg required airlines and ordered flight numbers are validated and applied without guessing codeshares", async () => {
+  const p = validateFlightPreferences({ ...base, legTimeWindows: [{ airline: "中國東方航空", flightNumbers: "mu 5616, MU-5005" }] });
+  assert.equal(p.legTimeWindows[0].airline, "MU");
+  assert.deepEqual(p.legTimeWindows[0].flightNumbers, ["MU5616", "MU5005"]);
+  const preferences = { ...p, ...p.legTimeWindows[0] };
+  const segments = [{ flightNumber: "MU 5616" }, { flightNumber: "MU 5005" }];
+  assert.equal(matchesFlightPreferences({ segments }, preferences), true);
+  assert.equal(matchesFlightPreferences({ segments: [...segments].reverse() }, preferences), false);
+  assert.equal(matchesFlightPreferences({ segments: [segments[0]] }, preferences), false);
+  assert.equal(matchesFlightPreferences({ segments: [{ flightNumber: "CI 5005", operatingAirlineCode: "MU" }] }, preferences), false);
+  const h = harness();
+  try {
+    for (const window of [{ flightNumbers: "BAD" }, { airline: "MU", flightNumbers: "BR123" }, { airline: "unknown carrier" }, { flightNumbers: ["MU5616", ""] }]) {
+      assert.equal((await h.request({ ...base, legTimeWindows: [window] })).status, 400);
+    }
+    assert.equal((await h.request({ ...base, excludedAirlines: ["MU"], legTimeWindows: [{ flightNumbers: "MU5616" }] })).status, 400);
+    assert.equal((await h.request({ ...base, airlineType: "low_cost", legTimeWindows: [{ airline: "MU" }] })).status, 400);
+    assert.equal(h.calls.length, 0);
+  } finally { h.restore(); }
+});
+
+test("two departure days preserve Shanghai deadline and ordered Harbin return flights across cabins and tracking", async () => {
+  const payload = { ...multi, departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB", flightMode: "date_window", startDate: "",
+    stopoverMinNights: 3, stopoverMaxNights: 4, includeReturn: true, destinationMinNights: 7, destinationMaxNights: 7,
+    legTimeWindows: [
+      { departureDate: "2027-01-05", departureDateAlternative: "2027-01-06" },
+      { departureDate: "2027-01-09", arrivalDate: "2027-01-09", arrivalTimeTo: "19:30" },
+      { departureDate: "2027-01-16", flightNumbers: "MU5616, MU5005" },
+    ] };
+  const h = harness((data, params, index) => {
+    const legs = JSON.parse(params.multi_city_json);
+    const flight = data.best_flights[0].flights[0];
+    data.best_flights[0].price += legs[0].date === "2027-01-05" ? 1500 : 0;
+    if (index === 1) {
+      flight.arrival_airport.time = `${legs[index].date} 19:30`;
+      const late = structuredClone(data.best_flights[0]);
+      late.flights[0].arrival_airport.time = `${legs[index].date} 19:31`;
+      late.price = 1;
+      data.best_flights.unshift(late);
+    }
+    if (index === 2) {
+      const onward = structuredClone(flight);
+      flight.flight_number = "MU 5616";
+      flight.airline = "China Eastern";
+      flight.arrival_airport = { id: "PVG", time: "2027-01-16 12:00" };
+      onward.flight_number = "MU 5005";
+      onward.airline = "China Eastern";
+      onward.departure_airport = { id: "PVG", time: "2027-01-16 15:00" };
+      onward.arrival_airport.time = "2027-01-16 17:00";
+      data.best_flights[0].flights.push(onward);
+      const wrong = structuredClone(data.best_flights[0]);
+      wrong.flights[1].flight_number = "MU 5007";
+      wrong.price = 1;
+      data.best_flights.unshift(wrong);
+    }
+    return data;
+  });
+  try {
+    const { status, data } = await h.request(payload);
+    assert.equal(status, 200);
+    assert.deepEqual(data.results.map((result) => result.departureDate), ["2027-01-06", "2027-01-05"]);
+    assert.ok(data.results.every((result) => result.returnDate === "2027-01-16" && result.legs[1].arrival === "2027-01-09 19:30"));
+    assert.equal(data.insights.cabinPrices.length, 3);
+    assert.ok(data.insights.cabinPrices.every((cabin) => cabin.available && cabin.legs[2].segments[1].flightNumber === "MU 5005"));
+    assert.ok(h.calls.length <= 24);
+    assert.ok(h.calls.every((params) => !params.include_airlines), "Return-only constraint must not restrict the unconstrained outbound legs");
+    const saved = await h.request(payload, "watches");
+    const planner = saved.data.watch.sources[0].planner;
+    assert.equal(planner.legTimeWindows[0].departureDateAlternative, "2027-01-06");
+    assert.deepEqual(planner.legTimeWindows[2].flightNumbers, ["MU5616", "MU5005"]);
+    const tracked = await h.request({ ...planner, trackingSample: true });
+    assert.equal(tracked.data.results.length, 1);
+    assert.equal(tracked.data.results[0].returnDate, "2027-01-16");
+  } finally { h.restore(); }
+});
+
+test("all-leg carrier filters use a safe union while each leg is checked independently", async () => {
+  const h = harness((data, params, index) => {
+    data.best_flights[0].flights[0].flight_number = index ? "MU 123" : "BR 123";
+    return data;
+  });
+  try {
+    const { data } = await h.request({ ...base, tripDays: 5, legTimeWindows: [{ airline: "br" }, { airline: "mu" }] });
+    assert.ok(data.results.length);
+    assert.ok(h.calls.every((p) => p.include_airlines === "BR,MU" && !p.exclude_airlines));
+  } finally { h.restore(); }
+});
+
 test("time windows enforce exact local minutes, including overnight windows", () => {
   const p = validateFlightPreferences({ ...base, departureTimeFrom: "22:30", departureTimeTo: "06:00", arrivalTimeFrom: "08:00", arrivalTimeTo: "10:15" });
   const item = (dep, arr) => ({ segments: [{ departureTime: `${date} ${dep}`, arrivalTime: `${date} ${arr}` }] });
