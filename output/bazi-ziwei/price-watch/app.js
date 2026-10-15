@@ -565,6 +565,39 @@ async function compareLegCabins(item, index, button) {
   } finally { button.disabled = false; }
 }
 
+async function quoteFormLeg(index, button) {
+  const form = elements.flightForm;
+  const data = Object.fromEntries(new FormData(form));
+  const multi = data.journeyType === "multicity";
+  const routes = multi ? [["departureId", "stopoverId"], ["stopoverId", "arrivalId"], ["arrivalId", "departureId"]]
+    : [["departureId", "arrivalId"], ["arrivalId", "departureId"]];
+  const window = { ...readLegWindows()[index] };
+  if (!window.departureDate && index === 0 && ["departure", "both"].includes(data.dateConstraint)) window.departureDate = data.fixedDepartureDate;
+  if (!window.departureDate && index === (multi ? 2 : 1) && ["return", "both"].includes(data.dateConstraint)) window.departureDate = data.fixedReturnDate;
+  const quotes = button.nextElementSibling;
+  button.disabled = true;
+  button.textContent = "查詢中…";
+  try {
+    if (!window.departureDate && !window.arrivalDate) throw new Error("請先填這一段的出發或抵達日期。");
+    const [departureId, arrivalId] = await Promise.all(routes[index].map((key) => resolvePlaceCode(form.elements[key])));
+    const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
+      type: "flight", journeyType: "simple", tripDays: 0, compareDurations: false, departureId, arrivalId,
+      flightMode: "date_window", dateConstraint: "flexible", startDate: "", legTimeWindows: [window],
+      airlineType: data.airlineType, routeType: data.routeType, currency: data.currency, market: data.market,
+      excludedAirlines: [...new FormData(form).getAll("excludedAirlines"), ...(data.otherExcludedAirlines || "").split(/[,，\s]+/).filter(Boolean)],
+      excludedAircraft: [...new FormData(form).getAll("excludedAircraft"), ...(data.otherExcludedAircraft || "").split(/[,，]+/).map((s) => s.trim()).filter(Boolean)],
+      allowUnknownAircraft: form.elements.allowUnknownAircraft.checked,
+    }) });
+    const prices = response.insights?.cabinPrices;
+    quotes.innerHTML = `<p class="fare-note">單段另購報價，不可相加視為聯程總價</p>
+      ${(response.results || []).map((item) => `<p class="fare-note">${escapeHtml(item.departureDate)} 經濟艙 ${escapeHtml(item.priceText)}</p>`).join("")}
+      ${response.results?.[0] ? `<p class="fare-note">艙等對照出發日：${escapeHtml(response.results[0].departureDate)}</p>` : ""}
+      ${cabinComparisonHtml(prices, data.currency)}
+      ${!response.results?.length ? '<p class="fare-note">目前未取得符合此段條件的報價，不代表航空公司已售罄。</p>' : ""}`;
+  } catch (error) { quotes.textContent = searchErrorMessage(error, "此段暫時無法查價。"); }
+  finally { button.disabled = false; button.textContent = "單段查價／艙等"; }
+}
+
 const tripLinkFields = ["journeyType", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "routeType", "currency", "market"];
 function applyTripFromLink() {
   if (!location.hash.startsWith("#trip=")) return;
@@ -678,7 +711,7 @@ function renderLegWindows() {
   const roles = multi ? [["outbound", "第 1 段：出發地 A → 停留地 B"], ["onward", "第 2 段：停留地 B → 目的地 C"],
     ...(form.elements.includeReturn.checked ? [["return", "第 3 段：目的地 C → 出發地 A"]] : [])]
     : [["outbound", "去程：出發地 → 目的地"], ...(form.elements.journeyType.value === "oneway" ? [] : [["return", "回程：目的地 → 出發地"]])];
-  document.querySelector("#legScheduleFields").innerHTML = roles.map(([role, label]) => {
+  document.querySelector("#legScheduleFields").innerHTML = roles.map(([role, label], index) => {
     const values = legWindowDrafts.get(role) || {};
     return `<fieldset data-leg-role="${role}"><legend>${label}</legend>${[["departure", "出發"], ["arrival", "抵達"]].map(([key, title]) => `
       <div class="leg-event-grid">
@@ -689,8 +722,9 @@ function renderLegWindows() {
       <div class="leg-carrier-grid">
         <label><span>指定航空公司（選填）</span><input list="airlineSuggestions" data-window-field="airline" placeholder="MU／中國東方航空" value="${escapeHtml(values.airline || "")}" maxlength="80" /></label>
         <label><span>必搭班號（依序，逗號分隔，選填）</span><input data-window-field="flightNumbers" placeholder="MU5616, MU5005" value="${escapeHtml(String(values.flightNumbers || ""))}" maxlength="100" autocapitalize="characters" spellcheck="false" /></label>
-      </div></fieldset>`;
+      </div><button type="button" class="compare-button" data-form-leg="${index}">單段查價／艙等</button><div class="leg-form-quotes" aria-live="polite"></div></fieldset>`;
   }).join("");
+  document.querySelectorAll("[data-form-leg]").forEach((button) => button.addEventListener("click", () => quoteFormLeg(Number(button.dataset.formLeg), button)));
   document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
   updateDateFields();
 }
@@ -1097,7 +1131,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=15").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=16").catch(() => {});
   }
 }
 

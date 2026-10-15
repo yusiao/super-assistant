@@ -141,7 +141,7 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${width}px results overflow`);
     await page.screenshot({ path: join(root, `tmp/flight-planner-results-${width}.png`) });
   }
-  const comparison = page.locator(".compare-button:not([data-leg-cabins])").first();
+  const comparison = page.locator(".result-card .compare-button:not([data-leg-cabins])").first();
   await comparison.click();
   await page.waitForFunction(() => document.querySelectorAll(".inline-cabins").length === 2);
   await page.locator(".track-button").first().click();
@@ -295,6 +295,13 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: join(root, `tmp/flight-trip-${browserName}-${width}.png`) });
   }
+  const standaloneResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+  await page.locator('[data-form-leg="2"]').click();
+  const standalone = await (await standaloneResponse).json();
+  await page.locator('[data-leg-role="return"] .leg-form-quotes .inline-cabins').waitFor();
+  assert.ok(standalone.insights.cabinPrices.every((cabin) => cabin.available));
+  assert.equal(lastSearch.legTimeWindows[0].flightNumbers, 'MU5616, MU5005');
+  assert.equal(lastSearch.departureId, 'HRB');
   const exampleResult = await submit();
   assert.equal(exampleResult.results[0].departureDate, '2027-01-06');
   assert.equal(exampleResult.results[1].departureDate, '2027-01-05');
