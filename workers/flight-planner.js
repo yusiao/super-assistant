@@ -32,7 +32,8 @@ function normalizedFlightNumber(value) {
 function validateLegWindows(p) {
   const count = p.journeyType === "multicity" ? (p.includeReturn ? 3 : 2) : (p.tripDays > 0 ? 2 : 1);
   if (p.legTimeWindows !== undefined && (!Array.isArray(p.legTimeWindows) || p.legTimeWindows.length > count)) invalid("各段日期時段與旅程段數不符。");
-  p.legTimeWindows = (p.legTimeWindows || []).map((window, index) => {
+  const windows = p.journeyAirline ? Array.from({ length: count }, (_, index) => p.legTimeWindows?.[index] || {}) : (p.legTimeWindows || []);
+  p.legTimeWindows = windows.map((window, index) => {
     if (!window || typeof window !== "object" || Array.isArray(window)) invalid("各段日期時段格式錯誤。");
     const result = {};
     if (window.departureDateAlternative) {
@@ -41,11 +42,12 @@ function validateLegWindows(p) {
       if (p.fixedDepartureDate) invalid("比較兩個出發日請將上方日期條件改為彈性日期。");
       if (alternate !== window.departureDate) result.departureDateAlternative = alternate;
     }
-    if (window.airline) {
-      const raw = String(window.airline).trim();
+    if (window.airline || p.journeyAirline) {
+      const raw = String(window.airline || p.journeyAirline).trim();
       const code = /^(?:[A-Z][A-Z0-9]|[0-9][A-Z])$/i.test(raw) ? raw.toUpperCase()
         : Object.keys(airlineNames).find((key) => airlineNames[key].test(raw));
       if (!code) invalid(`第 ${index + 1} 段航空公司無法辨識，請輸入兩碼 IATA 代碼。`);
+      if (p.journeyAirline && code !== p.journeyAirline) invalid(`第 ${index + 1} 段與全程指定航空公司不同，請清除全程條件或統一航空公司。`);
       result.airline = code;
     }
     if (window.flightNumbers) {
@@ -90,6 +92,10 @@ function validateLegWindows(p) {
 
 export function validateFlightPreferences(input) {
   const payload = { ...input };
+  const carrier = String(payload.journeyAirline || "").trim();
+  payload.journeyAirline = carrier ? (/^(?:[A-Z][A-Z0-9]|[0-9][A-Z])$/i.test(carrier) ? carrier.toUpperCase()
+    : Object.keys(airlineNames).find((key) => airlineNames[key].test(carrier))) : "";
+  if (carrier && !payload.journeyAirline) invalid("全程航空公司無法辨識，請輸入兩碼 IATA 代碼。");
   payload.ticketMode = payload.ticketMode === "separate" ? "separate" : "auto";
   for (const key of ["departureId", "arrivalId", ...(payload.journeyType === "multicity" ? ["stopoverId"] : [])]) {
     payload[key] = normalizeAirportCodes(payload[key]);

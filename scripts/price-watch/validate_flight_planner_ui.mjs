@@ -34,6 +34,10 @@ globalThis.fetch = async (url) => {
       departure_airport: { id: leg.departure_id.split(",").at(-1), time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
   }] };
   if (legs[0].date === "2027-01-05") data.best_flights[0].price += 1500;
+  if (p.include_airlines === "MU") {
+    data.best_flights[0].flights[0].flight_number = "MU 100";
+    data.best_flights[0].flights[0].airline = "中國東方航空";
+  }
   if (leg.departure_id === "HRB") {
     const first = data.best_flights[0].flights[0];
     const second = structuredClone(first);
@@ -283,6 +287,29 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/#trip=${encodeURIComponent(JSON.stringify(exampleTrip))}`);
   await page.locator('#statusText').filter({ hasText: '行程已帶入' }).waitFor();
   assert.equal(await page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]').inputValue(), 'MU5616, MU5005');
+  const firstDeparture = page.locator('[data-leg-role="outbound"] [data-window-field="departureDate"]');
+  const firstArrival = page.locator('[data-leg-role="outbound"] [data-window-field="arrivalDate"]');
+  await page.setViewportSize({ width: 390, height: 900 });
+  await firstArrival.click();
+  assert.equal(await page.locator('.flatpickr-calendar.open .cur-year').inputValue(), '2027');
+  assert.equal(await page.locator('.flatpickr-calendar.open .flatpickr-monthDropdown-months').inputValue(), '0');
+  assert.equal(await firstArrival.inputValue(), '', 'Opening a month must not impose an arrival day');
+  await page.screenshot({ path: join(root, `tmp/flight-calendar-${browserName}-390.png`) });
+  await firstArrival.press('Escape');
+  await firstDeparture.fill('2027-12-31');
+  await firstDeparture.press('Tab');
+  await firstArrival.click();
+  assert.equal(await page.locator('.flatpickr-calendar.open .flatpickr-monthDropdown-months').inputValue(), '11');
+  await page.locator('.flatpickr-calendar.open .flatpickr-next-month').click();
+  await page.locator('.flatpickr-calendar.open [aria-label="2028年01月01日"]').click();
+  assert.equal(await firstArrival.inputValue(), '2028-01-01');
+  await firstArrival.click();
+  await page.locator('.flatpickr-calendar.open .date-clear').click();
+  assert.equal(await firstArrival.inputValue(), '');
+  await firstDeparture.fill('2027-01-05');
+  await firstDeparture.press('Tab');
+  await firstDeparture.press('Escape');
+  await page.locator('[name="journeyAirline"]').click();
   for (const width of [320, 360, 375, 390, 430, 600, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await page.locator('.leg-schedules summary').scrollIntoViewIfNeeded();
@@ -330,12 +357,18 @@ try {
   assert.equal(exampleWatch.ticketMode, 'separate');
   assert.deepEqual(exampleWatch.legTimeWindows[2].flightNumbers, ['MU5616', 'MU5005']);
   assert.equal(exampleWatch.legTimeWindows[0].departureDateAlternative, '2027-01-06');
+  await page.locator('[name="journeyAirline"]').fill('mu');
+  const muResult = await submit();
+  assert.equal(lastSearch.journeyAirline, 'mu');
+  assert.ok(muResult.results.length);
+  assert.ok(muResult.results.every((r) => r.segments.every((s) => s.flightNumber.startsWith('MU'))));
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.copiedTripLink = value; } } }));
   await page.locator('#copyTripLinkButton').click();
   const copied = await page.evaluate(() => window.copiedTripLink);
   const shared = JSON.parse(decodeURIComponent(new URL(copied).hash.slice(6)));
   assert.equal(shared.legTimeWindows[2].flightNumbers, 'MU5616, MU5005');
   assert.equal(shared.legTimeWindows[0].departureDateAlternative, '2027-01-06');
+  assert.equal(shared.journeyAirline, 'mu');
   assert.equal(copied.includes('test-ui'), false, 'Share links must never include the access token');
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[data-leg-role="return"] [data-window-field="flightNumbers"]')?.value === 'MU5616, MU5005');

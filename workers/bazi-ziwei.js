@@ -50,6 +50,7 @@ const AIRLINE_OFFICIAL_SITES = {
   KE: "https://www.koreanair.com/",
   LJ: "https://www.jinair.com/",
   MM: "https://www.flypeach.com/tw",
+  MU: "https://www.ceair.com/",
   NH: "https://www.ana.co.jp/zh/tw/",
   OZ: "https://flyasiana.com/C/TW/CH/index",
   QH: "https://www.bambooairways.com/",

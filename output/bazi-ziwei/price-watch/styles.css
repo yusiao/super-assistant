@@ -22,8 +22,15 @@
 .leg-schedules legend { font-size: 14px; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; }
 .leg-schedules label, #legScheduleFields, .leg-event-grid { min-width: 0; max-width: 100%; }
 .leg-schedules input { display: block; width: 100%; min-width: 0; max-width: 100%; }
-.leg-schedules input[type="date"], .leg-schedules input[type="time"] { appearance: none; -webkit-appearance: none; min-height: 48px; }
-.leg-schedules input::-webkit-date-and-time-value { text-align: left; min-width: 0; }
+.leg-schedules input[type="date"], .leg-schedules input[type="time"], .leg-schedules .leg-date { appearance: none; -webkit-appearance: none; height: 48px; min-height: 48px; text-align: center; position: relative; padding-inline: 32px; }
+.leg-schedules input::-webkit-date-and-time-value { text-align: center; min-width: 0; margin: 0 auto; }
+.leg-schedules input::-webkit-datetime-edit { display: block; text-align: center; padding: 0; }
+.leg-schedules input::-webkit-calendar-picker-indicator { position: absolute; right: 10px; margin: 0; }
+.flatpickr-calendar { font-family: inherit; border-radius: 6px; max-width: calc(100vw - 12px); }
+.flatpickr-calendar .numInputWrapper input.cur-year, .flatpickr-calendar select.flatpickr-monthDropdown-months { min-height: 0; height: 28px; padding-block: 0; border-radius: 0; font-size: 16px; }
+.flatpickr-calendar .flatpickr-current-month { padding-top: 4px; }
+.flatpickr-day.selected { background: var(--accent); border-color: var(--accent); }
+.date-clear { width: 100%; min-height: 44px; border: 0; border-top: 1px solid var(--line); background: var(--surface); color: var(--accent-strong); cursor: pointer; }
 .leg-carrier-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; min-width: 0; }
 .leg-cabin-quotes { min-width: 0; }
 .leg-event-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }

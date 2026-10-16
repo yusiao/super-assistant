@@ -586,7 +586,7 @@ async function quoteFormLeg(index, button) {
     const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
       type: "flight", journeyType: "simple", tripDays: 0, compareDurations: false, departureId, arrivalId,
       flightMode: "date_window", dateConstraint: "flexible", startDate: "", legTimeWindows: [window],
-      airlineType: data.airlineType, routeType: data.routeType, currency: data.currency, market: data.market,
+      airlineType: data.airlineType, journeyAirline: data.journeyAirline, routeType: data.routeType, currency: data.currency, market: data.market,
       excludedAirlines: [...new FormData(form).getAll("excludedAirlines"), ...(data.otherExcludedAirlines || "").split(/[,，\s]+/).filter(Boolean)],
       excludedAircraft: [...new FormData(form).getAll("excludedAircraft"), ...(data.otherExcludedAircraft || "").split(/[,，]+/).map((s) => s.trim()).filter(Boolean)],
       allowUnknownAircraft: form.elements.allowUnknownAircraft.checked,
@@ -601,7 +601,7 @@ async function quoteFormLeg(index, button) {
   finally { button.disabled = false; button.textContent = "單段查價／艙等"; }
 }
 
-const tripLinkFields = ["journeyType", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "routeType", "currency", "market"];
+const tripLinkFields = ["journeyType", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "journeyAirline", "routeType", "currency", "market"];
 function applyTripFromLink() {
   if (!location.hash.startsWith("#trip=")) return;
   try {
@@ -609,6 +609,7 @@ function applyTripFromLink() {
     const trip = JSON.parse(decodeURIComponent(location.hash.slice(6)));
     const form = elements.flightForm;
     if (!trip || !Array.isArray(trip.legTimeWindows) || trip.legTimeWindows.length > 3) throw new Error();
+    form.elements.journeyAirline.value = "";
     for (const key of tripLinkFields) if (trip[key] !== undefined) {
       if (key === "includeReturn") form.elements[key].checked = trip[key] === true;
       else form.elements[key].value = String(trip[key]).slice(0, 100);
@@ -628,7 +629,10 @@ function applyTripFromLink() {
     form.querySelector('[name="journeyType"]:checked').dispatchEvent(new Event("change"));
     document.querySelectorAll("[data-leg-role]").forEach((fieldset, index) => {
       const window = trip.legTimeWindows[index] || {};
-      fieldset.querySelectorAll("[data-window-field]").forEach((input) => { input.value = String(window[input.dataset.windowField] || "").slice(0, 100); });
+      fieldset.querySelectorAll("[data-window-field]").forEach((input) => {
+        input.value = String(window[input.dataset.windowField] || "").slice(0, 100);
+        input._flatpickr?.setDate(input.value, false);
+      });
     });
     setFlightMode(trip.flightMode === "date_window" ? "date_window" : "annual_low");
     document.querySelector(".leg-schedules").open = true;
@@ -710,6 +714,7 @@ function readLegWindows() {
 function renderLegWindows() {
   const current = readLegWindows();
   document.querySelectorAll("[data-leg-role]").forEach((fieldset, index) => legWindowDrafts.set(fieldset.dataset.legRole, current[index]));
+  document.querySelectorAll(".leg-date").forEach((input) => input._flatpickr?.destroy());
   const form = elements.flightForm;
   const multi = form.elements.journeyType.value === "multicity";
   const roles = multi ? [["outbound", "第 1 段：出發地 A → 停留地 B"], ["onward", "第 2 段：停留地 B → 目的地 C"],
@@ -730,7 +735,44 @@ function renderLegWindows() {
   }).join("");
   document.querySelectorAll("[data-form-leg]").forEach((button) => button.addEventListener("click", () => quoteFormLeg(Number(button.dataset.formLeg), button)));
   document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
+  setupLegDatePickers();
   updateDateFields();
+}
+
+function setupLegDatePickers() {
+  if (!window.flatpickr) return;
+  document.querySelectorAll('#legScheduleFields input[type="date"]').forEach((input) => {
+    input.classList.add("leg-date");
+    input.placeholder = "選擇日期";
+    window.flatpickr(input, {
+      locale: "zh_tw", dateFormat: "Y-m-d", ariaDateFormat: "Y年m月d日",
+      disableMobile: true, allowInput: true, animate: false, position: "auto center",
+      onOpen: (_, __, picker) => {
+        const fieldset = input.closest("[data-leg-role]");
+        const fields = [...document.querySelectorAll("[data-leg-role]")];
+        const previous = fields[fields.indexOf(fieldset) - 1];
+        const departure = fieldset.querySelector('[data-window-field="departureDate"]').value;
+        const anchor = input.value || departure
+          || previous?.querySelector('[data-window-field="arrivalDate"]').value
+          || previous?.querySelector('[data-window-field="departureDate"]').value
+          || elements.flightForm.elements.fixedDepartureDate.value;
+        picker.setDate(input.value, false);
+        // Move only the calendar view, never silently add an arrival-date constraint.
+        picker.jumpToDate(anchor || new Date());
+      },
+      onReady: (_, __, picker) => {
+        const clear = document.createElement("button");
+        clear.type = "button";
+        clear.className = "date-clear";
+        clear.textContent = "清除日期";
+        clear.addEventListener("click", () => { picker.clear(); picker.close(); });
+        picker.calendarContainer.append(clear);
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") { picker.close(); event.stopPropagation(); }
+        });
+      },
+    });
+  });
 }
 
 function renderCabinOverview(prices, currency = "TWD") {
@@ -916,6 +958,7 @@ async function searchFlight(event) {
       lookaheadDays: Number(data.lookaheadDays ?? 30),
       targetPrice: data.targetPrice,
       airlineType: data.airlineType || "all",
+      journeyAirline: data.journeyAirline || "",
       routeType: data.routeType || "any",
       currency: data.currency || "TWD",
       market: data.market || "TW",
@@ -990,6 +1033,7 @@ function setFlightMode(mode) {
 
 function dateConstraintLabel(flight) {
   return [flight.fixedDepartureDate ? `${flight.fixedDepartureDate} 出發` : "", flight.fixedReturnDate ? `${flight.fixedReturnDate} 回程起飛` : "",
+    flight.journeyAirline ? `全程 ${flight.journeyAirline}` : "",
     ...(flight.legTimeWindows || []).flatMap((w, index) => [w.departureDate ? `第${index + 1}段 ${w.departureDate}${w.departureDateAlternative ? ` 或 ${w.departureDateAlternative}` : ""} 出發` : "", w.arrivalDate ? `第${index + 1}段 ${w.arrivalDate} 抵達` : "", w.airline || "", String(w.flightNumbers || "")])].filter(Boolean).join(" · ");
 }
 
@@ -1136,7 +1180,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=17").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=18").catch(() => {});
   }
 }
 

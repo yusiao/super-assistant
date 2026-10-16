@@ -370,6 +370,32 @@ test("all-leg carrier filters use a safe union while each leg is checked indepen
   } finally { h.restore(); }
 });
 
+test("whole-journey airline applies to all legs, persists, and rejects conflicting constraints", async () => {
+  const h = harness((data) => {
+    data.best_flights[0].flights[0].flight_number = "MU 100";
+    data.best_flights[0].flights[0].airline = "China Eastern";
+    return data;
+  });
+  try {
+    const payload = { ...multi, journeyAirline: "中國東方航空", includeReturn: true, destinationMinNights: 3, destinationMaxNights: 3 };
+    const { data } = await h.request(payload);
+    assert.ok(data.results.length);
+    assert.ok(h.calls.every((p) => p.include_airlines === "MU"));
+    assert.ok(data.results[0].segments.every((s) => s.flightNumber === "MU 100"));
+    assert.ok(data.results[0].purchaseLinks.some((l) => l.kind === "official" && l.url === "https://www.ceair.com/"));
+    const saved = await h.request(payload, "watches");
+    assert.equal(saved.data.watch.sources[0].planner.journeyAirline, "MU");
+    assert.equal(saved.data.watch.sources[0].planner.legTimeWindows.length, 3);
+    const before = h.calls.length;
+    for (const extra of [{ excludedAirlines: ["MU"] }, { legTimeWindows: [{ airline: "BR" }] },
+      { legTimeWindows: [{ flightNumbers: "BR100" }] }, { journeyAirline: "unknown-carrier" }]) {
+      assert.equal((await h.request({ ...payload, ...extra })).status, 400);
+    }
+    assert.equal(h.calls.length, before);
+    assert.equal(validateFlightPreferences({ ...base, journeyAirline: "mu" }).legTimeWindows[0].airline, "MU");
+  } finally { h.restore(); }
+});
+
 test("time windows enforce exact local minutes, including overnight windows", () => {
   const p = validateFlightPreferences({ ...base, departureTimeFrom: "22:30", departureTimeTo: "06:00", arrivalTimeFrom: "08:00", arrivalTimeTo: "10:15" });
   const item = (dep, arr) => ({ segments: [{ departureTime: `${date} ${dep}`, arrivalTime: `${date} ${arr}` }] });
