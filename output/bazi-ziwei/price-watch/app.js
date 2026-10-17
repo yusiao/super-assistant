@@ -494,20 +494,21 @@ function resultCard(item) {
         </div>
       </div>
       <div class="price-block">
-        ${item.separateTickets ? '<span class="fare-note">分開購票合計</span>' : ""}
+        ${item.quoteStatus === "no_booking_offer" ? '<span class="fare-note">符合條件的航班組合</span>' : item.separateTickets ? '<span class="fare-note">分開購票合計</span>' : item.journeyType === "multicity" ? '<span class="fare-note">聯程整趟報價</span>' : ""}
         <span class="cabin-tag">${escapeHtml(item.cabinLabel || "經濟艙")}</span>
         <div class="price">${escapeHtml(item.priceText || money(item.price, item.currency))}</div>
       </div>
     </div>
     ${flightDetails}
     ${item.separateTickets ? '<p class="airport-change">分開購票組合，非一張聯程票。各段需分別購買；票價、行李與改退規則分開計算，跨票段不保證轉機保障。</p>' : ""}
+    ${item.bookingQuote ? `<p class="fare-note">整趟購票報價${item.bookingQuote.seller ? ` · ${escapeHtml(item.bookingQuote.seller)}` : ""} · 來源未標示分開開票</p>` : ""}
     ${journeyDetails(item)}
     ${item.differentReturnAirport ? `<p class="airport-change">去回不同機場：${escapeHtml(item.departureAirport)} 出發，${escapeHtml(item.legs.at(-1).arrivalAirport)} 返回</p>` : ""}
     ${(item.airportChanges || []).map((change) => `<p class="airport-change">停留期間需自行更換機場：${escapeHtml(change.arrivalAirport)} → ${escapeHtml(change.departureAirport)}</p>`).join("")}
     <div class="cabin-comparison">${item.legs?.length > 1 && item.cabinPrices ? `<p class="fare-note">${item.separateTickets ? "分開購票艙等加總" : "整趟行程艙等總價"}</p>` : ""}${cabinComparisonHtml(item.cabinPrices, item.currency)}</div>
     <p class="upgrade-status">里程升等：待確認票種與各航段升等名額</p>
     <div class="action-row flight-actions">
-      ${purchaseActions}${!item.cabinPrices ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
+      ${purchaseActions}${!item.cabinPrices && item.quoteStatus !== "no_booking_offer" ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
     </div>
   `;
   card.querySelector(".track-button")?.addEventListener("click", () => trackResult(item));
@@ -537,7 +538,7 @@ function journeyDetails(item) {
     ["BR", "長榮升等規則", "https://www.evaair.com/zh-tw/customer-services/faq/detail.html?FaqCategories=Award-Program"],
     ["CI", "華航升等規則", "https://www.china-airlines.com/au/zh/member/miles/redeem/cabin-upgrade.html"],
   ].filter(([code]) => codes.has(code)).map(([, label, url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`).join(" · ");
-  return `<details class="journey-details" ${item.journeyType === "multicity" ? "open" : ""}><summary>${item.legs.length} 段旅程・航班與機型</summary>${rows}<p class="fare-note">${item.separateTickets ? "各段獨立報價加總，須分別確認可購買。" : "全行程報價；"}行李、開票及改退規則以購票頁為準。機型可能異動。${rules}</p></details>`;
+  return `<details class="journey-details" ${item.journeyType === "multicity" ? "open" : ""}><summary>${item.legs.length} 段旅程・航班與機型</summary>${rows}<p class="fare-note">${item.quoteStatus === "no_booking_offer" ? "航班符合搜尋條件，尚未取得整趟購票價格；" : item.separateTickets ? "各段獨立報價加總，須分別確認可購買。" : "全行程報價；"}行李、開票及改退規則以購票頁為準。機型可能異動。${rules}</p></details>`;
 }
 
 function cabinComparisonHtml(prices, currency) {
@@ -601,7 +602,7 @@ async function quoteFormLeg(index, button) {
   finally { button.disabled = false; button.textContent = "單段查價／艙等"; }
 }
 
-const tripLinkFields = ["journeyType", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "journeyAirline", "routeType", "currency", "market"];
+const tripLinkFields = ["journeyType", "ticketMode", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "journeyAirline", "routeType", "currency", "market"];
 function applyTripFromLink() {
   if (!location.hash.startsWith("#trip=")) return;
   try {
@@ -610,6 +611,8 @@ function applyTripFromLink() {
     const form = elements.flightForm;
     if (!trip || !Array.isArray(trip.legTimeWindows) || trip.legTimeWindows.length > 3) throw new Error();
     form.elements.journeyAirline.value = "";
+    form.elements.ticketMode.value = "through";
+    trip.ticketMode = trip.ticketMode === "separate" ? "separate" : "through";
     for (const key of tripLinkFields) if (trip[key] !== undefined) {
       if (key === "includeReturn") form.elements[key].checked = trip[key] === true;
       else form.elements[key].value = String(trip[key]).slice(0, 100);
@@ -663,7 +666,7 @@ async function compareCabins(item, card, button) {
     const response = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({
       ...original, type: "flight", flightMode: "date_window", startDate: item.departureDate, lookaheadDays: 0,
       tripDays: item.tripDays, compareDurations: false, comparisonPlan: item.plan,
-      ticketMode: item.separateTickets ? "separate" : "auto",
+      ticketMode: item.separateTickets ? "separate" : "through",
     }) });
     const prices = response.insights?.cabinPrices;
     if (!response.results?.length) throw new Error("目前未取得相同日期的完整行程報價。");
@@ -690,6 +693,8 @@ function setupJourneyFields() {
     form.elements.departureId.closest("label").querySelector("span").textContent = multi ? "出發地 A" : "出發地";
     form.elements.arrivalId.closest("label").querySelector("span").textContent = multi ? "目的地 C" : "目的地";
     const stopover = document.querySelector("#stopoverFields");
+    document.querySelector("#ticketModeField").hidden = !multi;
+    form.elements.ticketMode.disabled = !multi;
     stopover.hidden = !multi;
     stopover.disabled = !multi;
     document.querySelector("#tripDaysField").hidden = multi;
@@ -883,8 +888,36 @@ function renderActiveView() {
   elements.resultsZone.hidden = false;
   renderFlightYearStats(view.insights?.yearStats, view.currency);
   renderDurationAlternatives(view.insights, view.currency);
-  renderCabinOverview(view.insights?.cabinPrices, view.currency);
-  renderResults(view.searched ? view.title : "機票搜尋結果", view.results);
+  renderCabinOverview(view.unpricedResults?.length && !view.results.length ? [] : view.insights?.cabinPrices, view.currency);
+  renderResults(view.searched ? view.title : "機票搜尋結果", [...view.results, ...(view.unpricedResults || [])]);
+  renderTicketQuoteStatus(view);
+}
+
+function renderTicketQuoteStatus(view) {
+  const section = document.querySelector("#ticketQuoteStatus");
+  section.replaceChildren();
+  section.hidden = !view.searched || view.journeyType !== "multicity";
+  if (section.hidden) return;
+  const separate = view.ticketMode === "separate";
+  const title = document.createElement("h3");
+  title.textContent = separate ? "分開購票" : "多城市聯程";
+  const message = document.createElement("p");
+  message.textContent = view.results.length
+    ? separate ? "各段獨立購票，合計不是一張聯程票價。" : "資料來源提供整趟報價，非各段相加；是否以一張票開立及轉機保障，仍須由購票頁確認。"
+    : view.unpricedResults?.length ? "已找到符合條件的航班，但尚未取得整趟聯程購票價格；是否能開立一張票仍待確認。"
+    : view.insights ? separate ? "未取得完整的分段購票組合。" : "未取得聯程報價，不代表航空公司無票；未以分段加總替代。"
+      : "查詢失敗，尚無法確認報價。";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "compare-button";
+  button.textContent = separate ? "改查聯程整趟報價" : "改查分開購票價格";
+  button.addEventListener("click", () => {
+    if (elements.flightSubmitButton.disabled) return;
+    elements.flightForm.elements.ticketMode.value = separate ? "through" : "separate";
+    elements.flightForm.requestSubmit();
+  });
+  section.append(title, message, button);
+  if (!view.results.length && !view.unpricedResults?.length) elements.resultList.replaceChildren();
 }
 
 function watchFromResult(item) {
@@ -964,6 +997,7 @@ async function searchFlight(event) {
       market: data.market || "TW",
       locale: "zh-TW",
       journeyType: multi ? "multicity" : "simple",
+      ticketMode: multi && data.ticketMode === "separate" ? "separate" : "through",
       stopoverId,
       stopoverMinNights: Number(data.stopoverMinNights || 2),
       stopoverMaxNights: Number(data.stopoverMaxNights || 5),
@@ -988,17 +1022,20 @@ async function searchFlight(event) {
     });
     const view = state.views.flightPanel;
     view.results = (response.results || []).map((item) => ({ ...item, searchPayload: structuredClone(state.lastFlightPayload) }));
+    view.unpricedResults = (response.unpricedResults || []).map((item) => ({ ...item, searchPayload: structuredClone(state.lastFlightPayload) }));
     view.insights = response.insights || null;
     view.currency = response.currency || data.currency || "TWD";
     view.searched = true;
-    view.title = multi ? "多城市完整行程" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
+    view.journeyType = state.lastFlightPayload.journeyType;
+    view.ticketMode = state.lastFlightPayload.ticketMode;
+    view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : "多城市聯程整趟報價" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
     }
     setFlightLoading(false);
     const resultMessage = response.insights?.samplingNotice || (view.results.length ? "搜尋完成" : "沒有找到票價");
-    if (view.results.length) {
+    if (view.results.length || view.unpricedResults.length) {
       setPanelStatus("flightPanel", resultMessage);
       setFlightFeedback("查詢完成", "complete", 100);
       setTimeout(() => setFlightFeedback(""), 900);
@@ -1010,9 +1047,12 @@ async function searchFlight(event) {
     setFlightLoading(false);
     const view = state.views.flightPanel;
     view.results = [];
+    view.unpricedResults = [];
     view.insights = null;
     view.searched = true;
     view.title = "機票結果";
+    view.journeyType = data.journeyType;
+    view.ticketMode = data.ticketMode || "through";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
@@ -1180,7 +1220,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=18").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=21").catch(() => {});
   }
 }
 

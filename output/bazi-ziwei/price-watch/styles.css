@@ -1046,3 +1046,11 @@ select {
     font-size: 36px;
   }
 }
+.ticket-quote-status {
+  padding: 12px 0 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #d9e2df;
+}
+.ticket-quote-status h3 { margin: 0 0 8px; font-size: 16px; }
+.ticket-quote-status p { margin: 0 0 12px; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.ticket-quote-status button { max-width: 100%; min-height: 44px; white-space: normal; }

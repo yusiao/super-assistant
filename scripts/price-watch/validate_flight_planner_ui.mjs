@@ -18,6 +18,8 @@ const records = new Map();
 const env = { PRICE_WATCH_PUBLIC_SEARCH: "true", PRICE_WATCH_ACCESS_TOKEN: "test-ui", SERPAPI_API_KEY: "test", PRICE_WATCH_PUBLIC_SEARCH_PER_MINUTE: "100",
   PRICE_WATCH_KV: { async get(key) { return records.get(key) || null; }, async put(key, value) { records.set(key, JSON.parse(value)); } } };
 const originalFetch = globalThis.fetch;
+let throughBookingFixture = false;
+let bookingUnavailableFixture = false;
 globalThis.fetch = async (url) => {
   const p = Object.fromEntries(new URL(url).searchParams);
   assert.equal(new URL(url).hostname, "serpapi.com", "No real provider calls in UI tests");
@@ -25,11 +27,12 @@ globalThis.fetch = async (url) => {
     { departure_id: p.departure_id, arrival_id: p.arrival_id, date: p.outbound_date },
     ...(p.return_date ? [{ departure_id: p.arrival_id, arrival_id: p.departure_id, date: p.return_date }] : []),
   ];
-  const index = Number(p.departure_token || 0);
+  const index = p.booking_token ? legs.length - 1 : Number(p.departure_token || 0);
   const leg = legs[index];
   if (!leg) return Response.json({ suggestions: [] });
   const data = { best_flights: [{ price: 12000 * Number(p.travel_class) + index * 1000, total_duration: 180,
     departure_token: index < legs.length - 1 ? String(index + 1) : undefined,
+    booking_token: index === legs.length - 1 ? "final-booking-token" : undefined,
     flights: [{ airline: "長榮航空", flight_number: "BR 198", airplane: "Boeing 787-9", travel_class: p.travel_class === "1" ? "Economy" : "Business",
       departure_airport: { id: leg.departure_id.split(",").at(-1), time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
   }] };
@@ -44,13 +47,17 @@ globalThis.fetch = async (url) => {
     first.flight_number = "MU 5616";
     first.airline = "中國東方航空";
     first.arrival_airport = { id: "PVG", time: `${leg.date} 12:00` };
-    second.flight_number = p.multi_city_json ? "MU 5007" : "MU 5005";
+    second.flight_number = p.multi_city_json && !throughBookingFixture ? "MU 5007" : "MU 5005";
     second.airline = "中國東方航空";
     second.departure_airport = { id: "PVG", time: `${leg.date} 15:00` };
     second.arrival_airport.time = `${leg.date} 17:00`;
     data.best_flights[0].flights.push(second);
   }
-  return Response.json(data);
+  if (throughBookingFixture && p.multi_city_json && !p.booking_token) delete data.best_flights[0].price;
+  if (p.booking_token && bookingUnavailableFixture) return Response.json({});
+  return Response.json(p.booking_token
+    ? { booking_options: [{ together: { price: data.best_flights[0].price, book_with: "測試航空公司" } }] }
+    : data);
 };
 let lastSearch;
 const server = createServer(async (req, res) => {
@@ -329,7 +336,23 @@ try {
   assert.ok(standalone.insights.cabinPrices.every((cabin) => cabin.available));
   assert.equal(lastSearch.legTimeWindows[0].flightNumbers, 'MU5616, MU5005');
   assert.equal(lastSearch.departureId, 'HRB');
-  const exampleResult = await submit();
+  assert.equal(await page.locator('[name="ticketMode"]').inputValue(), 'through');
+  const unavailableThrough = await submit();
+  assert.equal(lastSearch.ticketMode, 'through');
+  assert.deepEqual(unavailableThrough.results, []);
+  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /未取得聯程報價.*未以分段加總替代/);
+  assert.equal(await page.locator('.result-card').count(), 0);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('#ticketQuoteStatus').scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-through-${browserName}-${width}.png`) });
+  }
+  const splitResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
+  await page.getByRole('button', { name: '改查分開購票價格', exact: true }).click();
+  const exampleResult = await (await splitResponse).json();
+  await page.locator('.result-card').first().waitFor();
+  assert.equal(lastSearch.ticketMode, 'separate');
   assert.equal(exampleResult.results[0].departureDate, '2027-01-06');
   assert.equal(exampleResult.results[1].departureDate, '2027-01-05');
   assert.deepEqual(lastSearch.legTimeWindows, exampleTrip.legTimeWindows);
@@ -369,9 +392,52 @@ try {
   assert.equal(shared.legTimeWindows[2].flightNumbers, 'MU5616, MU5005');
   assert.equal(shared.legTimeWindows[0].departureDateAlternative, '2027-01-06');
   assert.equal(shared.journeyAirline, 'mu');
+  assert.equal(shared.ticketMode, 'separate');
   assert.equal(copied.includes('test-ui'), false, 'Share links must never include the access token');
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[data-leg-role="return"] [data-window-field="flightNumbers"]')?.value === 'MU5616, MU5005');
+  throughBookingFixture = true;
+  for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
+  await page.locator('[name="ticketMode"]').selectOption('through');
+  const throughResult = await submit();
+  assert.equal(throughResult.results.length, 2);
+  assert.ok(throughResult.results.every((r) => !r.separateTickets && r.bookingQuote.basis === 'provider_together_offer'));
+  assert.equal(throughResult.results[0].price, 14000);
+  assert.match(await page.locator('.result-card').first().innerText(), /整趟購票報價.*測試航空公司/);
+  assert.doesNotMatch(await page.locator('.result-card').first().innerText(), /分開購票合計/);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.locator('.result-card').first().scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-through-priced-${browserName}-${width}.png`) });
+  }
+  bookingUnavailableFixture = true;
+  for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
+  const unpricedResult = await submit();
+  assert.deepEqual(unpricedResult.results, []);
+  assert.equal(unpricedResult.unpricedResults.length, 2);
+  assert.equal(await page.locator('.result-card').count(), 2);
+  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /已找到符合條件的航班/);
+  assert.match(await page.locator('.result-card').first().innerText(), /聯程總價待確認/);
+  assert.doesNotMatch(await page.locator('.result-card').first().innerText(), /聯程整趟報價/);
+  assert.match(await page.locator('.result-card').first().innerText(), /MU 5616[\s\S]*MU 5005/);
+  assert.doesNotMatch(await page.locator('#resultList').innerText(), /NT\$\s*0\b/);
+  assert.equal(await page.locator('.result-card .track-button').count(), 0);
+  assert.equal(await page.locator('.result-card .compare-button:not([data-leg-cabins])').count(), 0);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.locator('.result-card').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-through-unpriced-${browserName}-${width}.png`) });
+  }
+  bookingUnavailableFixture = false;
+  for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
+  const recovered = await submit();
+  assert.equal(recovered.results.length, 2);
+  assert.deepEqual(recovered.unpricedResults, []);
+  assert.equal(await page.locator('.result-card').count(), 2);
+  assert.equal(await page.locator('.result-card .track-button').count(), 2);
+  assert.doesNotMatch(await page.locator('#resultList').innerText(), /聯程總價待確認/);
   assert.deepEqual(errors, []);
   console.log(`${browserName}: 320/360/375/390/430/600/1280px, two departure dates, ordered return flights, per-leg cabins, share links, tracking and existing flows passed; zero real API calls.`);
 } finally {

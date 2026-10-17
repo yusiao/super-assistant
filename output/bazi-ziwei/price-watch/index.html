@@ -12,7 +12,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./vendor/flatpickr/flatpickr.min.css?v=4.6.13" />
-    <link rel="stylesheet" href="./styles.css?v=21" />
+    <link rel="stylesheet" href="./styles.css?v=22" />
   </head>
   <body>
     <main class="app-shell">
@@ -46,6 +46,13 @@
               <label><input type="radio" name="journeyType" value="multicity" /><span>多城市停留</span></label>
             </div>
           </fieldset>
+          <label id="ticketModeField" hidden>
+            <span>多城市購票方式</span>
+            <select name="ticketMode" disabled>
+              <option value="through" selected>聯程整趟報價（預設）</option>
+              <option value="separate">分開購票加總</option>
+            </select>
+          </label>
           <label>
             <span>日期條件</span>
             <select name="dateConstraint">
@@ -208,6 +215,7 @@
           <h2 id="resultsTitle">搜尋結果</h2>
           <span id="resultCount"></span>
         </div>
+        <section id="ticketQuoteStatus" class="ticket-quote-status" aria-live="polite" hidden></section>
         <div class="flight-year-stats" id="flightYearStats" hidden>
           <div class="year-stat">
             <span id="currentYearLabel">該年抽樣均價</span>
@@ -265,6 +273,6 @@
 
     <script src="./vendor/flatpickr/flatpickr.min.js?v=4.6.13"></script>
     <script src="./vendor/flatpickr/zh-tw.js?v=4.6.13"></script>
-    <script src="./app.js?v=23" type="module"></script>
+    <script src="./app.js?v=26" type="module"></script>
   </body>
 </html>

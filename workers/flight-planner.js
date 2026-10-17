@@ -96,7 +96,8 @@ export function validateFlightPreferences(input) {
   payload.journeyAirline = carrier ? (/^(?:[A-Z][A-Z0-9]|[0-9][A-Z])$/i.test(carrier) ? carrier.toUpperCase()
     : Object.keys(airlineNames).find((key) => airlineNames[key].test(carrier))) : "";
   if (carrier && !payload.journeyAirline) invalid("全程航空公司無法辨識，請輸入兩碼 IATA 代碼。");
-  payload.ticketMode = payload.ticketMode === "separate" ? "separate" : "auto";
+  if (payload.ticketMode && !["through", "auto", "separate"].includes(payload.ticketMode)) invalid("購票方式不正確。");
+  payload.ticketMode = payload.ticketMode === "separate" ? "separate" : "through";
   for (const key of ["departureId", "arrivalId", ...(payload.journeyType === "multicity" ? ["stopoverId"] : [])]) {
     payload[key] = normalizeAirportCodes(payload[key]);
     if (!payload[key]) invalid("請選擇有效機場或城市機場組合（最多 6 個）。");
@@ -382,11 +383,13 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     const data = await search(query);
     const preferences = legPreferences(p, i);
     const candidates = normalize(data, { ...preferences, arrivalDate: "", departureId: legs[i].departure_id, arrivalId: legs[i].arrival_id,
-      outboundDate: legs[i].date, returnDate: "", travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label }, p.currency || "TWD").results;
+      outboundDate: legs[i].date, returnDate: "", allowUnpricedSelection: !separate && (multi || i < legs.length - 1),
+      travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label }, p.currency || "TWD").results;
     const airportCandidates = candidates.filter((item) => {
       if (!legs[i].departure_id.split(",").includes(item.departureAirport) || !legs[i].arrival_id.split(",").includes(item.arrivalAirport)) return false;
       if (item.departure.slice(0, 10) !== legs[i].date || !validDate(item.arrival.slice(0, 10))) return false;
       if (!separate && i < legs.length - 1 && !item.departureToken) return false;
+      if (multi && !separate && i === legs.length - 1 && !item.bookingToken) return false;
       return true;
     });
     const datedCandidates = airportCandidates.filter((item) => !preferences.arrivalDate || item.arrival.slice(0, 10) === preferences.arrivalDate);
@@ -430,6 +433,14 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     selected.push(best);
     if (!separate) params.departure_token = best.departureToken;
   }
+  let bookingQuote;
+  if (multi && !separate) {
+    const bookingParams = { ...params, booking_token: best.bookingToken };
+    delete bookingParams.departure_token;
+    const bookingData = await search(bookingParams);
+    bookingQuote = throughBookingQuote(bookingData, selected, p.currency || "TWD");
+  }
+  const unpriced = multi && !separate && !bookingQuote;
   const first = selected[0];
   const allSegments = selected.flatMap((item, legIndex) => item.segments.map((segment) => ({ ...segment, legIndex })));
   const requestedCabin = { "1": /^(economy|經濟艙)$/i, "2": /premium economy|豪華經濟|豪經/i, "3": /business|商務|商務艙/i }[cabin.code];
@@ -440,17 +451,19 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const airportChanges = selected.slice(1).flatMap((leg, index) => selected[index].arrivalAirport === leg.departureAirport ? []
     : [{ arrivalAirport: selected[index].arrivalAirport, departureAirport: leg.departureAirport }]);
   const duration = selected.reduce((total, item) => total + item.duration, 0);
-  const price = separate ? selected.reduce((total, item) => total + item.price, 0) : best.price;
-  const priceText = separate ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
+  const price = unpriced ? null : separate ? selected.reduce((total, item) => total + item.price, 0) : bookingQuote?.price ?? best.price;
+  const priceText = unpriced ? "聯程總價待確認" : separate || bookingQuote ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
-    title: route, price, priceText, departureToken: undefined, differentReturnAirport, airportChanges,
+    title: route, price, priceText, departureToken: undefined, bookingToken: undefined, differentReturnAirport, airportChanges,
     separateTickets: separate, priceBasis: separate ? "separate_ticket_sum" : "whole_itinerary_quote",
+    ...(bookingQuote ? { bookingQuote } : {}),
+    ...(unpriced ? { quoteStatus: "no_booking_offer", trackable: false } : {}),
     departureDate: plan.date, returnDate, tripDays: returnDate ? dateDifference(plan.date, returnDate) : 0,
-    journeyType: multi ? "multicity" : "simple", itineraryComplete: true, legs: selected.map(({ departureToken, ...leg }) => leg),
+    journeyType: multi ? "multicity" : "simple", itineraryComplete: true, legs: selected.map(({ departureToken, bookingToken, ...leg }) => leg),
     segments: allSegments, duration, stops: selected.reduce((total, item) => total + item.stops, 0),
     travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: mixedCabin ? `${cabin.label}（含其他艙等）` : cabin.label, mixedCabin,
     airline: [...new Set(allSegments.map((s) => s.airline))].join(" / "),
-    plan, sampled: true, source: separate ? "Google Flights 分開購票組合" : "Google Flights 完整行程抽樣",
+    plan, sampled: !unpriced, source: unpriced ? "Google Flights 航班組合（未報價）" : separate ? "Google Flights 分開購票組合" : "Google Flights 完整行程抽樣",
     stopoverNights: multi ? dateDifference(selected[0].arrival.slice(0, 10), selected[1].departure.slice(0, 10)) : null,
     destinationNights: multi && p.includeReturn ? dateDifference(selected[1].arrival.slice(0, 10), selected[2].departure.slice(0, 10)) : null,
     purchaseLinks: multi
@@ -459,4 +472,21 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     link: `https://www.google.com/travel/flights?q=${encodeURIComponent(selected.map((leg) => `${leg.departureAirport} ${leg.arrivalAirport} ${leg.departureDate}`).join(" "))}`,
     upgradeEligibility: { status: "unknown", label: "里程升等待確認", reason: "未取得訂位艙等、票價規則與各航段升等名額。" },
   };
+}
+
+function throughBookingQuote(data, selected, currency) {
+  if (data.search_parameters?.currency && data.search_parameters.currency !== currency) throw new Error("購票報價幣別與搜尋條件不符。");
+  const expected = selected.flatMap((leg) => leg.segments.map((segment) => normalizedFlightNumber(segment.flightNumber)));
+  const quotes = (Array.isArray(data.booking_options) ? data.booking_options : []).flatMap((option) => {
+    if (!option || (option.separate_tickets !== undefined && option.separate_tickets !== false) || option.departing || option.returning) return [];
+    const quote = option.together;
+    if (!quote || !Number.isFinite(Number(quote.price)) || Number(quote.price) <= 0) return [];
+    // A seller may market codeshares differently; never silently replace explicitly selected flight numbers.
+    if (Array.isArray(quote.marketed_as) && quote.marketed_as.length
+      && JSON.stringify(quote.marketed_as.map(normalizedFlightNumber)) !== JSON.stringify(expected)) return [];
+    return [{ price: Number(quote.price), currency, seller: String(quote.book_with || "").slice(0, 120),
+      airline: quote.airline === true, basis: "provider_together_offer",
+      baggage: (Array.isArray(quote.baggage_prices) ? quote.baggage_prices : []).slice(0, 8).map((item) => String(item).slice(0, 200)) }];
+  });
+  return quotes.sort((a, b) => a.price - b.price)[0] || null;
 }

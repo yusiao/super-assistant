@@ -393,10 +393,10 @@ async function serpApiSampledFlightSearch(input, env) {
     inFlightQueries.set(key, pending);
     return pending;
   };
-  let usingSeparateTickets = multi && payload.ticketMode === "separate";
+  const usingSeparateTickets = multi && payload.ticketMode === "separate";
   const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
   const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan)) => {
-    const result = await searchCompleteJourney({ ...payload, ticketMode: usingSeparateTickets ? "separate" : "auto", tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
+    const result = await searchCompleteJourney({ ...payload, ticketMode: usingSeparateTickets ? "separate" : "through", tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
     if (result && !multi && !result.differentReturnAirport && !result.airportChanges.length) result.purchaseLinks = flightPurchaseLinks({ ...payload,
       departureId: result.departureAirport, arrivalId: result.arrivalAirport, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
     if (result && !multi && (result.differentReturnAirport || result.airportChanges.length)) result.purchaseLinks.push(
@@ -411,19 +411,15 @@ async function serpApiSampledFlightSearch(input, env) {
     return result;
   };
   const searches = await Promise.allSettled(plans.map((plan) => run(plan, primaryCabin)));
-  let economyResults = searches.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value).sort((a, b) => a.price - b.price);
+  const completed = searches.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value);
+  const economyResults = completed.filter((result) => result.price > 0).sort((a, b) => a.price - b.price);
+  const unpricedResults = completed.filter((result) => result.quoteStatus === "no_booking_offer");
   const failed = searches.filter((result) => result.status === "rejected");
-  if (multi && !usingSeparateTickets && !economyResults.length && !failed.length) {
-    usingSeparateTickets = true;
-    const fallback = await Promise.allSettled(plans.map((plan) => run(plan, primaryCabin)));
-    economyResults = fallback.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value).sort((a, b) => a.price - b.price);
-    failed.push(...fallback.filter((result) => result.status === "rejected"));
-  }
-  if (!economyResults.length && failed.length) throw failed[0].reason;
+  if (!economyResults.length && !unpricedResults.length && failed.length) throw failed[0].reason;
   const reference = economyResults[0];
   const cabinSearches = reference && !tracking
     ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true))) : [];
-  const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value).map((r) => r.value);
+  const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value?.price > 0).map((r) => r.value);
   let alternatives = !multi && payload.tripDays > 0 && (reference || tracking) && payload.compareDurations !== false
     ? nearbyTripDayOptions(payload.tripDays, 2).filter((days) => days !== payload.tripDays) : [];
   if (tracking && alternatives.length) alternatives = [alternatives[Math.floor(Date.now() / 86400000) % alternatives.length]];
@@ -458,12 +454,18 @@ async function serpApiSampledFlightSearch(input, env) {
   await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
   const failureCount = failed.length + cabinSearches.filter((r) => r.status === "rejected").length + durationSearches.filter((r) => r.status === "rejected").length;
   return { mode, startDate, endDate, tripDays: payload.tripDays, results: [...economyResults, ...(tracking ? durationAlternatives : [])].map((item, index) => ({ ...item, isRangeLow: index === 0 })),
+    unpricedResults: tracking ? [] : unpricedResults,
     insights: { lowestPrice: reference?.price ?? null, rangeStart: startDate, rangeEnd: endDate, sampleDates: plans.map((p) => p.date),
       searchedPlans: plans, queryCount, partial: failureCount > 0, failedQueries: failureCount, separateTickets: usingSeparateTickets,
+      ticketMode: usingSeparateTickets ? "separate" : "through",
       selectedDurationBest: reference || null, durationAlternatives, cabinPrices: tracking ? [] : cabinPrices,
       samplingNotice: economyResults.length
         ? `已比較 ${plans.length} 個${multi ? "出發日與停留組合" : "出發日"}，${usingSeparateTickets ? "分開購票加總，非聯程票；各段票價與保障須分別確認" : "完整行程報價"}；同日期艙等可能為不同航班，非全年最低保證。${failureCount ? "部分查詢失敗，結果不完整。" : ""}`
-        : "目前未取得符合全部條件的行程報價，不代表航班已售罄；可使用各段單段查價確認。",
+        : unpricedResults.length
+          ? `找到 ${unpricedResults.length} 組符合日期、時段與班號條件的航班，但來源未提供聯程購票價格；不代表已確認可開立一張票。${failureCount ? "部分查詢失敗。" : ""}`
+          : multi && !usingSeparateTickets
+          ? "資料來源未提供符合條件的多城市聯程總價，不代表航空公司無票。可至航空公司確認聯程票，或另查分開購票價格。"
+          : "目前未取得符合全部條件的行程報價，不代表航班已售罄；可使用各段單段查價確認。",
       yearStats: { year: comparisonYear, average: current?.average ?? null, minimum: current?.minimum ?? null, maximum: current?.maximum ?? null,
         sampleCount: current?.sampleCount || 0, previousYear: comparisonYear - 1, previousAverage: average(previous.map((r) => r.average)),
         previousMinimum: minimum(previous.map((r) => r.minimum)), previousMaximum: maximum(previous.map((r) => r.maximum)),
@@ -826,7 +828,8 @@ function normalizeFlightResults(data, payload, currency) {
   const items = flights
     .map((item, index) => {
       const price = normalizeMoney(item.price);
-      if (!price) return null;
+      // Intermediate selection tokens may omit prices; only a final priced quote is sellable.
+      if (!price && !(payload.allowUnpricedSelection && (item.departure_token || item.booking_token))) return null;
       const firstFlight = Array.isArray(item.flights) ? item.flights[0] || {} : {};
       const lastFlight = Array.isArray(item.flights) ? item.flights[item.flights.length - 1] || {} : {};
       const airline = compact(firstFlight.airline || item.airline || "Flight", "Flight", 80);
@@ -856,7 +859,7 @@ function normalizeFlightResults(data, payload, currency) {
         title: `${route} ${compact(airline, "航班", 60)}`,
         source: "Google Flights",
         price,
-        priceText: formatPrice(price, currency),
+        priceText: price ? formatPrice(price, currency) : "",
         currency: currencyLabel(currency),
         link: `https://www.google.com/travel/flights?q=${encodeURIComponent(
           `${payload.departureId || ""} ${payload.arrivalId || ""} ${payload.outboundDate || ""} ${payload.returnDate || ""}`,
@@ -879,6 +882,7 @@ function normalizeFlightResults(data, payload, currency) {
         airlineTypeLabel: airlineType === "low_cost" ? "廉價航空" : airlineType === "mixed" ? "混合航空" : "傳統航空",
         purchaseLinks,
         departureToken: typeof item.departure_token === "string" ? item.departure_token : "",
+        bookingToken: typeof item.booking_token === "string" ? item.booking_token : "",
         upgradeEligibility: { status: "unknown", label: "里程升等待確認", reason: "需確認訂位艙等、票價規則與升等名額。" },
       };
     })
@@ -892,7 +896,7 @@ function normalizeFlightResults(data, payload, currency) {
       if (routeType === "connecting" && item.stops === 0) return false;
       return matchesFlightPreferences(item, payload);
     })
-    .sort((left, right) => left.price - right.price)
+    .sort((left, right) => (left.price || Infinity) - (right.price || Infinity))
     .slice(0, 20);
 
   const insights = data.price_insights || {};

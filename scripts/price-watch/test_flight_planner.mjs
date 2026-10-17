@@ -11,8 +11,9 @@ const date = addDateDays(new Date().toISOString().slice(0, 10), 20);
 const base = { type: "flight", flightMode: "date_window", startDate: date, lookaheadDays: 0, departureId: "TPE", arrivalId: "NRT", tripDays: 0, compareDurations: false };
 const multi = { ...base, arrivalId: "LAX", journeyType: "multicity", stopoverId: "NRT", stopoverMinNights: 2, stopoverMaxNights: 2 };
 
-function harness(change = (data) => data) {
+function harness(change = (data) => data, changeBooking = (data) => data) {
   const calls = [];
+  const bookings = new Map();
   const records = new Map();
   const env = { PRICE_WATCH_PUBLIC_SEARCH: "true", PRICE_WATCH_ACCESS_TOKEN: "test", SERPAPI_API_KEY: "test",
     PRICE_WATCH_KV: { async get(key) { return records.get(key) || null; }, async put(key, value) { records.set(key, JSON.parse(value)); } } };
@@ -20,19 +21,26 @@ function harness(change = (data) => data) {
   globalThis.fetch = async (url) => {
     const params = Object.fromEntries(new URL(url).searchParams);
     calls.push(params);
-    const index = Number((params.departure_token || "leg-0").split("-")[1]);
+    if (params.booking_token) return Response.json(changeBooking(bookings.get(params.booking_token) || {}, params));
     const legs = params.multi_city_json ? JSON.parse(params.multi_city_json) : [
       { departure_id: params.departure_id, arrival_id: params.arrival_id, date: params.outbound_date },
       ...(params.return_date ? [{ departure_id: params.arrival_id, arrival_id: params.departure_id, date: params.return_date }] : []),
     ];
+    const index = Number((params.departure_token || "leg-0").split("-")[1]);
     const leg = legs[index];
     assert.ok(leg, "valid token traversal");
     const data = { best_flights: [{ price: Number(params.travel_class) * 9000 + index * 1000, total_duration: 180,
       departure_token: index < legs.length - 1 ? `leg-${index + 1}` : undefined,
+      booking_token: index === legs.length - 1 ? "final-booking-token" : undefined,
       flights: [{ airline: "EVA Air", flight_number: "BR 100", airplane: "Boeing 787-9", travel_class: params.travel_class === "1" ? "Economy" : "Business",
         departure_airport: { id: leg.departure_id.split(",")[0], time: `${leg.date} 09:00` }, arrival_airport: { id: leg.arrival_id.split(",")[0], time: `${leg.date} 13:00` }, duration: 180 }],
     }] };
-    return Response.json(change(data, params, index));
+    const changed = change(data, params, index);
+    for (const [i, item] of (changed.best_flights || []).entries()) if (item.booking_token) {
+      item.booking_token = `booking-${calls.length}-${i}`;
+      bookings.set(item.booking_token, { booking_options: [{ together: { price: item.price, book_with: "Fixture Airline" } }] });
+    }
+    return Response.json(changed);
   };
   return { calls, env, restore() { globalThis.fetch = previous; }, async request(payload, path = "search", authenticated = true) {
     const response = await worker.fetch(new Request(`https://test.example/api/price-watch/${path}`, { method: "POST", headers: {
@@ -545,9 +553,9 @@ test("multi-city uses whole-trip final quote, includes all legs and economy defa
     assert.equal(data.results[0].upgradeEligibility.status, "unknown");
     assert.equal(data.insights.cabinPrices.length, 3);
     assert.ok(h.calls.every((p) => p.type === "3" && !p.outbound_date));
-    assert.equal(h.calls.length, 6);
+    assert.equal(h.calls.length, 9);
     await h.request(multi);
-    assert.equal(h.calls.length, 6, "repeat queries use 15-minute cache");
+    assert.equal(h.calls.length, 9, "repeat queries use 15-minute cache");
   } finally { h.restore(); }
 });
 
@@ -587,10 +595,17 @@ test("return-leg exclusion cannot produce a matching round trip", async () => {
   } finally { h.restore(); }
 });
 
-test("missing selection tokens fall back to explicitly priced independent tickets", async () => {
+test("default and legacy auto never replace missing through fares with independent tickets", async () => {
   const h = harness((data) => { delete data.best_flights[0].departure_token; return data; });
   try {
-    const { data } = await h.request(multi);
+    for (const ticketMode of [undefined, "auto", "through"]) {
+      const { data } = await h.request({ ...multi, ticketMode });
+      assert.equal(data.results.length, 0);
+      assert.equal(data.insights.ticketMode, "through");
+      assert.match(data.insights.samplingNotice, /未提供.*聯程/);
+      assert.ok(h.calls.every((p) => p.type === "3"));
+    }
+    const { data } = await h.request({ ...multi, ticketMode: "separate" });
     assert.equal(data.results.length, 1);
     assert.equal(data.results[0].separateTickets, true);
     assert.equal(data.results[0].priceBasis, "separate_ticket_sum");
@@ -600,7 +615,126 @@ test("missing selection tokens fall back to explicitly priced independent ticket
   finally { h.restore(); }
 });
 
-test("independent fallback never totals an incomplete journey or hides provider failure", async () => {
+test("through fares tolerate unpriced intermediate selections but require a final priced booking option", async () => {
+  for (const missingFinal of ["none", "price", "booking_token"]) {
+    const h = harness((data, params, index) => {
+      if (index === 0) delete data.best_flights[0].price;
+      else if (missingFinal !== "none") delete data.best_flights[0][missingFinal];
+      return data;
+    });
+    try {
+      const { status, data } = await h.request(multi);
+      assert.equal(status, 200);
+      if (missingFinal === "none") {
+        assert.equal(data.results[0].price, 10000, "Use final whole-journey price, never sum intermediate estimates");
+        assert.equal(data.results[0].separateTickets, false);
+        assert.equal(data.results[0].priceBasis, "whole_itinerary_quote");
+        assert.equal(data.results[0].bookingToken, undefined);
+        assert.ok(data.results[0].legs.every((leg) => !leg.bookingToken && !leg.departureToken));
+        assert.ok(data.insights.cabinPrices.every((c) => c.available && !c.separateTickets));
+      } else assert.deepEqual(data.results, []);
+      assert.ok(h.calls.every((p) => p.type === "3"));
+    } finally { h.restore(); }
+  }
+});
+
+test("through-ticket tracking keeps its fare basis and never silently switches to split fares", async () => {
+  const h = harness();
+  try {
+    const saved = await h.request(multi, "watches");
+    const planner = saved.data.watch.sources[0].planner;
+    assert.equal(planner.ticketMode, "through");
+    const tracked = await h.request({ ...planner, trackingSample: true });
+    assert.equal(tracked.data.results[0].priceBasis, "whole_itinerary_quote");
+    assert.equal(tracked.data.results[0].price, 10000);
+    assert.ok(h.calls.every((p) => p.type === "3"));
+  } finally { h.restore(); }
+});
+
+test("all unpriced selections resolve a together booking offer without adding leg fares", async () => {
+  const h = harness((data) => { delete data.best_flights[0].price; return data; }, (_, params) => {
+    assert.equal(params.departure_token, undefined, "Booking and departure tokens are mutually exclusive");
+    return { search_parameters: { currency: "TWD" }, booking_options: [
+      { separate_tickets: true, together: { price: 1, book_with: "Split Seller" } },
+      { together: { price: 2, book_with: "Wrong flights", marketed_as: ["MU5008", "MU5005"] } },
+      { together: { price: 16500 * Number(params.travel_class), book_with: "Airline", airline: true,
+        marketed_as: ["BR 100", "BR 100"], baggage_prices: ["1 free checked bag"] } },
+    ] };
+  });
+  try {
+    const { data } = await h.request(multi);
+    assert.equal(data.results[0].price, 16500);
+    assert.equal(data.results[0].bookingQuote.seller, "Airline");
+    assert.equal(data.results[0].bookingQuote.basis, "provider_together_offer");
+    assert.deepEqual(data.insights.cabinPrices.map((c) => c.price), [16500, 33000, 49500]);
+    assert.equal(h.calls.filter((p) => p.booking_token).length, 3);
+  } finally { h.restore(); }
+});
+
+test("through fares reject split-only, no-price, different-flight and wrong-currency booking offers", async () => {
+  for (const booking of [
+    { booking_options: [{ separate_tickets: true, together: { price: 5000 } }] },
+    { booking_options: [{ departing: { price: 3000 }, returning: { price: 2000 } }] },
+    { booking_options: [{ together: { book_with: "No price" } }] },
+    { booking_options: [{ together: { price: 5000, marketed_as: ["BR101", "BR100"] } }] },
+    { search_parameters: { currency: "USD" }, booking_options: [{ together: { price: 5000 } }] },
+  ]) {
+    const h = harness(undefined, () => booking);
+    try {
+      const { status, data } = await h.request(multi);
+      if (booking.search_parameters) assert.notEqual(status, 200);
+      else assert.deepEqual(data.results, []);
+      assert.ok(h.calls.every((p) => p.type === "3"));
+    } finally { h.restore(); }
+  }
+});
+
+test("booking source failure is not silently reported as no flights", async () => {
+  const h = harness(undefined, () => { throw new Error("Booking provider unavailable"); });
+  try {
+    const { status } = await h.request(multi);
+    assert.equal(status, 502);
+    assert.ok(h.calls.every((p) => p.type === "3"));
+  } finally { h.restore(); }
+});
+
+test("matching flights without a booking quote are display-only, never zero-price samples or alerts", async () => {
+  const h = harness((data) => { delete data.best_flights[0].price; return data; }, () => ({}));
+  try {
+    const { status, data } = await h.request(multi);
+    assert.equal(status, 200);
+    assert.deepEqual(data.results, []);
+    assert.equal(data.unpricedResults.length, 1);
+    const itinerary = data.unpricedResults[0];
+    assert.equal(itinerary.quoteStatus, "no_booking_offer");
+    assert.equal(itinerary.price, null);
+    assert.equal(itinerary.priceText, "聯程總價待確認");
+    assert.equal(itinerary.trackable, false);
+    assert.equal(itinerary.sampled, false);
+    assert.equal(itinerary.legs.length, 2);
+    assert.ok(itinerary.legs.every((leg) => !leg.bookingToken && !leg.departureToken));
+    assert.equal(data.insights.lowestPrice, null);
+    assert.equal(data.insights.yearStats.average, null);
+    assert.equal(data.insights.yearStats.sampleCount, 0);
+    assert.ok(data.insights.cabinPrices.every((cabin) => !cabin.available && cabin.price === null));
+    assert.match(data.insights.samplingNotice, /航班.*未提供聯程購票價格/);
+    const tracked = await h.request({ ...multi, trackingSample: true });
+    assert.deepEqual(tracked.data.results, []);
+    assert.deepEqual(tracked.data.unpricedResults, []);
+  } finally { h.restore(); }
+});
+
+test("unpriced premium cabins do not become available when economy has a quote", async () => {
+  const h = harness(undefined, (data, params) => params.travel_class === "1" ? data : {});
+  try {
+    const { data } = await h.request(multi);
+    assert.equal(data.results.length, 1);
+    assert.equal(data.insights.cabinPrices[0].available, true);
+    assert.ok(data.insights.cabinPrices.slice(1).every((cabin) => !cabin.available && cabin.price === null));
+  } finally { h.restore(); }
+});
+
+test("through search never hides provider failure or substitutes incomplete split tickets", async () => {
   for (const fail of [false, true]) {
     const h = harness((data, params) => {
       if (fail) throw new Error("Provider unavailable");
@@ -620,8 +754,8 @@ test("independent fallback never totals an incomplete journey or hides provider 
   }
 });
 
-test("automatic separate-ticket fallback preserves both departure dates, deadline, fixed flights and cabin sums", async () => {
-  const payload = { ...multi, departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB", includeReturn: true,
+test("explicit separate tickets preserve both departure dates, deadline, fixed flights and cabin sums", async () => {
+  const payload = { ...multi, ticketMode: "separate", departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB", includeReturn: true,
     stopoverMinNights: 3, stopoverMaxNights: 4, destinationMinNights: 7, destinationMaxNights: 7,
     legTimeWindows: [
       { departureDate: "2027-01-05", departureDateAlternative: "2027-01-06" },
@@ -704,7 +838,7 @@ test("saved tracking preserves every preference and only authenticates tracking 
     assert.equal(h.calls.length, 0);
     const tracked = await h.request({ ...payload, trackingSample: true });
     assert.equal(tracked.data.results[0].itineraryComplete, true);
-    assert.equal(h.calls.length, 2);
+    assert.equal(h.calls.length, 3);
   } finally { h.restore(); }
 });
 
