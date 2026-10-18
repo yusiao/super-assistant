@@ -459,6 +459,21 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const duration = selected.reduce((total, item) => total + item.duration, 0);
   const price = unpriced ? null : separate ? selected.reduce((total, item) => total + item.price, 0) : bookingQuote?.price ?? best.price;
   const priceText = unpriced ? "此來源未提供聯程售價" : separate || bookingQuote ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
+  const purchaseLinks = multi
+    ? [...new Map(selected.flatMap((leg) => leg.purchaseLinks.filter((link) => link.kind === "official")).map((link) => [link.url, link])).values()]
+    : first.purchaseLinks.filter((link) => link.kind === "official");
+  if (multi && !separate && (p.currency || "TWD") === "TWD"
+    && allSegments.every((segment) => /^MU\d+$/.test(normalizedFlightNumber(segment.flightNumber)))) {
+    // This public shopping URL pre-fills a search, not a verified fare or a flight reservation.
+    const shopping = { passengerNum: "1,0,0", travelType: "multitrip", classCode: "ALL", payWay: "money",
+      segList: JSON.stringify(legs.map((leg, index) => ({ depCode: leg.departure_id, arrCode: leg.arrival_id, depDate: leg.date, segId: index + 1 }))),
+      t: Date.now() };
+    const link = { kind: "official", label: "東航多城市查價", url: `https://www.ceair.com/hk/twd/shopping?${btoa(JSON.stringify(shopping))}encoded`,
+      note: "東航官網搜尋：1 位成人、相同日期與機場；未鎖定班號、時段、艙等或票價。" };
+    const homepage = purchaseLinks.findIndex((item) => item.url === "https://www.ceair.com/");
+    if (homepage < 0) purchaseLinks.unshift(link);
+    else purchaseLinks.splice(homepage, 1, link);
+  }
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
     title: route, price, priceText, departureToken: undefined, bookingToken: undefined, differentReturnAirport, airportChanges,
     separateTickets: separate, priceBasis: separate ? "separate_ticket_sum" : "whole_itinerary_quote",
@@ -472,9 +487,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     plan, sampled: !unpriced, source: unpriced ? "Google Flights 航班組合（未報價）" : separate ? "Google Flights 分開購票組合" : "Google Flights 完整行程抽樣",
     stopoverNights: multi ? dateDifference(selected[0].arrival.slice(0, 10), selected[1].departure.slice(0, 10)) : null,
     destinationNights: multi && p.includeReturn ? dateDifference(selected[1].arrival.slice(0, 10), selected[2].departure.slice(0, 10)) : null,
-    purchaseLinks: multi
-      ? [...new Map(selected.flatMap((leg) => leg.purchaseLinks.filter((link) => link.kind === "official")).map((link) => [link.url, link])).values()]
-      : first.purchaseLinks.filter((link) => link.kind === "official"),
+    purchaseLinks,
     link: `https://www.google.com/travel/flights?q=${encodeURIComponent(selected.map((leg) => `${leg.departureAirport} ${leg.arrivalAirport} ${leg.departureDate}`).join(" "))}`,
     upgradeEligibility: { status: "unknown", label: "里程升等待確認", reason: "未取得訂位艙等、票價規則與各航段升等名額。" },
   };

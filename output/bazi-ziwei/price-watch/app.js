@@ -511,6 +511,7 @@ function resultCard(item) {
     <div class="action-row flight-actions">
       ${purchaseActions}${!item.cabinPrices && item.quoteStatus !== "no_booking_offer" ? '<button class="compare-button" type="button">比較艙等</button>' : ""}${trackButton}
     </div>
+    ${(item.purchaseLinks || []).filter((link) => link.note).map((link) => `<p class="fare-note">${escapeHtml(link.note)}</p>`).join("")}
   `;
   card.querySelector(".track-button")?.addEventListener("click", () => trackResult(item));
   card.querySelector(".compare-button:not([data-leg-cabins])")?.addEventListener("click", (event) => compareCabins(item, card, event.currentTarget));
@@ -1221,7 +1222,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=22").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=23").catch(() => {});
   }
 }
 

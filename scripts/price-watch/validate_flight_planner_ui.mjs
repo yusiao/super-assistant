@@ -394,8 +394,10 @@ try {
   assert.equal(shared.journeyAirline, 'mu');
   assert.equal(shared.ticketMode, 'separate');
   assert.equal(copied.includes('test-ui'), false, 'Share links must never include the access token');
+  await page.goto(copied);
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[data-leg-role="return"] [data-window-field="flightNumbers"]')?.value === 'MU5616, MU5005');
+  assert.equal(await page.locator('[name="journeyAirline"]').inputValue(), 'mu');
   throughBookingFixture = true;
   for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
   await page.locator('[name="ticketMode"]').selectOption('through');
@@ -424,12 +426,17 @@ try {
   assert.doesNotMatch(await page.locator('#resultList').innerText(), /NT\$\s*0\b/);
   assert.equal(await page.locator('.result-card .track-button').count(), 0);
   assert.equal(await page.locator('.result-card .compare-button:not([data-leg-cabins])').count(), 0);
+  assert.equal(await page.getByRole('link', { name: '東航多城市查價', exact: true }).count(), 2);
+  assert.match(await page.locator('.result-card').first().innerText(), /未鎖定班號、時段、艙等或票價/);
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.locator('.result-card').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: join(root, `tmp/flight-through-unpriced-${browserName}-${width}.png`) });
     assert.ok(await page.locator('.unpriced-result .result-description').first().evaluate((el) => el.getBoundingClientRect().width >= 200), 'Unpriced status must not squeeze the route into a narrow column');
+    await page.getByRole('link', { name: '東航多城市查價', exact: true }).first().scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: join(root, `tmp/flight-ceair-link-${browserName}-${width}.png`) });
   }
   bookingUnavailableFixture = false;
   for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);

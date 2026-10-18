@@ -390,7 +390,18 @@ test("whole-journey airline applies to all legs, persists, and rejects conflicti
     assert.ok(data.results.length);
     assert.ok(h.calls.every((p) => p.include_airlines === "MU"));
     assert.ok(data.results[0].segments.every((s) => s.flightNumber === "MU 100"));
-    assert.ok(data.results[0].purchaseLinks.some((l) => l.kind === "official" && l.url === "https://www.ceair.com/"));
+    const official = data.results[0].purchaseLinks.find((l) => l.kind === "official" && l.url.startsWith("https://www.ceair.com/hk/twd/shopping?"));
+    assert.ok(official);
+    const shopping = JSON.parse(atob(new URL(official.url).search.slice(1, -7)));
+    assert.equal(shopping.passengerNum, "1,0,0");
+    assert.equal(shopping.travelType, "multitrip");
+    assert.equal(shopping.classCode, "ALL");
+    assert.deepEqual(JSON.parse(shopping.segList), [
+      { depCode: "TPE", arrCode: "NRT", depDate: date, segId: 1 },
+      { depCode: "NRT", arrCode: "LAX", depDate: addDateDays(date, 2), segId: 2 },
+      { depCode: "LAX", arrCode: "TPE", depDate: addDateDays(date, 5), segId: 3 },
+    ]);
+    assert.match(official.note, /未鎖定班號/);
     const saved = await h.request(payload, "watches");
     assert.equal(saved.data.watch.sources[0].planner.journeyAirline, "MU");
     assert.equal(saved.data.watch.sources[0].planner.legTimeWindows.length, 3);
@@ -402,6 +413,45 @@ test("whole-journey airline applies to all legs, persists, and rejects conflicti
     assert.equal(h.calls.length, before);
     assert.equal(validateFlightPreferences({ ...base, journeyAirline: "mu" }).legTimeWindows[0].airline, "MU");
   } finally { h.restore(); }
+});
+
+test("unpriced China Eastern links preserve airport groups and dates without inventing a quote", async () => {
+  const h = harness((data) => {
+    data.best_flights[0].flights[0].flight_number = "MU 100";
+    data.best_flights[0].flights[0].airline = "China Eastern";
+    return data;
+  }, () => ({}));
+  try {
+    const { data } = await h.request({ ...multi, departureId: "TPE,TSA", stopoverId: "PVG,SHA", arrivalId: "HRB" });
+    assert.equal(data.results.length, 0);
+    const result = data.unpricedResults[0];
+    assert.equal(result.price, null);
+    assert.equal(result.trackable, false);
+    const link = result.purchaseLinks.find((item) => item.url.startsWith("https://www.ceair.com/hk/twd/shopping?"));
+    const shopping = JSON.parse(atob(new URL(link.url).search.slice(1, -7)));
+    assert.deepEqual(JSON.parse(shopping.segList), [
+      { depCode: "TPE,TSA", arrCode: "PVG,SHA", depDate: date, segId: 1 },
+      { depCode: "PVG,SHA", arrCode: "HRB", depDate: addDateDays(date, 2), segId: 2 },
+    ]);
+    assert.equal(result.bookingQuote, undefined);
+    assert.equal(link.url.includes("test"), false);
+  } finally { h.restore(); }
+});
+
+test("China Eastern multi-city links do not replace mixed-carrier, separate or non-TWD purchase links", async () => {
+  for (const variant of ["mixed", "separate", "USD", "oneway"]) {
+    const h = harness((data, params, index) => {
+      data.best_flights[0].flights[0].flight_number = variant === "mixed" && index === 1 ? "BR 100" : "MU 100";
+      data.best_flights[0].flights[0].airline = variant === "mixed" && index === 1 ? "EVA Air" : "China Eastern";
+      return data;
+    });
+    try {
+      const payload = variant === "oneway" ? base : { ...multi, ...(variant === "separate" ? { ticketMode: "separate" } : {}), ...(variant === "USD" ? { currency: "USD" } : {}) };
+      const { data } = await h.request(payload);
+      assert.ok(data.results.length);
+      assert.ok(data.results.every((result) => result.purchaseLinks.every((link) => !link.url.includes("ceair.com/hk/twd/shopping"))), variant);
+    } finally { h.restore(); }
+  }
 });
 
 test("time windows enforce exact local minutes, including overnight windows", () => {
