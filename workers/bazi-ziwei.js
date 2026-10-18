@@ -226,7 +226,7 @@ async function serpApiSearch(params, env) {
       Accept: "application/json",
       "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
     },
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(params.deep_search === "true" ? 45000 : 25000),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {

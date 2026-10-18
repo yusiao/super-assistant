@@ -319,6 +319,9 @@ export function flightDateRange(p, today) {
 export async function searchCompleteJourney(p, plan, cabin, search, normalize, lowCostCodes, retry = false) {
   const multi = p.journeyType === "multicity";
   const separate = multi && p.ticketMode === "separate";
+  const requestedCabin = { "1": /^(economy|經濟艙)$/i, "2": /premium economy|豪華經濟|豪經/i, "3": /business|商務|商務艙/i }[cabin.code];
+  const cabinPenalty = (item) => item.segments.some((segment) => segment.travelClass && segment.travelClass !== "未提供" && !requestedCabin.test(segment.travelClass)) ? 2
+    : item.segments.some((segment) => !segment.travelClass || segment.travelClass === "未提供") ? 1 : 0;
   if (plan.date < new Date().toISOString().slice(0, 10) || (p.fixedDepartureDate && plan.date !== p.fixedDepartureDate)) return null;
   const legs = multi
     ? [{ departure_id: p.departureId, arrival_id: p.stopoverId, date: plan.date },
@@ -346,6 +349,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     gl: (p.market || "TW").toLowerCase(), travel_class: cabin.code, sort_by: "2", ...filters,
     type: multi ? "3" : legs.length === 2 ? "1" : "2" };
   if (multi) {
+    if (!separate) params.deep_search = "true";
     params.multi_city_json = JSON.stringify(legs.map((leg, index) => ({ ...leg, ...(legFilters[index].outbound_times ? { times: legFilters[index].outbound_times } : {}) })));
     delete params.outbound_times;
   } else {
@@ -403,7 +407,10 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
       return nights >= (i === 0 ? p.stopoverMinNights : p.destinationMinNights)
         && nights <= (i === 0 ? p.stopoverMaxNights : p.destinationMaxNights);
     }) : datedCandidates;
-    best = (forwardCandidates.length ? forwardCandidates : datedCandidates).find((item) => {
+    // Without prices, source order is not a cheapest-fare ranking; prefer the requested cabin.
+    const rankedCandidates = [...(forwardCandidates.length ? forwardCandidates : datedCandidates)]
+      .sort((a, b) => ((a.price || Infinity) - (b.price || Infinity)) || cabinPenalty(a) - cabinPenalty(b));
+    best = rankedCandidates.find((item) => {
       if (!selected.length) return true;
       const previous = selected.at(-1);
       const nights = dateDifference(previous.arrival.slice(0, 10), item.departure.slice(0, 10));
@@ -443,7 +450,6 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   const unpriced = multi && !separate && !bookingQuote;
   const first = selected[0];
   const allSegments = selected.flatMap((item, legIndex) => item.segments.map((segment) => ({ ...segment, legIndex })));
-  const requestedCabin = { "1": /^(economy|經濟艙)$/i, "2": /premium economy|豪華經濟|豪經/i, "3": /business|商務|商務艙/i }[cabin.code];
   const mixedCabin = allSegments.some((segment) => segment.travelClass && segment.travelClass !== "未提供" && !requestedCabin.test(segment.travelClass));
   const returnDate = legs.length > 1 && (!multi || p.includeReturn) ? legs.at(-1).date : "";
   const route = multi ? [first.departureAirport, ...selected.map((leg) => leg.arrivalAirport)].join(" → ") : `${first.departureAirport} → ${first.arrivalAirport}`;
@@ -452,7 +458,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     : [{ arrivalAirport: selected[index].arrivalAirport, departureAirport: leg.departureAirport }]);
   const duration = selected.reduce((total, item) => total + item.duration, 0);
   const price = unpriced ? null : separate ? selected.reduce((total, item) => total + item.price, 0) : bookingQuote?.price ?? best.price;
-  const priceText = unpriced ? "聯程總價待確認" : separate || bookingQuote ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
+  const priceText = unpriced ? "此來源未提供聯程售價" : separate || bookingQuote ? `${(p.currency || "TWD") === "TWD" ? "NT$" : `${p.currency} `}${Math.round(price).toLocaleString("zh-TW")}` : best.priceText;
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
     title: route, price, priceText, departureToken: undefined, bookingToken: undefined, differentReturnAirport, airportChanges,
     separateTickets: separate, priceBasis: separate ? "separate_ticket_sum" : "whole_itinerary_quote",

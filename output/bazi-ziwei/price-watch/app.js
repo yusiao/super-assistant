@@ -463,6 +463,7 @@ function emptyNode() {
 function resultCard(item) {
   const card = document.createElement("article");
   card.className = "result-card";
+  card.classList.toggle("unpriced-result", item.quoteStatus === "no_booking_offer");
   const dateText = item.returnDate ? `${item.departureDate} - ${item.returnDate}` : item.departureDate || "";
   const trackButton = item.trackable === false ? "" : '<button class="track-button" type="button">追蹤</button>';
   const stopText = Number(item.stops || 0) === 0 ? "直達" : `${Number(item.stops)} 次轉乘`;
@@ -904,7 +905,7 @@ function renderTicketQuoteStatus(view) {
   const message = document.createElement("p");
   message.textContent = view.results.length
     ? separate ? "各段獨立購票，合計不是一張聯程票價。" : "資料來源提供整趟報價，非各段相加；是否以一張票開立及轉機保障，仍須由購票頁確認。"
-    : view.unpricedResults?.length ? "已找到符合條件的航班，但尚未取得整趟聯程購票價格；是否能開立一張票仍待確認。"
+    : view.unpricedResults?.length ? "查詢已完成，但此資料來源沒有提供整趟聯程售價，目前無法判定哪天較便宜或是否比分開購票便宜；不代表航空公司無票。"
     : view.insights ? separate ? "未取得完整的分段購票組合。" : "未取得聯程報價，不代表航空公司無票；未以分段加總替代。"
       : "查詢失敗，尚無法確認報價。";
   const button = document.createElement("button");
@@ -1028,7 +1029,7 @@ async function searchFlight(event) {
     view.searched = true;
     view.journeyType = state.lastFlightPayload.journeyType;
     view.ticketMode = state.lastFlightPayload.ticketMode;
-    view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : "多城市聯程整趟報價" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
+    view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : view.results.length ? "多城市聯程整趟報價" : "多城市航班（未取得聯程售價）" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
@@ -1220,7 +1221,7 @@ function boot() {
   document.querySelector("#copyTripLinkButton").addEventListener("click", copyTripLink);
   loadConfig();
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js?v=21").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=22").catch(() => {});
   }
 }
 

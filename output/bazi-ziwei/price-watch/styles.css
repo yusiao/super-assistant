@@ -792,6 +792,10 @@ select {
   align-items: start;
 }
 
+.unpriced-result .result-main { grid-template-columns: minmax(0, 1fr); }
+.unpriced-result .price-block { justify-items: start; }
+.unpriced-result .price { font-size: 18px; white-space: normal; }
+
 .result-description {
   display: flex;
   min-width: 0;

@@ -648,6 +648,7 @@ test("through-ticket tracking keeps its fare basis and never silently switches t
     assert.equal(tracked.data.results[0].priceBasis, "whole_itinerary_quote");
     assert.equal(tracked.data.results[0].price, 10000);
     assert.ok(h.calls.every((p) => p.type === "3"));
+    assert.ok(h.calls.every((p) => p.deep_search === "true"));
   } finally { h.restore(); }
 });
 
@@ -708,7 +709,7 @@ test("matching flights without a booking quote are display-only, never zero-pric
     const itinerary = data.unpricedResults[0];
     assert.equal(itinerary.quoteStatus, "no_booking_offer");
     assert.equal(itinerary.price, null);
-    assert.equal(itinerary.priceText, "聯程總價待確認");
+    assert.equal(itinerary.priceText, "此來源未提供聯程售價");
     assert.equal(itinerary.trackable, false);
     assert.equal(itinerary.sampled, false);
     assert.equal(itinerary.legs.length, 2);
@@ -731,6 +732,23 @@ test("unpriced premium cabins do not become available when economy has a quote",
     assert.equal(data.results.length, 1);
     assert.equal(data.insights.cabinPrices[0].available, true);
     assert.ok(data.insights.cabinPrices.slice(1).every((cabin) => !cabin.available && cabin.price === null));
+  } finally { h.restore(); }
+});
+
+test("unpriced selections prefer the requested cabin over an earlier mixed-cabin result", async () => {
+  const h = harness((data, params) => {
+    for (const item of data.best_flights) delete item.price;
+    const mismatch = structuredClone(data.best_flights[0]);
+    mismatch.flights[0].flight_number = "BR 999";
+    mismatch.flights[0].travel_class = params.travel_class === "1" ? "Business Class" : "Economy";
+    data.best_flights.unshift(mismatch);
+    return data;
+  }, () => ({}));
+  try {
+    const { data } = await h.request(multi);
+    assert.equal(data.unpricedResults.length, 1);
+    assert.ok(data.unpricedResults[0].segments.every((segment) => segment.flightNumber === "BR 100"));
+    assert.equal(data.unpricedResults[0].mixedCabin, false);
   } finally { h.restore(); }
 });
 

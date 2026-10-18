@@ -417,8 +417,8 @@ try {
   assert.deepEqual(unpricedResult.results, []);
   assert.equal(unpricedResult.unpricedResults.length, 2);
   assert.equal(await page.locator('.result-card').count(), 2);
-  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /已找到符合條件的航班/);
-  assert.match(await page.locator('.result-card').first().innerText(), /聯程總價待確認/);
+  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /查詢已完成.*沒有提供整趟聯程售價/);
+  assert.match(await page.locator('.result-card').first().innerText(), /此來源未提供聯程售價/);
   assert.doesNotMatch(await page.locator('.result-card').first().innerText(), /聯程整趟報價/);
   assert.match(await page.locator('.result-card').first().innerText(), /MU 5616[\s\S]*MU 5005/);
   assert.doesNotMatch(await page.locator('#resultList').innerText(), /NT\$\s*0\b/);
@@ -429,6 +429,7 @@ try {
     await page.locator('.result-card').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: join(root, `tmp/flight-through-unpriced-${browserName}-${width}.png`) });
+    assert.ok(await page.locator('.unpriced-result .result-description').first().evaluate((el) => el.getBoundingClientRect().width >= 200), 'Unpriced status must not squeeze the route into a narrow column');
   }
   bookingUnavailableFixture = false;
   for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
@@ -437,7 +438,7 @@ try {
   assert.deepEqual(recovered.unpricedResults, []);
   assert.equal(await page.locator('.result-card').count(), 2);
   assert.equal(await page.locator('.result-card .track-button').count(), 2);
-  assert.doesNotMatch(await page.locator('#resultList').innerText(), /聯程總價待確認/);
+  assert.doesNotMatch(await page.locator('#resultList').innerText(), /此來源未提供聯程售價/);
   assert.deepEqual(errors, []);
   console.log(`${browserName}: 320/360/375/390/430/600/1280px, two departure dates, ordered return flights, per-leg cabins, share links, tracking and existing flows passed; zero real API calls.`);
 } finally {
