@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-11T21:29:03.931Z",
+  "generatedAt": "2026-10-18T20:04:16.276Z",
   "sitemapUrl": "https://finfo.tw/sitemap.xml.gz",
   "sitemapPages": [
     {
@@ -15,14 +15,14 @@
     },
     {
       "url": "https://finfo.tw/sitemap2.xml.gz",
-      "locations": 1276,
+      "locations": 1331,
       "type": "urlset"
     }
   ],
-  "totalUrls": 51274,
-  "lifeProductVersions": 8931,
-  "uniqueCodes": 3703,
-  "duplicateCodeCount": 427,
+  "totalUrls": 51329,
+  "lifeProductVersions": 8978,
+  "uniqueCodes": 3720,
+  "duplicateCodeCount": 430,
   "duplicateCodes": [
     {
       "code": "06",
@@ -36,9 +36,10 @@
       "code": "1A",
       "insurers": [
         "臺銀人壽",
-        "新光人壽"
+        "新光人壽",
+        "國寶人壽"
       ],
-      "versions": 2
+      "versions": 3
     },
     {
       "code": "1P",
@@ -459,7 +460,7 @@
         "中國人壽",
         "保誠人壽"
       ],
-      "versions": 3
+      "versions": 4
     },
     {
       "code": "BQ",
@@ -958,6 +959,14 @@
       "versions": 2
     },
     {
+      "code": "ET",
+      "insurers": [
+        "元大人壽",
+        "宏泰人壽"
+      ],
+      "versions": 6
+    },
+    {
       "code": "EU",
       "insurers": [
         "新光人壽",
@@ -1340,7 +1349,7 @@
         "富邦人壽",
         "三商美邦人壽"
       ],
-      "versions": 4
+      "versions": 6
     },
     {
       "code": "HJ",
@@ -2129,9 +2138,10 @@
       "insurers": [
         "富邦人壽",
         "南山人壽",
-        "新光人壽"
+        "新光人壽",
+        "宏泰人壽"
       ],
-      "versions": 7
+      "versions": 8
     },
     {
       "code": "MR",
@@ -2702,7 +2712,7 @@
         "台新人壽",
         "宏泰人壽"
       ],
-      "versions": 14
+      "versions": 15
     },
     {
       "code": "PWLA",
@@ -2991,9 +3001,10 @@
       "insurers": [
         "宏泰人壽",
         "國寶人壽",
-        "朝陽人壽"
+        "朝陽人壽",
+        "興農人壽"
       ],
-      "versions": 9
+      "versions": 10
     },
     {
       "code": "RQ",
@@ -3002,6 +3013,14 @@
         "元大人壽"
       ],
       "versions": 7
+    },
+    {
+      "code": "RSH",
+      "insurers": [
+        "康健人壽",
+        "興農人壽"
+      ],
+      "versions": 2
     },
     {
       "code": "RU",
@@ -3162,6 +3181,14 @@
       "versions": 7
     },
     {
+      "code": "TDH",
+      "insurers": [
+        "大都會國際人壽",
+        "南山人壽"
+      ],
+      "versions": 2
+    },
+    {
       "code": "TIB",
       "insurers": [
         "台灣人壽",
@@ -3281,9 +3308,10 @@
       "code": "WLC",
       "insurers": [
         "康健人壽",
-        "南山人壽"
+        "南山人壽",
+        "宏泰人壽"
       ],
-      "versions": 3
+      "versions": 4
     },
     {
       "code": "WLS",
@@ -3307,9 +3335,10 @@
         "富邦人壽",
         "紐約人壽",
         "安泰人壽",
-        "國泰人壽"
+        "國泰人壽",
+        "保德信國際人壽"
       ],
-      "versions": 13
+      "versions": 14
     },
     {
       "code": "WP2",
@@ -3575,7 +3604,7 @@
         "新光人壽",
         "元大人壽"
       ],
-      "versions": 4
+      "versions": 5
     },
     {
       "code": "YQ",
@@ -3604,121 +3633,148 @@
     }
   ],
   "changes": {
-    "addedCount": 16,
-    "updatedCount": 2,
+    "addedCount": 17,
+    "updatedCount": 5,
     "removedFromSitemapCount": 0,
     "addedProducts": [
       {
-        "code": "2TRSD",
+        "code": "7K0",
+        "insurer": "台灣人壽",
+        "name": "LONG好康手術醫療終身保險附約A型",
+        "effectiveDate": "2016-01-01"
+      },
+      {
+        "code": "BEM",
+        "insurer": "全球人壽",
+        "name": "借款人為要保人之保險商品辦理保費融資訂定保險契約相關權利批註條款",
+        "effectiveDate": "2026-06-29"
+      },
+      {
+        "code": "BPFEB9",
         "insurer": "南山人壽",
-        "name": "增享心安保險",
-        "effectiveDate": "2024-12-21"
+        "name": "銀行保險保費融資批註條款B9",
+        "effectiveDate": "2026-09-12"
       },
       {
-        "code": "5JA",
-        "insurer": "台灣人壽",
-        "name": "真關懷豁免保險費保險附約A型",
-        "effectiveDate": "2010-11-03"
-      },
-      {
-        "code": "5JB",
-        "insurer": "台灣人壽",
-        "name": "真關懷豁免保險費保險附約B型",
-        "effectiveDate": "2010-11-03"
-      },
-      {
-        "code": "67",
-        "insurer": "中國人壽",
-        "name": "新登峰終身保險平準型",
-        "effectiveDate": "1998-12-15"
-      },
-      {
-        "code": "ADHL",
-        "insurer": "保誠人壽",
-        "name": "新康寧終身醫療保險",
+        "code": "CW",
+        "insurer": "興農人壽",
+        "name": "癌症終身醫療保險",
         "effectiveDate": "1961-01-01"
       },
       {
-        "code": "BYAR2",
+        "code": "E1DH",
         "insurer": "南山人壽",
-        "name": "珍安康2意外傷害保險附約",
+        "name": "穩助糖醫療保險",
         "effectiveDate": "2024-09-14"
       },
       {
-        "code": "DMAL",
-        "insurer": "南山人壽",
-        "name": "憶起幸福終身保險",
-        "effectiveDate": "2024-12-21"
+        "code": "EIF",
+        "insurer": "宏泰人壽",
+        "name": "E起真心小額終身壽險",
+        "effectiveDate": "2026-08-31"
       },
       {
-        "code": "ECPA1",
+        "code": "EIPA",
+        "insurer": "宏泰人壽",
+        "name": "E齊安心傷害保險",
+        "effectiveDate": "2024-11-15"
+      },
+      {
+        "code": "FRMMR",
         "insurer": "南山人壽",
-        "name": "網路投保ILIKE相挺傷害保險",
+        "name": "FULL樂微型傷害醫療保險附約",
         "effectiveDate": "2024-09-14"
       },
       {
-        "code": "FRMPA",
+        "code": "FRPAR",
         "insurer": "南山人壽",
-        "name": "FULL樂微型傷害保險",
+        "name": "FULL樂平安小額傷害保險附約",
         "effectiveDate": "2024-09-14"
       },
       {
-        "code": "NCPF0301",
-        "insurer": "台灣人壽",
-        "name": "保單融資批註條款",
-        "effectiveDate": "2026-06-01"
+        "code": "ICPA",
+        "insurer": "宏泰人壽",
+        "name": "天然災害傷害保險附約",
+        "effectiveDate": "2023-02-09"
       },
       {
-        "code": "NCPF0401",
-        "insurer": "台灣人壽",
-        "name": "保費融資三批註條款",
-        "effectiveDate": "2026-08-26"
+        "code": "MIPC",
+        "insurer": "宏泰人壽",
+        "name": "多元型傷害保險",
+        "effectiveDate": "2025-01-10"
       },
       {
-        "code": "TPHI5",
+        "code": "MIPD",
+        "insurer": "宏泰人壽",
+        "name": "多元型傷害失能保險",
+        "effectiveDate": "2025-01-10"
+      },
+      {
+        "code": "MPA2",
         "insurer": "南山人壽",
-        "name": "樂活洋溢醫療終身保險",
-        "effectiveDate": "2025-01-01"
+        "name": "集體投保型微型傷害保險",
+        "effectiveDate": "2024-09-14"
       },
       {
-        "code": "TSL9",
+        "code": "NCIC",
+        "insurer": "南山人壽",
+        "name": "安心溢百重大傷病終身保險",
+        "effectiveDate": "2026-10-09"
+      },
+      {
+        "code": "NTPA4101",
         "insurer": "台灣人壽",
-        "name": "寶利旺利率變動型增額終身壽險",
-        "effectiveDate": "2018-09-14"
+        "name": "樂齡心安定期傷害保險",
+        "effectiveDate": "2026-09-23"
       },
       {
-        "code": "WM3",
-        "insurer": "國泰人壽",
-        "name": "HEN美滿重大傷病健康保險定期型",
-        "effectiveDate": "2020-01-01"
+        "code": "RQD",
+        "insurer": "興農人壽",
+        "name": "一年定期二至十一級殘廢保險附約",
+        "effectiveDate": "2006-10-03"
       },
       {
-        "code": "XLO",
-        "insurer": "富邦人壽",
-        "name": "醫把罩終身健康保險",
-        "effectiveDate": "2016-05-03"
-      },
-      {
-        "code": "YEH",
-        "insurer": "遠雄人壽",
-        "name": "金滿意年年還本終身保險",
-        "effectiveDate": "2002-01-15"
+        "code": "SIPA",
+        "insurer": "南山人壽",
+        "name": "長青傷害保險",
+        "effectiveDate": "2024-09-14"
       }
     ],
     "updatedProducts": [
       {
-        "code": "LTC",
-        "previousEffectiveDate": "2025-01-01",
-        "effectiveDate": "2026-03-02",
-        "insurer": "新光人壽",
-        "name": "長期照顧分期長期看護保險金連續給付後申領文件調整批註條款"
+        "code": "BER",
+        "previousEffectiveDate": "2026-03-30",
+        "effectiveDate": "2026-09-21",
+        "insurer": "全球人壽",
+        "name": "附約延續批註條款"
       },
       {
-        "code": "NCPF0101",
-        "previousEffectiveDate": "2026-04-30",
-        "effectiveDate": "2026-07-06",
-        "insurer": "台灣人壽",
-        "name": "保費融資批註條款"
+        "code": "HSA",
+        "previousEffectiveDate": "2023-02-09",
+        "effectiveDate": "2023-03-21",
+        "insurer": "宏泰人壽",
+        "name": "薰衣草醫療健康保險附約"
+      },
+      {
+        "code": "MTA",
+        "previousEffectiveDate": "2025-01-01",
+        "effectiveDate": "2026-04-01",
+        "insurer": "凱基人壽",
+        "name": "心平安傷害醫療保險給付附加條款"
+      },
+      {
+        "code": "TDH",
+        "previousEffectiveDate": "1996-09-06",
+        "effectiveDate": "2024-09-14",
+        "insurer": "南山人壽",
+        "name": "HOLD助糖定期醫療保險"
+      },
+      {
+        "code": "WLC",
+        "previousEffectiveDate": "2020-01-01",
+        "effectiveDate": "2025-01-01",
+        "insurer": "宏泰人壽",
+        "name": "安心終身壽險實物給付型"
       }
     ],
     "removedProducts": []
