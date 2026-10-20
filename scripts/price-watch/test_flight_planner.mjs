@@ -785,6 +785,104 @@ test("unpriced premium cabins do not become available when economy has a quote",
   } finally { h.restore(); }
 });
 
+function connectionQuoteFixture(data, params, index) {
+  const legs = JSON.parse(params.multi_city_json);
+  const item = data.best_flights[0];
+  const segment = item.flights[0];
+  if (legs.length === 2 && index === 1) {
+    const onward = structuredClone(segment);
+    segment.flight_number = "BR 101";
+    segment.arrival_airport = { id: "SFO", time: `${legs[1].date} 11:00` };
+    onward.flight_number = "BR 102";
+    onward.departure_airport = { id: "SFO", time: `${legs[1].date} 12:00` };
+    item.flights.push(onward);
+  } else if (legs.length === 3 && index > 0) {
+    segment.flight_number = index === 1 ? "BR 101" : "BR 102";
+    if (index === 1) segment.arrival_airport.time = `${legs[index].date} 11:00`;
+    else segment.departure_airport.time = `${legs[index].date} 12:00`;
+  }
+  return data;
+}
+
+test("unpriced connections recover one whole-ticket quote by expanding the same flights", async () => {
+  const h = harness(connectionQuoteFixture, (_, params) => JSON.parse(params.multi_city_json).length === 3
+    ? { booking_options: [{ together: { price: 23500, book_with: "Fixture Airline", marketed_as: ["BR100", "BR101", "BR102"] } }] } : {});
+  try {
+    const { data } = await h.request(multi);
+    assert.equal(data.results[0].price, 23500);
+    assert.equal(data.results[0].priceBasis, "whole_itinerary_quote");
+    assert.equal(data.results[0].bookingQuote.queryLayout, "flight_segments");
+    assert.equal(data.results[0].separateTickets, false);
+    assert.equal(data.results[0].legs.length, 2, "Keep the user's stopover structure");
+    assert.deepEqual(data.results[0].segments.map((s) => s.flightNumber), ["BR 100", "BR 101", "BR 102"]);
+    assert.deepEqual(data.unpricedResults, []);
+    assert.equal(data.insights.expandedQuoteAttempts, 1);
+    assert.equal(h.calls.length, 13);
+    assert.ok(h.calls.every((p) => p.type === "3" && p.deep_search === "true"));
+    assert.ok(h.calls.filter((p) => p.booking_token).every((p) => !p.departure_token));
+    await h.request(multi);
+    assert.equal(h.calls.length, 13, "Recovery also reuses the existing query cache");
+  } finally { h.restore(); }
+});
+
+test("expanded quotes cannot substitute dates, times, airports, flights, aircraft or cabins", async () => {
+  for (const mismatch of ["number", "date", "time", "airport", "cabin", "aircraft"]) {
+    const h = harness((data, params, index) => {
+      connectionQuoteFixture(data, params, index);
+      if (JSON.parse(params.multi_city_json).length === 3 && index === 1) {
+        const segment = data.best_flights[0].flights[0];
+        if (mismatch === "number") segment.flight_number = "BR999";
+        if (mismatch === "date") segment.departure_airport.time = `${addDateDays(date, 5)} 09:00`;
+        if (mismatch === "time") segment.departure_airport.time = `${addDateDays(date, 2)} 10:00`;
+        if (mismatch === "airport") segment.arrival_airport.id = "OAK";
+        if (mismatch === "cabin") segment.travel_class = "Business";
+        if (mismatch === "aircraft") segment.airplane = "Boeing 737 MAX 8";
+      }
+      return data;
+    }, () => ({}));
+    try {
+      const { data } = await h.request(multi);
+      assert.deepEqual(data.results, [], mismatch);
+      assert.equal(data.unpricedResults[0].price, null);
+      assert.equal(data.insights.expandedQuoteAttempts, 1);
+      assert.equal(data.insights.yearStats.sampleCount, 0);
+      assert.ok(h.calls.every((p) => p.type === "3"));
+    } finally { h.restore(); }
+  }
+});
+
+test("expanded recovery tries at most one date plan and stays within the shared provider budget", async () => {
+  const h = harness(connectionQuoteFixture, () => ({}));
+  try {
+    const { data } = await h.request({ ...multi, stopoverMinNights: 2, stopoverMaxNights: 3,
+      legTimeWindows: [{ departureDate: date, departureDateAlternative: addDateDays(date, 1) }, { departureDate: addDateDays(date, 3) }] });
+    assert.equal(data.unpricedResults.length, 2);
+    assert.equal(data.insights.expandedQuoteAttempts, 1);
+    assert.ok(h.calls.length <= 24);
+    assert.equal(h.calls.filter((p) => JSON.parse(p.multi_city_json).length === 3 && !p.departure_token && !p.booking_token).length, 1);
+  } finally { h.restore(); }
+});
+
+test("expanded quotes still reject split offers and report source failures without losing the itinerary", async () => {
+  for (const failure of ["split", "wrong_flights", "currency", "network"]) {
+    const h = harness(connectionQuoteFixture, (_, params) => {
+      if (JSON.parse(params.multi_city_json).length !== 3) return {};
+      if (failure === "network") throw new Error("Fixture provider failure");
+      if (failure === "currency") return { search_parameters: { currency: "USD" } };
+      return { booking_options: [{ separate_tickets: failure === "split",
+        together: { price: 1, marketed_as: ["BR100", "BR101", "BR999"] } }] };
+    });
+    try {
+      const { data } = await h.request(multi);
+      assert.deepEqual(data.results, []);
+      assert.equal(data.unpricedResults[0].trackable, false);
+      assert.equal(data.insights.partial, ["currency", "network"].includes(failure));
+      assert.equal(data.insights.yearStats.sampleCount, 0);
+      assert.ok(h.calls.length <= 24);
+    } finally { h.restore(); }
+  }
+});
+
 test("unpriced selections prefer the requested cabin over an earlier mixed-cabin result", async () => {
   const h = harness((data, params) => {
     for (const item of data.best_flights) delete item.price;
@@ -818,6 +916,78 @@ test("through search never hides provider failure or substitutes incomplete spli
         assert.equal(status, 200);
         assert.deepEqual(data.results, []);
       }
+    } finally { h.restore(); }
+  }
+});
+
+test("provider's explicit empty flight response is cached as no results, not an outage", async () => {
+  const h = harness(() => ({ search_metadata: { status: "Success" },
+    error: "Google Flights hasn't returned any results for this query." }));
+  try {
+    const { status, data } = await h.request(multi);
+    assert.equal(status, 200);
+    assert.deepEqual(data.results, []);
+    assert.equal(data.insights.partial, false);
+    await h.request(multi);
+    assert.equal(h.calls.length, 1);
+  } finally { h.restore(); }
+  const failed = harness(() => ({ error: "Unexpected provider failure" }));
+  try {
+    const { status, data } = await failed.request(multi);
+    assert.equal(status, 502);
+    assert.equal(data.code, "provider_error");
+  } finally { failed.restore(); }
+});
+
+test("required later flights recover via one compatible prefix instead of the cheapest dead end", async () => {
+  const h = harness((data, params, index) => {
+    if (index === 0) {
+      const preferred = data.best_flights[0];
+      preferred.departure_token = "leg-1-compatible";
+      const cheaper = structuredClone(preferred);
+      cheaper.price = 1;
+      cheaper.flights[0].flight_number = "CZ 100";
+      cheaper.flights[0].airline = "China Southern";
+      cheaper.departure_token = "leg-1-cheap";
+      data.best_flights.unshift(...Array.from({ length: 25 }, (_, i) => {
+        const candidate = structuredClone(cheaper);
+        candidate.flights[0].flight_number = `CZ ${100 + i}`;
+        return candidate;
+      }));
+    } else if (params.departure_token === "leg-1-cheap") {
+      return { error: "Google Flights hasn't returned any results for this query." };
+    }
+    return data;
+  });
+  try {
+    const { status, data } = await h.request({ ...multi, legTimeWindows: [{}, { flightNumbers: "BR100" }] });
+    assert.equal(status, 200);
+    assert.equal(data.results[0].price, 10000);
+    assert.equal(data.results[0].selectionStrategy, "required_carrier_recovery");
+    assert.ok(data.results[0].segments.every((s) => s.flightNumber === "BR 100"));
+    assert.equal(data.insights.carrierRecoveryAttempts, 1);
+    assert.equal(data.insights.partial, false);
+    assert.ok(data.insights.cabinPrices.every((c) => c.available));
+    assert.ok(h.calls.length <= 24);
+    assert.ok(h.calls.every((p) => !p.include_airlines && p.type === "3"), "Do not impose new airline filters or split tickets");
+    assert.equal(h.calls.filter((p) => p.travel_class === "1" && !p.departure_token && !p.booking_token).length, 1);
+  } finally { h.restore(); }
+});
+
+test("carrier recovery preserves arrival deadlines and is not applied to separate tickets", async () => {
+  for (const ticketMode of ["through", "separate"]) {
+    const h = harness((data, params, index) => {
+      const first = index === 0 && (params.type === "3" || params.departure_id === "TPE");
+      if (first) data.best_flights[0].flights[0].arrival_airport.time = `${date} 20:00`;
+      return data;
+    });
+    try {
+      const { status, data } = await h.request({ ...multi, ticketMode,
+        legTimeWindows: [{ arrivalTimeTo: "19:30" }, { flightNumbers: "BR100" }] });
+      assert.equal(status, 200);
+      assert.deepEqual(data.results, []);
+      assert.equal(data.insights.carrierRecoveryAttempts, ticketMode === "through" ? 1 : 0);
+      assert.equal(h.calls.length, 1, "Retry reuses the cached response and must not ignore the deadline");
     } finally { h.restore(); }
   }
 });

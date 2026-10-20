@@ -1,5 +1,5 @@
 import { validateFlightPreferences, hasFlightPreferences, matchesFlightPreferences, flightPreferenceKey,
-  makeJourneyPlans, searchCompleteJourney, flightDateRange, addDateDays, hasLegDates } from "./flight-planner.js";
+  makeJourneyPlans, searchCompleteJourney, searchExpandedJourneyQuote, expandedQuoteSegments, flightDateRange, addDateDays, hasLegDates } from "./flight-planner.js";
 import airportData from "../output/bazi-ziwei/price-watch/airports-data.json" with { type: "json" };
 import { buildAirportDirectory, searchAirports } from "../output/bazi-ziwei/price-watch/airports.js";
 
@@ -232,6 +232,11 @@ async function serpApiSearch(params, env) {
   if (!response.ok) {
     throw new Error(data.error || `SerpApi request failed with HTTP ${response.status}.`);
   }
+  if (params.engine === "google_flights" && data.error === "Google Flights hasn't returned any results for this query.") {
+    delete data.error;
+    data.best_flights = [];
+    data.other_flights = [];
+  }
   if (data.error) throw new Error(data.error);
   if (cacheKey) await env.PRICE_WATCH_KV.put(cacheKey, JSON.stringify({ data }), { expirationTtl: 900 }).catch(() => {});
   return data;
@@ -395,8 +400,8 @@ async function serpApiSampledFlightSearch(input, env) {
   };
   const usingSeparateTickets = multi && payload.ticketMode === "separate";
   const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
-  const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan)) => {
-    const result = await searchCompleteJourney({ ...payload, ticketMode: usingSeparateTickets ? "separate" : "through", tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES);
+  const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan), preferRequiredCarriers = false) => {
+    const result = await searchCompleteJourney({ ...payload, ticketMode: usingSeparateTickets ? "separate" : "through", tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES, false, preferRequiredCarriers);
     if (result && !multi && !result.differentReturnAirport && !result.airportChanges.length) result.purchaseLinks = flightPurchaseLinks({ ...payload,
       departureId: result.departureAirport, arrivalId: result.arrivalAirport, outboundDate: plan.date, returnDate: result.returnDate }, result.airline, result.segments);
     if (result && !multi && (result.differentReturnAirport || result.airportChanges.length)) result.purchaseLinks.push(
@@ -412,13 +417,43 @@ async function serpApiSampledFlightSearch(input, env) {
   };
   const searches = await Promise.allSettled(plans.map((plan) => run(plan, primaryCabin)));
   const completed = searches.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value);
+  let carrierRecoveryAttempts = 0;
+  const carrierRecoveryFailures = [];
+  // A cheapest prefix can exclude a required later flight. Try one compatible prefix without changing the user's filters.
+  if (!completed.length && multi && !usingSeparateTickets
+    && payload.legTimeWindows?.slice(1).some((window) => window.airline || window.flightNumbers?.length)
+    && queryCount <= 12) {
+    const planIndex = searches.findIndex((result) => result.status === "fulfilled" && !result.value);
+    if (planIndex >= 0) {
+      carrierRecoveryAttempts = 1;
+      try {
+        const recovered = await run(plans[planIndex], primaryCabin, payload.tripDays, Boolean(payload.comparisonPlan), true);
+        if (recovered) completed.push(recovered);
+      } catch (error) { carrierRecoveryFailures.push({ reason: error }); }
+    }
+  }
+  let expandedQuoteAttempts = 0;
+  let expandedQuoteFailures = 0;
+  // One bounded recovery per search, reserving calls for the normal cabin comparison.
+  for (const [index, itinerary] of completed.entries()) {
+    const segments = expandedQuoteSegments(itinerary);
+    if (!segments.length || queryCount + segments.length + 1 + (tracking ? 0 : 8) > 24) continue;
+    expandedQuoteAttempts += 1;
+    try {
+      const quoted = await searchExpandedJourneyQuote(payload, itinerary, primaryCabin, search, normalizeFlightResults);
+      if (quoted) completed[index] = quoted;
+    } catch {
+      expandedQuoteFailures += 1;
+    }
+    break;
+  }
   const economyResults = completed.filter((result) => result.price > 0).sort((a, b) => a.price - b.price);
   const unpricedResults = completed.filter((result) => result.quoteStatus === "no_booking_offer");
-  const failed = searches.filter((result) => result.status === "rejected");
+  const failed = [...searches.filter((result) => result.status === "rejected"), ...carrierRecoveryFailures];
   if (!economyResults.length && !unpricedResults.length && failed.length) throw failed[0].reason;
   const reference = economyResults[0];
   const cabinSearches = reference && !tracking
-    ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true))) : [];
+    ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true, reference.selectionStrategy === "required_carrier_recovery"))) : [];
   const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value?.price > 0).map((r) => r.value);
   let alternatives = !multi && payload.tripDays > 0 && (reference || tracking) && payload.compareDurations !== false
     ? nearbyTripDayOptions(payload.tripDays, 2).filter((days) => days !== payload.tripDays) : [];
@@ -452,11 +487,11 @@ async function serpApiSampledFlightSearch(input, env) {
   const current = yearlyQuotes[String(comparisonYear)];
   const previous = history.filter((record) => Number(record.travelYear) === comparisonYear - 1);
   await recordFlightYearHistory(env, historyKey, history, yearlyQuotes, today);
-  const failureCount = failed.length + cabinSearches.filter((r) => r.status === "rejected").length + durationSearches.filter((r) => r.status === "rejected").length;
+  const failureCount = failed.length + expandedQuoteFailures + cabinSearches.filter((r) => r.status === "rejected").length + durationSearches.filter((r) => r.status === "rejected").length;
   return { mode, startDate, endDate, tripDays: payload.tripDays, results: [...economyResults, ...(tracking ? durationAlternatives : [])].map((item, index) => ({ ...item, isRangeLow: index === 0 })),
     unpricedResults: tracking ? [] : unpricedResults,
     insights: { lowestPrice: reference?.price ?? null, rangeStart: startDate, rangeEnd: endDate, sampleDates: plans.map((p) => p.date),
-      searchedPlans: plans, queryCount, partial: failureCount > 0, failedQueries: failureCount, separateTickets: usingSeparateTickets,
+      searchedPlans: plans, queryCount, carrierRecoveryAttempts, expandedQuoteAttempts, partial: failureCount > 0, failedQueries: failureCount, separateTickets: usingSeparateTickets,
       ticketMode: usingSeparateTickets ? "separate" : "through",
       selectedDurationBest: reference || null, durationAlternatives, cabinPrices: tracking ? [] : cabinPrices,
       samplingNotice: economyResults.length
@@ -897,7 +932,7 @@ function normalizeFlightResults(data, payload, currency) {
       return matchesFlightPreferences(item, payload);
     })
     .sort((left, right) => (left.price || Infinity) - (right.price || Infinity))
-    .slice(0, 20);
+    .slice(0, payload.retainAllCandidates ? undefined : 20);
 
   const insights = data.price_insights || {};
   return {

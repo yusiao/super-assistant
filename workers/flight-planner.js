@@ -316,7 +316,7 @@ export function flightDateRange(p, today) {
 }
 
 // Selection-token quotes use the final whole-trip price; independent tickets explicitly sum leg quotes.
-export async function searchCompleteJourney(p, plan, cabin, search, normalize, lowCostCodes, retry = false) {
+export async function searchCompleteJourney(p, plan, cabin, search, normalize, lowCostCodes, retry = false, preferRequiredCarriers = false) {
   const multi = p.journeyType === "multicity";
   const separate = multi && p.ticketMode === "separate";
   const requestedCabin = { "1": /^(economy|經濟艙)$/i, "2": /premium economy|豪華經濟|豪經/i, "3": /business|商務|商務艙/i }[cabin.code];
@@ -372,7 +372,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
       if (pinnedDeparture(j) || (j < index && p.legTimeWindows?.[j]?.arrivalDate)) break;
       dates[j] = addDateDays(dates[j], offset);
     }
-    return searchCompleteJourney(p, { ...plan, date: dates[0], ...(multi ? { secondDate: dates[1], thirdDate: dates[2] } : { returnDate: dates[1] }) }, cabin, search, normalize, lowCostCodes, Number(retry) + 1);
+    return searchCompleteJourney(p, { ...plan, date: dates[0], ...(multi ? { secondDate: dates[1], thirdDate: dates[2] } : { returnDate: dates[1] }) }, cabin, search, normalize, lowCostCodes, Number(retry) + 1, preferRequiredCarriers);
   };
   let best;
   for (let i = 0; i < legs.length; i += 1) {
@@ -388,7 +388,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
     const preferences = legPreferences(p, i);
     const candidates = normalize(data, { ...preferences, arrivalDate: "", departureId: legs[i].departure_id, arrivalId: legs[i].arrival_id,
       outboundDate: legs[i].date, returnDate: "", allowUnpricedSelection: !separate && (multi || i < legs.length - 1),
-      travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label }, p.currency || "TWD").results;
+      travelClass: cabin.code, cabinClass: cabin.key, cabinLabel: cabin.label, retainAllCandidates: true }, p.currency || "TWD").results;
     const airportCandidates = candidates.filter((item) => {
       if (!legs[i].departure_id.split(",").includes(item.departureAirport) || !legs[i].arrival_id.split(",").includes(item.arrivalAirport)) return false;
       if (item.departure.slice(0, 10) !== legs[i].date || !validDate(item.arrival.slice(0, 10))) return false;
@@ -408,8 +408,12 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
         && nights <= (i === 0 ? p.stopoverMaxNights : p.destinationMaxNights);
     }) : datedCandidates;
     // Without prices, source order is not a cheapest-fare ranking; prefer the requested cabin.
+    const laterCarriers = new Set((p.legTimeWindows || []).slice(i + 1).flatMap((window) =>
+      [window.airline, ...(window.flightNumbers || []).map((number) => number.slice(0, 2))]).filter(Boolean));
+    const carrierPenalty = (item) => preferRequiredCarriers && laterCarriers.size
+      && !item.segments.every((segment) => laterCarriers.has(normalizedFlightNumber(segment.flightNumber).slice(0, 2))) ? 1 : 0;
     const rankedCandidates = [...(forwardCandidates.length ? forwardCandidates : datedCandidates)]
-      .sort((a, b) => ((a.price || Infinity) - (b.price || Infinity)) || cabinPenalty(a) - cabinPenalty(b));
+      .sort((a, b) => carrierPenalty(a) - carrierPenalty(b) || ((a.price || Infinity) - (b.price || Infinity)) || cabinPenalty(a) - cabinPenalty(b));
     best = rankedCandidates.find((item) => {
       if (!selected.length) return true;
       const previous = selected.at(-1);
@@ -432,9 +436,9 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
         if (i === 1 && p.fixedReturnDate) {
           const offset = dateDifference(nextDate, p.fixedReturnDate);
           const date = addDateDays(plan.date, offset);
-          return searchCompleteJourney(p, { ...plan, date, secondDate: addDateDays(legs[1].date, offset), thirdDate: p.fixedReturnDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1);
+          return searchCompleteJourney(p, { ...plan, date, secondDate: addDateDays(legs[1].date, offset), thirdDate: p.fixedReturnDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1, preferRequiredCarriers);
         }
-        return searchCompleteJourney(p, { ...plan, [i === 0 ? "secondDate" : "thirdDate"]: nextDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1);
+        return searchCompleteJourney(p, { ...plan, [i === 0 ? "secondDate" : "thirdDate"]: nextDate }, cabin, search, normalize, lowCostCodes, Number(retry) + 1, preferRequiredCarriers);
       }
     }
     selected.push(best);
@@ -477,6 +481,7 @@ export async function searchCompleteJourney(p, plan, cabin, search, normalize, l
   return { ...first, id: `${first.id}-${cabin.code}-${plan.date}-${plan.nights}-${plan.destinationNights}`,
     title: route, price, priceText, departureToken: undefined, bookingToken: undefined, differentReturnAirport, airportChanges,
     separateTickets: separate, priceBasis: separate ? "separate_ticket_sum" : "whole_itinerary_quote",
+    ...(preferRequiredCarriers ? { selectionStrategy: "required_carrier_recovery" } : {}),
     ...(bookingQuote ? { bookingQuote } : {}),
     ...(unpriced ? { quoteStatus: "no_booking_offer", trackable: false } : {}),
     departureDate: plan.date, returnDate, tripDays: returnDate ? dateDifference(plan.date, returnDate) : 0,
@@ -508,4 +513,51 @@ function throughBookingQuote(data, selected, currency) {
       baggage: (Array.isArray(quote.baggage_prices) ? quote.baggage_prices : []).slice(0, 8).map((item) => String(item).slice(0, 200)) }];
   });
   return quotes.sort((a, b) => a.price - b.price)[0] || null;
+}
+
+export function expandedQuoteSegments(itinerary) {
+  if (itinerary?.journeyType !== "multicity" || itinerary.separateTickets || itinerary.quoteStatus !== "no_booking_offer") return [];
+  const segments = itinerary.segments || [];
+  if (segments.length <= itinerary.legs.length || segments.length > 6) return [];
+  if (segments.some((segment) => !normalizedFlightNumber(segment.flightNumber)
+    || !/^[A-Z]{3}$/.test(segment.departureAirport) || !/^[A-Z]{3}$/.test(segment.arrivalAirport)
+    || !validDate(segment.departureTime?.slice(0, 10)) || !validDate(segment.arrivalTime?.slice(0, 10)))) return [];
+  return segments;
+}
+
+// Re-express connections inside ONE multi-city quote; never price these flights independently.
+export async function searchExpandedJourneyQuote(p, itinerary, cabin, search, normalize) {
+  const segments = expandedQuoteSegments(itinerary);
+  if (!segments.length) return null;
+  const currency = p.currency || "TWD";
+  const params = { engine: "google_flights", currency, hl: (p.locale || "zh-TW").toLowerCase(),
+    gl: (p.market || "TW").toLowerCase(), travel_class: cabin.code, sort_by: "2", type: "3", deep_search: "true",
+    stops: "1", show_hidden: "true", include_airlines: [...new Set(segments.map((segment) => normalizedFlightNumber(segment.flightNumber).slice(0, 2)))].join(","),
+    multi_city_json: JSON.stringify(segments.map((segment) => ({ departure_id: segment.departureAirport,
+      arrival_id: segment.arrivalAirport, date: segment.departureTime.slice(0, 10) }))) };
+  let selected;
+  for (const [index, expected] of segments.entries()) {
+    const data = await search({ ...params });
+    if (data.search_parameters?.currency && data.search_parameters.currency !== currency) throw new Error("購票報價幣別與搜尋條件不符。");
+    const candidates = normalize(data, { departureId: expected.departureAirport, arrivalId: expected.arrivalAirport,
+      outboundDate: expected.departureTime.slice(0, 10), allowUnpricedSelection: true, retainAllCandidates: true }, currency).results;
+    selected = candidates.find((item) => {
+      if (item.segments.length !== 1) return false;
+      const actual = item.segments[0];
+      return normalizedFlightNumber(actual.flightNumber) === normalizedFlightNumber(expected.flightNumber)
+        && ["departureAirport", "arrivalAirport", "departureTime", "arrivalTime", "travelClass", "airplane", "operatingAirlineCode"]
+          .every((key) => actual[key] === expected[key])
+        && Boolean(index < segments.length - 1 ? item.departureToken : item.bookingToken);
+    });
+    if (!selected) return null;
+    params.departure_token = selected.departureToken;
+  }
+  delete params.departure_token;
+  params.booking_token = selected.bookingToken;
+  const quote = throughBookingQuote(await search(params), itinerary.legs, currency);
+  if (!quote) return null;
+  return { ...itinerary, price: quote.price,
+    priceText: `${currency === "TWD" ? "NT$" : `${currency} `}${Math.round(quote.price).toLocaleString("zh-TW")}`,
+    bookingQuote: { ...quote, queryLayout: "flight_segments" }, quoteStatus: "quoted", trackable: true,
+    sampled: true, source: "Google Flights 完整行程抽樣" };
 }
