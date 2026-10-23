@@ -58,7 +58,7 @@ jobs:
           path: |
             vault/2-actions/scheduled-reports/a7-leju/state.json
             system/skills/local-scheduler/config/sync-ledger.json
-          key: a7-leju-state-${{ github.run_id }}
+          key: a7-leju-state-${{ github.run_id }}-${{ github.run_attempt }}-build
           restore-keys: |
             a7-leju-state-
 
@@ -66,12 +66,17 @@ jobs:
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           python --version
-          python -m pip install --disable-pip-version-check --quiet curl-cffi tzdata reportlab
+          python -m pip install --disable-pip-version-check --quiet -r scripts/a7-line-monitor/requirements.txt
+          if ($LASTEXITCODE -ne 0) { throw "Python dependency installation failed." }
+          python -m playwright install --only-shell chromium
+          if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
 
       - name: Run A7 digest
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          python scripts/a7-line-monitor/test_notification_ux.py
+          if ($LASTEXITCODE -ne 0) { throw "Notification regression tests failed." }
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
             python scripts/a7-line-monitor/a7_leju_digest.py --force --skip-line
           } else {
             python scripts/a7-line-monitor/a7_leju_digest.py --force-generate --skip-line
@@ -152,12 +157,14 @@ jobs:
   send-line:
     needs: [build-report, deploy-pages]
     if: ${{ needs.build-report.outputs.notification_due == 'true' }}
-    runs-on: ubuntu-latest
+    # Same OS as build-report so its delivery ledger can be restored reliably.
+    runs-on: [self-hosted, windows, a7-runner]
     env:
       TASK_ID: a7-leju-digest-cloud
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
       LINE_MODE: ${{ secrets.LINE_MODE }}
       LINE_TO: ${{ secrets.LINE_TO }}
+      SYNC_LEDGER_PATH: system/skills/local-scheduler/config/sync-ledger.json
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -173,9 +180,19 @@ jobs:
           name: a7-line-prepared
           path: vault/2-actions/scheduled-reports/a7-leju
 
+      - name: Restore and persist delivery checkpoints
+        uses: actions/cache@v4
+        with:
+          path: |
+            vault/2-actions/scheduled-reports/a7-leju/state.json
+            system/skills/local-scheduler/config/sync-ledger.json
+          key: a7-leju-state-${{ github.run_id }}-${{ github.run_attempt }}-sent
+          restore-keys: |
+            a7-leju-state-${{ github.run_id }}-${{ github.run_attempt }}-build
+            a7-leju-state-
+
       - name: Send prepared PDF notification
-        env:
-          SYNC_LEDGER_PATH: ${{ runner.temp }}/a7-line-ledger.json
+        shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          python scripts/a7-line-monitor/a7_leju_digest.py \
-            --send-prepared-line vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json
+          python scripts/a7-line-monitor/a7_leju_digest.py --send-prepared-line vault/2-actions/scheduled-reports/a7-leju/a7-line-prepared.json
+          if ($LASTEXITCODE -ne 0) { throw "LINE delivery failed; checkpoints were not saved." }
