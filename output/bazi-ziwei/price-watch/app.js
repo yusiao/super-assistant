@@ -181,6 +181,7 @@ function selectPlace(input, place) {
   input.dataset.iata = code;
   input.dataset.placeName = place.name;
   closePlaceOptions(input);
+  renderTripSummary();
 }
 
 function renderPlaceOptions(input, places, message = "", loading = false, limit = 50) {
@@ -604,7 +605,7 @@ async function quoteFormLeg(index, button) {
   finally { button.disabled = false; button.textContent = "單段查價／艙等"; }
 }
 
-const tripLinkFields = ["journeyType", "ticketMode", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "airlineType", "journeyAirline", "routeType", "currency", "market"];
+const tripLinkFields = ["journeyType", "ticketMode", "includeReturn", "dateConstraint", "fixedDepartureDate", "fixedReturnDate", "tripDays", "startDate", "lookaheadDays", "stopoverMinNights", "stopoverMaxNights", "destinationMinNights", "destinationMaxNights", "targetPrice", "airlineType", "journeyAirline", "routeType", "currency", "market"];
 function applyTripFromLink() {
   if (!location.hash.startsWith("#trip=")) return;
   try {
@@ -641,6 +642,12 @@ function applyTripFromLink() {
     });
     setFlightMode(trip.flightMode === "date_window" ? "date_window" : "annual_low");
     document.querySelector(".leg-schedules").open = true;
+    if (trip.journeyAirline || trip.currency && trip.currency !== "TWD" || trip.market && trip.market !== "TW"
+      || trip.airlineType && trip.airlineType !== "all" || trip.routeType && trip.routeType !== "any"
+      || trip.targetPrice || trip.allowUnknownAircraft || trip.otherExcludedAirlines || trip.otherExcludedAircraft
+      || trip.excludedAirlines?.length || trip.excludedAircraft?.length)
+      document.querySelector(".secondary-options").open = true;
+    renderTripSummary();
     setStatus("行程已帶入，請確認後搜尋");
   } catch { setStatus("行程連結格式不正確，請重新填寫條件", "error"); }
 }
@@ -706,6 +713,7 @@ function setupJourneyFields() {
     destination.disabled = destination.hidden;
     updateDateFields();
     renderLegWindows();
+    renderTripSummary();
   };
   document.querySelectorAll('[name="journeyType"], [name="includeReturn"]').forEach((input) => input.addEventListener("change", update));
   update();
@@ -713,6 +721,53 @@ function setupJourneyFields() {
 
 const legWindowDrafts = new Map();
 const flightOptionCache = new Map();
+function renderTripSummary() {
+  const container = document.querySelector("#tripSummary");
+  const form = elements.flightForm;
+  const roles = [...form.querySelectorAll("[data-leg-role]")];
+  if (!roles.length) return;
+  const multi = form.elements.journeyType.value === "multicity";
+  const secondaryCount = Number(Boolean(form.elements.targetPrice.value)) + Number(Boolean(form.elements.journeyAirline.value))
+    + Number(form.elements.airlineType.value !== "all") + Number(form.elements.routeType.value !== "any")
+    + Number(form.elements.currency.value !== "TWD") + Number(form.elements.market.value !== "TW")
+    + form.querySelectorAll('[name="excludedAirlines"]:checked, [name="excludedAircraft"]:checked').length
+    + Number(Boolean(form.elements.otherExcludedAirlines.value)) + Number(Boolean(form.elements.otherExcludedAircraft.value))
+    + Number(form.elements.allowUnknownAircraft.checked);
+  document.querySelector(".secondary-options > summary").textContent = secondaryCount ? `其他搜尋條件 · 已設定 ${secondaryCount} 項` : "其他搜尋條件";
+  const place = (name, fallback) => form.elements[name].dataset.placeName || form.elements[name].value.split(" · ").at(-1).trim() || fallback;
+  const origin = place("departureId", "出發地");
+  const destination = place("arrivalId", "目的地");
+  const stopover = place("stopoverId", "停留地");
+  const windows = readLegWindows();
+  container.replaceChildren();
+  roles.forEach((fieldset, index) => {
+    const role = fieldset.dataset.legRole;
+    const window = windows[index] || {};
+    const date = window.departureDate || (role === "return" ? form.elements.fixedReturnDate.value : role === "outbound" ? form.elements.fixedDepartureDate.value : "");
+    const alternate = window.departureDateAlternative;
+    const route = role === "return" ? `${destination} → ${origin}` : role === "onward" ? `${stopover} → ${destination}` : `${origin} → ${multi ? stopover : destination}`;
+    const parts = [date ? date.replaceAll("-", "/") : "日期未定"];
+    if (alternate) parts.push(`或 ${alternate.replaceAll("-", "/")}`);
+    if (window.arrivalDate && window.arrivalTimeTo) parts.push(`${window.arrivalDate.replaceAll("-", "/")} ${window.arrivalTimeTo} 前抵達`);
+    else if (window.arrivalTimeTo) parts.push(`${window.arrivalTimeTo} 前抵達`);
+    if (window.flightNumbers) parts.push(`必搭 ${window.flightNumbers.replace(/[,，]\s*/g, " + ")}`);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "trip-summary-leg";
+    const title = document.createElement("strong");
+    title.textContent = `${multi ? `第 ${index + 1} 段` : role === "return" ? "回程" : "去程"} · ${route}`;
+    const detail = document.createElement("small");
+    detail.textContent = parts.join(" · ");
+    button.append(title, detail);
+    button.addEventListener("click", () => {
+      document.querySelector(".leg-schedules").open = true;
+      const target = fieldset.querySelector('[data-window-field="departureDate"]');
+      target?.scrollIntoView({ block: "center" });
+      target?.focus({ preventScroll: true });
+    });
+    container.append(button);
+  });
+}
 const airlineAliases = {
   BR: "長榮 EVA Air", CI: "中華航空 華航 China Airlines", JX: "星宇 Starlux", IT: "台灣虎航 Tigerair Taiwan",
   MU: "中國東方航空 東航 China Eastern", CZ: "中國南方航空 南航 China Southern", CA: "中國國際航空 國航 Air China",
@@ -855,6 +910,7 @@ function renderLegWindows() {
   document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
   setupLegDatePickers();
   updateDateFields();
+  renderTripSummary();
 }
 
 function setupLegDatePickers() {
@@ -1004,6 +1060,45 @@ function renderActiveView() {
   renderCabinOverview(view.unpricedResults?.length && !view.results.length ? [] : view.insights?.cabinPrices, view.currency);
   renderResults(view.searched ? view.title : "機票搜尋結果", [...view.results, ...(view.separateResults || []), ...(view.unpricedResults || [])]);
   renderTicketQuoteStatus(view);
+  renderNoResultGuidance(view);
+}
+
+function renderNoResultGuidance(view) {
+  const section = document.querySelector("#noResultGuidance");
+  section.replaceChildren();
+  section.hidden = !view.searched || Boolean(view.results.length || view.separateResults?.length || view.unpricedResults?.length);
+  if (section.hidden) return;
+  const heading = document.createElement("h3");
+  heading.textContent = view.searchError ? "這次查詢未完成" : "目前沒有可確認的方案";
+  const note = document.createElement("p");
+  note.textContent = view.searchError
+    ? "搜尋未完成，請依上方訊息修正後重試；不能據此判定航班已售完。"
+    : "可能是日期、班號或抵達時間限制，也可能是資料來源沒有報價；目前無法確認是哪一項造成。";
+  section.append(heading, note);
+  const windows = state.lastFlightPayload?.legTimeWindows || readLegWindows();
+  const actions = [];
+  windows.forEach((window, index) => {
+    if (window.flightNumbers) actions.push([`檢查第 ${index + 1} 段必搭班號`, index, "flightNumbers"]);
+    if (window.arrivalTimeTo) actions.push([`檢查第 ${index + 1} 段抵達時間`, index, "arrivalTimeTo"]);
+  });
+  actions.push(["檢查各段日期", 0, "departureDate"]);
+  const buttons = document.createElement("div");
+  buttons.className = "no-result-actions";
+  for (const [label, index, field] of actions.slice(0, 3)) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "compare-button";
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      const target = [...document.querySelectorAll("[data-leg-role]")][index]?.querySelector(`[data-window-field="${field}"]`);
+      if (!target) return;
+      document.querySelector(".leg-schedules").open = true;
+      target.scrollIntoView({ block: "center" });
+      target.focus({ preventScroll: true });
+    });
+    buttons.append(button);
+  }
+  section.append(buttons);
 }
 
 function renderTicketQuoteStatus(view) {
@@ -1153,6 +1248,7 @@ async function searchFlight(event) {
     view.insights = response.insights || null;
     view.currency = response.currency || data.currency || "TWD";
     view.searched = true;
+    view.searchError = false;
     view.journeyType = state.lastFlightPayload.journeyType;
     view.ticketMode = state.lastFlightPayload.ticketMode;
     view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : view.separateResults.length ? "多城市方案比較" : view.results.length ? "多城市聯程整趟報價" : "多城市航班（未取得聯程售價）" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
@@ -1180,6 +1276,7 @@ async function searchFlight(event) {
     view.unpricedResults = [];
     view.insights = null;
     view.searched = true;
+    view.searchError = true;
     view.title = "機票結果";
     view.journeyType = data.journeyType;
     view.ticketMode = data.ticketMode || "through";
@@ -1314,6 +1411,8 @@ function boot() {
     tab.addEventListener("click", () => switchPanel(tab.dataset.panel));
   });
   elements.flightForm.addEventListener("submit", searchFlight);
+  elements.flightForm.addEventListener("input", () => requestAnimationFrame(renderTripSummary));
+  elements.flightForm.addEventListener("change", () => requestAnimationFrame(renderTripSummary));
   elements.flightModeButtons.forEach((button) => {
     button.addEventListener("click", () => setFlightMode(button.dataset.flightMode));
   });

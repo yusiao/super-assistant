@@ -20,9 +20,11 @@ const env = { PRICE_WATCH_PUBLIC_SEARCH: "true", PRICE_WATCH_ACCESS_TOKEN: "test
 const originalFetch = globalThis.fetch;
 let throughBookingFixture = false;
 let bookingUnavailableFixture = false;
+let emptyFlightsFixture = false;
 globalThis.fetch = async (url) => {
   const p = Object.fromEntries(new URL(url).searchParams);
   assert.equal(new URL(url).hostname, "serpapi.com", "No real provider calls in UI tests");
+  if (emptyFlightsFixture) return Response.json({ best_flights: [], other_flights: [] });
   const legs = p.multi_city_json ? JSON.parse(p.multi_city_json) : [
     { departure_id: p.departure_id, arrival_id: p.arrival_id, date: p.outbound_date },
     ...(p.return_date ? [{ departure_id: p.arrival_id, arrival_id: p.departure_id, date: p.return_date }] : []),
@@ -93,6 +95,10 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/`);
   await page.evaluate(() => localStorage.setItem("priceWatchAccessToken", "test-ui"));
   assert.equal(await page.locator('[name="departureId"]').inputValue(), "台北全部機場");
+  assert.match(await page.locator('#tripSummary').innerText(), /台北全部機場/);
+  assert.equal(await page.locator('.secondary-options').evaluate((el) => el.open), false);
+  await mkdir(join(root, "tmp"), { recursive: true });
+  await page.screenshot({ path: join(root, `tmp/flight-search-initial-${browserName}-390.png`) });
   await page.locator('[name="departureId"]').fill("台北");
   await page.locator('#departurePlaceOptions [data-iata="TPE,TSA"]').click();
   assert.equal(await page.locator('[name="departureId"]').getAttribute("data-iata"), "TPE,TSA");
@@ -113,6 +119,7 @@ try {
   await page.locator('[name="includeReturn"]').check();
   await page.locator('[name="destinationMinNights"]').fill("3");
   await page.locator('[name="destinationMaxNights"]').fill("4");
+  if (!(await page.locator('.secondary-options').evaluate((el) => el.open))) await page.locator('.secondary-options > summary').click();
   await page.locator('.advanced-filters summary').click();
   await page.locator('[name="excludedAircraft"][value="737 MAX"]').check();
   await page.locator('[name="excludedAirlines"][value="CI"]').check();
@@ -294,6 +301,10 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/#trip=${encodeURIComponent(JSON.stringify(exampleTrip))}`);
   await page.locator('#statusText').filter({ hasText: '行程已帶入' }).waitFor();
   assert.equal(await page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]').inputValue(), 'MU5616, MU5005');
+  assert.match(await page.locator('#tripSummary').innerText(), /第 3 段.*哈爾濱.*台北/s);
+  assert.match(await page.locator('#tripSummary').innerText(), /必搭 MU5616 \+ MU5005/);
+  await page.locator('#tripSummary .trip-summary-leg').nth(1).click();
+  assert.equal(await page.locator('[data-leg-role="onward"] [data-window-field="departureDate"]').evaluate((el) => document.activeElement === el), true);
   const fixedFlight = page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]');
   await page.setViewportSize({ width: 390, height: 900 });
   await fixedFlight.fill('中國東方');
@@ -327,6 +338,7 @@ try {
   await firstDeparture.fill('2027-01-05');
   await firstDeparture.press('Tab');
   await firstDeparture.press('Escape');
+  if (!(await page.locator('.secondary-options').evaluate((el) => el.open))) await page.locator('.secondary-options > summary').click();
   await page.locator('[name="journeyAirline"]').click();
   for (const width of [320, 360, 375, 390, 430, 600, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -365,6 +377,7 @@ try {
   await page.getByRole('button', { name: '改查分開購票價格', exact: true }).click();
   const exampleResult = await (await splitResponse).json();
   await page.locator('.result-card').first().waitFor();
+  await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
   assert.equal(lastSearch.ticketMode, 'separate');
   assert.equal(exampleResult.results[0].departureDate, '2027-01-06');
   assert.equal(exampleResult.results[1].departureDate, '2027-01-05');
@@ -398,6 +411,7 @@ try {
   assert.equal(lastSearch.journeyAirline, 'mu');
   assert.ok(muResult.results.length);
   assert.ok(muResult.results.every((r) => r.segments.every((s) => s.flightNumber.startsWith('MU'))));
+  await page.locator('[name="targetPrice"]').fill('8000');
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (value) => { window.copiedTripLink = value; } } }));
   await page.locator('#copyTripLinkButton').click();
   const copied = await page.evaluate(() => window.copiedTripLink);
@@ -405,12 +419,14 @@ try {
   assert.equal(shared.legTimeWindows[2].flightNumbers, 'MU5616, MU5005');
   assert.equal(shared.legTimeWindows[0].departureDateAlternative, '2027-01-06');
   assert.equal(shared.journeyAirline, 'mu');
+  assert.equal(shared.targetPrice, '8000');
   assert.equal(shared.ticketMode, 'separate');
   assert.equal(copied.includes('test-ui'), false, 'Share links must never include the access token');
   await page.goto(copied);
   await page.reload();
   await page.waitForFunction(() => document.querySelector('[data-leg-role="return"] [data-window-field="flightNumbers"]')?.value === 'MU5616, MU5005');
   assert.equal(await page.locator('[name="journeyAirline"]').inputValue(), 'mu');
+  assert.equal(await page.locator('[name="targetPrice"]').inputValue(), '8000');
   throughBookingFixture = true;
   for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
   await page.locator('[name="ticketMode"]').selectOption('through');
@@ -460,6 +476,14 @@ try {
   assert.equal(await page.locator('.result-card').count(), 2);
   assert.equal(await page.locator('.result-card .track-button').count(), 2);
   assert.doesNotMatch(await page.locator('#resultList').innerText(), /此來源未提供聯程售價/);
+  emptyFlightsFixture = true;
+  for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
+  const noFlights = await submit();
+  assert.deepEqual(noFlights.results, []);
+  assert.match(await page.locator('#noResultGuidance').innerText(), /不能判定|無法確認/);
+  assert.doesNotMatch(await page.locator('#noResultGuidance').innerText(), /售完/);
+  await page.getByRole('button', { name: '檢查第 3 段必搭班號' }).click();
+  assert.equal(await page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]').evaluate((el) => document.activeElement === el), true);
   assert.deepEqual(errors, []);
   console.log(`${browserName}: 320/360/375/390/430/600/1280px, two departure dates, ordered return flights, per-leg cabins, share links, tracking and existing flows passed; zero real API calls.`);
 } finally {

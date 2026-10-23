@@ -16,6 +16,19 @@
 .place-more { width: 100%; min-height: 44px; padding: 12px; border: 0; background: var(--soft); color: var(--accent-strong); cursor: pointer; }
 #fixedFlightFields input { min-width: 0; max-width: 100%; }
 .journey-filter { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.trip-summary { display: grid; gap: 0; border-block: 1px solid var(--line); }
+.trip-summary-leg { display: grid; gap: 3px; width: 100%; min-height: 52px; padding: 9px 4px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.trip-summary-leg:first-child { border-top: 0; }
+.trip-summary-leg strong { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.trip-summary-leg small { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.trip-summary-leg:hover, .trip-summary-leg:focus-visible { color: var(--accent-strong); background: var(--soft); }
+.secondary-options { border-block: 1px solid var(--line); }
+.secondary-options summary { padding: 14px 0; cursor: pointer; font-size: 14px; font-weight: 700; }
+.secondary-options-body { display: grid; gap: 12px; padding-bottom: 14px; }
+.no-result-guidance { padding: 12px 0; border-block: 1px solid var(--line); }
+.no-result-guidance h3 { margin: 0 0 6px; font-size: 15px; }
+.no-result-guidance p { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.no-result-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .leg-schedules { border-block: 1px solid var(--line); min-width: 0; max-width: 100%; }
 .leg-schedules summary { padding: 14px 0; cursor: pointer; font-size: 14px; font-weight: 700; }
 .leg-schedules fieldset { margin: 12px 0; padding: 12px 0; border: 0; border-top: 1px solid var(--line); min-width: 0; }

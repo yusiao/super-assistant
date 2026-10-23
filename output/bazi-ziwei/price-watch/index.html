@@ -12,7 +12,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./vendor/flatpickr/flatpickr.min.css?v=4.6.13" />
-    <link rel="stylesheet" href="./styles.css?v=24" />
+    <link rel="stylesheet" href="./styles.css?v=25" />
   </head>
   <body>
     <main class="app-shell">
@@ -46,6 +46,7 @@
               <label><input type="radio" name="journeyType" value="multicity" /><span>多城市停留</span></label>
             </div>
           </fieldset>
+          <nav id="tripSummary" class="trip-summary" aria-label="目前行程"></nav>
           <label id="ticketModeField" hidden>
             <span>多城市購票方式</span>
             <select name="ticketMode" disabled>
@@ -108,22 +109,23 @@
               </div>
             </fieldset>
           </fieldset>
-          <div class="field-row">
-            <label id="tripDaysField">
-              <span>旅行天數</span>
-              <input name="tripDays" type="number" inputmode="numeric" min="1" max="60" value="5" />
-            </label>
-            <label>
-              <span>追蹤目標價（選填）</span>
-              <input name="targetPrice" inputmode="numeric" placeholder="8000" />
-            </label>
-          </div>
-          <label><span>全程指定航空公司（選填）</span><input name="journeyAirline" list="airlineSuggestions" placeholder="不限航空／MU 中國東方航空" maxlength="80" /></label>
+          <label id="tripDaysField"><span>旅行天數</span><input name="tripDays" type="number" inputmode="numeric" min="1" max="60" value="5" /></label>
           <details class="leg-schedules">
             <summary>各段出發／抵達日期與時段（當地時間）</summary>
             <div id="legScheduleFields"></div>
             <datalist id="airlineSuggestions"></datalist>
           </details>
+          <div class="window-only" id="windowFlightFields" hidden>
+            <div class="field-row">
+              <label><span>最早出發日</span><input name="startDate" type="date" /></label>
+              <label><span>往後搜尋</span><select name="lookaheadDays"><option value="0">僅當天</option><option value="7">7 天</option><option value="14">14 天</option><option value="30" selected>30 天</option><option value="60">60 天</option><option value="90">90 天</option></select></label>
+            </div>
+          </div>
+          <details class="secondary-options">
+            <summary>其他搜尋條件</summary>
+            <div class="secondary-options-body">
+              <label><span>追蹤目標價（選填）</span><input name="targetPrice" inputmode="numeric" placeholder="8000" /></label>
+              <label><span>全程指定航空公司（選填）</span><input name="journeyAirline" list="airlineSuggestions" placeholder="不限航空／MU 中國東方航空" maxlength="80" /></label>
           <fieldset class="filter-fieldset">
             <legend>航空類型</legend>
             <div class="segmented-filter">
@@ -154,43 +156,12 @@
               <label><input type="radio" name="routeType" value="connecting" /><span>轉乘</span></label>
             </div>
           </fieldset>
-          <div class="window-only" id="windowFlightFields" hidden>
-            <div class="field-row">
-              <label>
-                <span>最早出發日</span>
-                <input name="startDate" type="date" />
-              </label>
-              <label>
-                <span>往後搜尋</span>
-                <select name="lookaheadDays">
-                  <option value="0">僅當天</option>
-                  <option value="7">7 天</option>
-                  <option value="14">14 天</option>
-                  <option value="30" selected>30 天</option>
-                  <option value="60">60 天</option>
-                  <option value="90">90 天</option>
-                </select>
-              </label>
+              <div class="field-row">
+                <label><span>幣別</span><select name="currency"><option value="TWD">TWD</option><option value="USD">USD</option><option value="JPY">JPY</option></select></label>
+                <label><span>市場</span><select name="market"><option value="TW">台灣</option><option value="JP">日本</option><option value="US">美國</option></select></label>
+              </div>
             </div>
-          </div>
-          <div class="field-row">
-            <label>
-              <span>幣別</span>
-              <select name="currency">
-                <option value="TWD">TWD</option>
-                <option value="USD">USD</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </label>
-            <label>
-              <span>市場</span>
-              <select name="market">
-                <option value="TW">台灣</option>
-                <option value="JP">日本</option>
-                <option value="US">美國</option>
-              </select>
-            </label>
-          </div>
+          </details>
           <button class="primary-button" id="flightSubmitButton" type="submit">探索未來一年低價</button>
           <button class="ghost-button" id="copyTripLinkButton" type="button">複製行程連結</button>
           <div class="search-feedback" id="flightSearchFeedback" aria-live="polite" hidden>
@@ -216,6 +187,7 @@
           <span id="resultCount"></span>
         </div>
         <section id="ticketQuoteStatus" class="ticket-quote-status" aria-live="polite" hidden></section>
+        <section id="noResultGuidance" class="no-result-guidance" aria-live="polite" hidden></section>
         <div class="flight-year-stats" id="flightYearStats" hidden>
           <div class="year-stat">
             <span id="currentYearLabel">該年抽樣均價</span>
@@ -273,6 +245,6 @@
 
     <script src="./vendor/flatpickr/flatpickr.min.js?v=4.6.13"></script>
     <script src="./vendor/flatpickr/zh-tw.js?v=4.6.13"></script>
-    <script src="./app.js?v=30" type="module"></script>
+    <script src="./app.js?v=31" type="module"></script>
   </body>
 </html>
