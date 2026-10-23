@@ -6,7 +6,7 @@ const state = {
   flightMode: "annual_low",
   config: null,
   views: {
-    flightPanel: { title: "機票結果", results: [], insights: null, currency: "TWD", searched: false, status: { text: "準備搜尋", kind: "ready" } },
+    flightPanel: { title: "機票結果", results: [], separateResults: [], insights: null, currency: "TWD", searched: false, status: { text: "準備搜尋", kind: "ready" } },
     savedPanel: { status: { text: "載入追蹤中", kind: "ready" } },
   },
 };
@@ -891,7 +891,7 @@ function renderActiveView() {
   renderFlightYearStats(view.insights?.yearStats, view.currency);
   renderDurationAlternatives(view.insights, view.currency);
   renderCabinOverview(view.unpricedResults?.length && !view.results.length ? [] : view.insights?.cabinPrices, view.currency);
-  renderResults(view.searched ? view.title : "機票搜尋結果", [...view.results, ...(view.unpricedResults || [])]);
+  renderResults(view.searched ? view.title : "機票搜尋結果", [...view.results, ...(view.separateResults || []), ...(view.unpricedResults || [])]);
   renderTicketQuoteStatus(view);
 }
 
@@ -905,8 +905,9 @@ function renderTicketQuoteStatus(view) {
   title.textContent = separate ? "分開購票" : "多城市聯程";
   const message = document.createElement("p");
   message.textContent = view.results.length
-    ? separate ? "各段獨立購票，合計不是一張聯程票價。" : "資料來源提供整趟報價，非各段相加；是否以一張票開立及轉機保障，仍須由購票頁確認。"
-    : view.unpricedResults?.length ? "查詢已完成，但此資料來源沒有提供整趟聯程售價，目前無法判定哪天較便宜或是否比分開購票便宜；不代表航空公司無票。"
+    ? separate ? "各段獨立購票，合計不是一張聯程票價。" : view.separateResults?.length ? "已列出聯程與分段報價，請對照同日期、班號與行李條件；分段購票須分別確認。" : "資料來源提供整趟報價；是否以一張票開立及轉機保障，仍須由購票頁確認。"
+    : view.separateResults?.length ? `聯程未取得總價；已補查前兩組候選日期，取得 ${view.separateResults.length} 組分段購票合計。仍無法判定聯程票是否更便宜。`
+    : view.unpricedResults?.length ? "此資料來源沒有提供整趟聯程售價；不代表航空公司無票。"
     : view.insights ? separate ? "未取得完整的分段購票組合。" : "未取得聯程報價，不代表航空公司無票；未以分段加總替代。"
       : "查詢失敗，尚無法確認報價。";
   const button = document.createElement("button");
@@ -919,7 +920,7 @@ function renderTicketQuoteStatus(view) {
     elements.flightForm.requestSubmit();
   });
   section.append(title, message, button);
-  if (!view.results.length && !view.unpricedResults?.length) elements.resultList.replaceChildren();
+  if (!view.results.length && !view.separateResults?.length && !view.unpricedResults?.length) elements.resultList.replaceChildren();
 }
 
 function watchFromResult(item) {
@@ -1024,20 +1025,35 @@ async function searchFlight(event) {
     });
     const view = state.views.flightPanel;
     view.results = (response.results || []).map((item) => ({ ...item, searchPayload: structuredClone(state.lastFlightPayload) }));
+    view.separateResults = [];
     view.unpricedResults = (response.unpricedResults || []).map((item) => ({ ...item, searchPayload: structuredClone(state.lastFlightPayload) }));
+    view.separateComparisonError = false;
+    if (multi && state.lastFlightPayload.ticketMode === "through" && (!view.results.length || view.unpricedResults.length)) {
+      setPanelStatus("flightPanel", "聯程報價不足，正在比較分開購票價格");
+      setFlightFeedback("正在比較分開購票價格", "loading", 80);
+      const comparisonPayload = { ...state.lastFlightPayload, ticketMode: "separate", quickComparison: true };
+      try {
+        const comparison = await api("/api/price-watch/search", { method: "POST", body: JSON.stringify({ type: "flight", ...comparisonPayload }) });
+        view.separateResults = (comparison.results || []).map((item) => ({ ...item, searchPayload: structuredClone(comparisonPayload) }));
+      } catch {
+        view.separateComparisonError = true;
+      }
+    }
     view.insights = response.insights || null;
     view.currency = response.currency || data.currency || "TWD";
     view.searched = true;
     view.journeyType = state.lastFlightPayload.journeyType;
     view.ticketMode = state.lastFlightPayload.ticketMode;
-    view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : view.results.length ? "多城市聯程整趟報價" : "多城市航班（未取得聯程售價）" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
+    view.title = multi ? view.ticketMode === "separate" ? "多城市分開購票" : view.separateResults.length ? "多城市方案比較" : view.results.length ? "多城市聯程整趟報價" : "多城市航班（未取得聯程售價）" : data.dateConstraint !== "flexible" || hasLegDates ? "指定日期與時段票價" : state.flightMode === "annual_low" ? "全年抽樣低價候選" : "日期區間抽樣票價";
     if (state.activePanel === "flightPanel") {
       renderActiveView();
       revealResults();
     }
     setFlightLoading(false);
-    const resultMessage = response.insights?.samplingNotice || (view.results.length ? "搜尋完成" : "沒有找到票價");
-    if (view.results.length || view.unpricedResults.length) {
+    const resultMessage = view.separateResults.length
+      ? `聯程${view.results.length ? "與分段" : "尚無總價，已補查前兩組候選日期的分段"}方案；共 ${view.separateResults.length} 組分段合計。僅比較已取得完整價格的方案。`
+      : `${response.insights?.samplingNotice || (view.results.length ? "搜尋完成" : "沒有找到票價")}${view.separateComparisonError ? " 分段購票補查失敗，可手動重試。" : ""}`;
+    if (view.results.length || view.separateResults.length || view.unpricedResults.length) {
       setPanelStatus("flightPanel", resultMessage);
       setFlightFeedback("查詢完成", "complete", 100);
       setTimeout(() => setFlightFeedback(""), 900);
@@ -1049,6 +1065,7 @@ async function searchFlight(event) {
     setFlightLoading(false);
     const view = state.views.flightPanel;
     view.results = [];
+    view.separateResults = [];
     view.unpricedResults = [];
     view.insights = null;
     view.searched = true;

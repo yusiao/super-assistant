@@ -338,10 +338,12 @@ try {
   assert.equal(lastSearch.departureId, 'HRB');
   assert.equal(await page.locator('[name="ticketMode"]').inputValue(), 'through');
   const unavailableThrough = await submit();
-  assert.equal(lastSearch.ticketMode, 'through');
+  assert.equal(lastSearch.ticketMode, 'separate');
+  assert.equal(lastSearch.quickComparison, true);
   assert.deepEqual(unavailableThrough.results, []);
-  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /未取得聯程報價.*未以分段加總替代/);
-  assert.equal(await page.locator('.result-card').count(), 0);
+  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /聯程未取得總價.*分段購票合計/);
+  assert.equal(await page.locator('.result-card').count(), 2);
+  assert.match(await page.locator('.result-card').first().innerText(), /分開購票合計/);
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await page.locator('#ticketQuoteStatus').scrollIntoViewIfNeeded();
@@ -418,16 +420,17 @@ try {
   const unpricedResult = await submit();
   assert.deepEqual(unpricedResult.results, []);
   assert.equal(unpricedResult.unpricedResults.length, 2);
-  assert.equal(await page.locator('.result-card').count(), 2);
-  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /查詢已完成.*沒有提供整趟聯程售價/);
-  assert.match(await page.locator('.result-card').first().innerText(), /此來源未提供聯程售價/);
-  assert.doesNotMatch(await page.locator('.result-card').first().innerText(), /聯程整趟報價/);
-  assert.match(await page.locator('.result-card').first().innerText(), /MU 5616[\s\S]*MU 5005/);
+  assert.equal(await page.locator('.result-card').count(), 4);
+  assert.match(await page.locator('#ticketQuoteStatus').innerText(), /聯程未取得總價.*分段購票合計/);
+  assert.match(await page.locator('.result-card').first().innerText(), /分開購票合計/);
+  assert.match(await page.locator('.unpriced-result').first().innerText(), /此來源未提供聯程售價/);
+  assert.doesNotMatch(await page.locator('.unpriced-result').first().innerText(), /聯程整趟報價/);
+  assert.match(await page.locator('.unpriced-result').first().innerText(), /MU 5616[\s\S]*MU 5005/);
   assert.doesNotMatch(await page.locator('#resultList').innerText(), /NT\$\s*0\b/);
-  assert.equal(await page.locator('.result-card .track-button').count(), 0);
-  assert.equal(await page.locator('.result-card .compare-button:not([data-leg-cabins])').count(), 0);
+  assert.equal(await page.locator('.unpriced-result .track-button').count(), 0);
+  assert.equal(await page.locator('.unpriced-result .compare-button:not([data-leg-cabins])').count(), 0);
   assert.equal(await page.getByRole('link', { name: '東航多城市查價', exact: true }).count(), 2);
-  assert.match(await page.locator('.result-card').first().innerText(), /未鎖定班號、時段、艙等或票價/);
+  assert.match(await page.locator('.unpriced-result').first().innerText(), /未鎖定班號、時段、艙等或票價/);
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.locator('.result-card').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));

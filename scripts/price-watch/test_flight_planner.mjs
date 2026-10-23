@@ -50,6 +50,42 @@ function harness(change = (data) => data, changeBooking = (data) => data) {
   } };
 }
 
+test("SerpApi backup is bounded and skips successful empty or invalid queries", async () => {
+  for (const status of [200, 400, 401, 403, 429, 500]) {
+    const h = harness();
+    h.env.SERPAPI_API_KEY_BACKUP = "backup";
+    const keys = [];
+    globalThis.fetch = async (url) => {
+      const key = new URL(url).searchParams.get("api_key");
+      keys.push(key);
+      return Response.json(key === "backup" ? { best_flights: [] } : {
+        error: status === 200 ? "Google Flights hasn't returned any results for this query." : "Failure",
+      }, { status: key === "backup" ? 200 : status });
+    };
+    try {
+      await h.request(base);
+      const retry = [401, 429, 500].includes(status);
+      assert.deepEqual(keys, retry ? ["test", "backup"] : ["test"], `HTTP ${status}`);
+    } finally { h.restore(); }
+  }
+});
+
+test("SerpApi deduplicates identical keys and stops after backup failure", async () => {
+  for (const backup of ["test", "backup", ""]) {
+    const h = harness();
+    h.env.SERPAPI_API_KEY_BACKUP = backup;
+    const keys = [];
+    globalThis.fetch = async (url) => {
+      keys.push(new URL(url).searchParams.get("api_key"));
+      throw new Error("Network failure");
+    };
+    try {
+      assert.equal((await h.request(base)).status, 502);
+      assert.deepEqual(keys, backup === "backup" ? ["test", "backup"] : ["test"]);
+    } finally { h.restore(); }
+  }
+});
+
 test("validates dates, airports, ranges and exclusion codes before paid calls", async () => {
   const h = harness();
   try {

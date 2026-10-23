@@ -206,8 +206,9 @@ function formatPrice(price, currency = "TWD") {
 }
 
 async function serpApiSearch(params, env) {
-  const apiKey = envValue(env, "SERPAPI_API_KEY");
-  if (!apiKey) throw new Error("SERPAPI_API_KEY is not set.");
+  const primaryKey = envValue(env, "SERPAPI_API_KEY");
+  if (!primaryKey) throw new Error("SERPAPI_API_KEY is not set.");
+  const apiKeys = [...new Set([primaryKey, envValue(env, "SERPAPI_API_KEY_BACKUP")].filter(Boolean))];
   let cacheKey;
   if (params.engine === "google_flights" && env.PRICE_WATCH_KV) {
     const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(params)));
@@ -216,21 +217,34 @@ async function serpApiSearch(params, env) {
     if (cached?.data) return cached.data;
   }
   const url = new URL("https://serpapi.com/search.json");
-  Object.entries({ ...params, api_key: apiKey }).forEach(([key, value]) => {
+  Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && String(value).trim() !== "") {
       url.searchParams.set(key, String(value));
     }
   });
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/json",
-      "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-    },
-    signal: AbortSignal.timeout(params.deep_search === "true" ? 45000 : 25000),
-  });
-  const data = await response.json().catch(() => ({}));
+  let response;
+  let data;
+  for (let index = 0; index < apiKeys.length; index++) {
+    url.searchParams.set("api_key", apiKeys[index]);
+    try {
+      response = await fetch(url.toString(), {
+        headers: {
+          Accept: "application/json",
+          "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        signal: AbortSignal.timeout(params.deep_search === "true" ? 45000 : 25000),
+      });
+    } catch {
+      if (index + 1 < apiKeys.length) continue;
+      throw new Error("SerpApi connection failed or timed out.");
+    }
+    data = await response.json().catch(() => ({}));
+    const retryable = [401, 429].includes(response.status) || response.status >= 500;
+    if (retryable && index + 1 < apiKeys.length) continue;
+    break;
+  }
   if (!response.ok) {
-    throw new Error(data.error || `SerpApi request failed with HTTP ${response.status}.`);
+    throw new Error(`SerpApi request failed with HTTP ${response.status}.`);
   }
   if (params.engine === "google_flights" && data.error === "Google Flights hasn't returned any results for this query.") {
     delete data.error;
@@ -384,21 +398,23 @@ async function serpApiSampledFlightSearch(input, env) {
   payload.currency = currency;
   const tracking = payload.trackingSample === true;
   const multi = payload.journeyType === "multicity";
-  const plans = multi || tracking || payload.comparisonPlan || hasLegDates(payload)
+  const usingSeparateTickets = multi && payload.ticketMode === "separate";
+  const quickComparison = usingSeparateTickets && payload.quickComparison === true && !tracking;
+  const candidatePlans = multi || tracking || payload.comparisonPlan || hasLegDates(payload)
     ? makeJourneyPlans(payload, startDate, endDate, tracking)
     : evenlySpacedDates(startDate, endDate, 3).map((date) => ({ date, nights: 0, destinationNights: 0 }));
+  const plans = quickComparison ? candidatePlans.slice(0, 2) : candidatePlans;
   let queryCount = 0;
   const inFlightQueries = new Map();
   const search = (params) => {
     const key = JSON.stringify(params);
     if (inFlightQueries.has(key)) return inFlightQueries.get(key);
-    if (queryCount >= 24) throw new Error("本次查詢數量已達上限。");
+    if (queryCount >= (quickComparison ? 12 : 24)) throw new Error("本次查詢數量已達上限。");
     queryCount += 1;
     const pending = serpApiSearch(params, env);
     inFlightQueries.set(key, pending);
     return pending;
   };
-  const usingSeparateTickets = multi && payload.ticketMode === "separate";
   const primaryCabin = tracking ? FLIGHT_CABINS.find((c) => c.code === payload.travelClass) || FLIGHT_CABINS[0] : FLIGHT_CABINS[0];
   const run = async (plan, cabin, days = payload.tripDays, lockDates = Boolean(payload.comparisonPlan), preferRequiredCarriers = false) => {
     const result = await searchCompleteJourney({ ...payload, ticketMode: usingSeparateTickets ? "separate" : "through", tripDays: days, lockDates }, plan, cabin, search, normalizeFlightResults, LOW_COST_AIRLINE_CODES, false, preferRequiredCarriers);
@@ -452,7 +468,7 @@ async function serpApiSampledFlightSearch(input, env) {
   const failed = [...searches.filter((result) => result.status === "rejected"), ...carrierRecoveryFailures];
   if (!economyResults.length && !unpricedResults.length && failed.length) throw failed[0].reason;
   const reference = economyResults[0];
-  const cabinSearches = reference && !tracking
+  const cabinSearches = reference && !tracking && !quickComparison
     ? await Promise.allSettled(FLIGHT_CABINS.slice(1).map((cabin) => run(reference.plan, cabin, payload.tripDays, true, reference.selectionStrategy === "required_carrier_recovery"))) : [];
   const cabinResults = cabinSearches.filter((r) => r.status === "fulfilled" && r.value?.price > 0).map((r) => r.value);
   let alternatives = !multi && payload.tripDays > 0 && (reference || tracking) && payload.compareDurations !== false
