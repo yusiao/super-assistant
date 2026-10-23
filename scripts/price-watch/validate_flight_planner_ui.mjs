@@ -294,6 +294,17 @@ try {
   await page.goto(`http://127.0.0.1:${server.address().port}/price-watch/#trip=${encodeURIComponent(JSON.stringify(exampleTrip))}`);
   await page.locator('#statusText').filter({ hasText: '行程已帶入' }).waitFor();
   assert.equal(await page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]').inputValue(), 'MU5616, MU5005');
+  const fixedFlight = page.locator('[data-leg-role="return"] [data-window-field="flightNumbers"]');
+  await page.setViewportSize({ width: 390, height: 900 });
+  await fixedFlight.fill('中國東方');
+  await page.locator('[data-leg-role="return"] .flight-option', { hasText: 'MU5616 → MU5005' }).waitFor();
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.locator('[data-leg-role="return"] .flight-option').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(root, `tmp/flight-options-${browserName}-390.png`) });
+  await fixedFlight.fill('China Eastern');
+  await page.locator('[data-leg-role="return"] .flight-option', { hasText: 'MU5616 → MU5005' }).waitFor();
+  await page.locator('[data-leg-role="return"] .flight-option', { hasText: 'MU5616 → MU5005' }).click();
+  assert.equal(await fixedFlight.inputValue(), 'MU5616, MU5005');
   const firstDeparture = page.locator('[data-leg-role="outbound"] [data-window-field="departureDate"]');
   const firstArrival = page.locator('[data-leg-role="outbound"] [data-window-field="arrivalDate"]');
   await page.setViewportSize({ width: 390, height: 900 });

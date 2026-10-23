@@ -1,7 +1,7 @@
 import { validateFlightPreferences, hasFlightPreferences, matchesFlightPreferences, flightPreferenceKey,
-  makeJourneyPlans, searchCompleteJourney, searchExpandedJourneyQuote, expandedQuoteSegments, flightDateRange, addDateDays, hasLegDates } from "./flight-planner.js";
+  makeJourneyPlans, searchCompleteJourney, searchExpandedJourneyQuote, expandedQuoteSegments, flightDateRange, addDateDays, hasLegDates, validDate } from "./flight-planner.js";
 import airportData from "../output/bazi-ziwei/price-watch/airports-data.json" with { type: "json" };
-import { buildAirportDirectory, searchAirports } from "../output/bazi-ziwei/price-watch/airports.js";
+import { buildAirportDirectory, searchAirports, normalizeAirportCodes } from "../output/bazi-ziwei/price-watch/airports.js";
 
 const AIRPORT_DIRECTORY = buildAirportDirectory(airportData.airports);
 
@@ -1063,6 +1063,46 @@ async function handlePriceWatchConfig(request, env) {
   });
 }
 
+async function handleFlightOptions(request, env) {
+  if (request.method === "OPTIONS") return corsPreflight();
+  if (request.method !== "POST") return methodNotAllowed();
+  if (!(await hasPriceWatchAccess(request, env, true))) return priceWatchAuthError(env);
+  const parsed = await request.json().catch(() => ({}));
+  const input = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  const departureId = normalizeAirportCodes(input.departureId);
+  const arrivalId = normalizeAirportCodes(input.arrivalId);
+  const date = input.date;
+  const today = new Date().toISOString().slice(0, 10);
+  if (!departureId || !arrivalId || departureId.split(",").some((code) => arrivalId.split(",").includes(code))
+    || !validDate(date) || date < today || date > addDays(today, 365)) {
+    return json(400, { code: "invalid_flight_options", error: "請先選擇有效的出發、抵達機場與未來一年內的起飛日。" });
+  }
+  const rateLimited = await publicSearchRateLimit(request, env, "flight-options");
+  if (rateLimited) return rateLimited;
+  const data = await serpApiSearch({ engine: "google_flights", type: "2", departure_id: departureId,
+    arrival_id: arrivalId, outbound_date: date, travel_class: "1", currency: "TWD", gl: "tw", hl: "zh-TW",
+    show_hidden: "true" }, env);
+  const seen = new Set();
+  const options = [...(data.best_flights || []), ...(data.other_flights || [])].flatMap((item) => {
+    const segments = (Array.isArray(item.flights) ? item.flights : []).map((flight) => ({
+      flightNumber: String(flight.flight_number || "").toUpperCase().replace(/[\s-]/g, ""),
+      airline: compact(flight.airline, "", 80),
+      departureAirport: compact(flight.departure_airport?.id, "", 3),
+      arrivalAirport: compact(flight.arrival_airport?.id, "", 3),
+      departureTime: compact(flight.departure_airport?.time, "", 30),
+      arrivalTime: compact(flight.arrival_airport?.time, "", 30),
+    }));
+    if (!segments.length || !segments[0].departureTime.startsWith(date) || segments.some((segment) => !/^(?:[A-Z][A-Z0-9]|[0-9][A-Z])\d{1,4}[A-Z]?$/.test(segment.flightNumber)
+      || !/^[A-Z]{3}$/.test(segment.departureAirport) || !/^[A-Z]{3}$/.test(segment.arrivalAirport)
+      || !segment.departureTime)) return [];
+    const key = segments.map((segment) => `${segment.flightNumber}:${segment.departureTime}:${segment.departureAirport}`).join("|");
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [{ flightNumbers: segments.map((segment) => segment.flightNumber), segments }];
+  }).slice(0, 60);
+  return json(200, { date, departureId, arrivalId, source: "Google Flights 經 SerpApi", options });
+}
+
 async function handlePriceWatchSearch(request, env) {
   if (request.method === "OPTIONS") return corsPreflight();
   if (request.method !== "POST") return methodNotAllowed();
@@ -1478,6 +1518,13 @@ export default {
     if (url.pathname === "/api/price-watch/search") {
       try {
         return await handlePriceWatchSearch(request, env);
+      } catch (error) {
+        return priceWatchSearchErrorResponse(error);
+      }
+    }
+    if (url.pathname === "/api/price-watch/flight-options") {
+      try {
+        return await handleFlightOptions(request, env);
       } catch (error) {
         return priceWatchSearchErrorResponse(error);
       }

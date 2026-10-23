@@ -712,6 +712,116 @@ function setupJourneyFields() {
 }
 
 const legWindowDrafts = new Map();
+const flightOptionCache = new Map();
+const airlineAliases = {
+  BR: "長榮 EVA Air", CI: "中華航空 華航 China Airlines", JX: "星宇 Starlux", IT: "台灣虎航 Tigerair Taiwan",
+  MU: "中國東方航空 東航 China Eastern", CZ: "中國南方航空 南航 China Southern", CA: "中國國際航空 國航 Air China",
+  CX: "國泰 Cathay Pacific", JL: "日本航空 Japan Airlines", NH: "全日空 ANA All Nippon Airways",
+  KE: "大韓航空 Korean Air", SQ: "新加坡航空 Singapore Airlines", TR: "酷航 Scoot", MM: "樂桃 Peach",
+};
+function flightOptionRoute(fieldset) {
+  const form = elements.flightForm;
+  const multi = form.elements.journeyType.value === "multicity";
+  const role = fieldset.dataset.legRole;
+  const from = role === "return" ? form.elements.arrivalId : role === "onward" ? form.elements.stopoverId : form.elements.departureId;
+  const to = role === "return" ? form.elements.departureId : role === "outbound" && multi ? form.elements.stopoverId : form.elements.arrivalId;
+  return { from, to };
+}
+function renderFlightOptionChoices(input, options, message = "") {
+  const list = input.closest(".flight-number-field").querySelector(".flight-option-list");
+  list.replaceChildren();
+  const needle = input.value.split(/[,，、;；]/).at(-1).trim().replaceAll("臺", "台").toLocaleLowerCase("zh-Hant");
+  const matches = options.filter((option) => option.segments.some((segment) => {
+    const code = segment.flightNumber.slice(0, 2);
+    return [segment.flightNumber, segment.airline, airlineAliases[code]].some((value) =>
+      String(value || "").replaceAll("臺", "台").toLocaleLowerCase("zh-Hant").includes(needle));
+  })).slice(0, 20);
+  if (matches.length) {
+    for (const option of matches) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "flight-option";
+      button.setAttribute("role", "option");
+      button.innerHTML = `<strong>${escapeHtml(option.flightNumbers.join(" → "))}</strong><span>${escapeHtml(option.segments.map((segment) => airlineAliases[segment.flightNumber.slice(0, 2)]?.split(" ")[0] || segment.airline).join(" · "))}</span><small>${escapeHtml(option.segments[0].departureAirport)} ${escapeHtml(timeText(option.segments[0].departureTime))} → ${escapeHtml(option.segments.at(-1).arrivalAirport)} ${escapeHtml(timeText(option.segments.at(-1).arrivalTime))}</small>`;
+      const select = () => {
+        input.value = option.flightNumbers.join(", ");
+        list.hidden = true;
+        input.setAttribute("aria-expanded", "false");
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.focus();
+      };
+      button.addEventListener("pointerdown", (event) => { event.preventDefault(); select(); });
+      button.addEventListener("click", select);
+      list.append(button);
+    }
+  } else {
+    const note = document.createElement("p");
+    note.textContent = message || "這次搜尋沒有符合的班機，可直接輸入班號";
+    list.append(note);
+  }
+  list.hidden = false;
+  input.setAttribute("aria-expanded", "true");
+}
+async function loadFlightOptionChoices(input) {
+  const query = input.value;
+  const fieldset = input.closest("[data-leg-role]");
+  const date = fieldset.querySelector('[data-window-field="departureDate"]').value
+    || (fieldset.dataset.legRole === "return" ? elements.flightForm.elements.fixedReturnDate.value : fieldset.dataset.legRole === "outbound" ? elements.flightForm.elements.fixedDepartureDate.value : "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return renderFlightOptionChoices(input, [], "請先選擇此段的出發日期");
+  const { from, to } = flightOptionRoute(fieldset);
+  let departureId;
+  let arrivalId;
+  try {
+    [departureId, arrivalId] = await Promise.all([resolvePlaceCode(from), resolvePlaceCode(to)]);
+  } catch { return renderFlightOptionChoices(input, [], "請先選擇此段的出發與抵達機場"); }
+  if (!normalizeAirportCodes(departureId) || !normalizeAirportCodes(arrivalId)) {
+    return renderFlightOptionChoices(input, [], "請先選擇此段的出發與抵達機場");
+  }
+  const key = JSON.stringify([departureId, arrivalId, date]);
+  const current = flightOptionCache.get(key);
+  if (!current || current.expiresAt < Date.now()) {
+    const promise = api("/api/price-watch/flight-options", { method: "POST",
+      body: JSON.stringify({ departureId, arrivalId, date }) }).catch((error) => {
+      flightOptionCache.delete(key);
+      throw error;
+    });
+    flightOptionCache.set(key, { promise, expiresAt: Date.now() + 15 * 60 * 1000 });
+  }
+  input.dataset.flightOptionKey = key;
+  renderFlightOptionChoices(input, [], "正在查詢當日航班...");
+  try {
+    const response = await flightOptionCache.get(key).promise;
+    if (input.isConnected && input.closest("[data-leg-role]") === fieldset && input.dataset.flightOptionKey === key && input.value === query)
+      renderFlightOptionChoices(input, response.options || []);
+  } catch (error) {
+    if (input.isConnected && input.dataset.flightOptionKey === key && input.value === query)
+      renderFlightOptionChoices(input, [], searchErrorMessage(error, "當日航班暫時查不到，可直接輸入班號"));
+  }
+}
+function setupFlightOptionInputs() {
+  document.querySelectorAll('[data-window-field="flightNumbers"]').forEach((input) => {
+    let timer;
+    const schedule = () => {
+      clearTimeout(timer);
+      const list = input.closest(".flight-number-field").querySelector(".flight-option-list");
+      input.dataset.flightOptionKey = "";
+      if (!input.value.trim()) { list.hidden = true; input.setAttribute("aria-expanded", "false"); return; }
+      timer = setTimeout(() => loadFlightOptionChoices(input), 280);
+    };
+    input.addEventListener("input", schedule);
+    input.addEventListener("keydown", (event) => {
+      const list = input.closest(".flight-number-field").querySelector(".flight-option-list");
+      if (event.key === "Escape") { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
+      if (event.key === "ArrowDown" && !list.hidden) { event.preventDefault(); list.querySelector("button")?.focus(); }
+    });
+    input.closest(".flight-number-field").addEventListener("focusout", (event) => {
+      if (event.currentTarget.contains(event.relatedTarget)) return;
+      clearTimeout(timer);
+      input.closest(".flight-number-field").querySelector(".flight-option-list").hidden = true;
+      input.setAttribute("aria-expanded", "false");
+    });
+  });
+}
 function readLegWindows() {
   return [...document.querySelectorAll("[data-leg-role]")].map((fieldset) => Object.fromEntries(
     [...fieldset.querySelectorAll("[data-window-field]")].filter((input) => input.value).map((input) => [input.dataset.windowField, input.value]),
@@ -737,10 +847,11 @@ function renderLegWindows() {
       </div>${key === "departure" && role === "outbound" ? `<label><span>另一出發日（擇低價，選填）</span><input type="date" data-window-field="departureDateAlternative" value="${escapeHtml(values.departureDateAlternative || "")}" /></label>` : ""}`).join("")}
       <div class="leg-carrier-grid">
         <label><span>指定航空公司（選填）</span><input list="airlineSuggestions" data-window-field="airline" placeholder="MU／中國東方航空" value="${escapeHtml(values.airline || "")}" maxlength="80" /></label>
-        <label><span>必搭班號（依序，逗號分隔，選填）</span><input data-window-field="flightNumbers" placeholder="MU5616, MU5005" value="${escapeHtml(String(values.flightNumbers || ""))}" maxlength="100" autocapitalize="characters" spellcheck="false" /></label>
+        <div class="flight-number-field"><label><span>必搭班號（依序，逗號分隔，選填）</span><input data-window-field="flightNumbers" placeholder="輸入航空公司或班號" value="${escapeHtml(String(values.flightNumbers || ""))}" maxlength="100" autocapitalize="characters" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="flight-options-${index}" /></label><div id="flight-options-${index}" class="flight-option-list" role="listbox" hidden></div></div>
       </div><button type="button" class="compare-button" data-form-leg="${index}">單段查價／艙等</button><div class="leg-form-quotes" aria-live="polite"></div></fieldset>`;
   }).join("");
   document.querySelectorAll("[data-form-leg]").forEach((button) => button.addEventListener("click", () => quoteFormLeg(Number(button.dataset.formLeg), button)));
+  setupFlightOptionInputs();
   document.querySelectorAll("[data-window-field]").forEach((input) => input.addEventListener("change", updateDateFields));
   setupLegDatePickers();
   updateDateFields();

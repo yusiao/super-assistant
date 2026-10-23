@@ -50,6 +50,36 @@ function harness(change = (data) => data, changeBooking = (data) => data) {
   } };
 }
 
+test("flight suggestions return dated connecting flights without claiming a complete schedule", async () => {
+  const h = harness((data, params) => {
+    assert.equal(params.type, "2");
+    assert.equal(params.outbound_date, date);
+    const first = data.best_flights[0].flights[0];
+    first.airline = "China Eastern";
+    first.flight_number = "MU 5616";
+    first.arrival_airport = { id: "PVG", time: `${date} 23:30` };
+    const second = structuredClone(first);
+    second.flight_number = "MU 5005";
+    second.departure_airport = { id: "PVG", time: `${addDateDays(date, 1)} 01:00` };
+    second.arrival_airport = { id: "TPE", time: `${addDateDays(date, 1)} 03:00` };
+    data.best_flights[0].flights.push(second);
+    data.other_flights = [structuredClone(data.best_flights[0])];
+    return data;
+  });
+  try {
+    const result = await h.request({ departureId: "HRB", arrivalId: "TPE,TSA", date }, "flight-options");
+    assert.equal(result.status, 200);
+    assert.equal(result.data.options.length, 1);
+    assert.deepEqual(result.data.options[0].flightNumbers, ["MU5616", "MU5005"]);
+    assert.equal(result.data.options[0].segments[1].departureTime.startsWith(addDateDays(date, 1)), true);
+    assert.equal(h.calls.length, 1);
+    assert.equal((await h.request({ departureId: "HRB", arrivalId: "HRB", date }, "flight-options")).status, 400);
+    assert.equal((await h.request({ departureId: "HRB", arrivalId: "TPE", date: "2000-01-01" }, "flight-options")).status, 400);
+    assert.equal((await h.request(null, "flight-options")).status, 400);
+    assert.equal(h.calls.length, 1);
+  } finally { h.restore(); }
+});
+
 test("SerpApi backup is bounded and skips successful empty or invalid queries", async () => {
   for (const status of [200, 400, 401, 403, 429, 500]) {
     const h = harness();

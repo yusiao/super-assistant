@@ -32,6 +32,14 @@
 .flatpickr-day.selected { background: var(--accent); border-color: var(--accent); }
 .date-clear { width: 100%; min-height: 44px; border: 0; border-top: 1px solid var(--line); background: var(--surface); color: var(--accent-strong); cursor: pointer; }
 .leg-carrier-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0; min-width: 0; }
+.flight-number-field { min-width: 0; }
+.flight-option-list { max-height: 260px; overflow-y: auto; margin-top: 4px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.flight-option-list[hidden] { display: none; }
+.flight-option-list p { padding: 12px; margin: 0; font-size: 13px; }
+.flight-option { display: grid; gap: 3px; width: 100%; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: #fff; color: var(--ink); text-align: left; }
+.flight-option:last-child { border-bottom: 0; }
+.flight-option:hover, .flight-option:focus-visible { background: #edf4f3; }
+.flight-option span, .flight-option small { overflow-wrap: anywhere; font-size: 12px; }
 .leg-cabin-quotes { min-width: 0; }
 .leg-event-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
 @media (max-width: 619px) {
