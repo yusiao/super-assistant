@@ -1097,19 +1097,100 @@ def get_new_pending_launch_projects(snapshots: list[dict[str, Any]], state: dict
     return new_items
 
 
-def get_new_bargain_watch_items(bargain_watch: dict[str, Any], state: dict[str, Any]) -> list[dict[str, Any]]:
-    if "bargain_watch_items" not in state:
-        return []
-    previous_keys = {
-        item.get("url", "") or f"{item.get('region_group')}|{item.get('area_name')}|{item.get('name')}"
-        for item in state.get("bargain_watch_items", [])
-    }
-    return [
-        item
-        for item in bargain_watch.get("all_items", bargain_watch.get("items", []))
-        if (item.get("url", "") or f"{item.get('region_group')}|{item.get('area_name')}|{item.get('name')}")
-        not in previous_keys
-    ][:20]
+def bargain_identity(item: dict[str, Any]) -> str:
+    # Location + name survives tracking URL changes and cross-source duplicates.
+    parts = [str(item.get(key) or "").strip() for key in ("region_group", "area_name", "name")]
+    if all(parts):
+        return "|".join(re.sub(r"\s+", "", part).replace("臺", "台") for part in parts)
+    url = urllib.parse.urlsplit(str(item.get("url") or ""))
+    return urllib.parse.urlunsplit((url.scheme, url.netloc, url.path.rstrip("/"), url.query, ""))
+
+
+def bargain_lifecycle(item: dict[str, Any]) -> str:
+    status = str(item.get("status") or "")
+    if any(word in status for word in ("新成屋", "已完工", "成屋")):
+        return "completed"
+    if any(word in status for word in ("完銷", "售罄")):
+        return "sold_out"
+    if any(word in status for word in ("待開", "未開", "尚未", "待售", "待定")):
+        return "pending"
+    return "active" if "預售" in status else "unknown"
+
+
+def get_new_bargain_watch_items(bargain_watch: dict[str, Any], delivery_state: dict[str, Any]) -> list[dict[str, Any]]:
+    previous = delivery_state.get("bargain_alerts", {})
+    changed = []
+    seen = set()
+    for item in bargain_watch.get("all_items", bargain_watch.get("items", [])):
+        key = bargain_identity(item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        old = previous.get(key)
+        reason = "首次通知"
+        if old:
+            old_price = old.get("low_price")
+            price = item.get("low_price")
+            lifecycle = bargain_lifecycle(item)
+            status_changed = lifecycle != "unknown" and old.get("lifecycle", "unknown") != "unknown" and lifecycle != old["lifecycle"]
+            price_dropped = (
+                isinstance(price, (int, float)) and isinstance(old_price, (int, float))
+                and old_price > 0 and 0 < price <= old_price * 0.97
+            )
+            if not status_changed and not price_dropped:
+                continue
+            reason = "銷售階段改變" if status_changed else f"較上次通知開價下調 {(1 - price / old_price) * 100:.1f}%"
+        changed.append({**item, "alert_reason": reason})
+    return changed[:20]
+
+
+def record_bargain_delivery(ledger: dict[str, Any], task_id: str, items: list[dict[str, Any]], local_now: datetime) -> None:
+    task = ledger.setdefault("delivery_state", {}).setdefault(task_id, {})
+    checkpoints = task.setdefault("bargain_alerts", {})
+    for item in items:
+        key = bargain_identity(item)
+        if key:
+            checkpoints[key] = {
+                "low_price": item.get("low_price"), "lifecycle": bargain_lifecycle(item),
+                "notified_at": local_now.isoformat(),
+            }
+
+
+def comparison_confidence(item: dict[str, Any]) -> str:
+    source = str(item.get("benchmark_source") or "")
+    if item.get("comparison_scope") == "district" or "行政區" in source:
+        return "低：同行政區開價初篩，未核對路段、坪數、樓層與車位"
+    return "低：比較樣本、日期或產品條件未齊，不視為已確認便宜"
+
+
+def readable_fetch_issue(error: Any) -> str:
+    text = str(error).lower()
+    if "unavailable" in text or "no module named" in text or "executable doesn't exist" in text:
+        return "執行環境缺少必要套件或瀏覽器"
+    if "cloudflare" in text or "403" in text:
+        return "來源網站限制自動讀取"
+    if "timeout" in text or "timed out" in text or "逾時" in text:
+        return "來源連線逾時"
+    if "parse" in text or "解析" in text:
+        return "來源內容未能完整辨識"
+    return "來源暫時無法取得完整資料"
+
+
+def coverage_notice(areas: list[dict[str, Any]]) -> str:
+    available = sum(not area.get("stale") for area in areas)
+    incomplete = any(area.get("stale") or any(value for key, value in area.items() if key.endswith("fetch_error")) for area in areas)
+    suffix = "；資料不完整，不能把未抓到當成零建案" if incomplete or not areas else "；僅代表本次可取得資料"
+    return f"A7 區域可用 {available}/{len(areas)} 區{suffix}。"
+
+
+def priority_bargains(bargain_watch: dict[str, Any] | None) -> list[dict[str, Any]]:
+    items = (bargain_watch or {}).get("items", [])
+    # A7 only when explicitly identified; Guishan district is not synonymous with A7.
+    return sorted(items, key=lambda item: (
+        "A7" not in str(item.get("area_name", "")).upper(),
+        -float(item.get("discount_percent") or 0),
+        str(item.get("name", "")),
+    ))[:3]
 
 
 def is_weekly_report_day(local_now: datetime, weekly_day: int) -> bool:
@@ -1134,7 +1215,7 @@ def get_weekly_report_key(scheduled_at: datetime) -> str:
 
 def test_weekly_report_already_sent(ledger_file: dict[str, Any], task_id: str, weekly_report_key: str) -> bool:
     return any(
-        entry.get("task_id") == task_id and entry.get("weekly_report_key") == weekly_report_key
+        entry.get("task_id") == task_id and entry.get("weekly_report_key") == weekly_report_key and entry.get("line_sent")
         for entry in ledger_file.get("ledger", [])
     )
 
@@ -1276,7 +1357,7 @@ def get_ledger_file(path: Path) -> dict[str, Any]:
 
 
 def test_ledger_already_ran(ledger_file: dict[str, Any], task_id: str, date_string: str) -> bool:
-    return any(entry.get("task_id") == task_id and entry.get("date") == date_string for entry in ledger_file.get("ledger", []))
+    return any(entry.get("task_id") == task_id and entry.get("date") == date_string and entry.get("line_sent") for entry in ledger_file.get("ledger", []))
 
 
 def update_ledger(
@@ -1821,6 +1902,8 @@ def get_housefun_bargain_items(config: dict[str, Any], threshold_percent: float)
                 "low_price": low_price,
                 "benchmark": benchmark,
                 "benchmark_source": f"同行政區其他預售案中位數（{len(peer_prices)}案）",
+                "comparable_count": len(peer_prices),
+                "comparison_scope": "district",
                 "discount_percent": discount_percent,
             }
         )
@@ -1908,13 +1991,14 @@ def format_bargain_watch_line(item: dict[str, Any]) -> list[str]:
     prefix = f"{item.get('region_group')}/{item.get('area_name')}".strip("/")
     first = (
         f"- [{prefix}] {item.get('name')} | {item.get('status') or '價格未解析'} | "
-        f"低於基準 {item.get('discount_percent', 0):.1f}%"
+        f"開價低點較基準低 {item.get('discount_percent', 0):.1f}%（待核實）"
     )
     second = (
         f"  基準：{item.get('benchmark', 0):.1f}萬/坪（{item.get('benchmark_source') or '未標示'}）；"
-        f"低價：{item.get('low_price', 0):.1f}萬/坪"
+        f"開價低點：{item.get('low_price', 0):.1f}萬/坪"
     )
     lines = [first, second]
+    lines.append(f"  比較可信度{comparison_confidence(item)}。開價不是成交價；車位是否另計仍待核實。")
     if item.get("address"):
         lines.append(f"  位置：{item['address']}")
     if item.get("source"):
@@ -3051,7 +3135,7 @@ def build_macro_summary(
 ) -> list[str]:
     lines: list[str] = []
     valid_areas = [area for area in areas if not area.get("stale")]
-    analysis_areas = valid_areas or areas
+    analysis_areas = valid_areas
 
     if not analysis_areas:
         lines.append("- 目前可用 A7 區域資料不足，今天先不下 A7 區域結論。")
@@ -3250,8 +3334,8 @@ def extract_area_pdf_metrics(
         row: dict[str, Any] = {"name": area_name}
         for key, pattern in patterns.items():
             match = re.search(pattern, joined)
-            row[key] = int(match.group(1)) if match else 0
-        row["stale"] = any("抓取失敗" in line for line in lines)
+            row[key] = int(match.group(1)) if match else None
+        row["stale"] = any(row[key] is None for key in patterns) or any("抓取失敗" in line for line in lines)
         metrics.append(row)
     return metrics
 
@@ -3343,7 +3427,7 @@ def generate_pdf_report(
     section_map = {heading: lines for heading, lines in sections}
     macro_lines = [
         line[2:].strip()
-        for line in section_map.get("大數據觀察", [])
+        for line in section_map.get("本期先看", section_map.get("大數據觀察", []))
         if line.strip().startswith("- ")
     ][:5]
     if not macro_lines:
@@ -3509,6 +3593,8 @@ def generate_pdf_report(
     total_active = sum(item["active"] for item in metrics if not item.get("stale"))
     total_pending = sum(item["pending"] for item in metrics if not item.get("stale"))
     successful_areas = sum(1 for item in metrics if not item.get("stale"))
+    if not successful_areas:
+        total_observable = total_active = total_pending = "未取得"
     kpi_data = [[
         Paragraph(f"{total_observable}<br/><font size='8' color='#65716C'>可觀察預售案</font>", styles["kpi_value"]),
         Paragraph(f"{total_active}<br/><font size='8' color='#65716C'>銷售中預售</font>", styles["kpi_value"]),
@@ -3541,15 +3627,25 @@ def generate_pdf_report(
     for heading in priority:
         if heading in section_map:
             ordered_sections.append((heading, section_map[heading]))
+    missing_area_lines = []
     for heading in area_names:
         if heading in section_map:
-            ordered_sections.append((heading, section_map[heading]))
+            row = next((item for item in metrics if item["name"] == heading), None)
+            if row and row.get("stale"):
+                missing_area_lines.append(f"### {heading}")
+                missing_area_lines.extend(section_map[heading])
+            else:
+                ordered_sections.append((heading, section_map[heading]))
+    if missing_area_lines:
+        ordered_sections.append(("本期未完整取得的區域", missing_area_lines))
     for heading, lines in sections:
-        if heading != macro_heading and heading not in {item[0] for item in ordered_sections}:
+        if heading not in {macro_heading, "本期先看", *area_names} and heading not in {item[0] for item in ordered_sections}:
             ordered_sections.append((heading, lines))
+    if macro_heading in section_map:
+        ordered_sections.append((macro_heading, section_map[macro_heading]))
 
     for heading, lines in ordered_sections:
-        story.append(PageBreak())
+        story.append(Spacer(1, 6 * mm) if heading == macro_heading else PageBreak())
         story.append(Paragraph(escape(heading), styles["section"]))
         if heading in area_names:
             row = next((item for item in metrics if item["name"] == heading), None)
@@ -3758,22 +3854,30 @@ def new_pdf_line_message(
         for item in pending_items[:3]:
             area_text = f"｜{item.get('area', '')}" if item.get("area") else ""
             lines.append(f"• {item.get('name', '未命名建案')}{area_text}")
-    elif bargain_items and report_kind == "低價新案提醒":
-        lines.append("本次低價異常：")
-        for item in bargain_items[:3]:
+    elif bargain_items:
+        lines.append("優先查證的 3 項以內開價線索：")
+        for item in priority_bargains(bargain_watch):
             city = item.get("city") or item.get("region_group")
             district = item.get("district") or item.get("area_name")
             location = "/".join(part for part in (city, district) if part)
             discount = item.get("discount_percent")
             discount_text = f"｜低於基準 {float(discount):.1f}%" if isinstance(discount, (int, float)) else ""
             lines.append(f"• {item.get('name', '未命名建案')}｜{location}{discount_text}")
+            lines.append(f"  開價低點 {item.get('low_price', 0):.1f} vs 基準 {item.get('benchmark', 0):.1f} 萬/坪")
+            lines.append(f"  基準：{item.get('benchmark_source') or '未完整標示'}")
+            lines.append(f"  比較可信度{comparison_confidence(item)}")
+            if item.get("alert_reason"):
+                lines.append(f"  提醒原因：{item['alert_reason']}")
+            if item.get("url"):
+                lines.append(str(item["url"]))
+        lines.append("開價不是成交價，車位是否另計待核實；先確認實際可購戶別，不視為買進建議。")
     else:
         lines.append("本期重點：")
         rising_watch = get_rising_price_watch(areas)
         falling_watch = get_falling_price_watch(areas)
         for item in build_macro_summary(areas, rising_watch, falling_watch, market_pulse)[:3]:
             lines.append(f"• {item.removeprefix('- ').strip()}")
-    lines.extend(["", "完整圖表、建案與資料限制：", pdf_url])
+    lines.extend(["", coverage_notice(areas), "完整圖表、建案與資料限制：", pdf_url])
     return "\n".join(lines).strip()
 
 
@@ -3790,13 +3894,26 @@ def new_report_content(
     lines = [
         f"# A7 Leju {report_kind} | {local_now:%Y-%m-%d}",
         "",
-        "- Source: leju.com.tw",
+        "- Sources: 樂居、好房網、官方實價登錄與設定的新聞來源（依本期可取得內容）",
         f"- Generated at: {local_now:%Y-%m-%d %H:%M:%S}",
         "",
     ]
     rising_watch = get_rising_price_watch(areas)
     falling_watch = get_falling_price_watch(areas)
     project_rise_watch = get_project_price_rise_watch(areas, state)
+
+    lines.extend(["## 本期先看", "", f"- {coverage_notice(areas)}"])
+    top_items = priority_bargains(bargain_watch)
+    if top_items:
+        for item in top_items:
+            lines.append(
+                f"- 優先查證：{item.get('area_name')}／{item.get('name')}；開價低點 {item.get('low_price', 0):.1f}、"
+                f"基準 {item.get('benchmark', 0):.1f} 萬/坪；比較可信度{comparison_confidence(item)}。"
+            )
+        lines.append("- 下一步：確認可購戶別、同路段同產品成交、車位拆價與付款條件，再判斷價差。")
+    else:
+        lines.append("- 本次沒有可列出的低價候選；資料缺漏不代表市場沒有機會。")
+    lines.append("")
 
     if market_pulse and market_pulse.get("enabled", False):
         lines.append("## 近一週市場脈動")
@@ -3813,8 +3930,7 @@ def new_report_content(
         if market_pulse.get("errors"):
             lines.append("")
             lines.append("資料限制：")
-            for error in market_pulse["errors"][:5]:
-                lines.append(f"- {error}")
+            lines.append(f"- 有 {len(market_pulse['errors'])} 筆新聞或內文取得異常，未讀到的內容不納入結論。")
         lines.append("")
 
     if bargain_watch and bargain_watch.get("enabled", False):
@@ -3831,8 +3947,8 @@ def new_report_content(
         if errors:
             lines.append("")
             lines.append("資料限制：")
-            for error in errors[:5]:
-                lines.append(f"- {error}")
+            reasons = "、".join(sorted({readable_fetch_issue(error) for error in errors}))
+            lines.append(f"- 有 {len(errors)} 筆來源異常（{reasons}），未涵蓋的來源不代表沒有低價案。")
         lines.append("")
 
     if rising_watch:
@@ -3880,7 +3996,7 @@ def new_report_content(
                 [
                     f"## {area['name']}",
                     "",
-                    f"- 本次抓取失敗，不顯示舊資料。原因：{area.get('fetch_error', '')}",
+                    f"- {readable_fetch_issue(area.get('fetch_error', ''))}；本期不提供該區數量或價格結論，也不以舊資料補足。",
                     "",
                 ]
             )
@@ -3945,8 +4061,7 @@ def new_line_message(
             lines.append("- 未解析到明確雙北、桃園行政區熱點。")
         if market_pulse.get("errors"):
             lines.append("- 部分新聞/報告來源抓取失敗：")
-            for error in market_pulse["errors"][:3]:
-                lines.append(f"  - {error}")
+            lines.append(f"  - 共 {len(market_pulse['errors'])} 筆；未讀到的內容不納入結論。")
         lines.append("")
 
     if bargain_watch and bargain_watch.get("enabled", False):
@@ -3961,8 +4076,7 @@ def new_line_message(
         if bargain_watch.get("errors"):
             errors = [str(error) for error in bargain_watch["errors"] if str(error).strip()]
             lines.append(f"- 低價新案監控有 {len(errors)} 筆來源/區域抓取異常；這代表該來源本次沒有納入低價判斷，不代表沒有低價案。")
-            for error in errors[:4]:
-                lines.append(f"  - {error}")
+            lines.append("  - " + "、".join(sorted({readable_fetch_issue(error) for error in errors})))
         lines.append("")
 
     if rising_watch:
@@ -4067,6 +4181,14 @@ def send_prepared_line_notification(file_config: dict[str, str], manifest_path: 
     if not isinstance(manifest, dict) or not manifest.get("message"):
         raise RuntimeError(f"Prepared LINE manifest is missing or invalid: {manifest_path}")
 
+    ledger_path = resolve_workspace_path(get_config_value(file_config, "SYNC_LEDGER_PATH", "system/skills/local-scheduler/config/sync-ledger.json"))
+    ledger_file = get_ledger_file(ledger_path)
+    local_now = datetime.fromisoformat(str(manifest["local_now"]))
+    task_id = str(manifest.get("task_id") or get_config_value(file_config, "TASK_ID", "a7-leju-digest"))
+    if any(entry.get("task_id") == task_id and entry.get("timestamp") == local_now.isoformat() and entry.get("line_sent") for entry in ledger_file["ledger"]):
+        print("This prepared notification was already sent; skipping duplicate.")
+        return 0
+
     line_token = get_config_value(file_config, "LINE_CHANNEL_ACCESS_TOKEN", "")
     line_mode = get_config_value(file_config, "LINE_MODE", "broadcast").strip().lower()
     line_to = get_config_value(file_config, "LINE_TO", "")
@@ -4079,17 +4201,8 @@ def send_prepared_line_notification(file_config: dict[str, str], manifest_path: 
     else:
         send_line_broadcast(line_token, str(manifest["message"]))
 
-    ledger_path = resolve_workspace_path(
-        get_config_value(
-            file_config,
-            "SYNC_LEDGER_PATH",
-            "system/skills/local-scheduler/config/sync-ledger.json",
-        )
-    )
-    local_now = datetime.fromisoformat(str(manifest["local_now"]))
-    task_id = str(manifest.get("task_id") or get_config_value(file_config, "TASK_ID", "a7-leju-digest"))
     report_path = Path(str(manifest["report_path"]))
-    ledger_file = get_ledger_file(ledger_path)
+    record_bargain_delivery(ledger_file, task_id, manifest.get("bargain_items", []), local_now)
     update_ledger(
         ledger_path,
         ledger_file,
@@ -4237,7 +4350,8 @@ def main() -> int:
 
     bargain_watch = get_bargain_watch_results(load_bargain_watch_config(bargain_config_path))
     urgent_pending_projects = get_new_pending_launch_projects(snapshots, state) if urgent_pending_enabled else []
-    urgent_bargain_items = get_new_bargain_watch_items(bargain_watch, state)
+    delivery_state = ledger_file.get("delivery_state", {}).get(task_id, {})
+    urgent_bargain_items = get_new_bargain_watch_items(bargain_watch, delivery_state)
     latest_weekly_schedule = get_latest_weekly_schedule(local_now, weekly_report_day, weekly_report_hour)
     weekly_report_key = get_weekly_report_key(latest_weekly_schedule)
     weekly_due = should_send_weekly_report(
@@ -4267,20 +4381,20 @@ def main() -> int:
         if weekly_due or args.force
         else {"enabled": False, "items": [], "errors": []}
     )
+    line_bargain_watch = bargain_watch
+    if urgent_bargain_items and not weekly_due:
+        line_bargain_watch = dict(bargain_watch)
+        line_bargain_watch["items"] = urgent_bargain_items
     report_content = new_report_content(
         snapshots,
         state,
         local_now,
-        bargain_watch,
+        line_bargain_watch,
         market_pulse,
         report_kind,
         urgent_pending_projects,
         area_config,
     )
-    line_bargain_watch = bargain_watch
-    if urgent_bargain_items and not weekly_due:
-        line_bargain_watch = dict(bargain_watch)
-        line_bargain_watch["items"] = urgent_bargain_items
     report_path.write_text(report_content + "\n", encoding="utf-8")
     if pdf_delivery_enabled:
         generate_pdf_report(
@@ -4333,6 +4447,7 @@ def main() -> int:
                 "local_now": local_now.isoformat(),
                 "report_kind": report_kind,
                 "weekly_report_key": weekly_report_key if weekly_due else "",
+                "bargain_items": line_bargain_watch.get("items", []),
             },
         )
         print(f"Prepared LINE notification: {prepared_line_path}")
@@ -4386,6 +4501,8 @@ def main() -> int:
 
     save_state_file(state_path, state, snapshots, local_now, bargain_watch)
 
+    if line_sent:
+        record_bargain_delivery(ledger_file, task_id, line_bargain_watch.get("items", []), local_now)
     update_ledger(
         ledger_path,
         ledger_file,
