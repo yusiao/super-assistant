@@ -532,8 +532,15 @@ def parse_project_blocks(content: str) -> list[dict[str, str]]:
         name = link["name"]
         if name in {"首頁", "前往看更多", "更多", "建案總表"} or "AlfaSafe" in name:
             continue
+        # Resale listing cards link to communities but are not project cards.
+        if re.search(r"\d+\s*刊登|\d+(?:\.\d+)?\s*坪.*(?:房|樓)", name):
+            continue
         tail = text.split(name, 1)[1] if name in text else ""
         snippet = tail[:900]
+        for other in links:
+            other_name = other["name"]
+            if other_name != name and other_name in snippet:
+                snippet = snippet.split(other_name, 1)[0]
         price_text = get_regex_value(snippet, r"開價\s*([^\s]+)", "")
         if not price_text:
             price_text = get_regex_value(snippet, r"(待定|未開賣|請電洽)", "")
@@ -544,22 +551,22 @@ def parse_project_blocks(content: str) -> list[dict[str, str]]:
         )
         status_bits = " ".join(bit for bit in [price_text, schedule_text] if bit).strip()
         projects.append({"name": name, "url": link["url"], "status": status_bits})
-    deduped: list[dict[str, str]] = []
-    seen: set[str] = set()
-    for item in projects:
-        key = item["url"].split("&is_alfasafe=", 1)[0]
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(item)
-    return deduped[:40]
+    return dedupe_projects(projects)
+
+
+def project_key(project: dict[str, str]) -> str:
+    url = project.get("url", "")
+    match = re.search(r"(?:https?://(?:www\.)?leju\.com\.tw)?/community/([A-Za-z0-9]+)(?:[/?#]|$)", url)
+    if match:
+        return "leju:" + match.group(1)
+    return url or project.get("name", "")
 
 
 def dedupe_projects(projects: list[dict[str, str]]) -> list[dict[str, str]]:
     deduped: list[dict[str, str]] = []
     seen: set[str] = set()
     for item in projects:
-        key = item.get("url", "").split("&is_alfasafe=", 1)[0] or item.get("name", "")
+        key = project_key(item)
         if not key or key in seen:
             continue
         seen.add(key)
@@ -597,7 +604,7 @@ def enrich_project_statuses(projects: list[dict[str, str]]) -> list[dict[str, st
             continue
         seen.add(key)
         detail_status = get_project_detail_status(item)
-        if detail_status:
+        if detail_status and not is_completed_project(item):
             item["status"] = detail_status
         enriched.append(item)
     return enriched
@@ -758,16 +765,7 @@ def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
 
 
 def merge_project_lists(*groups: list[dict[str, str]]) -> list[dict[str, str]]:
-    merged: list[dict[str, str]] = []
-    seen: set[str] = set()
-    for group in groups:
-        for item in group:
-            key = item.get("url", "") or f"{item.get('name', '')}|{item.get('status', '')}"
-            if key in seen:
-                continue
-            seen.add(key)
-            merged.append(item)
-    return merged
+    return dedupe_projects([item for group in groups for item in group])
 
 
 def get_full_community_list_url(area: dict[str, Any]) -> str:
@@ -793,12 +791,14 @@ def filter_excluded_projects(projects: list[dict[str, str]], excluded_names: set
 
 def is_pending_launch(project: dict[str, str]) -> bool:
     status = project.get("status", "")
-    return any(keyword in status for keyword in ["待定", "未開賣", "潛銷", "即將公開"])
+    if is_completed_project(project) or "完銷" in status:
+        return False
+    return any(keyword in status for keyword in ["未開賣", "潛銷", "即將公開"]) or ("待定" in status and "預售屋" in status)
 
 
 def is_completed_project(project: dict[str, str]) -> bool:
-    status = project.get("status", "")
-    return any(keyword in status for keyword in ["新成屋", "成屋", "已交屋", "交屋"])
+    status = " ".join([project.get("name", ""), project.get("status", "")])
+    return any(keyword in status for keyword in ["新成屋", "成屋", "已交屋", "已完工"]) or bool(re.search(r"(?<!預計)(?<!即將)交屋", status))
 
 
 def is_sold_out_presale(project: dict[str, str], active_project_urls: set[str] | None = None) -> bool:
@@ -810,13 +810,14 @@ def is_sold_out_presale(project: dict[str, str], active_project_urls: set[str] |
     if any(keyword in status for keyword in ["已完銷", "完銷"]):
         return True
     if active_project_urls is not None:
-        return project.get("url", "") not in active_project_urls
+        # Absence from a partial listing is not evidence of being sold out.
+        return False
     return False
 
 
 def is_active_presale(project: dict[str, str]) -> bool:
     status = project.get("status", "")
-    if is_pending_launch(project) or is_completed_project(project):
+    if is_pending_launch(project) or is_completed_project(project) or is_sold_out_presale(project):
         return False
     if "預售屋" in status or "預計" in status:
         return True
@@ -1180,7 +1181,7 @@ def coverage_notice(areas: list[dict[str, Any]]) -> str:
     available = sum(not area.get("stale") for area in areas)
     incomplete = any(area.get("stale") or any(value for key, value in area.items() if key.endswith("fetch_error")) for area in areas)
     suffix = "；資料不完整，不能把未抓到當成零建案" if incomplete or not areas else "；僅代表本次可取得資料"
-    return f"A7 區域可用 {available}/{len(areas)} 區{suffix}。"
+    return f"A7 取得部分資料 {available}/{len(areas)} 區{suffix}；不代表全區建案與成交資料齊全。"
 
 
 def priority_bargains(bargain_watch: dict[str, Any] | None) -> list[dict[str, Any]]:
@@ -3599,7 +3600,7 @@ def generate_pdf_report(
         Paragraph(f"{total_observable}<br/><font size='8' color='#65716C'>可觀察預售案</font>", styles["kpi_value"]),
         Paragraph(f"{total_active}<br/><font size='8' color='#65716C'>銷售中預售</font>", styles["kpi_value"]),
         Paragraph(f"{total_pending}<br/><font size='8' color='#65716C'>待開案預售</font>", styles["kpi_value"]),
-        Paragraph(f"{successful_areas}/{len(metrics)}<br/><font size='8' color='#65716C'>成功取得區域</font>", styles["kpi_value"]),
+        Paragraph(f"{successful_areas}/{len(metrics)}<br/><font size='8' color='#65716C'>可統計區域（非完整覆蓋）</font>", styles["kpi_value"]),
     ]]
     kpi_table = Table(kpi_data, colWidths=[40 * mm] * 4, rowHeights=[20 * mm])
     kpi_table.setStyle(TableStyle([

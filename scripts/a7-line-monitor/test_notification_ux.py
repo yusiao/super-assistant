@@ -21,6 +21,41 @@ ITEM = {
 
 
 class NotificationTests(unittest.TestCase):
+    def test_community_identity_ignores_query_and_fragment(self):
+        base = {"name": "英倫花都", "url": "https://www.leju.com.tw/community/L47315223426b05", "status": "預售屋"}
+        variants = [base, {**base, "url": base["url"] + "?mode=buy"}, {**base, "url": base["url"] + "?mode=price#detail"}]
+        self.assertEqual(len(digest.dedupe_projects(variants)), 1)
+        self.assertEqual(len(digest.merge_project_lists(variants[:1], variants[1:])), 1)
+
+    def test_completed_and_sold_out_never_enter_sales_buckets(self):
+        for status in ["待定 新成屋", "待定 已完工", "未開賣 已交屋", "完銷 預售屋"]:
+            item = {"name": "測試建案", "status": status}
+            self.assertFalse(digest.is_pending_launch(item), status)
+            self.assertFalse(digest.is_active_presale(item), status)
+        self.assertFalse(digest.is_pending_launch({"status": "價格待定"}))
+        self.assertTrue(digest.is_pending_launch({"status": "待定 預售屋"}))
+        self.assertTrue(digest.is_active_presale({"status": "預售屋 預計交屋"}))
+
+    def test_partial_list_does_not_prove_sold_out(self):
+        self.assertFalse(digest.is_sold_out_presale({"status": "預售屋", "url": "https://example.com/a"}, set()))
+
+    def test_listing_cards_are_not_project_cards(self):
+        html = '<a href="/community/L123?mode=buy">英倫花都</a> 開價 55~58萬 預售屋 <a href="/community/L123">931萬 1刊登 大樓 英倫花都 19.00坪 2房 15樓</a> 新成屋'
+        items = digest.parse_project_blocks(html)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["name"], "英倫花都")
+        self.assertNotIn("新成屋", items[0]["status"])
+
+    def test_status_does_not_bleed_from_next_card(self):
+        html = '<a href="/community/L1">甲案</a> <a href="/community/L2">乙案</a> 開價 待定 預售屋'
+        items = digest.parse_project_blocks(html)
+        self.assertEqual(items[0]["status"], "")
+
+    def test_coverage_is_not_completeness_claim(self):
+        notice = digest.coverage_notice([{"stale": False, "price_fetch_error": "blocked"}])
+        self.assertIn("取得部分資料 1/1", notice)
+        self.assertIn("不代表", notice)
+
     def checkpoint(self):
         ledger = {}
         digest.record_bargain_delivery(ledger, "test", [ITEM], NOW)
