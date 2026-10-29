@@ -365,6 +365,9 @@ try {
   assert.equal(lastSearch.quickComparison, true);
   assert.deepEqual(unavailableThrough.results, []);
   assert.match(await page.locator('#ticketQuoteStatus').innerText(), /聯程未取得總價.*分段購票合計/);
+  assert.match(await page.locator('#fareComparison').innerText(), /目前可核對總價：分段購買/);
+  assert.match(await page.locator('#fareComparison').innerText(), /不能判定整體最划算/);
+  assert.doesNotMatch(await page.locator('#fareComparison').innerText(), /價差/);
   assert.equal(await page.locator('.result-card').count(), 2);
   assert.match(await page.locator('.result-card').first().innerText(), /分開購票合計/);
   for (const width of [320, 390, 1280]) {
@@ -374,7 +377,7 @@ try {
     await page.screenshot({ path: join(root, `tmp/flight-through-${browserName}-${width}.png`) });
   }
   const splitResponse = page.waitForResponse((response) => response.url().endsWith('/api/price-watch/search'));
-  await page.getByRole('button', { name: '改查分開購票價格', exact: true }).click();
+  await page.getByRole('button', { name: '完整搜尋分段方案', exact: true }).click();
   const exampleResult = await (await splitResponse).json();
   await page.locator('.result-card').first().waitFor();
   await page.waitForFunction(() => !document.querySelector('#flightSubmitButton').disabled);
@@ -434,6 +437,15 @@ try {
   assert.equal(throughResult.results.length, 2);
   assert.ok(throughResult.results.every((r) => !r.separateTickets && r.bookingQuote.basis === 'provider_together_offer'));
   assert.equal(throughResult.results[0].price, 14000);
+  assert.match(await page.locator('#fareComparison').innerText(), /目前較低總價：聯程 NT\$14,000，價差 NT\$22,000/);
+  assert.match(await page.locator('#fareComparison').innerText(), /各段分開購買[\s\S]*NT\$36,000/);
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.locator('#fareComparison').scrollIntoViewIfNeeded();
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: join(root, `tmp/flight-fare-comparison-${browserName}-390.png`) });
+  await page.locator('#fareComparison .fare-comparison-row.lowest button').click();
+  assert.equal(await page.locator('.result-card').first().evaluate((el) => el.getBoundingClientRect().top < innerHeight), true);
+  assert.equal(await page.locator('.result-card').count(), 4);
   assert.match(await page.locator('.result-card').first().innerText(), /整趟購票報價.*測試航空公司/);
   assert.doesNotMatch(await page.locator('.result-card').first().innerText(), /分開購票合計/);
   for (const width of [320, 390, 1280]) {
@@ -473,13 +485,14 @@ try {
   const recovered = await submit();
   assert.equal(recovered.results.length, 2);
   assert.deepEqual(recovered.unpricedResults, []);
-  assert.equal(await page.locator('.result-card').count(), 2);
-  assert.equal(await page.locator('.result-card .track-button').count(), 2);
+  assert.equal(await page.locator('.result-card').count(), 4);
+  assert.equal(await page.locator('.result-card .track-button').count(), 4);
   assert.doesNotMatch(await page.locator('#resultList').innerText(), /此來源未提供聯程售價/);
   emptyFlightsFixture = true;
   for (const key of records.keys()) if (key.startsWith('price-watch:flight-query:')) records.delete(key);
   const noFlights = await submit();
   assert.deepEqual(noFlights.results, []);
+  assert.match(await page.locator('#fareComparison').innerText(), /目前沒有可比較的整趟報價/);
   assert.match(await page.locator('#noResultGuidance').innerText(), /不能判定|無法確認/);
   assert.doesNotMatch(await page.locator('#noResultGuidance').innerText(), /售完/);
   await page.getByRole('button', { name: '檢查第 3 段必搭班號' }).click();
