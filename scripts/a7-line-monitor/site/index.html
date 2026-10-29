@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>房市觀測室｜從區域，看見變化</title>
+  <link rel="stylesheet" href="leaflet.css"><link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="road-map.css?v=12"><script src="leaflet.js" defer></script><script src="redevelopment-areas.js?v=4" defer></script><script src="road-map.js?v=14" defer></script><script src="app.js?v=8" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">▥</span>房市觀測室<span class="brand-en">PROPERTY OBSERVATORY</span></a><span class="edition">個人選區 · 公開資料</span></header>
+  <main>
+    <section class="region-map" aria-label="行政區地圖選擇">
+      <div class="map-heading"><div><div class="section-no">EXPLORE TAIWAN / 從地圖開始</div><h1>點一個地方，展開觀察。</h1></div><div class="map-controls"><button id="map-overview" type="button">全臺總覽／重設</button><button id="map-city" type="button">放大所選縣市</button></div></div>
+      <div class="road-consent"><button id="enable-roads" type="button">載入道路底圖（OpenStreetMap）</button><span>啟用後，圖磚服務會收到 IP、目前地圖範圍與網站來源；不傳送關注名單或 LINE 設定。</span></div>
+      <div class="catalog-toolbar"><label for="place-type">地圖區域類型</label><select id="place-type"><option value="all">全部類型</option><option value="development">重劃／開發區</option><option value="established">既有生活圈／次分區</option><option value="planned">開發計畫</option></select><p id="catalog-coverage" role="status"></p></div>
+      <div class="map-body"><div class="map-canvas"><div id="road-map" role="region" aria-label="全臺道路與行政區地圖"></div><p id="tile-status" role="status"></p></div><div class="map-detail"><span class="section-no">SELECTED REGION</span><h3 id="map-selection">桃園市</h3><p id="map-status" role="status">正在載入行政區界線…</p><label class="check"><input id="district-toggle" type="checkbox" checked>行政區界線</label><label class="check"><input id="life-toggle" type="checkbox" checked disabled>已核對生活圈範圍</label><p id="boundary-status" role="status">生活圈範圍待核對</p><p class="map-hint">全臺可放大到街道。若界線遮住路名，可取消行政區界線；仍可用下方行政區按鈕選擇。</p><div id="map-district-buttons" class="map-district-buttons" aria-label="行政區快速選擇"></div></div></div>
+      <p class="map-credit">圖資：<a href="https://maps.nlsc.gov.tw/pro/download.jsp" target="_blank" rel="noopener noreferrer">內政部國土測繪中心</a> · 政府資料開放授權條款第1版 · TOWN_MOI_1120317 圖層，非地籍用途。縣市放大以主要陸塊為中心；全臺總覽不展開東沙、南沙遠距附屬圖形，仍可用選單選取所屬行政區。地圖涵蓋範圍不等於房市資料涵蓋範圍。</p>
+      <section class="map-local" aria-label="行政區內的生活圈與建案"><div class="section-no">LOCAL VIEW / 再看近一點</div><h2>生活圈與預售建案</h2><div id="map-subareas" class="map-district-buttons" aria-label="生活圈快速選擇"></div><p id="map-local-note" role="status">點選行政區查看較小範圍。</p><div id="map-projects" class="map-projects"></div><p class="map-hint">成功取得並發布的新建案會隨「重新讀取」更新在此；不是即時推案監測。未取得座標前不繪製建案位置點，初次觀察不等於首次開賣。</p></section>
+      <section class="catalog-index" aria-label="已收錄區域名錄"><h3>本行政區的區域入口</h3><p>可直接點地圖標籤；標籤重疊時可放大地圖或使用此清單。生活圈、官方次分區與開發案並非相同範圍。</p><div id="catalog-places"></div><details><summary>北北基桃 61 個行政區收錄狀態</summary><p>沒有標示「完整」：這是查核工作清單，不是全市場資料涵蓋率。已收錄仍需續查其他生活圈、自辦重劃與新計畫。</p><div id="catalog-audit"></div></details></section>
+    </section>
+    <p class="map-credit">已移除未經核對的生活圈估繪框。道路、河川與鐵路依 OpenStreetMap 底圖呈現，非衛星影像或精密地形測量。生活圈僅收錄附來源且已核對的邊界；目前尚無已核對範圍，不用行政區或里界代替。<a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">回報底圖問題</a></p>
+    <div class="update"><span class="dot"></span><span id="updated">正在讀取資料版本…</span></div>
+    <div id="notice" class="notice" role="status">資料載入中。尚未完成載入前，不代表沒有建案。</div>
+    <div class="workspace">
+      <aside class="filters" aria-label="篩選區域"><div class="section-no">01 / 選擇觀察範圍</div><h2>你的區域視角</h2>
+        <label for="city">縣市</label><select id="city"><option>桃園市</option><option>新北市</option><option>臺北市</option><option>基隆市</option></select>
+        <label for="district">行政區</label><select id="district"><option value="">全部已接入行政區</option></select>
+        <label for="area">重劃區 / 子區</label><select id="area"><option value="">全部已接入子區</option></select>
+        <label for="search">找建案</label><div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="輸入建案名稱" maxlength="80"></div>
+        <label class="check"><input id="favorites" type="checkbox">只看我關注的建案</label>
+        <button id="reset" class="reset" type="button">重設篩選 <span>↺</span></button>
+        <div class="local-note"><strong>這是你的瀏覽視角</strong><p>選區與關注清單僅存於這台裝置，不會變更 LINE 通知範圍，也不會影響其他人。</p></div>
+      </aside>
+      <section class="results" aria-label="區域資料">
+        <div class="result-heading"><div><div class="section-no">02 / 市場切面</div><h2 id="region-title">A7 區域觀察</h2></div><button id="refresh" class="refresh" type="button">重新讀取 ↗</button></div>
+        <div class="metrics"><div><span>本次觀察建案</span><strong id="project-count">—</strong><small>案 · 跨區重複合併</small></div><div><span>銷售中預售</span><strong id="active-count">—</strong><small>案 · 依來源標示</small></div><div><span>待開案預售</span><strong id="pending-count">—</strong><small>案 · 未公開銷售</small></div></div>
+        <div class="tabs" role="tablist" aria-label="資料種類"><button role="tab" id="tab-projects" aria-controls="panel" aria-selected="true" data-view="projects">建案清單</button><button role="tab" id="tab-transactions" aria-controls="panel" aria-selected="false" data-view="transactions" tabindex="-1">成交紀錄</button><button role="tab" id="tab-reports" aria-controls="panel" aria-selected="false" data-view="reports" tabindex="-1">報告與資料說明</button></div>
+        <div id="categories" class="chips" aria-label="建案階段"><button data-category="all" aria-pressed="true">全部階段</button><button data-category="active" aria-pressed="false">銷售中預售</button><button data-category="pending" aria-pressed="false">未開賣預售</button><button data-category="sold_out" aria-pressed="false">完銷預售</button><button data-category="completed" aria-pressed="false">已完工建案</button></div>
+        <p id="result-note" class="result-note"></p><div id="panel" role="tabpanel" aria-labelledby="tab-projects" aria-live="polite"></div>
+      </section>
+    </div>
+    <section class="method"><span class="section-no">READ THE SIGNAL, NOT THE NOISE</span><h2>有資料，才有判斷。</h2><p>開價不等於成交價，待定不一定是未開賣。資料缺漏時不補猜，也不把抓取失敗當作零供給。</p></section>
+  </main>
+  <footer><span>房市觀測室 / PROPERTY OBSERVATORY</span><span>公開資訊整理，非投資報酬保證。網站設定不等於 LINE 設定。</span></footer>
+  <noscript>請啟用 JavaScript，以使用區域篩選及查看資料。</noscript>
+</body>
+</html>
