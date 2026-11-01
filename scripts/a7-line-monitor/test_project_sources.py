@@ -133,8 +133,15 @@ class ProjectSourcesTests(unittest.TestCase):
     def test_completion_year_is_not_price_trend(self):
         from a7_leju_digest import get_project_price_rise_watch
         current = {"name": "A7", "active_presale_projects": [{"name": "test", "source": "official", "price_text": "開價未公布", "status": "預計完工2032"}]}
-        state = {"areas": [{"name": "A7", "active_presale_projects": [{"name": "test", "source": "official", "price_text": "開價未公布", "status": "預計完工2031"}]}]}
+        state = {"runs": [{"name": "A7", "active_presale_projects": [{"name": "test", "source": "official", "price_text": "開價未公布", "status": "預計完工2031"}]}]}
         self.assertEqual(get_project_price_rise_watch([current], state), [])
+
+    def test_new_project_link_does_not_create_fake_new_transaction(self):
+        from a7_leju_digest import get_new_registration_rows
+        old = {"project_name": "test", "unit": "A1-8F", "total_price": "1500萬", "deal_date": "1150101", "url": "https://www.leju.com.tw/community/L123"}
+        fresh = {**old, "url": "https://nbm.jsl.com.tw/"}
+        self.assertEqual(get_new_registration_rows([fresh], {"latest_presale_registrations": [old]}), [])
+        self.assertEqual(len(get_new_registration_rows([{**fresh, "deal_date": "1150201"}], {"latest_presale_registrations": [old]})), 1)
 
 
 if __name__ == "__main__":

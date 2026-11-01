@@ -1439,7 +1439,7 @@ def get_registration_key(item: dict[str, str]) -> str:
             item.get("parking_price", ""),
             item.get("total_price", ""),
             item.get("unit_price", ""),
-            item.get("url", ""),
+            item.get("deal_date", ""),
         ]
     )
 
