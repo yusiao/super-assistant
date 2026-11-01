@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-25T20:24:38.465Z",
+  "generatedAt": "2026-11-01T21:42:29.391Z",
   "source": "finfo-index",
   "sourceNote": "由 Finfo robots.txt 指定之公開 sitemap 自動建立；商品詳細保障與費率仍以保險公司正式文件為準。",
   "sitemapUrl": "https://finfo.tw/sitemap.xml.gz",
@@ -2002,6 +2002,21 @@
       "alternateProducts": []
     },
     {
+      "code": "360",
+      "name": "長發還本終身保險",
+      "insurer": "台灣人壽",
+      "category": "savings",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/360-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E9%95%B7%E7%99%BC%E9%82%84%E6%9C%AC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-1994-12-17",
+      "effectiveDate": "1994-12-17",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "37",
       "name": "全福還本終身壽險",
       "insurer": "中央人壽",
@@ -2073,6 +2088,21 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/3A-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E9%87%91%E5%AF%B6%E8%B2%9D%E7%B5%82%E8%BA%AB%E9%82%84%E6%9C%AC%E5%A3%BD%E9%9A%AA-1997-12-18",
       "effectiveDate": "1997-12-18",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "3ATE",
+      "name": "金佳多利利率變動型還本終身保險定期給付型",
+      "insurer": "南山人壽",
+      "category": "savings",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/3ATE-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%87%91%E4%BD%B3%E5%A4%9A%E5%88%A9%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E9%82%84%E6%9C%AC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-08-09",
+      "effectiveDate": "2025-08-09",
       "versionCount": 1,
       "alternateProducts": []
     },
@@ -3451,9 +3481,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/6QY-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%81%A5%E5%BA%B7%E6%BB%BF%E5%88%86%E7%B5%82%E8%BA%AB%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA0501-2015-08-04",
-      "effectiveDate": "2015-08-04",
-      "versionCount": 2,
+      "sourceUrl": "https://finfo.tw/products/6QY-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%81%A5%E5%BA%B7%E6%BB%BF%E5%88%86%E7%B5%82%E8%BA%AB%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA0501-2016-01-01",
+      "effectiveDate": "2016-01-01",
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -3496,9 +3526,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/6QY1-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%81%A5%E5%BA%B7%E6%BB%BF%E5%88%86%E7%B5%82%E8%BA%AB%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA0501-2018-09-14",
-      "effectiveDate": "2018-09-14",
-      "versionCount": 1,
+      "sourceUrl": "https://finfo.tw/products/6QY1-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%81%A5%E5%BA%B7%E6%BB%BF%E5%88%86%E7%B5%82%E8%BA%AB%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA0501-2019-10-01",
+      "effectiveDate": "2019-10-01",
+      "versionCount": 2,
       "alternateProducts": []
     },
     {
@@ -3922,6 +3952,21 @@
       "alternateProducts": []
     },
     {
+      "code": "7M",
+      "name": "新紀元增額終身壽險",
+      "insurer": "新光人壽",
+      "category": "savings",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/7M-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E6%96%B0%E7%B4%80%E5%85%83%E5%A2%9E%E9%A1%8D%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-1995-11-24",
+      "effectiveDate": "1995-11-24",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "7X1",
       "name": "FUN心照護終身保險附約A型",
       "insurer": "台灣人壽",
@@ -4308,8 +4353,15 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/8S-%E5%9C%8B%E5%AF%B6%E4%BA%BA%E5%A3%BD%E6%97%A5%E9%A1%8D%E5%9E%8B%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84951-2006-11-16",
       "effectiveDate": "2006-11-16",
-      "versionCount": 1,
-      "alternateProducts": []
+      "versionCount": 2,
+      "alternateProducts": [
+        {
+          "insurer": "中國人壽",
+          "name": "松柏333終身保險",
+          "effectiveDate": "1995-04-18",
+          "sourceUrl": "https://finfo.tw/products/8S-%E4%B8%AD%E5%9C%8B%E4%BA%BA%E5%A3%BD%E6%9D%BE%E6%9F%8F333%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-1995-04-18"
+        }
+      ]
     },
     {
       "code": "8SQ",
@@ -4963,6 +5015,21 @@
       "alternateProducts": []
     },
     {
+      "code": "ACINLB1",
+      "name": "保心肝重大傷病終身健康保險",
+      "insurer": "保誠人壽",
+      "category": "critical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACINLB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%BF%83%E8%82%9D%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2026-04-27",
+      "effectiveDate": "2026-04-27",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ACINTB2",
       "name": "安鑫保定期重大傷病健康保險",
       "insurer": "保誠人壽",
@@ -5053,6 +5120,36 @@
       "alternateProducts": []
     },
     {
+      "code": "ACLPEN25",
+      "name": "富享雙收終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN25-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E4%BA%AB%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN26",
+      "name": "享利雙收終身保險113定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN26-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ACLPEN27",
       "name": "樂利雙收終身保險定期給付型",
       "insurer": "保誠人壽",
@@ -5063,6 +5160,36 @@
       "rateStatus": "index-only",
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/ACLPEN27-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN29",
+      "name": "享利雙收終身保險113定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN29-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN30",
+      "name": "超紅運來終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN30-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%B6%85%E7%B4%85%E9%81%8B%E4%BE%86%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
       "effectiveDate": "2025-01-01",
       "versionCount": 1,
       "alternateProducts": []
@@ -5080,6 +5207,81 @@
       "sourceUrl": "https://finfo.tw/products/ACLPEN32-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%87%91%E6%9C%83%E6%97%BA%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
       "effectiveDate": "2025-01-01",
       "versionCount": 2,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN33",
+      "name": "吉利雙收終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN33-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%90%89%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN34",
+      "name": "鑫利發終身保險113定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN34-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E5%88%A9%E7%99%BC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN35",
+      "name": "金利發終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN35-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%87%91%E5%88%A9%E7%99%BC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN38",
+      "name": "富享年年終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN38-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E4%BA%AB%E5%B9%B4%E5%B9%B4%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-03-03",
+      "effectiveDate": "2025-03-03",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ACLPEN39",
+      "name": "鑫享豐收終身保險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ACLPEN39-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E4%BA%AB%E8%B1%90%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-11-17",
+      "effectiveDate": "2025-11-17",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -6144,6 +6346,36 @@
       "alternateProducts": []
     },
     {
+      "code": "AHINTB3",
+      "name": "E保天天一年定期住院日額醫療健康保險",
+      "insurer": "保誠人壽",
+      "category": "medical",
+      "endAgeKnown": false,
+      "premiumMode": "ageBand",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/AHINTB3-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E4%BF%9D%E5%A4%A9%E5%A4%A9%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30",
+      "effectiveDate": "2024-09-30",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "AHINTB4",
+      "name": "E視健康定期健康保險",
+      "insurer": "保誠人壽",
+      "category": "medical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/AHINTB4-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E8%A6%96%E5%81%A5%E5%BA%B7%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2026-03-09",
+      "effectiveDate": "2026-03-09",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "AHINTR1",
       "name": "宜家保醫療健康保險附約",
       "insurer": "保誠人壽",
@@ -6574,7 +6806,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/AIR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2021-11-30",
       "effectiveDate": "2021-11-30",
-      "versionCount": 7,
+      "versionCount": 9,
       "alternateProducts": [
         {
           "insurer": "中國人壽",
@@ -7059,7 +7291,22 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/AMRN-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%87%91%E7%B5%A6%E4%BB%98%E9%99%84%E5%8A%A0%E6%A2%9D%E6%AC%BE%E4%B8%80%E8%88%AC%E5%AF%A6%E6%94%AF-2021-11-30",
       "effectiveDate": "2021-11-30",
-      "versionCount": 5,
+      "versionCount": 6,
+      "alternateProducts": []
+    },
+    {
+      "code": "AMRNTB1",
+      "name": "E保庇健康保險",
+      "insurer": "保誠人壽",
+      "category": "medical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/AMRNTB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E4%BF%9D%E5%BA%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30",
+      "effectiveDate": "2024-09-30",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -7463,6 +7710,51 @@
           "sourceUrl": "https://finfo.tw/products/APAED-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%B8%80%E8%87%B3%E5%85%AD%E7%B4%9A%E5%82%B7%E6%AE%98%E8%A3%9C%E5%84%9F%E4%BF%9D%E9%9A%AA%E9%99%84%E5%8A%A0%E6%A2%9D%E6%AC%BE-2008-07-01"
         }
       ]
+    },
+    {
+      "code": "APANTB10",
+      "name": "阿里叭叭意外傷害保險",
+      "insurer": "保誠人壽",
+      "category": "accident",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/APANTB10-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%98%BF%E9%87%8C%E5%8F%AD%E5%8F%AD%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30",
+      "effectiveDate": "2024-09-30",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "APANTB2",
+      "name": "無微不至集體投保微型傷害保險",
+      "insurer": "保誠人壽",
+      "category": "accident",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/APANTB2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E7%84%A1%E5%BE%AE%E4%B8%8D%E8%87%B3%E9%9B%86%E9%AB%94%E6%8A%95%E4%BF%9D%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30",
+      "effectiveDate": "2024-09-30",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "APANTB9",
+      "name": "E騎幸福意外傷害保險",
+      "insurer": "保誠人壽",
+      "category": "accident",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/APANTB9-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E9%A8%8E%E5%B9%B8%E7%A6%8F%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30",
+      "effectiveDate": "2024-09-30",
+      "versionCount": 1,
+      "alternateProducts": []
     },
     {
       "code": "APANTR1",
@@ -8082,6 +8374,36 @@
       "alternateProducts": []
     },
     {
+      "code": "ARDPLN6",
+      "name": "富貴世代終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARDPLN6-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E8%B2%B4%E4%B8%96%E4%BB%A3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARDPLN7",
+      "name": "超紅運相傳終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARDPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%B6%85%E7%B4%85%E9%81%8B%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ARLPLN10",
       "name": "福安滿利終身壽險113定期給付型",
       "insurer": "保誠人壽",
@@ -8097,6 +8419,36 @@
       "alternateProducts": []
     },
     {
+      "code": "ARLPLN11",
+      "name": "鑫滿傳家終身壽險113定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN11-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E6%BB%BF%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARLPLN12",
+      "name": "臻愛相傳終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN12-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%87%BB%E6%84%9B%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ARLPLN16",
       "name": "鑫福安康終身壽險定期給付型",
       "insurer": "保誠人壽",
@@ -8108,6 +8460,21 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/ARLPLN16-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E7%A6%8F%E5%AE%89%E5%BA%B7%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-06-03",
       "effectiveDate": "2025-06-03",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARLPLN18",
+      "name": "樂享相傳終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN18-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-04-15",
+      "effectiveDate": "2025-04-15",
       "versionCount": 1,
       "alternateProducts": []
     },
@@ -8142,6 +8509,51 @@
       "alternateProducts": []
     },
     {
+      "code": "ARLPLN21",
+      "name": "鑫滿安康終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN21-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E6%BB%BF%E5%AE%89%E5%BA%B7%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-10-15",
+      "effectiveDate": "2025-10-15",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARLPLN22",
+      "name": "鴻裕相傳終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN22-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%B4%BB%E8%A3%95%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-11-10",
+      "effectiveDate": "2025-11-10",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARLPLN23",
+      "name": "福康傳富終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN23-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E7%A6%8F%E5%BA%B7%E5%82%B3%E5%AF%8C%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-12-08",
+      "effectiveDate": "2025-12-08",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ARLPLN25",
       "name": "金寶貝終身壽險定額給付型",
       "insurer": "保誠人壽",
@@ -8172,6 +8584,21 @@
       "alternateProducts": []
     },
     {
+      "code": "ARLPLN7",
+      "name": "樂享傳家終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
+      "effectiveDate": "2025-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "ARLPLN8",
       "name": "金世代終身壽險定額給付型",
       "insurer": "保誠人壽",
@@ -8184,6 +8611,21 @@
       "sourceUrl": "https://finfo.tw/products/ARLPLN8-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%87%91%E4%B8%96%E4%BB%A3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E9%A1%8D%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
       "effectiveDate": "2025-01-01",
       "versionCount": 3,
+      "alternateProducts": []
+    },
+    {
+      "code": "ARLPN002",
+      "name": "富貴得利終身壽險定期給付型",
+      "insurer": "保誠人壽",
+      "category": "life",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/ARLPN002-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E8%B2%B4%E5%BE%97%E5%88%A9%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2026-03-09",
+      "effectiveDate": "2026-03-09",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -11317,6 +11759,21 @@
       "alternateProducts": []
     },
     {
+      "code": "CED",
+      "name": "防癌保本保險",
+      "insurer": "三商美邦人壽",
+      "category": "critical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/CED-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%98%B2%E7%99%8C%E4%BF%9D%E6%9C%AC%E4%BF%9D%E9%9A%AA-2008-11-21",
+      "effectiveDate": "2008-11-21",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "CED6",
       "name": "防癌保本保險",
       "insurer": "三商美邦人壽",
@@ -12477,7 +12934,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/CLO-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%B2%BE%E6%BA%96%E5%AE%88%E8%AD%B7%E9%98%B2%E7%99%8C%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-23",
       "effectiveDate": "2024-09-23",
-      "versionCount": 2,
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -13533,6 +13990,21 @@
       "sourceUrl": "https://finfo.tw/products/CWR3-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%96%B0%E7%B5%82%E8%BA%AB%E9%98%B2%E7%99%8C%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23",
       "effectiveDate": "2024-09-23",
       "versionCount": 3,
+      "alternateProducts": []
+    },
+    {
+      "code": "CWR4",
+      "name": "愛鑫安防癌終身健康保險附約",
+      "insurer": "富邦人壽",
+      "category": "critical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/CWR4-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%84%9B%E9%91%AB%E5%AE%89%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-10-12",
+      "effectiveDate": "2026-10-12",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -15475,6 +15947,21 @@
       "alternateProducts": []
     },
     {
+      "code": "DQ0",
+      "name": "鑫富旺利率變動型終身壽險",
+      "insurer": "新光人壽",
+      "category": "savings",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/DQ0-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E9%91%AB%E5%AF%8C%E6%97%BA%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2017-01-01",
+      "effectiveDate": "2017-01-01",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "DQ1",
       "name": "美滿富足利率變動型增額終身壽險106",
       "insurer": "遠雄人壽",
@@ -15565,7 +16052,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/DR2A-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%A4%B1%E8%83%BD%E7%B5%A6%E4%BB%98%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2023-02-09",
       "effectiveDate": "2023-02-09",
-      "versionCount": 2,
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -15956,7 +16443,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/DWPR-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%8F%8A%E4%BA%8C%E4%B8%89%E7%B4%9A%E6%AE%98%E5%BB%A2%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84-2004-01-01",
       "effectiveDate": "2004-01-01",
-      "versionCount": 2,
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -17903,8 +18390,14 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/FA-%E5%87%B1%E5%9F%BA%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA-2024-01-01",
       "effectiveDate": "2024-01-01",
-      "versionCount": 2,
+      "versionCount": 3,
       "alternateProducts": [
+        {
+          "insurer": "臺銀人壽",
+          "name": "保平安定期壽險",
+          "effectiveDate": "2019-03-29",
+          "sourceUrl": "https://finfo.tw/products/FA-%E8%87%BA%E9%8A%80%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%B9%B3%E5%AE%89%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA-2019-03-29"
+        },
         {
           "insurer": "中國人壽",
           "name": "一年定期壽險",
@@ -19910,7 +20403,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/G61-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E6%97%A5%E9%A1%8D%E7%B5%A6%E4%BB%98%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2020-01-01",
       "effectiveDate": "2020-01-01",
-      "versionCount": 1,
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -22810,9 +23303,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/HJK-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%97%A5%E6%97%A5%E5%BF%83%E5%AE%89%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-08-11",
-      "effectiveDate": "2025-08-11",
-      "versionCount": 2,
+      "sourceUrl": "https://finfo.tw/products/HJK-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%97%A5%E6%97%A5%E5%BF%83%E5%AE%89%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-10-23",
+      "effectiveDate": "2026-10-23",
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -25201,6 +25694,21 @@
       "alternateProducts": []
     },
     {
+      "code": "HY2",
+      "name": "愛無懼B型防癌終身健康保險附約",
+      "insurer": "遠雄人壽",
+      "category": "critical",
+      "endAgeKnown": false,
+      "premiumMode": "level",
+      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
+      "rateStatus": "index-only",
+      "source": "finfo-index",
+      "sourceUrl": "https://finfo.tw/products/HY2-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%9B%E7%84%A1%E6%87%BCB%E5%9E%8B%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2018-09-14",
+      "effectiveDate": "2018-09-14",
+      "versionCount": 1,
+      "alternateProducts": []
+    },
+    {
       "code": "HY3",
       "name": "愛無懼B型防癌終身健康保險附約",
       "insurer": "遠雄人壽",
@@ -25210,9 +25718,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/HY3-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%9B%E7%84%A1%E6%87%BCB%E5%9E%8B%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2019-01-01",
-      "effectiveDate": "2019-01-01",
-      "versionCount": 1,
+      "sourceUrl": "https://finfo.tw/products/HY3-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%9B%E7%84%A1%E6%87%BCB%E5%9E%8B%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2020-01-01",
+      "effectiveDate": "2020-01-01",
+      "versionCount": 2,
       "alternateProducts": []
     },
     {
@@ -35882,7 +36390,7 @@
       "source": "finfo-index",
       "sourceUrl": "https://finfo.tw/products/NCRC-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%96%B0%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-%E8%A8%88%E5%8A%83%E4%B8%89-1997-12-19",
       "effectiveDate": "1997-12-19",
-      "versionCount": 1,
+      "versionCount": 2,
       "alternateProducts": []
     },
     {
@@ -41578,9 +42086,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/PCC5-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%BA%A2%E8%B5%B7%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2025-07-01",
-      "effectiveDate": "2025-07-01",
-      "versionCount": 2,
+      "sourceUrl": "https://finfo.tw/products/PCC5-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%BA%A2%E8%B5%B7%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-10-23",
+      "effectiveDate": "2026-10-23",
+      "versionCount": 3,
       "alternateProducts": []
     },
     {
@@ -45338,21 +45846,6 @@
       ]
     },
     {
-      "code": "RDPLN6",
-      "name": "富貴世代終身壽險定期給付型",
-      "insurer": "保誠人壽",
-      "category": "life",
-      "endAgeKnown": false,
-      "premiumMode": "level",
-      "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
-      "rateStatus": "index-only",
-      "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/RDPLN6-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E8%B2%B4%E4%B8%96%E4%BB%A3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
-      "effectiveDate": "2025-01-01",
-      "versionCount": 1,
-      "alternateProducts": []
-    },
-    {
       "code": "RE",
       "name": "鑫安久久意外還本終身保險",
       "insurer": "元大人壽",
@@ -45914,9 +46407,9 @@
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/RLPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01",
-      "effectiveDate": "2025-01-01",
-      "versionCount": 2,
+      "sourceUrl": "https://finfo.tw/products/RLPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2024-01-08",
+      "effectiveDate": "2024-01-08",
+      "versionCount": 1,
       "alternateProducts": []
     },
     {
@@ -46611,18 +47104,25 @@
     },
     {
       "code": "RWL",
-      "name": "祥榮兒童終身壽險",
-      "insurer": "三商美邦人壽",
+      "name": "金旺年年終身保險",
+      "insurer": "南山人壽",
       "category": "life",
       "endAgeKnown": false,
       "premiumMode": "level",
       "premiumChange": "已收錄商品代號與最新版；選取後會自動查詢保障年齡及公開費率。",
       "rateStatus": "index-only",
       "source": "finfo-index",
-      "sourceUrl": "https://finfo.tw/products/RWL-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%A5%A5%E6%A6%AE%E5%85%92%E7%AB%A5%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2006-01-01",
-      "effectiveDate": "2006-01-01",
-      "versionCount": 4,
-      "alternateProducts": []
+      "sourceUrl": "https://finfo.tw/products/RWL-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%87%91%E6%97%BA%E5%B9%B4%E5%B9%B4%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA-2015-08-04",
+      "effectiveDate": "2015-08-04",
+      "versionCount": 8,
+      "alternateProducts": [
+        {
+          "insurer": "三商美邦人壽",
+          "name": "祥榮兒童終身壽險",
+          "effectiveDate": "2006-01-01",
+          "sourceUrl": "https://finfo.tw/products/RWL-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%A5%A5%E6%A6%AE%E5%85%92%E7%AB%A5%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2006-01-01"
+        }
+      ]
     },
     {
       "code": "RX",
