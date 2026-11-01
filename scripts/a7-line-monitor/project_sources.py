@@ -139,7 +139,7 @@ def observe(card, content, now, config, agency_listing=False):
     completion = completion_month(data.get("預期完工", "")) or completion_month(data.get("交屋日期", ""))
     price = data.get("單價", "")
     if not re.search(r"\d", price):
-        price = "開價未公布"
+        price = "此來源未提供開價"
     project.update(category=category, reason=reason, price_text=price, completion=f"{completion[0]}-{completion[1]:02}" if completion else "",
                    observed_at=now.isoformat(), source_url=card["url"], phase_evidence=data.get("銷售狀態", "官方代銷清單刊登" if agency_listing else ""),
                    construction_evidence=data.get("建案型態") or data.get("建案類型", ""))

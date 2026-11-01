@@ -3558,6 +3558,9 @@ def generate_pdf_report(
         ),
     }
 
+    for style in styles.values():
+        style.wordWrap = "CJK"
+
     doc = SimpleDocTemplate(
         str(output_path),
         pagesize=A4,
@@ -3611,7 +3614,7 @@ def generate_pdf_report(
         Paragraph(f"{total_observable}<br/><font size='8' color='#65716C'>可觀察預售案</font>", styles["kpi_value"]),
         Paragraph(f"{total_active}<br/><font size='8' color='#65716C'>銷售中預售</font>", styles["kpi_value"]),
         Paragraph(f"{total_pending}<br/><font size='8' color='#65716C'>待開案預售</font>", styles["kpi_value"]),
-        Paragraph(f"{successful_areas}/{len(metrics)}<br/><font size='8' color='#65716C'>可統計區域（非完整覆蓋）</font>", styles["kpi_value"]),
+        Paragraph(f"{successful_areas}/{len(metrics)}<br/><font size='8' color='#65716C'>有資料範圍（含周邊待核對）</font>", styles["kpi_value"]),
     ]]
     kpi_table = Table(kpi_data, colWidths=[40 * mm] * 4, rowHeights=[20 * mm])
     kpi_table.setStyle(TableStyle([
