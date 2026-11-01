@@ -2,11 +2,34 @@
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import argparse
 import json
+import shutil
 import urllib.error
 import urllib.request
 
-from public_site import export_public_site
+from public_site import SITE_ASSETS, export_public_site
+
+
+def stage_weekly(report_dir, target):
+    report_dir, target = Path(report_dir), Path(target)
+    source = report_dir / "public-site"
+    data = json.loads((source / "market-data.json").read_text(encoding="utf-8"))
+    if data.get("schema_version") != 1 or not data.get("areas") or data.get("initializing"):
+        raise ValueError("Missing weekly public export")
+    stamp = datetime.fromisoformat(data["generated_at"])
+    if not stamp.tzinfo:
+        raise ValueError("Missing report timezone")
+    pdf = report_dir / f"a7-market-report-{stamp.astimezone(ZoneInfo('Asia/Taipei')).date()}.pdf"
+    with pdf.open("rb") as stream:
+        if stream.read(5) != b"%PDF-":
+            raise ValueError("Invalid weekly PDF")
+    target.mkdir(parents=True, exist_ok=False)
+    for filename in SITE_ASSETS:
+        shutil.copyfile(source / filename, target / filename)
+    shutil.copyfile(pdf, target / "a7-market-report-latest.pdf")
+    data["pdf_available"] = True
+    (target / "market-data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
 
 
 def main():
@@ -45,4 +68,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--weekly", nargs=2, metavar=("REPORT_DIR", "PUBLIC_DIR"))
+    args = parser.parse_args()
+    if args.weekly:
+        stage_weekly(*args.weekly)
+    else:
+        main()

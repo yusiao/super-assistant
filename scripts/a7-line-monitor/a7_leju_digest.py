@@ -4397,6 +4397,8 @@ def main() -> int:
         area_config,
     )
     report_path.write_text(report_content + "\n", encoding="utf-8")
+    from public_site import export_public_site
+    export_public_site(snapshots, local_now, report_path.parent / "public-site")
     if pdf_delivery_enabled:
         generate_pdf_report(
             report_content,

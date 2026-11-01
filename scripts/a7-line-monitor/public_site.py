@@ -6,6 +6,10 @@ import re
 import shutil
 from urllib.parse import urlsplit, urlunsplit
 
+SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js", "road-map.css",
+               "redevelopment-areas.js", "districts.geojson", "leaflet.js", "leaflet.css",
+               "leaflet-LICENSE.txt", "life-boundaries.geojson")
+
 
 def public_url(value):
     try:
@@ -66,7 +70,7 @@ def build_public_data(snapshots, generated_at):
 def export_public_site(snapshots, generated_at, target):
     target = Path(target)
     target.mkdir(parents=True, exist_ok=True)
-    for name in ["index.html", "style.css", "app.js", "robots.txt", "road-map.js", "road-map.css", "redevelopment-areas.js", "districts.geojson", "leaflet.js", "leaflet.css", "leaflet-LICENSE.txt", "life-boundaries.geojson"]:
+    for name in SITE_ASSETS:
         shutil.copyfile(Path(__file__).with_name("site") / name, target / name)
     destination = target / "market-data.json"
     temporary = destination.with_suffix(".tmp")
