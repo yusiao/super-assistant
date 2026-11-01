@@ -9,7 +9,18 @@ if (!saved || typeof saved !== "object") saved = {};
 const state = {data:null,view:"projects",category:"all",favorites:new Set(Array.isArray(saved.favorites)?saved.favorites:[]),error:""};
 function save(){try{localStorage.setItem(storageKey,JSON.stringify({city:$("city").value,district:$("district").value,area:$("area").value,favorites:[...state.favorites]}));}catch{/* Browsing still works without storage. */}}
 function el(tag,cls,txt){const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
-function link(url,title){try{const u=new URL(url);if(u.protocol!=="https:"||!["www.leju.com.tw","leju.com.tw"].includes(u.hostname))return el("span","", "建案連結未取得");}catch{return el("span","","建案連結未取得");}const a=el("a","",title);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a;}
+function projectLinkUrl(url){
+  try{
+    const u=new URL(url),p=u.pathname.replace(/\/$/,""),h=u.hostname;
+    if(u.protocol!=="https:"||u.username||u.password||(u.port&&u.port!=="443"))return "";
+    const valid=(["www.leju.com.tw","leju.com.tw"].includes(h)&&/^\/community\/[A-Za-z0-9]+$/.test(p))||
+      (h==="newhouse.housefun.com.tw"&&/^\/building\/\d+(\/detail)?$/.test(p))||
+      (h==="www.jsl.com.tw"&&/^\/cases\/[A-Za-z0-9_-]+(\/architecture)?$/.test(p))||
+      (/^(?!www\.)[a-z0-9-]+\.jsl\.com\.tw$/.test(h)&&!p);
+    if(!valid)return "";u.search="";u.hash="";return u.href;
+  }catch{return "";}
+}
+function link(url,title){const safe=projectLinkUrl(url);if(!safe)return el("span","","建案連結未取得");const a=el("a","",title);a.href=safe;a.target="_blank";a.rel="noopener noreferrer";return a;}
 function options(select,values,placeholder,preferred){select.replaceChildren();const first=el("option","",placeholder);first.value="";select.append(first);for(const [value,title] of values){const o=el("option","",title);o.value=value;select.append(o);}select.value=values.some(v=>v[0]===preferred)?preferred:"";}
 function syncRegions(preferredDistrict="",preferredArea=""){
   const areas=(state.data?.areas||[]).filter(a=>a.city===$("city").value);
@@ -25,7 +36,13 @@ function selectedAreas(){return(state.data?.areas||[]).filter(a=>a.city===$("cit
 function projectList(areas){const unique=new Map();for(const area of areas){if(area.availability==="unavailable")continue;for(const p of area.projects||[]){if(!unique.has(p.id))unique.set(p.id,{...p,areaNames:[area.name]});else unique.get(p.id).areaNames.push(area.name);}}return[...unique.values()];}
 function empty(title,body){const box=el("div","empty");box.append(el("span","empty-icon","◎"),el("h3","",title),el("p","",body));return box;}
 function statusRows(areas){const box=el("div","availability");for(const area of areas){const row=el("div","availability-row");row.append(el("span","",area.name.replace("A7站重劃區-","")),el("span","",availability[area.availability]||"狀態未確認"));box.append(row);}return box;}
-function projectCard(p){const card=el("article","card");const top=el("div","card-top");const star=el("button","star",state.favorites.has(p.id)?"★":"☆");star.type="button";star.setAttribute("aria-label",`${state.favorites.has(p.id)?"取消關注":"關注"}${p.name}`);star.setAttribute("aria-pressed",String(state.favorites.has(p.id)));star.addEventListener("click",()=>{if(state.favorites.has(p.id))state.favorites.delete(p.id);else state.favorites.add(p.id);save();render();});top.append(el("span",`badge ${p.category}`,labels[p.category]||"階段待確認"),star);const bottom=el("div","card-bottom");bottom.append(link(p.url,"查看建案 ↗"),el("span","","樂居 · 來源標示"));card.append(top,el("h3","",p.name),el("div","location",p.areaNames.map(a=>a.replace("A7站重劃區-","")).join(" / ")),el("p","status",p.status||"價格／階段未取得"),bottom);return card;}
+function projectCard(p){const card=el("article","card");const top=el("div","card-top");const star=el("button","star",state.favorites.has(p.id)?"★":"☆");star.type="button";star.setAttribute("aria-label",`${state.favorites.has(p.id)?"取消關注":"關注"}${p.name}`);star.setAttribute("aria-pressed",String(state.favorites.has(p.id)));star.addEventListener("click",()=>{if(state.favorites.has(p.id))state.favorites.delete(p.id);else state.favorites.add(p.id);save();render();});top.append(el("span",`badge ${p.category}`,labels[p.category]||"階段待確認"),star);const bottom=el("div","card-bottom");bottom.append(link(p.url,"查看建案 ↗"),el("span","",p.source||"來源未標示"));card.append(top,el("h3","",p.name),el("div","location",p.areaNames.map(a=>a.replace("A7站重劃區-","")).join(" / ")),el("p","status",p.status||"價格／階段未取得"));
+  if(p.address)card.append(el("p","location",`基地：${p.address}`));
+  if(p.observed_at)card.append(el("p","location",`本次讀取：${p.observed_at.slice(0,10)}，非來源更新日期`));
+  card.append(bottom);
+  for(const s of p.sources||[])if(s.url!==p.url)card.append(link(s.url,`交叉來源：${s.name} ↗`));
+  return card;
+}
 function render(){
   if(typeof RegionMap!=="undefined")RegionMap.render($("city").value,$("district").value,state.data?.areas||[],$("area").value);
   const areas=selectedAreas(), projects=projectList(areas), usable=areas.some(a=>a.availability!=="unavailable");

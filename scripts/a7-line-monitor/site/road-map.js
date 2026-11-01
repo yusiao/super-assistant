@@ -131,7 +131,7 @@ const RegionMap = (() => {
     const projects=new Map();for(const a of chosen){if(a.availability==='unavailable')continue;for(const p of a.projects||[])if(['pending','active'].includes(p.category)&&!projects.has(p.id))projects.set(p.id,p);}
     for(const p of projects.values()){
       const card=document.createElement('article');card.append(text('strong',p.name),text('p',(p.category==='pending'?'未開賣預售':'銷售中預售')+(p.status?' · '+p.status:'')));
-      try{const u=new URL(p.url);if(u.protocol==='https:'&&['www.leju.com.tw','leju.com.tw'].includes(u.hostname)&&!u.username&&!u.password&&/^\/community\/[A-Za-z0-9]+\/?$/.test(u.pathname)){const a=text('a','查看建案');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}}catch{/* Invalid links stay hidden. */}cards.append(card);
+      if(typeof projectLinkUrl==='function'){const safe=projectLinkUrl(p.url);if(safe){const a=text('a','查看建案');a.href=safe;a.target='_blank';a.rel='noopener noreferrer';card.append(a);}}cards.append(card);
     }
     if(!projects.size&&chosen.length)cards.append(text('p','本次沒有可展示的預售資料，不代表零供給；不以舊建案補數。'));
   }
