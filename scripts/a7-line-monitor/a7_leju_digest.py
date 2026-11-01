@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 import urllib.parse
@@ -20,6 +21,10 @@ from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
 from zoneinfo import ZoneInfo
+from fetch_policy import FetchBlocked, FetchPolicy, challenge_page, check_response
+
+
+FETCH_POLICY = FetchPolicy()
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -199,12 +204,7 @@ def html_to_text(content: str) -> str:
 
 
 def is_cloudflare_challenge(content: str) -> bool:
-    lower = content.lower()
-    return (
-        ("just a moment" in lower and "challenges.cloudflare.com" in lower)
-        or "cf-chl" in lower
-        or "cf_clearance" in lower
-    )
+    return challenge_page(content)
 
 
 def fetch_text_with_curl_cffi(url: str) -> str:
@@ -228,77 +228,52 @@ def fetch_text_with_curl_cffi(url: str) -> str:
         timeout=10,
     )
     text = response.text or ""
-    if response.status_code >= 400:
-        raise RuntimeError(f"HTTP {response.status_code} for {url}")
+    check_response(response.status_code, response.headers, text)
     if not text.strip():
         raise RuntimeError(f"empty response for {url}")
-    if is_cloudflare_challenge(text):
-        raise RuntimeError(f"Cloudflare challenge blocked {url}")
     return text
 
 
 def fetch_text_with_curl(url: str) -> str:
-    attempts = [
-        [
-            "-A",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-            "-H",
-            "Accept-Language: zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "-H",
-            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-            "-H",
-            "Referer: https://www.leju.com.tw/",
-            "-H",
-            "Cache-Control: no-cache",
-        ],
-        [
-            "-A",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
-            "-H",
-            "Accept-Language: zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            "-H",
-            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "-H",
-            "Referer: https://www.leju.com.tw/",
-        ],
-    ]
-    errors: list[str] = []
+    body = fetch_curl_response(url, 12)
+    text = body.decode("utf-8", errors="replace")
+    if not text.strip():
+        raise RuntimeError("empty response")
+    return text
+
+
+def fetch_curl_response(url: str, timeout: int) -> bytes:
     curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
-    for extra_args in attempts:
+    with tempfile.TemporaryDirectory(prefix="market-fetch-") as tmp:
+        headers_path, body_path = Path(tmp) / "headers", Path(tmp) / "body"
         result = subprocess.run(
-            [
-                curl_bin,
-                "-L",
-                "-sS",
-                "--compressed",
-                "--http1.1",
-                "--connect-timeout",
-                "5",
-                "--max-time",
-                "12",
-                *extra_args,
-                url,
-            ],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="ignore",
-            timeout=15,
-            check=False,
+            [curl_bin, "-L", "-sS", "--compressed", "--http1.1",
+             "--connect-timeout", "5", "--max-time", str(timeout),
+             "--max-redirs", "5", "--dump-header", str(headers_path),
+             "--output", str(body_path), "--write-out", "%{http_code}",
+             "-A", "Mozilla/5.0", "-H", "Accept-Language: zh-TW,zh;q=0.9", url],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=timeout + 3, check=False,
         )
-        if result.returncode != 0 or not result.stdout.strip():
-            errors.append(result.stderr.strip() or str(result.returncode))
-            continue
-        if is_cloudflare_challenge(result.stdout):
-            errors.append("Cloudflare challenge")
-            continue
-        return result.stdout
-    raise RuntimeError(f"curl fetch failed for {url}: {'; '.join(errors[-2:])}")
+        if result.returncode != 0:
+            raise RuntimeError(f"curl transport failure {result.returncode}")
+        headers = {}
+        for line in headers_path.read_text(encoding="iso-8859-1").splitlines():
+            if line.upper().startswith("HTTP/"):
+                headers = {}
+            elif ":" in line:
+                key, value = line.split(":", 1)
+                headers[key.strip()] = value.strip()
+        body = body_path.read_bytes()
+        check_response(int(result.stdout.strip()), headers, body[:65536].decode("utf-8", errors="ignore"))
+        if not body:
+            raise RuntimeError("empty response")
+        return body
 
 
 def fetch_text_with_proxy(url: str) -> str:
     proxy_url = os.environ.get("LEJU_FETCH_PROXY_URL", "").strip()
-    if not proxy_url or "leju.com.tw" not in url:
+    if not proxy_url or urllib.parse.urlsplit(url).hostname not in {"www.leju.com.tw", "leju.com.tw"}:
         raise RuntimeError("Leju fetch proxy not configured")
 
     encoded_target = urllib.parse.quote(url, safe="")
@@ -322,17 +297,38 @@ def fetch_text_with_proxy(url: str) -> str:
         headers["Authorization"] = f"Bearer {token}"
 
     request = urllib.request.Request(request_url, headers=headers)
-    with urllib.request.urlopen(request, timeout=12) as response:
-        raw = response.read()
-        content_type = response.headers.get("Content-Type", "")
+    try:
+        with urllib.request.urlopen(request, timeout=12) as response:
+            raw = response.read()
+            content_type = response.headers.get("Content-Type", "")
+            status, response_headers = response.status, response.headers
+    except urllib.error.HTTPError as error:
+        raw = error.read(65536)
+        status, response_headers = error.code, error.headers
+        content_type = error.headers.get("Content-Type", "")
     text = raw.decode("utf-8", errors="ignore")
     if "application/json" in content_type:
-        data = json.loads(text)
+        try:
+            data = json.loads(text)
+        except ValueError:
+            check_response(status, response_headers, text)
+            raise RuntimeError("invalid proxy JSON")
+        if not isinstance(data, dict):
+            raise RuntimeError("invalid proxy JSON schema")
+        if data.get("error") == "Leju returned Cloudflare challenge":
+            raise FetchBlocked("Cloudflare challenge")
         text = str(data.get("html") or data.get("content") or data.get("body") or "")
+        upstream = data.get("status")
+        if isinstance(upstream, int) and 100 <= upstream <= 599:
+            upstream_headers = dict(response_headers)
+            if data.get("retry_after") is not None:
+                upstream_headers["Retry-After"] = str(data["retry_after"])
+            check_response(upstream, upstream_headers, text)
+    check_response(status, response_headers, text)
     if not text.strip():
         raise RuntimeError(f"empty proxy response for {url}")
     if is_cloudflare_challenge(text):
-        raise RuntimeError(f"Cloudflare challenge returned by proxy for {url}")
+        raise FetchBlocked("Cloudflare challenge")
     return text
 
 
@@ -346,9 +342,7 @@ def fetch_text_with_playwright(url: str) -> str:
         browser = playwright.chromium.launch(
             headless=True,
             args=[
-                "--disable-blink-features=AutomationControlled",
                 "--disable-dev-shm-usage",
-                "--no-sandbox",
             ],
         )
         try:
@@ -368,61 +362,25 @@ def fetch_text_with_playwright(url: str) -> str:
             )
             page = context.new_page()
             response = page.goto(url, wait_until="domcontentloaded", timeout=15000)
-            page.wait_for_timeout(1500)
             content = page.content()
             status = response.status if response else 0
-            if status >= 400 and not content.strip():
-                raise RuntimeError(f"HTTP {status} for {url}")
+            check_response(status, response.headers if response else {}, content)
             if not content.strip():
                 raise RuntimeError(f"empty browser response for {url}")
-            if is_cloudflare_challenge(content):
-                page.wait_for_timeout(3000)
-                content = page.content()
-                if is_cloudflare_challenge(content):
-                    raise RuntimeError(f"Cloudflare challenge blocked browser fetch for {url}")
             return content
         finally:
             browser.close()
 
 
 def fetch_text(url: str) -> str:
-    errors: list[str] = []
-    for fetcher in (fetch_text_with_proxy, fetch_text_with_curl_cffi, fetch_text_with_curl, fetch_text_with_playwright):
-        try:
-            return fetcher(url)
-        except Exception as exc:
-            errors.append(str(exc))
-    raise RuntimeError(f"fetch failed for {url}: {'; '.join(errors)}")
+    fetchers = [fetch_text_with_curl_cffi, fetch_text_with_curl, fetch_text_with_playwright]
+    if os.environ.get("LEJU_FETCH_PROXY_URL") and urllib.parse.urlsplit(url).hostname in {"www.leju.com.tw", "leju.com.tw"}:
+        fetchers.insert(0, fetch_text_with_proxy)
+    return FETCH_POLICY.fetch(url, fetchers)
 
 
 def fetch_bytes(url: str) -> bytes:
-    curl_bin = shutil.which("curl") or shutil.which("curl.exe") or "curl"
-    result = subprocess.run(
-        [
-            curl_bin,
-            "-L",
-            "-sS",
-            "--connect-timeout",
-            "10",
-            "--max-time",
-            "25",
-            "-A",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-            "-H",
-            "Accept-Language: zh-TW,zh;q=0.9,en;q=0.8",
-            url,
-        ],
-        capture_output=True,
-        timeout=30,
-        check=False,
-    )
-    if result.returncode != 0 or not result.stdout:
-        stderr = result.stderr.decode("utf-8", errors="ignore") if result.stderr else ""
-        error_text = re.sub(r"\s+", " ", stderr).strip()
-        if "Failed to connect" in error_text or result.returncode == 28:
-            error_text = "連線逾時或無法連到官方資料站"
-        raise RuntimeError(error_text or f"下載失敗，代碼 {result.returncode}")
-    return result.stdout
+    return FETCH_POLICY.fetch(url, [lambda target: fetch_curl_response(target, 25)])
 
 
 def get_regex_value(content: str, pattern: str, default: str = "") -> str:
@@ -1193,6 +1151,8 @@ def comparison_confidence(item: dict[str, Any]) -> str:
 
 def readable_fetch_issue(error: Any) -> str:
     text = str(error).lower()
+    if "429" in text:
+        return "來源限制請求頻率，本輪已停止重試"
     if "unavailable" in text or "no module named" in text or "executable doesn't exist" in text:
         return "執行環境缺少必要套件或瀏覽器"
     if "cloudflare" in text or "403" in text:
@@ -4274,6 +4234,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    global FETCH_POLICY
     args = build_parser().parse_args()
     file_config = read_env_file(Path(args.config_path))
     if args.send_prepared_line:
@@ -4286,6 +4247,7 @@ def main() -> int:
             os.environ[env_key] = file_config[env_key]
     task_id = get_config_value(file_config, "TASK_ID", "a7-leju-digest")
     report_root = resolve_workspace_path(get_config_value(file_config, "REPORT_ROOT", "vault/2-actions/scheduled-reports/a7-leju"))
+    FETCH_POLICY = FetchPolicy(report_root / "fetch-policy.json")
     state_path = resolve_workspace_path(get_config_value(file_config, "STATE_PATH", str(report_root / "state.json")))
     ledger_path = resolve_workspace_path(get_config_value(file_config, "SYNC_LEDGER_PATH", "system/skills/local-scheduler/config/sync-ledger.json"))
     timezone_raw = get_config_value(file_config, "TIME_ZONE", "Asia/Taipei")
@@ -4439,6 +4401,7 @@ def main() -> int:
         urgent_pending_projects,
         area_config,
     )
+    print("Fetch policy diagnostics: " + json.dumps(FETCH_POLICY.diagnostics(), ensure_ascii=False))
     report_path.write_text(report_content + "\n", encoding="utf-8")
     from public_site import export_public_site
     export_public_site(snapshots, local_now, report_path.parent / "public-site")

@@ -94,3 +94,26 @@ from current project observations, not just configured aliases. Fresh official
 transactions may display independently of failed Leju listings. Record dates
 are transaction dates, NOT publication dates or same-day sale detection.
 
+## Rate Limit Handling (2026-11-01)
+
+fetch_policy.py serializes requests per host and spaces Leju attempts by
+2 seconds. HTTP 401/403/429, Cloudflare challenge responses, and error
+responses with Retry-After stop all further same-host requests for this run,
+including alternate clients and proxies. Successful responses may be reused
+only in memory during the same run; no historical listing data is restored.
+
+Retry-After supports both delay-seconds and HTTP dates. Without it, cooldowns
+default to 15 minutes for 429 and one hour for access denial/challenges.
+No long sleep/retry loop: the remaining run continues with independent sources.
+The next normal execution may retry after cooldown; expiry does NOT create a
+new scheduled execution or promise that the source has unblocked access.
+fetch-policy.json stores only host, reason and deadline, is persisted in
+GitHub's separate cooldown cache, and is excluded from Pages. The existing
+delivery-state cache paths stay unchanged. --force does not bypass cooldowns.
+The Leju proxy may wrap upstream errors in HTTP502 JSON; the client checks
+the inner status too. No proxy service is required or automatically enabled.
+
+Run python -m unittest discover -s scripts/a7-line-monitor -p "test_*.py".
+These tests simulate rate limits without making network requests or sending
+LINE. Fixing retry behavior does not guarantee permission to read Leju.
+
