@@ -30,7 +30,8 @@ def text(value):
 def build_public_data(snapshots, generated_at):
     areas = []
     buckets = [("pending_launch_projects", "pending"), ("active_presale_projects", "active"),
-               ("sold_out_presale_projects", "sold_out"), ("completed_projects", "completed")]
+               ("sold_out_presale_projects", "sold_out"), ("completed_projects", "completed"),
+               ("status_unconfirmed_projects", "status_unknown")]
     for index, area in enumerate(snapshots):
         stale = bool(area.get("stale"))
         partial = stale or bool(area.get("summary_parse_warning")) or any(v for k, v in area.items() if k.endswith("fetch_error"))
@@ -48,20 +49,27 @@ def build_public_data(snapshots, generated_at):
                         continue
                     seen.add(url)
                     projects.append({"id": url.rsplit("/", 1)[-1], "name": name, "url": url, "category": category, "status": status})
-            transaction_keys = set()
-            for key in ["latest_presale_registrations", "latest_new_completion_registrations"]:
-                for row in area.get(key, []):
-                    safe = {field: text(row.get(field)) for field in ["project_name", "unit", "floor", "area", "parking_price", "total_price", "unit_price", "deal_date"]}
-                    safe["url"] = public_url(row.get("url"))
-                    identity = json.dumps(safe, sort_keys=True)
-                    if identity in transaction_keys:
-                        continue
-                    transaction_keys.add(identity)
-                    transactions.append(safe)
+        transaction_keys = set()
+        keys = ["official_rows_this_run"] if stale else ["latest_presale_registrations", "latest_new_completion_registrations"]
+        for key in keys:
+            for row in area.get(key, []):
+                safe = {field: text(row.get(field)) for field in ["project_name", "unit", "floor", "layout", "area", "parking", "parking_price", "total_price", "unit_price", "deal_date", "source"]}
+                safe["url"] = public_url(row.get("url"))
+                identity = json.dumps(safe, sort_keys=True)
+                if not safe["url"] or not safe["project_name"] or identity in transaction_keys:
+                    continue
+                transaction_keys.add(identity)
+                transactions.append(safe)
+        transactions.sort(key=lambda t: t["deal_date"], reverse=True)
+        traded_urls = {t["url"] for t in transactions if t["source"] == "內政部實價登錄"}
+        for project in projects:
+            if project["category"] == "pending" and project["url"] in traded_urls:
+                project.update(category="status_unknown", status="已有官方預售成交，目前是否仍銷售待確認")
         areas.append({"id": f"area-{index}", "name": text(area.get("name")),
                       "city": text(area.get("city_name") or "桃園市"), "district": text(area.get("district_name") or "龜山區"),
                       "theme": text(area.get("theme")), "roads": [text(v) for v in area.get("road_focus", [])],
                       "availability": "unavailable" if stale else "partial" if partial else "observed",
+                      "transaction_source": "unavailable" if area.get("official_presale_fetch_error") else area.get("official_status", "unknown"),
                       "projects": projects, "transactions": transactions})
     return {"schema_version": 1, "generated_at": generated_at.isoformat(), "areas": areas,
             "scope_note": "目前接入 A7 五個子區；建案與成交僅代表本次可取得內容，不是全市場完整清單。"}

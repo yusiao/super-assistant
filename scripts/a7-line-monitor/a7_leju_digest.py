@@ -627,7 +627,7 @@ def get_configured_project_links(area: dict[str, Any], key: str) -> list[dict[st
     return projects
 
 
-def get_project_url_mappings(areas: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def get_project_url_mappings(areas: list[dict[str, Any]], snapshots=()) -> list[dict[str, Any]]:
     mappings: list[dict[str, Any]] = []
     for area in areas:
         for item in area.get("project_url_mappings", []):
@@ -639,6 +639,14 @@ def get_project_url_mappings(areas: list[dict[str, Any]]) -> list[dict[str, Any]
                 continue
             aliases = [str(alias).strip() for alias in item.get("aliases", []) if str(alias).strip()]
             mappings.append({"name": name, "url": url, "aliases": aliases, "area_name": area.get("name", "")})
+    for area in snapshots:
+        if area.get("stale"):
+            continue
+        for key in ("active_presale_projects", "pending_launch_projects", "sold_out_presale_projects"):
+            for project in area.get(key, []):
+                name, url = project.get("name", ""), project.get("url", "")
+                if name and url:
+                    mappings.append({"name": name, "url": url, "aliases": name.split("/"), "area_name": area["name"]})
     return mappings
 
 
@@ -652,17 +660,16 @@ def decode_csv_bytes(data: bytes) -> str:
 
 
 def iter_csv_rows_from_archive(data: bytes) -> list[dict[str, str]]:
-    rows: list[dict[str, str]] = []
     if data[:2] == b"PK":
         with ZipFile(io.BytesIO(data)) as archive:
-            for name in archive.namelist():
-                if not name.lower().endswith(".csv"):
-                    continue
-                content = decode_csv_bytes(archive.read(name))
-                rows.extend(csv.DictReader(io.StringIO(content)))
-        return rows
-    content = decode_csv_bytes(data)
-    return list(csv.DictReader(io.StringIO(content)))
+            files = [n for n in archive.namelist() if n.split("/")[-1].lower() == "h_lvr_land_b.csv"]
+            if len(files) != 1:
+                raise ValueError("Official download is missing the Taoyuan presale table")
+            data = archive.read(files[0])
+    reader = csv.DictReader(io.StringIO(decode_csv_bytes(data)))
+    if not {"鄉鎮市區", "建案名稱", "交易年月日", "棟及號", "總價元"} <= set(reader.fieldnames or []):
+        raise ValueError("Unrecognized official presale table")
+    return [row for row in reader if row["鄉鎮市區"].strip() == "龜山區" and not row.get("解約情形","").strip()]
 
 
 def get_first_field(row: dict[str, str], names: list[str]) -> str:
@@ -676,8 +683,8 @@ def get_first_field(row: dict[str, str], names: list[str]) -> str:
 
 def get_int_field(row: dict[str, str], names: list[str]) -> int | None:
     value = get_first_field(row, names)
-    digits = re.sub(r"[^\d]", "", value)
-    return int(digits) if digits else None
+    number = value.replace(",", "")
+    return round(float(number)) if re.fullmatch(r"\d+(?:\.\d+)?", number) else None
 
 
 def square_meter_to_ping(value: str) -> str:
@@ -707,19 +714,30 @@ def row_text_for_match(row: dict[str, str]) -> str:
 
 
 def match_project_mapping(row: dict[str, str], mappings: list[dict[str, Any]]) -> dict[str, Any] | None:
-    text = row_text_for_match(row)
+    clean = lambda s: re.sub(r"\s+", "", s).casefold()
+    name = clean(row.get("建案名稱") or "")
+    hits = {}
     for mapping in mappings:
         candidates = [mapping["name"], *mapping.get("aliases", [])]
-        if any(candidate and candidate in text for candidate in candidates):
-            return mapping
-    return None
+        if any(name and name == clean(candidate) for candidate in candidates):
+            hits[(mapping.get("area_name"), mapping["url"].split("?")[0])] = mapping
+    return next(iter(hits.values())) if len(hits) == 1 else None
 
 
 def parse_official_presale_row(row: dict[str, str], mapping: dict[str, Any]) -> dict[str, str]:
-    unit = get_first_field(row, ["棟及號", "棟戶", "交易標的", "土地位置建物門牌", "建物門牌"])
+    unit = get_first_field(row, ["棟及號", "棟戶"])
     floor = get_first_field(row, ["移轉層次", "樓層"])
     building_area = square_meter_to_ping(get_first_field(row, ["建物移轉總面積平方公尺", "建物移轉面積平方公尺", "房屋移轉總面積平方公尺"]))
-    parking_price = money_to_wan(get_int_field(row, ["車位總價元", "車位總價"]))
+    gross = get_first_field(row, ["建物移轉總面積平方公尺"])
+    park_area = get_first_field(row, ["車位移轉總面積平方公尺"])
+    park_type = get_first_field(row, ["車位類別"])
+    has_park = bool(park_type or re.search(r"車位[1-9]", row.get("交易筆棟數", "")))
+    if has_park and gross and park_area and float(park_area) > 0:
+        building_area = square_meter_to_ping(str(float(gross) - float(park_area))) + "（不含車位）"
+    elif has_park and building_area:
+        building_area += "（含車位，無法拆算）"
+    raw_parking = get_int_field(row, ["車位總價元", "車位總價"])
+    parking_price = money_to_wan(raw_parking) if raw_parking else ("未拆列" if has_park else "無車位" if "車位0" in row.get("交易筆棟數","") else "")
     total_price = money_to_wan(get_int_field(row, ["總價元", "交易總價元", "總價"]))
     unit_price = unit_price_to_wan_per_ping(get_int_field(row, ["單價元平方公尺", "單價元/平方公尺"]))
     if not unit_price:
@@ -734,15 +752,26 @@ def parse_official_presale_row(row: dict[str, str], mapping: dict[str, Any]) -> 
         "total_price": total_price or "總價未解析",
         "unit_price": unit_price or "單價未解析",
         "deal_date": deal_date,
+        "parking": "含車位" if has_park else "不含車位" if "車位0" in row.get("交易筆棟數","") else "未揭露",
+        "layout": "".join(f"{row['建物現況格局-'+k]}{k}" for k in ("房","廳","衛") if row.get("建物現況格局-"+k)),
         "url": mapping["url"],
         "source": "內政部實價登錄",
     }
 
 
-def get_official_presale_registrations(source_url: str, mappings: list[dict[str, Any]], limit: int = 50) -> list[dict[str, str]]:
+def get_official_presale_registrations(source_url: str, mappings: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, str]]:
     if not source_url or not mappings:
         return []
-    rows = iter_csv_rows_from_archive(fetch_bytes(source_url))
+    legacy = "https://data.moi.gov.tw/MoiOD/System/DownloadFile.aspx?DATA=402BE9A1-6B0B-470B-806A-F9BFB15A8749"
+    direct = "https://plvr.land.moi.gov.tw/Download?type=zip&fileName=lvr_landcsv.zip"
+    sources = [direct, legacy] if source_url in (direct, legacy) else [source_url]
+    for i, url in enumerate(sources):
+        try:
+            rows = iter_csv_rows_from_archive(fetch_bytes(url))
+            break
+        except Exception:
+            if i + 1 == len(sources):
+                raise
     registrations: list[dict[str, str]] = []
     seen: set[str] = set()
     for row in rows:
@@ -755,9 +784,7 @@ def get_official_presale_registrations(source_url: str, mappings: list[dict[str,
             continue
         seen.add(key)
         registrations.append(item)
-        if len(registrations) >= limit:
-            break
-    return registrations
+    return sorted(registrations, key=lambda row: row["deal_date"], reverse=True)[:limit]
 
 
 def get_extra_project_links(area: dict[str, Any]) -> list[dict[str, str]]:
@@ -1410,7 +1437,8 @@ def format_registration_line(item: dict[str, str]) -> list[str]:
             f"{item.get('project_name', '未命名建案')} "
             f"{item.get('unit', '戶別未解析')}；"
             f"樓層：{item.get('floor', '樓層未解析')}；"
-            f"房屋坪數：{item.get('area', '坪數未解析')}；"
+            f"戶型：{item.get('layout') or '未揭露'}；房屋坪數：{item.get('area', '坪數未解析')}；"
+            f"{item.get('parking') or '車位未揭露'}；"
             f"車位價：{item.get('parking_price', '車位價未解析')}；"
             f"總價：{item.get('total_price', '總價未解析')}；"
             f"成交單價：{item.get('unit_price', '單價未解析')}"
@@ -1468,9 +1496,19 @@ def attach_official_presale_registrations(
         if not area_name or area_name not in area_by_name:
             continue
         area = area_by_name[area_name]
+        area.setdefault("official_rows_this_run", []).append(item)
         existing = area.setdefault("latest_presale_registrations", [])
         if get_registration_key(item) not in {get_registration_key(row) for row in existing if isinstance(row, dict)}:
             existing.append(item)
+    for area in snapshots:
+        traded = {r["url"].split("?")[0] for r in area.get("official_rows_this_run", [])}
+        pending = area.get("pending_launch_projects", [])
+        conflicted = [p for p in pending if p.get("url", "").split("?")[0] in traded]
+        if conflicted:
+            area["pending_launch_projects"] = [p for p in pending if p not in conflicted]
+            area["status_unconfirmed_projects"] = [
+                {**p, "status": "已有官方預售成交，目前是否仍銷售待確認"} for p in conflicted
+            ]
 
 
 def format_price_compare_line(item: dict[str, str], label: str) -> list[str]:
@@ -4001,6 +4039,8 @@ def new_report_content(
                     "",
                 ]
             )
+            for item in get_new_registration_rows(area.get("official_rows_this_run", []), previous):
+                lines.extend(format_registration_line(item))
             continue
         lines.extend(
             [
@@ -4019,7 +4059,7 @@ def new_report_content(
         latest_presale_regs = get_new_registration_rows(
             area.get("latest_presale_registrations", []),
             previous,
-        )[:5]
+        )
         if latest_presale_regs:
             lines.append("### 新增登錄的預售屋成交")
             for item in latest_presale_regs:
@@ -4226,6 +4266,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--market-pulse-config-path", default="")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--force-generate", action="store_true")
+    parser.add_argument("--weekly-preview", action="store_true", help="Build a full weekly report without changing delivery eligibility")
     parser.add_argument("--skip-line", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--send-prepared-line", default="")
@@ -4340,12 +4381,14 @@ def main() -> int:
 
     if official_presale_enabled:
         try:
-            project_mappings = get_project_url_mappings(area_config)
+            project_mappings = get_project_url_mappings(area_config, snapshots)
             official_regs = get_official_presale_registrations(official_presale_url, project_mappings)
             attach_official_presale_registrations(snapshots, official_regs, project_mappings)
+            for area in snapshots:
+                area["official_status"] = "matched_scope" if any(m["area_name"] == area["name"] for m in project_mappings) else "unmapped"
         except Exception as exc:
-            if snapshots:
-                snapshots[0]["official_presale_fetch_error"] = str(exc)
+            for area in snapshots:
+                area["official_presale_fetch_error"] = str(exc)
 
     print_extraction_diagnostics(snapshots)
 
@@ -4370,7 +4413,7 @@ def main() -> int:
         or bool(urgent_pending_projects)
         or bool(urgent_bargain_items)
     )
-    if weekly_due:
+    if weekly_due or args.weekly_preview:
         report_kind = "週報"
     elif urgent_bargain_items:
         report_kind = "低價新案提醒"
@@ -4379,7 +4422,7 @@ def main() -> int:
 
     market_pulse = (
         get_market_pulse(load_market_pulse_config(market_pulse_config_path), local_now)
-        if weekly_due or args.force
+        if weekly_due or args.force or args.weekly_preview
         else {"enabled": False, "items": [], "errors": []}
     )
     line_bargain_watch = bargain_watch
