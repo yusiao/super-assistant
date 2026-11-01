@@ -46,13 +46,13 @@ function render(){
     box.append(el("p","","分類說明：預售屋指未完工建案；完銷與完工是不同狀態。已完工建案另列，未確認屋齡前不宣稱是五年內新成屋。"),el("p","","成交欄位未取得就留缺，不以開價代替成交價。實價登錄有揭露時間落差，並非即時銷售動態。"),el("p","","網站不提供修改 LINE 或排程的公開介面。星號關注只存在你的瀏覽器；清除瀏覽器資料後會消失。"));panel.append(box,statusRows(areas));return;
   }
   if(!areas.length){panel.append(empty("這個區域還沒接入", "第一版先提供 A7 五個子區。切回桃園市即可查看；你的選擇不會自動新增後端抓取或 LINE 通知。"));return;}
-  if(!usable){panel.append(empty("這次資料還不夠，不急著下結論", "來源未成功取得，本次不展示舊建案充數。請稍後重新讀取，或在下一次排程更新後查看。"),statusRows(areas));return;}
+  if(!usable && state.view!=="transactions"){panel.append(empty("這次資料還不夠，不急著下結論", "來源未成功取得，本次不展示舊建案充數。請稍後重新讀取，或在下一次排程更新後查看。"),statusRows(areas));return;}
   if(state.view==="transactions"){
     const unique=new Map();const favoriteNames=new Set(projects.filter(p=>state.favorites.has(p.id)).map(p=>p.name));
-    for(const area of areas){if(area.availability==="unavailable")continue;for(const t of area.transactions||[]){if(search&&!t.project_name.toLowerCase().includes(search))continue;if($("favorites").checked&&!favoriteNames.has(t.project_name))continue;unique.set(JSON.stringify(t),t);}}
-    const rows=[...unique.values()];$("result-note").textContent=`本次取得 ${rows.length} 筆紀錄；交易日不等於揭露日，不保證是當日新成交。`;
-    if(!rows.length){panel.append(empty("本次沒有可展示的成交紀錄","可能是來源未提供或篩選後沒有資料，不能推論市場沒有成交。"));return;}
-    for(const t of rows){const card=el("article","transaction");card.append(el("h3","",t.project_name));const dl=el("dl");for(const [key,title]of[["unit","棟別／戶別"],["floor","樓層"],["area","房屋面積"],["total_price","成交總價"],["unit_price","每坪單價"],["parking_price","車位價"],["deal_date","交易日期"]]){const cell=el("div");cell.append(el("dt","",title),el("dd","",t[key]||"未取得"));dl.append(cell);}card.append(dl,el("p","result-note","是否含車位：未經來源明示，不自行推算。"),link(t.url,"查看建案 ↗"));panel.append(card);}return;
+    for(const area of areas){for(const t of area.transactions||[]){if(search&&!t.project_name.toLowerCase().includes(search))continue;if($("favorites").checked&&!favoriteNames.has(t.project_name)&&!state.favorites.has((t.url||"").split("/").pop()))continue;unique.set(JSON.stringify(t),t);}}
+    const rows=[...unique.values()].sort((a,b)=>(b.deal_date||"").localeCompare(a.deal_date||""));$("result-note").textContent=`目前條件可顯示 ${rows.length} 筆；交易日不等於揭露日，不代表當日新成交。`;
+    if(!rows.length){panel.append(empty("本次沒有可展示的成交紀錄",areas.some(a=>a.transaction_source==="unavailable")?"部分官方來源未取得，不能判定有沒有新登錄。":"本期資料未能配對建案或不符合篩選，不代表區內沒有成交。"));return;}
+    for(const t of rows){const card=el("article","transaction");card.append(el("h3","",t.project_name));const dl=el("dl");for(const [key,title]of[["unit","棟別／戶別"],["floor","樓層"],["layout","格局"],["area","房屋面積"],["total_price","成交總價"],["unit_price","每坪單價"],["parking","是否含車位"],["parking_price","車位價"],["deal_date","交易日（民國年月日）"]]){const cell=el("div");cell.append(el("dt","",title),el("dd","",t[key]||"未取得"));dl.append(cell);}card.append(dl,el("p","result-note",t.source||"成交來源未標明"),link(t.url,"查看建案 ↗"));panel.append(card);}return;
   }
   const visible=projects.filter(p=>(state.category==="all"||p.category===state.category)&&(!search||p.name.toLowerCase().includes(search))&&(!$("favorites").checked||state.favorites.has(p.id)));
   $("result-note").textContent=`顯示 ${visible.length} 案 · ${scopeText}`;

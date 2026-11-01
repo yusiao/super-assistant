@@ -41,6 +41,29 @@ Validation: node scripts/a7-line-monitor/test_road_map.cjs
 
 All positionAccuracy fields remain approximate-navigation. checkedAt is
 the name/classification review date, not source publication date, current
-construction status, or precision geocoding verification. No polygons or
-live property feeds were added. Official subdistricts, commercial life
+construction status, or precision geocoding verification. Official subdistricts, commercial life
 areas, and development plans overlap and must not be summed as land area.
+
+## Official Polygon Layer (2026-11-01)
+
+The separate life-boundaries.geojson layer now contains 20 Taipei zone
+expropriation project polygons. These are NOT commercial life areas,
+current project launch footprints, or individual cadastral boundaries.
+Source: Taipei Department of Land Administration, dataset
+https://data.taipei/dataset/detail?id=1ab43adf-5f81-4601-84af-47a39f267b93
+(Government Data Open License, Taiwan 1.0).
+
+Rebuild with build_development_boundaries.py using the dataset's ZEPN.zip.
+Use ZEPN/ZEPN.shp (project boundaries), NOT ZEPN_1 (internal blocks).
+Decode UTF-8 attributes; transform the supplied PRJ to WGS84, preserving
+all rings. Reject invalid geometry. District filters are inferred from
+intersection with bundled administrative data; they do not alter polygons.
+Beitou-Shilin's north-side expropriation polygon is also navigable from
+Shilin; this does not claim the whole plan is that polygon.
+
+Wenzizun: first and second phase official plan pages are now directly
+accessible in the place panel. No verified vector coordinates obtained;
+do not substitute rectangular buffers or erase excluded settlements.
+Official pages:
+https://xintai.ntpc.gov.tw/home.jsp?id=0c69de209c17e5c4
+https://xintai.ntpc.gov.tw/home.jsp?id=ca11f6fbd52e6cd5
