@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      publish_only:
+        description: "Verify the weekly website and PDF without sending LINE"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -74,26 +79,20 @@ jobs:
       - name: Run A7 digest
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          python scripts/a7-line-monitor/test_notification_ux.py
+          python -m unittest discover -s scripts/a7-line-monitor -p "test_*.py"
           if ($LASTEXITCODE -ne 0) { throw "Notification regression tests failed." }
           if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.force_send }}" -eq "true") {
             python scripts/a7-line-monitor/a7_leju_digest.py --force --skip-line
           } else {
             python scripts/a7-line-monitor/a7_leju_digest.py --force-generate --skip-line
           }
+          if ($LASTEXITCODE -ne 0) { throw "Digest generation failed; previous public data will not be replaced." }
 
-      - name: Prepare PDF for GitHub Pages
+      - name: Stage verified website, market data and matching PDF
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          $pdf = Get-ChildItem "vault/2-actions/scheduled-reports/a7-leju" -Filter "a7-market-report-*.pdf" |
-            Sort-Object LastWriteTime -Descending |
-            Select-Object -First 1
-          if (-not $pdf) {
-            throw "No generated market report PDF was found."
-          }
-          $target = "output/bazi-ziwei/a7-reports"
-          New-Item -ItemType Directory -Force -Path $target | Out-Null
-          Copy-Item -LiteralPath $pdf.FullName -Destination "$target/a7-market-report-latest.pdf" -Force
+          python scripts/a7-line-monitor/publish_site.py --weekly "$env:REPORT_ROOT" "$env:RUNNER_TEMP/a7-pages-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          if ($LASTEXITCODE -ne 0) { throw "Public website export failed." }
 
       - name: Check prepared LINE notification
         id: notification
@@ -110,7 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: a7-pages-site
-          path: output/bazi-ziwei/a7-reports/
+          path: ${{ runner.temp }}/a7-pages-${{ github.run_id }}-${{ github.run_attempt }}/
           if-no-files-found: error
 
       - name: Upload prepared LINE notification
@@ -156,7 +155,7 @@ jobs:
 
   send-line:
     needs: [build-report, deploy-pages]
-    if: ${{ needs.build-report.outputs.notification_due == 'true' }}
+    if: ${{ needs.build-report.outputs.notification_due == 'true' && !inputs.publish_only }}
     # Same OS as build-report so its delivery ledger can be restored reliably.
     runs-on: [self-hosted, windows, a7-runner]
     env:
