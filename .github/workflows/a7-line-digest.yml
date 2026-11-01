@@ -68,6 +68,14 @@ jobs:
           restore-keys: |
             a7-leju-state-
 
+      - name: Restore source cooldowns separately from delivery state
+        uses: actions/cache@v4
+        with:
+          path: vault/2-actions/scheduled-reports/a7-leju/fetch-policy.json
+          key: a7-fetch-policy-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            a7-fetch-policy-
+
       - name: Prepare fast Python dependencies
         shell: powershell -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
