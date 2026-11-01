@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "max_details_per_source": 30,
+  "housefun_regions": [
+    {
+      "name": "好房網龜山區新建案",
+      "url": "https://newhouse.housefun.com.tw/region/%E6%A1%83%E5%9C%92%E5%B8%82-%E9%BE%9C%E5%B1%B1%E5%8D%80_c/",
+      "max_pages": 5
+    }
+  ],
+  "agency_indexes": [
+    {
+      "name": "愛山林官方代銷清單",
+      "url": "https://www.isanlin.com/selling"
+    }
+  ],
+  "scope_address_keywords": ["文桃路", "文青路", "文青二路", "樂善一路", "樂善二路", "樂善三路", "樂學路", "長慶一街", "長慶二街"]
+}

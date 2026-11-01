@@ -4,7 +4,8 @@ from pathlib import Path
 import json
 import re
 import shutil
-from urllib.parse import urlsplit, urlunsplit
+import hashlib
+from project_sources import project_url
 
 SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js", "road-map.css",
                "redevelopment-areas.js", "districts.geojson", "leaflet.js", "leaflet.css",
@@ -12,15 +13,7 @@ SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js",
 
 
 def public_url(value):
-    try:
-        parts = urlsplit(str(value or ""))
-        if parts.scheme != "https" or parts.hostname not in {"www.leju.com.tw", "leju.com.tw"} or parts.username or parts.password:
-            return ""
-        if not re.fullmatch(r"/community/[A-Za-z0-9]+/?", parts.path):
-            return ""
-        return urlunsplit(("https", "www.leju.com.tw", parts.path.rstrip("/"), "", ""))
-    except ValueError:
-        return ""
+    return project_url(value)
 
 
 def text(value):
@@ -48,7 +41,11 @@ def build_public_data(snapshots, generated_at):
                     if url in seen:
                         continue
                     seen.add(url)
-                    projects.append({"id": url.rsplit("/", 1)[-1], "name": name, "url": url, "category": category, "status": status})
+                    stable_id = text(item.get("id")) or url.rstrip('/').rsplit('/', 1)[-1] or hashlib.sha256(url.encode()).hexdigest()[:16]
+                    projects.append({"id": stable_id, "name": name, "url": url, "category": category, "status": status,
+                                     "source": text(item.get("source") or ("樂居" if "leju.com.tw/" in url else "來源未標示")),
+                                     "sources": [{"name": text(s.get("name")), "url": public_url(s.get("url"))} for s in item.get("sources", []) if public_url(s.get("url"))],
+                                     "address": text(item.get("address")), "observed_at": text(item.get("observed_at"))})
         transaction_keys = set()
         keys = ["official_rows_this_run"] if stale else ["latest_presale_registrations", "latest_new_completion_registrations"]
         for key in keys:
@@ -72,7 +69,7 @@ def build_public_data(snapshots, generated_at):
                       "transaction_source": "unavailable" if area.get("official_presale_fetch_error") else area.get("official_status", "unknown"),
                       "projects": projects, "transactions": transactions})
     return {"schema_version": 1, "generated_at": generated_at.isoformat(), "areas": areas,
-            "scope_note": "目前接入 A7 五個子區；建案與成交僅代表本次可取得內容，不是全市場完整清單。"}
+            "scope_note": "觀察 A7 五子區；無法確認子區的建案另列周邊待核對。多來源建案與成交僅代表本次可取得內容，不是全市場完整清單；讀取日期不等於資料更新日期。"}
 
 
 def export_public_site(snapshots, generated_at, target):

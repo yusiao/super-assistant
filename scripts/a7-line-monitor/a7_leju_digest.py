@@ -22,6 +22,7 @@ from typing import Any
 from zipfile import ZipFile
 from zoneinfo import ZoneInfo
 from fetch_policy import FetchBlocked, FetchPolicy, challenge_page, check_response
+from project_sources import attach_projects, collect_projects, identity as project_identity
 
 
 FETCH_POLICY = FetchPolicy()
@@ -604,6 +605,7 @@ def get_project_url_mappings(areas: list[dict[str, Any]], snapshots=()) -> list[
             for project in area.get(key, []):
                 name, url = project.get("name", ""), project.get("url", "")
                 if name and url:
+                    mappings = [m for m in mappings if not (m['area_name'] == area['name'] and project_identity(m['name']) == project_identity(name))]
                     mappings.append({"name": name, "url": url, "aliases": name.split("/"), "area_name": area["name"]})
     return mappings
 
@@ -1151,6 +1153,8 @@ def comparison_confidence(item: dict[str, Any]) -> str:
 
 def readable_fetch_issue(error: Any) -> str:
     text = str(error).lower()
+    if "authorization pending" in text:
+        return "其他來源未取得可核對建案；樂居自動讀取暫停，等待資料授權"
     if "429" in text:
         return "來源限制請求頻率，本輪已停止重試"
     if "unavailable" in text or "no module named" in text or "executable doesn't exist" in text:
@@ -1165,6 +1169,7 @@ def readable_fetch_issue(error: Any) -> str:
 
 
 def coverage_notice(areas: list[dict[str, Any]]) -> str:
+    areas = [area for area in areas if not area.get("supplemental_scope")]
     available = sum(not area.get("stale") for area in areas)
     incomplete = any(area.get("stale") or any(value for key, value in area.items() if key.endswith("fetch_error")) for area in areas)
     suffix = "；資料不完整，不能把未抓到當成零建案" if incomplete or not areas else "；僅代表本次可取得資料"
@@ -1386,9 +1391,15 @@ def update_ledger(
 
 
 def format_project_line(item: dict[str, str]) -> list[str]:
-    if item.get("status"):
-        return [f"- {item['name']} | {item['status']}", f"  {item['url']}"]
-    return [f"- {item['name']}", f"  {item['url']}"]
+    lines = [f"- {item['name']}" + (f" | {item['status']}" if item.get("status") else ""), f"  {item['url']}"]
+    if item.get("source"):
+        lines.append(f"  來源：{item['source']}；本次讀取：{item.get('observed_at', '')[:10]}")
+    if item.get("address"):
+        lines.append(f"  基地：{item['address']}")
+    for source in item.get("sources", []):
+        if source["url"] != item["url"]:
+            lines.append(f"  交叉來源：{source['name']} {source['url']}")
+    return lines
 
 
 def format_registration_line(item: dict[str, str]) -> list[str]:
@@ -1928,7 +1939,7 @@ def get_bargain_watch_results(config: dict[str, Any]) -> dict[str, Any]:
     items.extend(housefun_items)
     errors.extend(housefun_errors)
 
-    for area in config.get("areas", []):
+    for area in config.get("areas", []) if os.getenv("LEJU_SOURCE_ENABLED", "false").lower() in {"true", "1", "yes"} else []:
         area_name = str(area.get("name", "未命名區域"))
         try:
             if not area.get("price_url") and area.get("benchmark_price_per_ping") is None:
@@ -3093,8 +3104,10 @@ def get_project_price_rise_watch(areas: list[dict[str, Any]], state: dict[str, A
             if not name or name not in previous_projects:
                 continue
             prev = previous_projects[name]
-            prev_low, prev_high = parse_price_range(prev.get("status", ""))
-            cur_low, cur_high = parse_price_range(current.get("status", ""))
+            if current.get("source") != prev.get("source"):
+                continue
+            prev_low, prev_high = parse_price_range(prev.get("price_text", prev.get("status", "")))
+            cur_low, cur_high = parse_price_range(current.get("price_text", current.get("status", "")))
             if prev_high is None or cur_high is None:
                 continue
             if cur_high > prev_high or (cur_low is not None and prev_low is not None and cur_low > prev_low):
@@ -3172,16 +3185,16 @@ def build_macro_summary(
         )
 
     if presale_count > 0:
+        presale_total = sum(len(area.get("active_presale_projects", [])) for area in analysis_areas)
         lines.append(
-            f"- 預售案最密集的區塊是 {presale_focus_area['name']}，目前可觀察到 {presale_count} 個預售案，"
-            "最適合拿來連續盯價格帶是否有集體墊高。"
+            f"- 本次來源可核對 {presale_total} 個銷售中預售案（含另列的周邊待核對子區）；"
+            "各區來源覆蓋不一，不以刊登數推論供給最密集區、剩餘戶數或去化速度。"
         )
 
     if pending_total > 0 and pending_count > 0:
         lines.append(
-            f"- 目前全 A7 可看到待預售 / 未開賣新建案共 {pending_total} 案，"
-            f"其中 {pending_focus_area['name']} 最需要先盯，因為這區目前有 {pending_count} 案仍在待定階段，"
-            "後續一旦公開價格，通常最能反映市場對該區的信心。"
+            f"- 本次來源可核對未開賣預售共 {pending_total} 案，不是全 A7 待推案總量；"
+            "後續應核對首次開價、同產品成交與實際銷售狀態，不把未報價直接視為未開賣。"
         )
 
     if presale_count == 0 and pending_total == 0:
@@ -3227,8 +3240,8 @@ def build_macro_summary(
 
     if stale_count > 0:
         lines.append(
-            f"- 今天有 {stale_count} 個區塊因網站擋爬或資料不穩而抓取失敗，"
-            "本日結論只採用成功抓到的即時資料，不使用舊資料或設定清單補足。"
+            f"- 本次有 {stale_count} 個區塊未取得可核對的建案清單；"
+            "不代表零供給，也不以舊資料補足。刊登頁讀取成功不等於庫存已向建商確認。"
         )
 
     return lines
@@ -3891,9 +3904,9 @@ def new_report_content(
     area_config: list[dict[str, Any]] | None = None,
 ) -> str:
     lines = [
-        f"# A7 Leju {report_kind} | {local_now:%Y-%m-%d}",
+        f"# A7 房市 {report_kind} | {local_now:%Y-%m-%d}",
         "",
-        "- Sources: 樂居、好房網、官方實價登錄與設定的新聞來源（依本期可取得內容）",
+        "- Sources: 好房網、代銷官方建案頁、官方實價登錄與新聞來源（僅採本次可核對內容；非完整供給清單）",
         f"- Generated at: {local_now:%Y-%m-%d %H:%M:%S}",
         "",
     ]
@@ -4010,8 +4023,7 @@ def new_report_content(
                 f"- 銷售中預售屋：{format_project_count(area, 'active_presale_projects')}",
                 f"- 未開賣預售：{format_project_count(area, 'pending_launch_projects')}",
                 f"- 完銷 / 非銷售中預售：{format_project_count(area, 'sold_out_presale_projects')}",
-                f"- 買房頁：{area['buy_url']}",
-                f"- 房價頁：{area['price_url']}",
+                "- 以上是本次來源辨識數量，並非完整供給或剩餘戶數；0 個不代表市場沒有。",
                 "",
             ]
         )
@@ -4334,12 +4346,21 @@ def main() -> int:
     state = get_state_file(state_path)
     area_config = load_area_config(area_config_path)
     snapshots: list[dict[str, Any]] = []
+    leju_enabled = get_config_value(file_config, "LEJU_SOURCE_ENABLED", "false").strip().lower() in {"true", "1", "yes"}
+    os.environ["LEJU_SOURCE_ENABLED"] = str(leju_enabled).lower()
     for area in area_config:
         previous = get_previous_area(state, area["name"])
         try:
+            if not leju_enabled:
+                raise RuntimeError("Leju authorization pending; using independent public sources")
             snapshots.append(get_area_snapshot(area))
         except Exception as exc:
             snapshots.append(build_stale_snapshot(area, previous, exc))
+
+    collection = collect_projects(fetch_text, local_now)
+    attach_projects(snapshots, area_config, collection)
+    print("Project source diagnostics: " + json.dumps(collection["sources"], ensure_ascii=False))
+    print("Unverified project exclusions: " + json.dumps(collection["excluded"], ensure_ascii=False))
 
     if official_presale_enabled:
         try:
@@ -4411,7 +4432,7 @@ def main() -> int:
             pdf_path,
             local_now,
             report_kind,
-            [area["name"] for area in area_config],
+            [area["name"] for area in snapshots],
         )
 
     if pdf_delivery_enabled:
