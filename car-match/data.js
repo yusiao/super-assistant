@@ -3212,8 +3212,8 @@
     "brand": "Hyundai",
     "name": "Hyundai Kona Hybrid",
     "variant": "U-CAR new-car catalog",
-    "price": 99,
-    "priceLabel": "99-110 TWD 10k",
+    "price": 98.9,
+    "priceLabel": "98.9-109.9 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -3231,9 +3231,9 @@
     ],
     "tagline": "Kona Hybrid: synced from Taiwan new-car catalog.",
     "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7294.jpg",
-    "url": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7294/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7294/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7309.jpg",
+    "url": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7309/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/kona%20hybrid/7309/overall",
     "source": "ucar"
   },
   {
@@ -3322,34 +3322,6 @@
   },
   {
     "brand": "Hyundai",
-    "name": "Hyundai Staria",
-    "variant": "U-CAR new-car catalog",
-    "price": 159.8,
-    "priceLabel": "159.8-224.8 TWD 10k",
-    "body": "mpv",
-    "power": "gas",
-    "seats": 7,
-    "priorities": [
-      "space",
-      "comfort",
-      "value"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Staria: synced from Taiwan new-car catalog.",
-    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6859.jpg",
-    "url": "https://newcar.u-car.com.tw/hyundai/staria/6859/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/staria/6859/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Hyundai",
     "name": "Hyundai Ioniq 5",
     "variant": "U-CAR new-car catalog",
     "price": 159.9,
@@ -3378,10 +3350,38 @@
   },
   {
     "brand": "Hyundai",
+    "name": "Hyundai Staria",
+    "variant": "U-CAR new-car catalog",
+    "price": 164.8,
+    "priceLabel": "164.8-228.8 TWD 10k",
+    "body": "mpv",
+    "power": "hybrid",
+    "seats": 7,
+    "priorities": [
+      "space",
+      "comfort",
+      "value"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Staria: synced from Taiwan new-car catalog.",
+    "note": "一般級距MPV廂式休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7306.jpg",
+    "url": "https://newcar.u-car.com.tw/hyundai/staria/7306/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/staria/7306/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Hyundai",
     "name": "Hyundai Santa Fe",
     "variant": "U-CAR new-car catalog",
     "price": 172.9,
-    "priceLabel": "172.9-214.9 TWD 10k",
+    "priceLabel": "172.9-215.9 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -3399,9 +3399,9 @@
     ],
     "tagline": "Santa Fe: synced from Taiwan new-car catalog.",
     "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7181.jpg",
-    "url": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7181/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7181/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7308.jpg",
+    "url": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7308/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/hyundai/santa%20fe/7308/overall",
     "source": "ucar"
   },
   {
@@ -3969,7 +3969,7 @@
     "name": "Lamborghini Urus",
     "variant": "U-CAR new-car catalog",
     "price": 1338,
-    "priceLabel": "1338 TWD 10k",
+    "priceLabel": "1338-1688 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -3987,9 +3987,9 @@
     ],
     "tagline": "Urus: synced from Taiwan new-car catalog.",
     "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7118.jpg",
-    "url": "https://newcar.u-car.com.tw/lamborghini/urus/7118/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/lamborghini/urus/7118/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7305.jpg",
+    "url": "https://newcar.u-car.com.tw/lamborghini/urus/7305/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/lamborghini/urus/7305/overall",
     "source": "ucar"
   },
   {
@@ -4276,8 +4276,8 @@
     "brand": "Lexus",
     "name": "Lexus LBX",
     "variant": "U-CAR new-car catalog",
-    "price": 129.9,
-    "priceLabel": "129.9-169 TWD 10k",
+    "price": 127.9,
+    "priceLabel": "127.9-169 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -4491,9 +4491,9 @@
     ],
     "tagline": "RX: synced from Taiwan new-car catalog.",
     "note": "豪華大型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6764.jpg",
-    "url": "https://newcar.u-car.com.tw/lexus/rx/6764/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/lexus/rx/6764/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7307.jpg",
+    "url": "https://newcar.u-car.com.tw/lexus/rx/7307/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/lexus/rx/7307/overall",
     "source": "ucar"
   },
   {
@@ -5144,8 +5144,8 @@
     "brand": "Mazda",
     "name": "Mazda CX-60",
     "variant": "U-CAR new-car catalog",
-    "price": 118.9,
-    "priceLabel": "118.9-171.9 TWD 10k",
+    "price": 129.9,
+    "priceLabel": "129.9-171.9 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -5163,9 +5163,9 @@
     ],
     "tagline": "CX-60: synced from Taiwan new-car catalog.",
     "note": "一般級距大中型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6959.jpg",
-    "url": "https://newcar.u-car.com.tw/mazda/cx-60/6959/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-60/6959/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7312.jpg",
+    "url": "https://newcar.u-car.com.tw/mazda/cx-60/7312/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/mazda/cx-60/7312/overall",
     "source": "ucar"
   },
   {
@@ -7102,34 +7102,6 @@
   },
   {
     "brand": "Mitsubishi",
-    "name": "Mitsubishi Colt Plus",
-    "variant": "U-CAR new-car catalog",
-    "price": 54.6,
-    "priceLabel": "54.6-58.6 TWD 10k",
-    "body": "suv",
-    "power": "gas",
-    "seats": 5,
-    "priorities": [
-      "space",
-      "comfort",
-      "tech"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Colt Plus: synced from Taiwan new-car catalog.",
-    "note": "一般級距中型掀背; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6768.jpg",
-    "url": "https://newcar.u-car.com.tw/mitsubishi/colt%20plus/6768/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/mitsubishi/colt%20plus/6768/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Mitsubishi",
     "name": "Mitsubishi Delica廂車",
     "variant": "U-CAR new-car catalog",
     "price": 74.8,
@@ -7245,7 +7217,7 @@
     "name": "Nissan Kicks",
     "variant": "U-CAR new-car catalog",
     "price": 74.9,
-    "priceLabel": "74.9-85.5 TWD 10k",
+    "priceLabel": "74.9-85.9 TWD 10k",
     "body": "suv",
     "power": "gas",
     "seats": 5,
@@ -7263,9 +7235,9 @@
     ],
     "tagline": "Kicks: synced from Taiwan new-car catalog.",
     "note": "一般級距小型SUV運動休旅; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7263.jpg",
-    "url": "https://newcar.u-car.com.tw/nissan/kicks/7263/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/nissan/kicks/7263/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7303.jpg",
+    "url": "https://newcar.u-car.com.tw/nissan/kicks/7303/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/nissan/kicks/7303/overall",
     "source": "ucar"
   },
   {
@@ -7273,7 +7245,7 @@
     "name": "Nissan Sentra",
     "variant": "U-CAR new-car catalog",
     "price": 78.5,
-    "priceLabel": "78.5-88.9 TWD 10k",
+    "priceLabel": "78.5-89.9 TWD 10k",
     "body": "sedan",
     "power": "gas",
     "seats": 5,
@@ -7291,9 +7263,9 @@
     ],
     "tagline": "Sentra: synced from Taiwan new-car catalog.",
     "note": "一般級距中型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7137.jpg",
-    "url": "https://newcar.u-car.com.tw/nissan/sentra/7137/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/nissan/sentra/7137/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7304.jpg",
+    "url": "https://newcar.u-car.com.tw/nissan/sentra/7304/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/nissan/sentra/7304/overall",
     "source": "ucar"
   },
   {
@@ -7746,6 +7718,34 @@
   },
   {
     "brand": "Porsche",
+    "name": "Porsche Cayenne Electric",
+    "variant": "U-CAR new-car catalog",
+    "price": 398,
+    "priceLabel": "398-748 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 5,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Cayenne Electric: synced from Taiwan new-car catalog.",
+    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7310.jpg",
+    "url": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7310/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7310/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Porsche",
     "name": "Porsche Taycan",
     "variant": "U-CAR new-car catalog",
     "price": 416,
@@ -7774,6 +7774,34 @@
   },
   {
     "brand": "Porsche",
+    "name": "Porsche Cayenne Coupé Electric",
+    "variant": "U-CAR new-car catalog",
+    "price": 418,
+    "priceLabel": "418-758 TWD 10k",
+    "body": "suv",
+    "power": "electric",
+    "seats": 5,
+    "priorities": [
+      "tech",
+      "economy",
+      "comfort"
+    ],
+    "colors": [
+      "white",
+      "black",
+      "gray",
+      "blue",
+      "red"
+    ],
+    "tagline": "Cayenne Coupé Electric: synced from Taiwan new-car catalog.",
+    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7311.jpg",
+    "url": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7311/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7311/overall",
+    "source": "ucar"
+  },
+  {
+    "brand": "Porsche",
     "name": "Porsche Cayenne",
     "variant": "U-CAR new-car catalog",
     "price": 419,
@@ -7798,62 +7826,6 @@
     "imageUrl": "https://image.u-car.com.tw/newcar_7119.jpg",
     "url": "https://newcar.u-car.com.tw/porsche/cayenne/7119/overall",
     "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne/7119/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Porsche",
-    "name": "Porsche Cayenne Electric",
-    "variant": "U-CAR new-car catalog",
-    "price": 419,
-    "priceLabel": "419-769 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 5,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Cayenne Electric: synced from Taiwan new-car catalog.",
-    "note": "電動車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7133.jpg",
-    "url": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7133/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20electric/7133/overall",
-    "source": "ucar"
-  },
-  {
-    "brand": "Porsche",
-    "name": "Porsche Cayenne Coupé Electric",
-    "variant": "U-CAR new-car catalog",
-    "price": 439,
-    "priceLabel": "439-779 TWD 10k",
-    "body": "suv",
-    "power": "electric",
-    "seats": 5,
-    "priorities": [
-      "tech",
-      "economy",
-      "comfort"
-    ],
-    "colors": [
-      "white",
-      "black",
-      "gray",
-      "blue",
-      "red"
-    ],
-    "tagline": "Cayenne Coupé Electric: synced from Taiwan new-car catalog.",
-    "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7189.jpg",
-    "url": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7189/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/porsche/cayenne%20coup%C3%A9%20electric/7189/overall",
     "source": "ucar"
   },
   {
@@ -8887,9 +8859,9 @@
     ],
     "tagline": "Town Ace: synced from Taiwan new-car catalog.",
     "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6271.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/town%20ace/6271/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/town%20ace/6271/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7301.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/town%20ace/7301/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/town%20ace/7301/overall",
     "source": "ucar"
   },
   {
@@ -8915,9 +8887,9 @@
     ],
     "tagline": "Town Ace Van: synced from Taiwan new-car catalog.",
     "note": "商用車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_6927.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/6927/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/6927/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7302.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/7302/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/town%20ace%20van/7302/overall",
     "source": "ucar"
   },
   {
@@ -9233,7 +9205,7 @@
     "name": "Toyota Crown Crossover",
     "variant": "U-CAR new-car catalog",
     "price": 157,
-    "priceLabel": "157-200 TWD 10k",
+    "priceLabel": "157-195 TWD 10k",
     "body": "suv",
     "power": "hybrid",
     "seats": 5,
@@ -9251,9 +9223,9 @@
     ],
     "tagline": "Crown Crossover: synced from Taiwan new-car catalog.",
     "note": "一般級距中大型轎車; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7288.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7288/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7288/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7314.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7314/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20crossover/7314/overall",
     "source": "ucar"
   },
   {
@@ -9288,8 +9260,8 @@
     "brand": "Toyota",
     "name": "Toyota Crown Sport",
     "variant": "U-CAR new-car catalog",
-    "price": 175,
-    "priceLabel": "175-210 TWD 10k",
+    "price": 169,
+    "priceLabel": "169-209 TWD 10k",
     "body": "sedan",
     "power": "hybrid",
     "seats": 5,
@@ -9307,9 +9279,9 @@
     ],
     "tagline": "Crown Sport: synced from Taiwan new-car catalog.",
     "note": "Taiwan new-car listing; monthly synced from U-CAR. Price uses the lowest catalog value shown on the source page.",
-    "imageUrl": "https://image.u-car.com.tw/newcar_7289.jpg",
-    "url": "https://newcar.u-car.com.tw/toyota/crown%20sport/7289/overall",
-    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20sport/7289/overall",
+    "imageUrl": "https://image.u-car.com.tw/newcar_7315.jpg",
+    "url": "https://newcar.u-car.com.tw/toyota/crown%20sport/7315/overall",
+    "sourceUrl": "https://newcar.u-car.com.tw/toyota/crown%20sport/7315/overall",
     "source": "ucar"
   },
   {
@@ -11003,12 +10975,12 @@
   window.JARVIS_DATA_META = {
   "sourceName": "U-CAR new-car catalog",
   "sourceUrl": "https://newcar.u-car.com.tw/newcar",
-  "updatedAt": "2026-10-05T14:24:53.252Z",
+  "updatedAt": "2026-11-01T06:31:17.303Z",
   "updateCadence": "monthly",
   "fetchedBrands": 47,
-  "fetchedCars": 368,
-  "publishedCars": 368,
-  "minimumFetchedCars": 331,
+  "fetchedCars": 367,
+  "publishedCars": 367,
+  "minimumFetchedCars": 332,
   "minimumCatalogRetainRatio": 0.9,
   "pruneMissing": true,
   "failedBrands": []
