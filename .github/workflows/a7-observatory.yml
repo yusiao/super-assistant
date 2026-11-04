@@ -33,6 +33,10 @@ jobs:
           python-version: '3.12'
       - name: Test public data boundary
         run: python -m unittest discover -s scripts/a7-line-monitor -p 'test_public_site.py'
+      - name: Test geographic navigation
+        run: |
+          node scripts/a7-line-monitor/test_road_map.cjs
+          node scripts/a7-line-monitor/test_station_atlas.cjs
       - name: Build public website without sending LINE
         run: python scripts/a7-line-monitor/publish_site.py
       - uses: actions/configure-pages@v5

@@ -45,7 +45,7 @@ const RegionMap = (() => {
   ];
   function paintPlaces(){
     if(!map||!placeLayer)return;placeLayer.clearLayers();
-    if(overview||!district)return;
+    if(overview||!district||(typeof StationAtlas!=='undefined'&&StationAtlas.isActive()))return;
     const marker=(lat,lon,label,side,fn,type='development')=>{
       const b=text('button',label);b.type='button';b.className=`place-map-button ${side} place-${type}`;b.title=typeLabels[type];
       b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn();});
@@ -64,7 +64,7 @@ const RegionMap = (() => {
       if(area)marker(lat,lon,name,side,()=>{drill='subareas';choose(city,district,area.id);});
     }
   }
-  function choose(c,d,a=''){overview=false;callback(c,d,a);}
+  function choose(c,d,a=''){if(typeof StationAtlas!=='undefined'){if(StationAtlas.isActive())frame='';StationAtlas.leave();}overview=false;callback(c,d,a);}
   function pickDistrict(c,d){
     if(c!==city||d!==district)placeLevel='area';
     drill=!overview&&c===city&&d===district?'subareas':'district';
@@ -136,8 +136,8 @@ const RegionMap = (() => {
     if(!projects.size&&chosen.length)cards.append(text('p','本次沒有可展示的預售資料，不代表零供給；不以舊建案補數。'));
   }
   function render(c,d,connectedAreas,areaId=''){
-    if(frame&&(c!==city||d!==district)){overview=false;drill='district';placeLevel='area';selectedPlace=null;placeType='all';$('place-type').value='all';}city=c;district=d;areas=connectedAreas||[];selectedArea=areaId;
-    const next=overview?'all':`${city}/${district}`;if(next!==frame){frame=next;fit();}
+    if(frame&&(c!==city||d!==district)){if(typeof StationAtlas!=='undefined')StationAtlas.leave();overview=false;drill='district';placeLevel='area';selectedPlace=null;placeType='all';$('place-type').value='all';}city=c;district=d;areas=connectedAreas||[];selectedArea=areaId;
+    const next=overview?'all':`${city}/${district}`;if(next!==frame){frame=next;if(typeof StationAtlas==='undefined'||!StationAtlas.isActive())fit();}
     const boundaries=overview?verified:verified.filter(inScope),status=boundaries.length?`可查 ${boundaries.length} 個官方區段徵收範圍（非生活圈界線）`:'本範圍尚無已核對的開發區圖層';
     $('life-toggle').disabled=!boundaries.length;$('boundary-status').textContent=status+'；地圖標籤是概略定位入口，不是範圍或建案座標。';
     $('map-selection').textContent=city+(district?' · '+district:'');$('map-status').textContent='全臺道路可瀏覽；行政區界線非生活圈界線。可用滾輪、雙指或＋／−繼續放大到街道。';
@@ -145,7 +145,7 @@ const RegionMap = (() => {
   }
   async function init(onSelect){
     $('place-type').addEventListener('change',()=>{placeType=$('place-type').value;selectedPlace=null;paintPlaces();coverage();drillPanel();});
-    callback=onSelect;$('map-overview').addEventListener('click',()=>{overview=true;frame='';render(city,district,areas,selectedArea);});$('map-city').addEventListener('click',()=>{frame='';choose(city,'');});
+    callback=onSelect;$('map-overview').addEventListener('click',()=>{if(typeof StationAtlas!=='undefined')StationAtlas.leave();overview=true;frame='';render(city,district,areas,selectedArea);});$('map-city').addEventListener('click',()=>{frame='';choose(city,'');});
     try{const r=await fetch('districts.geojson',{signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('boundary');data=await r.json();if(!Array.isArray(data.features)||!Array.isArray(data.cities))throw Error('schema');}catch{$('tile-status').textContent='行政區界線載入失敗，仍可使用下方選單。';return false;}
     if(typeof L==='undefined'){$('tile-status').textContent='地圖程式未載入，仍可使用行政區選單。';return true;}
     map=L.map('road-map',{minZoom:6,maxZoom:19,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
@@ -164,7 +164,9 @@ const RegionMap = (() => {
       const p=f.properties,box=document.createElement('div'),a=text('a','查看市府原始圖資');a.href=p.source_url;a.target='_blank';a.rel='noopener noreferrer';box.append(text('strong',p.name),text('p',`${p.boundary_kind} · 核對日期：${p.checked_at}`),a);layer.bindTooltip(text('span',p.name));layer.on('click',()=>{if(overview||!district||city!==p.city)choose(p.city,p.district);L.popup().setLatLng(layer.getBounds().getCenter()).setContent(box).openOn(map);});
     }}).addTo(map);
     $('district-toggle').addEventListener('change',()=>{$('district-toggle').checked?districtLayer.addTo(map):map.removeLayer(districtLayer);});$('life-toggle').addEventListener('change',paint);fit();
-    try{const r=await fetch('life-boundaries.geojson',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('life');const body=await r.json();if(body.type!=='FeatureCollection'||!Array.isArray(body.features))throw Error('schema');verified=body.features.filter(validLife);}catch{$('tile-status').textContent='生活圈圖層未載入；道路與行政區仍可使用。';}return true;
+    try{const r=await fetch('life-boundaries.geojson',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('life');const body=await r.json();if(body.type!=='FeatureCollection'||!Array.isArray(body.features))throw Error('schema');verified=body.features.filter(validLife);}catch{$('tile-status').textContent='生活圈圖層未載入；道路與行政區仍可使用。';}
+    if(typeof StationAtlas!=='undefined')await StationAtlas.init(map,()=>{placeLayer.clearLayers();$('map-drill').hidden=true;});
+    return true;
   }
   return {init,render,cities,districts};
 })();

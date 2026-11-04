@@ -9,7 +9,8 @@ from project_sources import project_url
 
 SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js", "road-map.css",
                "redevelopment-areas.js", "districts.geojson", "leaflet.js", "leaflet.css",
-               "leaflet-LICENSE.txt", "life-boundaries.geojson")
+               "leaflet-LICENSE.txt", "life-boundaries.geojson", "station-atlas.js",
+               "station-atlas.geojson", "station-terrain.webp", "ATLAS-SOURCES.md")
 
 
 def public_url(value):
