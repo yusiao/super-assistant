@@ -17,6 +17,15 @@
 #atlas-detail p{font-size:13px;line-height:1.85}
 #atlas-detail small{display:block;font-size:11px;color:var(--muted);line-height:1.8;margin-top:14px}
 #atlas-detail a{font-size:12px}
+.atlas-project-panel{border-top:2px solid var(--green);margin:18px 0;padding-top:12px}
+.atlas-project-panel h4{font-size:17px;margin:0 0 8px}.atlas-project-panel h5{font-size:13px;margin:18px 0 8px;color:var(--muted)}
+.atlas-project-card{padding:12px;margin:10px 0;border:1px solid var(--line);background:var(--paper);overflow-wrap:anywhere}
+#atlas-detail summary{cursor:pointer;font-size:13px;line-height:1.7;padding:7px 0}
+.atlas-project-card summary{font-weight:700;color:var(--green);min-height:44px}
+#atlas-detail .atlas-project-card small{margin:7px 0;font-size:11px}
+.atlas-project-card a{display:inline-block;line-height:1.7;padding:5px 0;min-height:32px}
+.atlas-trades article{border-top:1px solid var(--line);padding:12px 0;overflow-wrap:anywhere}
+@media(min-width:801px){.map-detail:has(#atlas-detail:not([hidden])){max-height:620px;overflow:auto}}
 .atlas-area-choice{display:block;width:100%;text-align:left;background:var(--paper);color:var(--green);border:1px solid var(--line);border-radius:3px;padding:12px 14px;margin:8px 0;cursor:pointer;font:inherit;font-size:14px}
 .atlas-area-choice:hover,.atlas-area-choice:focus-visible{border-color:var(--green);background:#edf0e6}
 .administrative-info{margin-top:20px;border-top:1px solid var(--line);padding-top:14px}

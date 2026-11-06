@@ -44,6 +44,7 @@ function projectCard(p){const card=el("article","card");const top=el("div","card
   return card;
 }
 function render(){
+  if(typeof StationAtlas!=="undefined")StationAtlas.setMarketData(state.data,state.error);
   if(typeof RegionMap!=="undefined")RegionMap.render($("city").value,$("district").value,state.data?.areas||[],$("area").value);
   const areas=selectedAreas(), projects=projectList(areas), usable=areas.some(a=>a.availability!=="unavailable");
   $("region-title").textContent=$("area").value?areas[0]?.name.replace("A7站重劃區-","A7 · ")||"區域觀察":`${$("city").value}${$("district").value}區域觀察`;

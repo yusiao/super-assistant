@@ -26,12 +26,24 @@ function geoJSON(features=[],opts={}){
  layer.addData(features);layers.push(layer);return layer;
 }
 const markers=[];
+const market={generated_at:'2026-11-01T20:25:22+08:00',areas:[
+ {name:'A7站重劃區-郵政物流',city:'桃園市',district:'龜山區',availability:'partial',projects:[
+  {id:'one',name:'測試預售甲',category:'active',url:'https://nbm.jsl.com.tw/',address:'測試基地',status:'預計完工 2028'},
+  {id:'done',name:'不可顯示的成屋',category:'completed',url:'https://nbm.jsl.com.tw/'}]},
+ {name:'A7站重劃區-樂善國小',city:'桃園市',district:'龜山區',availability:'unavailable',projects:[
+  {id:'old',name:'不可補數的舊資料',category:'active',url:'https://nbm.jsl.com.tw/'}],transactions:[
+  {project_name:'僅有成交的建案',unit:'A08-8F',total_price:'1200萬',url:'https://nbm.jsl.com.tw/'}]},
+ {name:'A7周邊-子區待核對',city:'桃園市',district:'龜山區',availability:'partial',projects:[
+  {id:'two',name:'測試周邊乙',category:'pending',url:'https://ttt.jsl.com.tw/'}]}
+]};
+const text=n=>(n.textContent||'')+n.children.map(text).join(' ');
+const descendants=n=>[n,...n.children.flatMap(descendants)];
 const L={geoJSON,layerGroup:()=>({addTo(){return this;},clearLayers(){markers.length=0;}}),
  divIcon:o=>o,marker:(position,o)=>({addTo(){markers.push({...o,position});return this;}}),
  imageOverlay:(url,bounds,o)=>{overlays.push({url,bounds,...o});return {addTo(){}};}};
 const context=vm.createContext({document:{getElementById:get,createElement:tag=>new Element(tag)},fetch:async url=>{
  assert.equal(url,'station-atlas.geojson');return {ok:true,json:async()=>data};
-},URL,AbortSignal,L});
+},URL,AbortSignal,L,Date,projectLinkUrl:url=>/^https:\/\/(nbm|ttt)\.jsl\.com\.tw\/$/.test(url)?url:''});
 vm.runInContext(fs.readFileSync(path.join(__dirname,'site/station-atlas.js'),'utf8'),context);
 const atlas=vm.runInContext('StationAtlas',context);
 async function main(){
@@ -46,16 +58,34 @@ async function main(){
  assert.ok(+panes.atlasAreas.style.zIndex>400,'Polygon pane must intercept clicks ahead of districts');
  assert.ok(+panes.atlasTerrain.style.zIndex<200,'Opt-in external roads must not be covered by the terrain image');
  const shapes=layers.find(l=>l.opts.pane==='atlasAreas');
+ atlas.setMarketData(market);
  assert.equal(shapes.opts.bubblingMouseEvents,false);
  shapes.paths[0].events.click();
  assert.equal(calls.at(-1)[0],'a7','A geographic polygon click opens its extent, not a point buffer');
  assert.equal(markers.length,3);
+ const panel=get('atlas-detail');
+ assert.match(text(panel),/測試預售甲/);assert.match(text(panel),/測試周邊乙/);
+ assert.match(text(panel),/子區待核對/);assert.match(text(panel),/僅有成交的建案/);
+ assert.doesNotMatch(text(panel),/不可顯示的成屋|不可補數的舊資料/);
+ const card=descendants(panel).find(n=>n.tag==='summary'&&n.textContent.includes('測試預售甲'));
+ assert.ok(card,'A project name is an expandable details control');
+ assert.ok(descendants(panel).some(n=>n.tag==='a'&&n.href==='https://nbm.jsl.com.tw/'));
+ atlas.show('a7-post');assert.match(text(panel),/測試預售甲/);assert.doesNotMatch(text(panel),/測試周邊乙/);
+ assert.match(text(panel),/不代表基地位在此園區範圍內/);
+ atlas.show('a7-school');assert.doesNotMatch(text(panel),/測試預售甲/);
+ assert.match(text(panel),/尚未接入/);
+ atlas.show('a7');
+ const updated=structuredClone(market);updated.areas[0].projects[0].name='更新後建案';
+ atlas.setMarketData(updated);assert.match(text(panel),/更新後建案/);assert.doesNotMatch(text(panel),/測試預售甲/);
+ atlas.setMarketData(null,'network');assert.match(text(panel),/讀取失敗/);assert.doesNotMatch(text(panel),/更新後建案/);
+ atlas.setMarketData(market);
  const a7ids=shapes.features.map(f=>f.properties.id);assert.ok(a7ids.includes('a7-post')&&a7ids.includes('a7-school'));
  atlas.show('a9');assert.ok(markers.some(m=>m.icon.html.textContent==='三井周邊商業街廓 ›'));
  markers[0].icon.html.click();assert.equal(calls.at(-1)[0],'a9-mitsui');assert.equal(markers.length,2);
  markers.find(m=>m.icon.html.textContent==='三井 OUTLET 二館').icon.html.click();
  assert.equal(calls.at(-1)[0],'a9-mall2');
- const panel=get('atlas-detail');assert.ok(panel.children.some(n=>n.textContent==='三井 OUTLET 二館'));
+ assert.ok(panel.children.some(n=>n.textContent==='三井 OUTLET 二館'));
+ assert.match(text(panel),/尚未接入/);assert.doesNotMatch(text(panel),/測試預售甲|測試周邊乙/);
  panel.children[0].children[1].click();assert.equal(calls.at(-1)[0],'a9');
  get('atlas-corridor').click();assert.equal(markers.length,3);
  zoom=16;events.zoomend();assert.ok(markers.length>3,'Zooming into an overview exposes neighborhood polygons');
@@ -66,6 +96,6 @@ async function main(){
   assert.ok(f.properties.note&&f.properties.checked_at&&f.properties.kind);
  }
  assert.equal(data.features.length,11);
- console.log('PASS: polygon clicks, nested shop areas, breadcrumbs, zoom, validation, privacy and layer hit testing.');
+ console.log('PASS: polygon-to-project scope, source links, detail cards, trade-only records, refresh/error handling, no stale fallback, drilldown and privacy.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
