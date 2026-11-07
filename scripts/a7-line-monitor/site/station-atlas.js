@@ -3,6 +3,8 @@ const StationAtlas = (() => {
   const $ = id => document.getElementById(id);
   let map, data, shapes, labels, focus = "", active = false, onNavigate=()=>{};
   let market = null, marketError = "";
+  const stationButtons = new Map();
+  const stages = {active:"銷售中預售",pending:"未開賣預售",sold_out:"完銷預售"};
   const colors = {a7:"#ad5929",a8:"#276b66",a9:"#3b6592"};
   const node = (tag, value) => {const n=document.createElement(tag);n.textContent=value;return n;};
   const roots = () => data.features.filter(f=>!f.properties.parent);
@@ -44,41 +46,56 @@ const StationAtlas = (() => {
     const all=areas.filter(inStation);
     // A source's neighborhood classification is not a geocoded point inside the drawn polygon.
     return {related,areas:related?all.filter(a=>a.name===`A7站重劃區-${related}`):all,
-      note:related?`以下為「${related}」來源分類的周邊參考，不代表基地位在此${feature.properties.kind}內。`:
+      note:related?`以下為「${related}」來源分類的周邊參考，不代表基地位在此${feature.properties.kind}內。`:feature.properties.parent?
+        `以下為 ${station.toUpperCase()} 周邊參考，尚未核實位於此街廓內。`:
         "按來源的區域分類列出，尚未核實基地座標；不代表每案都位於彩色框內。"};
+  }
+  const usable = a => ["partial","observed"].includes(a.availability);
+  function projects(areas){
+    const seen=new Set(),rows=[];
+    for(const area of areas){
+      if(!usable(area))continue;
+      for(const project of area.projects||[]){
+        const id=project.id||project.url||project.name;
+        if(!Object.hasOwn(stages,project.category)||seen.has(id))continue;
+        seen.add(id);rows.push({project,area});
+      }
+    }
+    return rows;
   }
   function projectPanel(feature){
     const box=node("section","");box.className="atlas-project-panel";box.setAttribute("aria-label","選取範圍的建案");
-    box.append(node("h4","建案與建案連結"));
-    if(marketError){box.append(node("p","本次建案資料讀取失敗，請按下方「重新讀取」。不以舊資料補數。"));return box;}
+    if(marketError){box.append(node("p","建案資料讀取失敗。不以舊資料補數。"),button("重新讀取",()=>$("refresh").click(),"atlas-secondary"));return box;}
     if(!market){box.append(node("p","建案資料載入中…"));return box;}
     const stamp=new Date(market.generated_at);
-    if(Number.isFinite(stamp.getTime()))box.append(node("small",`資料版本：${stamp.toLocaleDateString("zh-TW",{timeZone:"Asia/Taipei"})}。非即時銷售資訊。${Date.now()-stamp.getTime()>8*86400000?"已超過 8 天未更新。":""}`));
     const scope=marketScope(feature);
-    box.append(node("p",scope.note));
     if(!scope.areas.length){box.append(node("p","此範圍尚未接入可核對的建案資料，不代表沒有預售屋。"));return box;}
     const groups=[scope.areas.filter(a=>!a.name.includes("子區待核對")),scope.areas.filter(a=>a.name.includes("子區待核對"))];
-    const seen=new Set();let count=0;
+    const rows=projects(groups.flat()),count=rows.length;
+    const meta=node("p",count?`可看 ${count} 案`:(scope.areas.some(usable)?"本次無可展示建案":"本次未取得建案資料"));meta.className="atlas-list-meta";
+    if(Number.isFinite(stamp.getTime()))meta.append(node("span",`資料 ${stamp.toLocaleDateString("zh-TW",{timeZone:"Asia/Taipei"})}${Date.now()-stamp.getTime()>8*86400000?" · 超過 8 天未更新":""}`));
+    box.append(meta);
     for(const [index,areas] of groups.entries()){
-      const section=node("div","");let shown=0;
-      if(index&&areas.length)section.append(node("h5","A7 周邊參考 · 子區待核對"));
-      for(const area of areas){
-        if(!["partial","observed"].includes(area.availability))continue;
-        for(const p of area.projects||[]){
-          if(!["active","pending","sold_out"].includes(p.category)||seen.has(p.id||p.url||p.name))continue;
-          seen.add(p.id||p.url||p.name);count++;shown++;
+      const shown=rows.filter(row=>areas.includes(row.area));if(!shown.length)continue;
+      const section=node("div","");
+      if(index)section.append(node("h5",`${root(feature).toUpperCase()} 周邊參考 · 子區待核對`));
+      for(const {project:p,area} of shown){
           const card=node("article","");card.className="atlas-project-card";
-          const details=node("details",""),summary=node("summary",p.name+" · "+({active:"銷售中預售",pending:"未開賣預售",sold_out:"完銷預售"}[p.category]));
-          details.append(summary,node("p",p.status||"價格與銷售狀態未取得"),node("p","基地："+(p.address||"地址未取得")));
+          const title=node("h4",p.name),stage=node("span",stages[p.category]);stage.className=`badge ${p.category}`;
+          const details=node("details","");
+          details.append(node("summary","建案詳情"),node("p",p.status||"價格與銷售狀態未取得"));
           for(const s of p.sources||[])if(s.url!==p.url)details.append(sourceLink(s.url,`交叉來源：${s.name} ↗`));
           if(p.observed_at)details.append(node("small",`本次讀取：${p.observed_at.slice(0,10)}；非來源更新日。`));
-          card.append(details,node("small",area.name),sourceLink(p.url,"查看建案網址 ↗"));section.append(card);
-        }
+          const label=node("p",area.name.replace("A7站重劃區-",""));label.className="atlas-card-location";
+          const actions=node("div","");actions.className="atlas-card-actions";
+          const link=sourceLink(p.url,"開啟建案頁 ↗");link.className="atlas-primary";actions.append(link);
+          card.append(stage,title,label);
+          if(p.address)card.append(node("p",p.address));
+          card.append(actions,details);section.append(card);
       }
-      if(shown)box.append(section);
+      box.append(section);
     }
-    if(count)box.append(node("p",`本次可展示 ${count} 案；點建案名稱展開詳情，不是全區供給總量。`));
-    else box.append(node("p",scope.areas.some(a=>["partial","observed"].includes(a.availability))?"本次未取得可展示的預售建案，不代表零供給。":"此區建案來源本次未取得，不以舊建案或固定名單補數。"));
+    if(!count)box.append(node("p","資料不足不代表零供給，不以舊建案補數。"));
     const trades=new Map();for(const a of scope.areas)for(const t of a.transactions||[])trades.set(JSON.stringify(t),t);
     if(trades.size){
       const details=node("details","");details.className="atlas-trades";
@@ -88,11 +105,13 @@ const StationAtlas = (() => {
       }
       box.append(details);
     }
-    if(scope.related)box.append(button("查看 A7 全部已取得建案",()=>show("a7"),"atlas-area-choice"));
+    box.append(node("small",`${scope.note} 不是即時銷售資訊或全區供給總量。`));
     return box;
   }
   function setMarketData(body,error=""){
-    market=body;marketError=error;if(active&&data)info();
+    if(market===body&&marketError===error)return;
+    market=body;marketError=error;
+    if(active&&data){info();if($("atlas-results").open)renderResults(find(focus));}
   }
   function draw(){
     if(!data)return;
@@ -113,44 +132,61 @@ const StationAtlas = (() => {
   function info(){
     const panel=$("atlas-detail");panel.replaceChildren();panel.hidden=!active;
     if(!active)return;
-    const selected=focus?find(focus):null,p=selected?.properties;
-    const crumb=node("nav","");crumb.setAttribute("aria-label","區域地圖層級");
-    crumb.append(button("A7–A9 總覽",()=>show("")));
-    if(selected){
-      const ancestors=[];let f=selected;
-      while(f.properties.parent){f=find(f.properties.parent);ancestors.unshift(f);}
-      for(const f of ancestors)crumb.append(button(f.properties.name,()=>show(f.properties.id)));
+    const selected=focus?root(find(focus)):"";
+    stationButtons.clear();
+    for(const f of roots()){
+      const {id,name}=f.properties,areas=marketScope(f).areas,count=projects(areas).length;
+      const status=marketError?"讀取失敗":!market?"讀取中":count?`看 ${count} 案`:!areas.length?"尚未接入":"本次未取得建案";
+      const b=button("",()=>show(id),`atlas-station ${id}`);
+      b.setAttribute("aria-pressed",String(selected===id));b.setAttribute("aria-haspopup","dialog");
+      b.append(node("strong",name),node("span",status));panel.append(b);stationButtons.set(id,b);
     }
-    panel.append(crumb,node("p",p?p.kind:"REGION → NEIGHBORHOOD"),node("h3",p?p.name:"看範圍，再看街廓。"));
-    if(selected)panel.append(projectPanel(selected));
-    else panel.append(node("p","點選彩色區域，直接查看已取得的建案名稱、銷售階段與建案網址；也可繼續點進商圈。"));
-    const items=selected?children(focus):roots();
-    for(const f of items){const b=button(f.properties.name+" →",()=>show(f.properties.id),"atlas-area-choice");panel.append(b);}
-    if(selected){
-      if(!items.length)panel.append(node("p","已到此範圍最細層級；仍可用＋／−或滾輪查看道路。"));
-      const more=node("details","");more.append(node("summary","範圍說明與圖資來源"),node("p",p.note));
-      if(p.roads.length)more.append(node("p","沿線道路："+p.roads.join("、")));
-      const a=node("a","查看範圍依據");a.href=p.source_url;a.target="_blank";a.rel="noopener noreferrer";more.append(a,node("small","查核："+p.checked_at+"。名稱與範圍不表示有新推建案。"));panel.append(more);
-    }
-    panel.append(node("small","此處建案隨地圖選區更新；下方報告篩選條件獨立。未核實基地座標前，不放置推測的建案位置點。"));
+  }
+  function renderResults(feature){
+    const p=feature.properties,body=$("atlas-results-body"),station=find(root(feature));
+    $("atlas-result-title").textContent=p.name;
+    const select=node("select","");select.id="atlas-area-select";
+    const label=node("label","切換生活圈");label.htmlFor=select.id;
+    const addOptions=(f,depth=0)=>{
+      const opt=node("option",(depth?"　".repeat(depth):"")+f.properties.name);
+      opt.value=f.properties.id;select.append(opt);
+      for(const child of children(f.properties.id))addOptions(child,depth+1);
+    };
+    addOptions(station);select.value=p.id;
+    select.addEventListener("change",()=>{show(select.value);$("atlas-area-select").focus();});
+    const control=node("div","");control.className="atlas-scope-control";control.append(label,select);
+    const more=node("details","");more.className="atlas-source-notes";
+    more.append(node("summary","地圖範圍與圖資來源"),node("p",p.note));
+    if(p.roads.length)more.append(node("p","沿線道路："+p.roads.join("、")));
+    const a=node("a","查看範圍依據");a.href=p.source_url;a.target="_blank";a.rel="noopener noreferrer";more.append(a);
+    body.replaceChildren(control,projectPanel(feature),more);
+    body.scrollTop=0;
   }
   function show(id){
     if(!data||id&&!find(id))return;
     focus=id;active=true;onNavigate();
     $("map-drill")?.setAttribute("hidden","");
     $("road-map").classList.add("atlas-active");
-    draw();info();
+    map.invalidateSize?.({pan:false});draw();info();
     const features=id?[find(id)]:roots();
     map.fitBounds(L.geoJSON(features).getBounds(),{padding:[45,45],maxZoom:17,animate:false});
     $("atlas-corridor").setAttribute("aria-pressed","true");
+    const dialog=$("atlas-results");
+    if(id){renderResults(find(id));if(!dialog.open)dialog.showModal();}
+    else if(dialog.open)dialog.close();
   }
   function leave(){
     active=false;focus="";$("atlas-detail").hidden=true;$("road-map").classList.remove("atlas-active");
+    if($("atlas-results").open)$("atlas-results").close();
     $("atlas-corridor").setAttribute("aria-pressed","false");draw();
+    map?.invalidateSize?.({pan:false});
   }
   async function init(instance,onFocus=()=>{}){
     map=instance;onNavigate=onFocus;
     $("atlas-corridor").addEventListener("click",()=>show(""));
+    const dialog=$("atlas-results");
+    $("atlas-close").addEventListener("click",()=>dialog.close());
+    dialog.addEventListener("close",()=>{if(active&&focus&&!dialog.open)stationButtons.get(root(find(focus)))?.focus({preventScroll:true});});
     try{
       const r=await fetch("station-atlas.geojson",{signal:AbortSignal.timeout(10000)});
       if(!r.ok)throw Error("atlas");const body=await r.json();if(!valid(body))throw Error("schema");data=body;
