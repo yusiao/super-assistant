@@ -2,6 +2,7 @@
 const TaiwanContext=(()=>{
   const root="taiwan-context/",$=id=>document.getElementById(id);
   const kinds={transport:["交通","站"],medical:["醫療","醫"],education:["校園","學"],retail:["大型商場","商"],jobs:["產業園區","產"],leisure:["公園／公共地標","景"]};
+  const priority={transport:0,medical:1,jobs:2,retail:3,education:4,leisure:5};
   const styles=[
     ["#ec9959","#fff8e4",3.6],["#e8b34e","#fff9df",3.0],["#f4d480","#fdf9df",2.4],
     ["#f9e9b5","#c8ad77",2.2],["#fff9ea","#b6b4a0",1.5],["#fffdf5","#c9c7ba",1.1],["#83bcd3",null,1.5]
@@ -11,7 +12,8 @@ const TaiwanContext=(()=>{
   let indexPromise;
   function load(){return indexPromise??=get("index.json").then(data=>{
     if(data.version!==1||data.grid!==4||!Array.isArray(data.places)||!Array.isArray(data.tiles))throw Error("context index");
-    return {...data,tiles:new Set(data.tiles.filter(key=>/^\d{3}-\d{2,3}$/.test(key)))};
+    const places=data.places.filter(p=>Object.hasOwn(kinds,p[1])).sort((a,b)=>a[2]-b[2]||priority[a[1]]-priority[b[1]]);
+    return {...data,places,tiles:new Set(data.tiles.filter(key=>/^\d{3}-\d{2,3}$/.test(key)))};
   });}
   const placeName=p=>p[6]==="rail"&&!p[3].endsWith("站")?`${p[3]}站`:p[3];
   const radians=n=>n*Math.PI/180;
@@ -94,7 +96,10 @@ const TaiwanContext=(()=>{
     }
     function draw(details=[]){
       lines.clearLayers();labels.clearLayers();pins.clearLayers();
-      const zoom=map.getZoom(),view=map.getBounds(),b=view.pad(.12),size=map.getSize(),used=[];
+      const zoom=map.getZoom(),view=map.getBounds(),b=view.pad(.12),size=map.getSize();
+      const container=map.getContainer(),{left,top}=container.getBoundingClientRect();
+      const used=[...container.querySelectorAll(".project-pin,.atlas-map-label,.place-map-button")].map(n=>n.getBoundingClientRect())
+        .filter(r=>r.width&&r.height).map(r=>[r.left-left-3,r.top-top-3,r.right-left+3,r.bottom-top+3]);
       const inView=(lat,lng)=>lat>=b.getSouth()&&lat<=b.getNorth()&&lng>=b.getWest()&&lng<=b.getEast();
       const reserve=(position,w,h)=>{
         const {x,y}=map.latLngToContainerPoint(position),rect=[x-w/2,y-h/2,x+w/2,y+h/2];

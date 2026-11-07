@@ -22,7 +22,9 @@ class Node{
 const elements={},requests=[],panes={},layers=[],events={};let zoom=6;
 const get=id=>elements[id]??=(new Node());
 const bounds={pad(){return this;},getWest:()=>121.35,getEast:()=>121.41,getSouth:()=>25.02,getNorth:()=>25.07};
+const obstacles=[],container={querySelectorAll:()=>obstacles,getBoundingClientRect:()=>({left:0,top:0})};
 const map={createPane:n=>panes[n]={style:{}},getZoom:()=>zoom,getBounds:()=>bounds,getSize:()=>({x:950,y:620}),
+  getContainer:()=>container,
   latLngToContainerPoint:([lat,lng])=>({x:(lng-121.35)*14000+25,y:(25.07-lat)*10000+25}),on:(n,f)=>events[n]=f,
   attributionControl:{addAttribution(){}}};
 const feature=(point,opts)=>({point,opts,addTo(group){group.items.push(this);return this;}});
@@ -49,6 +51,10 @@ const settled=()=>new Promise(resolve=>setImmediate(resolve));
   assert.ok(requests.some(r=>r.includes('roads-485-100')));
   assert.ok(layers[1].items.some(n=>n.opts.icon.html.textContent.includes('路')));
   assert.ok(layers[2].items.some(n=>n.opts.icon.html['aria-label']?.includes('體育大學站')));
+  const station=map.latLngToContainerPoint([25.04133,121.38541]);
+  obstacles.push({getBoundingClientRect:()=>({left:station.x-20,top:station.y-20,right:station.x+20,bottom:station.y+20,width:40,height:40})});
+  events.moveend();await settled();
+  assert.ok(!layers[2].items.some(n=>n.opts.icon.html['aria-label']?.includes('體育大學站')),'Do not render a landmark button underneath existing pins');
   get('show-landmarks').checked=false;get('show-landmarks').events.change();await settled();
   assert.equal(layers[2].items.length,0);
   get('show-context-roads').checked=false;get('show-context-roads').events.change();
