@@ -50,6 +50,8 @@ const LiveProjects = (() => {
     overview.append(basics);if(benchmark)overview.append(benchmark);
     box.append(overview,node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
     if(p.verified_on)box.append(node("small",`工期與狀態核對：${p.verified_on}`));
+    const point=location(p);
+    if(point&&typeof TaiwanContext!=="undefined")box.append(TaiwanContext.projectContext(point));
     return box;
   }
   function card(p,{onLocate,onProject}={}){

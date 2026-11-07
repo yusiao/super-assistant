@@ -24,6 +24,17 @@
 
 ## 圖資與授權
 
+- 全臺彩色道路與地標：Geofabrik 臺灣 OSM 快照，資料截至 2026-11-02 (UTC)。
+  國道、快速道路、主要幹道、具名街道與河川依縮放分層顯示。站內圖資不是即時路況或完整巷弄導航。
+  地標依地段研究需求篩選：軌道站與機場、醫院、校園、大型商場、產業園區、大型公園及公共設施。
+  不採用一般店家或僅規劃、施工、廢棄的標記。點位與名稱是地圖快照，不是營運或工程進度驗證；
+  未收錄不等於沒有設施。建案附近距離是到圖上地標代表點的直線距離，不等於出入口、步行路程或學區。
+  林口三井二館的 OSM 施工標籤與官網現況不符，依官網列出的一、二館營運資訊補正；點位仍取 OSM 基地圖形。
+  https://www.mitsui-shopping-park.com.tw/mop/linkou/tw/index.html
+  `taiwan-context/` 的衍生資料為 © OpenStreetMap contributors，適用 ODbL 1.0。
+  https://download.geofabrik.de/asia/taiwan.html
+  https://www.openstreetmap.org/copyright
+  https://opendatacommons.org/licenses/odbl/1-0/
 - 全臺地形陰影：同一公開高程資料集的 Terrarium zoom 10 圖磚，2026-11-07 下載。
   使用 Web Mercator（EPSG:3857），臺灣緯度下每像元約 140 公尺。
   涵蓋臺灣本島、澎湖、金門、馬祖、綠島、蘭嶼與小琉球，不含東沙、南沙。
@@ -59,6 +70,10 @@ python scripts/a7-line-monitor/build_taiwan_terrain.py --cache tmp/taiwan-terrai
 ```
 
 `taiwan-terrain.webp` 和 `taiwan-terrain.json` 同步發布，原始 PNG 快取不發布。
+
+道路與地標更新：使用 Geofabrik 的臺灣 PBF，安裝 osmium 和 shapely 後執行
+`python scripts/a7-line-monitor/build_taiwan_context.py tmp/atlas-taiwan.osm.pbf`。
+`taiwan-context/index.json` 列出發布圖塊；原始 PBF 不發布。地標點位標示獨立於生活圈外框。
 
 A7–A9 區域圖重建：
 

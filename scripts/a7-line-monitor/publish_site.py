@@ -8,7 +8,7 @@ import shutil
 import urllib.error
 import urllib.request
 
-from public_site import SITE_ASSETS, export_public_site
+from public_site import copy_public_assets, export_public_site
 
 
 def stage_weekly(report_dir, target):
@@ -25,8 +25,7 @@ def stage_weekly(report_dir, target):
         if stream.read(5) != b"%PDF-":
             raise ValueError("Invalid weekly PDF")
     target.mkdir(parents=True, exist_ok=False)
-    for filename in SITE_ASSETS:
-        shutil.copyfile(source / filename, target / filename)
+    copy_public_assets(source, target)
     shutil.copyfile(pdf, target / "a7-market-report-latest.pdf")
     data["pdf_available"] = True
     (target / "market-data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")

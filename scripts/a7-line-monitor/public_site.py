@@ -12,6 +12,7 @@ SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js",
                "leaflet-LICENSE.txt", "life-boundaries.geojson", "station-atlas.js",
                "station-atlas.geojson", "station-terrain.webp", "ATLAS-SOURCES.md",
                "taiwan-terrain.json", "taiwan-terrain.webp",
+               "taiwan-context.js",
                "national-market.js", "national-market.json", "NATIONAL-SOURCES.md",
                "live-projects.js", "national-listings.json")
 
@@ -76,11 +77,26 @@ def build_public_data(snapshots, generated_at):
             "scope_note": "觀察 A7 五子區；無法確認子區的建案另列周邊待核對。多來源建案與成交僅代表本次可取得內容，不是全市場完整清單；讀取日期不等於資料更新日期。"}
 
 
+def copy_public_assets(source, target):
+    for name in SITE_ASSETS:
+        shutil.copyfile(source / name, target / name)
+    layers = source / "taiwan-context"
+    index = json.loads((layers / "index.json").read_text(encoding="utf-8"))
+    keys = index.get("tiles")
+    if index.get("version") != 1 or not isinstance(keys, list) or not keys or not all(
+        isinstance(key, str) and re.fullmatch(r"[0-9]{3}-[0-9]{2,3}", key) for key in keys
+    ):
+        raise ValueError("Invalid Taiwan road tile index")
+    destination = target / layers.name
+    destination.mkdir(exist_ok=True)
+    for name in ("index.json", "main.json", "primary.json", *(f"roads-{key}.json" for key in keys)):
+        shutil.copyfile(layers / name, destination / name)
+
+
 def export_public_site(snapshots, generated_at, target):
     target = Path(target)
     target.mkdir(parents=True, exist_ok=True)
-    for name in SITE_ASSETS:
-        shutil.copyfile(Path(__file__).with_name("site") / name, target / name)
+    copy_public_assets(Path(__file__).with_name("site"), target)
     destination = target / "market-data.json"
     temporary = destination.with_suffix(".tmp")
     temporary.write_text(json.dumps(build_public_data(snapshots, generated_at), ensure_ascii=False, indent=2), encoding="utf-8")

@@ -39,6 +39,7 @@ jobs:
       - name: Test geographic navigation
         run: |
           node scripts/a7-line-monitor/test_road_map.cjs
+          node scripts/a7-line-monitor/test_taiwan_context.cjs
           node scripts/a7-line-monitor/test_station_atlas.cjs
           node scripts/a7-line-monitor/test_national_market.cjs
           node scripts/a7-line-monitor/test_live_projects.cjs

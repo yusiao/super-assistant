@@ -181,6 +181,7 @@ const RegionMap = (() => {
     if(typeof L==='undefined'){$('tile-status').textContent='地圖程式未載入，仍可使用行政區選單。';return true;}
     map=L.map('road-map',{minZoom:5,maxZoom:19,zoomSnap:.25,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
     void loadTerrain(map);
+    if(typeof TaiwanContext!=='undefined')TaiwanContext.init(map);
     placeLayer=L.layerGroup().addTo(map);
     const panel=document.createElement('section');panel.id='map-drill';panel.className='map-drill';panel.hidden=true;panel.setAttribute('aria-label','行政區內分區導覽');panel.setAttribute('aria-live','polite');$('map-navigation').append(panel);
     // Picking stays available even when the visual boundary layer is hidden.
