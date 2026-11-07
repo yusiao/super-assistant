@@ -24,7 +24,10 @@ const national=vm.runInContext("NationalMarket",context);
   get("national-district").value="左營區";get("national-view").click();
   assert.equal(request.city,"高雄市");assert.equal(request.district,"左營區");
   const district=national.districtPanel(request,()=>{});
-  assert.match(text(district),/行政區｜新成屋均價/);
+  assert.match(text(district),/左營區｜成交均價/);
+  assert.match(text(district),/新成屋成交均價/);
+  assert.match(text(district),/預售屋成交均價/);
+  assert.match(text(district),/各建案預售成交/);
   assert.ok(data.districts["高雄市/左營區"].filings.length);
   const all=national.districtPanel({},()=>{});
   assert.match(text(all),/近一年備查與首次登記紀錄/);
@@ -32,9 +35,15 @@ const national=vm.runInContext("NationalMarket",context);
   const linked=new Set([...data.areas.a8.filings,...data.areas.a8.nearby]);
   assert.ok(linked.size);
   const a8=text(national.areaPanel("a8",{city:"桃園市",district:"龜山區"},()=>{}));
-  assert.match(a8,/不顯示均價/);assert.doesNotMatch(a8,/行政區｜新成屋均價/);
+  assert.match(a8,/不顯示均價/);assert.match(a8,/龜山區行政區參考（非本圖框均價）/);
+  if(data.areas.a8.presale_price.mean!==null){
+    assert.ok(a8.includes(data.areas.a8.presale_price.mean.toFixed(2)+" 萬元／坪"));
+  }
   const a9=text(national.areaPanel("a9",{city:"新北市",district:"林口區"},()=>{}));
   assert.match(a9,/萬元／坪/);assert.match(a9,/500 公尺/);
+  const board=national.areaPanel("a9",{city:"新北市",district:"林口區"},()=>{}).children[0];
+  const hasLink=e=>e.tag==="a"||e.children.some(hasLink);
+  assert.equal(hasLink(board),false,"Prices are visible without navigating away");
   const unknown=text(national.districtPanel({place:"unverified",city:"高雄市",district:"左營區"},()=>{}));
   assert.match(unknown,/不能用行政區平均代替/);
   console.log("PASS: nationwide picker, district data, filing details, scope prices and no misleading fallback.");

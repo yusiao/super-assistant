@@ -19,6 +19,8 @@ COUNTIES = dict(zip("abcdefghijkmnopqtuvwxz", (
 ).split(), strict=True))
 MIN_SALES = 5
 M2_PER_PING = 400 / 121
+# Correct only a verified encoding substitution, scoped to the matching filing and address.
+PRESALE_NAME_CORRECTIONS = {("桃園市/龜山區", "丰嶺?林", "桃市都建執照字第會龜00076-01號"): "丰嶺彡林"}
 
 
 def clean(value):
@@ -74,6 +76,23 @@ def comparable(record, start, end):
         return None
     if not record[11].startswith(("住宅大樓", "華廈", "公寓")) or record[12] not in ("住家用", "集合住宅"):
         return None
+    return net_sale(record, sold)
+
+
+def comparable_presale(record, start, end):
+    sold = roc(record[7])
+    if not sold or not start <= sold <= end or not record[28].strip() or record[30].strip():
+        return None
+    if record[1] not in ("房地(土地+建物)", "房地(土地+建物)+車位"):
+        return None
+    if not record[11].startswith(("住宅大樓", "華廈", "公寓")) or record[12] not in ("住家用", "集合住宅", "住商用"):
+        return None
+    if clean(record[9]) in ("一層", "一樓", "1層", "1樓", "1"):
+        return None
+    return net_sale(record, sold)
+
+
+def net_sale(record, sold):
     if record[26].strip() or not record[27]:
         return None
     transfer = re.fullmatch(r"土地\d+建物1車位(\d+)", record[8])
@@ -106,12 +125,56 @@ def stats(samples):
 
 
 def registration_span(archive):
+    return batch_span(archive, r"登記日期", "registration")
+
+
+def presale_span(archive):
+    return batch_span(archive, r"交易日期", "presale", r"\s*之預售屋案件")
+
+
+def batch_span(archive, prefix, label, suffix=""):
     content = archive.read("build_time.xml").decode("utf-8-sig")
-    match = re.search(r"登記日期\s*(\d+)年(\d+)月(\d+)日至\s*(\d+)年(\d+)月(\d+)日", content)
+    match = re.search(prefix + r"\s*(\d+)年(\d+)月(\d+)日至\s*(\d+)年(\d+)月(\d+)日" + suffix, content)
     if not match:
-        raise ValueError("Missing sale registration period")
+        raise ValueError(f"Missing {label} period")
     a, b, c, d, e, f = map(int, match.groups())
     return date(a + 1911, b, c), date(d + 1911, e, f)
+
+
+def presale_positions(path, as_of):
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    candidates = defaultdict(list)
+    for project in data["projects"]:
+        key = (clean(project["city"]) + "/" + clean(project["district"]), clean(project["name"]))
+        point = project.get("coordinates")
+        if project.get("verified_on", "") >= (as_of - timedelta(days=7)).isoformat() and point:
+            candidates[key].append(tuple(point))
+        else:
+            candidates[key].append(None)
+    return {key: points[0] for key, points in candidates.items() if len(points) == 1 and points[0]}
+
+
+def presale_summary(records):
+    projects = defaultdict(list)
+    for name, sample in records:
+        projects[name].append(sample)
+    return {
+        "presale_price": stats([sample for _, sample in records]),
+        "presale_projects": [{"name": name, **stats(samples)}
+                             for name, samples in sorted(projects.items(), key=lambda p: (-len(p[1]), p[0]))],
+    }
+
+
+def presale_name_corrections(filings):
+    corrections = {}
+    for town, _, item in filings.values():
+        name = clean(item["name"])
+        corrected = PRESALE_NAME_CORRECTIONS.get((town, name, clean(item["permit"])))
+        if corrected and (address := address_key(item["address"], *town.split("/"))):
+            corrections[town, name, address] = corrected
+    return corrections
 
 
 def address_positions(address_files, features, wanted):
@@ -171,6 +234,7 @@ def build(args):
             geom = shape(f["geometry"])
             shapes[key] = shapes[key].union(geom) if key in shapes else geom
     sales, spans, seen = defaultdict(list), [], set()
+    presales, presale_spans, presale_seen = defaultdict(list), [], set()
     transactions = defaultdict(list)
     shapes_by_district = {
         "桃園市/龜山區": [k for k in shapes if k.startswith(("a7", "a8"))],
@@ -188,14 +252,37 @@ def build(args):
     for file in args.sales:
         with ZipFile(file) as archive:
             spans.append(registration_span(archive))
+            presale_spans.append(presale_span(archive))
     spans.sort()
-    if any(a[1] + timedelta(days=1) != b[0] for a, b in zip(spans, spans[1:])):
+    presale_spans.sort()
+    if any(a[1] + timedelta(days=1) != b[0] for periods in (spans, presale_spans)
+           for a, b in zip(periods, periods[1:])):
         raise ValueError("Use contiguous, non-overlapping MOI sale batches")
     end = spans[-1][1]
     start = end - timedelta(days=182)
+    presale_start, presale_end = presale_spans[0][0], presale_spans[-1][1]
+    presale_file_count = 0
     for file in args.sales:
         with ZipFile(file) as archive:
             for code, city in COUNTIES.items():
+                name = f"{code}_lvr_land_b.csv"
+                if name in archive.namelist():
+                    presale_file_count += 1
+                    records = rows(archive, name)
+                    header = next(records)
+                    next(records)
+                    if header[27:31] != ["編號", "建案名稱", "棟及號", "解約情形"]:
+                        raise ValueError(f"Changed presale fields: {name}")
+                    for row in records:
+                        if len(row) < 31:
+                            continue
+                        town = f"{city}/{clean(row[0])}"
+                        key = code, row[27]
+                        if town not in districts or key in presale_seen or not (sample := comparable_presale(row, presale_start, presale_end)):
+                            continue
+                        presale_seen.add(key)
+                        name_key = clean(row[28])
+                        presales[town].append((name_key, address_key(row[2], city, clean(row[0])), sample))
                 name = f"{code}_lvr_land_a.csv"
                 if name not in archive.namelist():
                     continue
@@ -217,6 +304,8 @@ def build(args):
                         address = address_key(row[2], city, clean(row[0]))
                         if address:
                             transactions[town].append((address, sample))
+    if not presale_file_count:
+        raise ValueError("Missing MOI presale batch files")
     filings, located = {}, defaultdict(list)
     cutoff = years_before(args.as_of, 1)
     with ZipFile(args.filings) as archive:
@@ -255,16 +344,32 @@ def build(args):
             address = address_key(item["address"], *town.split("/"))
             if address:
                 located[town].append((key, address))
+    corrections = presale_name_corrections(filings)
+    for town, records in presales.items():
+        presales[town] = [(corrections.get((town, name, address), name), address, sample)
+                          for name, address, sample in records]
     wanted = {town: {a for a, _ in transactions[town]} | {a for _, a in located[town]}
+              | {a for _, a, _ in presales[town] if a}
               for town in shapes_by_district}
     points = address_positions(args.addresses, divisions, wanted)
+    bases = presale_positions(SITE / "national-listings.json", args.as_of)
     areas = {key: {"filings": [], "price": None} for key in shapes}
     project_m = Transformer.from_crs(4326, 3826, always_xy=True).transform
     vicinity = {key: transform(project_m, shapes[key]).buffer(500) for key in ("a7", "a8", "a9")}
     area_sales, vicinity_sales = defaultdict(list), defaultdict(list)
+    area_presales, vicinity_presales = defaultdict(list), defaultdict(list)
     for key in vicinity:
         areas[key]["nearby"] = []
     for town, ids in shapes_by_district.items():
+        for name, address, sample in presales[town]:
+            coordinates = bases.get((town, name)) or points.get((town, address))
+            if coordinates:
+                point = Point(*coordinates)
+                for key in ids:
+                    if shapes[key].covers(point):
+                        area_presales[key].append((name, sample))
+                    if key in vicinity and vicinity[key].covers(Point(*project_m(*coordinates))):
+                        vicinity_presales[key].append((name, sample))
         for address, sample in transactions[town]:
             if coordinates := points.get((town, address)):
                 point = Point(*coordinates)
@@ -283,21 +388,34 @@ def build(args):
                         areas[key]["nearby"].append(project)
     for key in areas:
         areas[key]["price"] = stats(area_sales[key]) if area_sales[key] else None
+        areas[key].update(presale_summary(area_presales[key]))
     for key in vicinity:
         areas[key]["nearby_price"] = stats(vicinity_sales[key])
+        areas[key]["nearby_presale_price"] = stats([sample for _, sample in vicinity_presales[key]])
     for town, item in districts.items():
         item["filings"].sort(key=lambda key: filings[key][1], reverse=True)
         item["price"] = stats(sales[town])
+        item.update(presale_summary([(name, sample) for name, _, sample in presales[town]]))
     for item in areas.values():
         item["filings"].sort(key=lambda key: filings[key][1], reverse=True)
+    cities = {city: {
+        "price": stats([sample for town, values in sales.items() if town.startswith(city + "/") for sample in values]),
+        "presale_price": stats([sample for town, values in presales.items() if town.startswith(city + "/") for _, _, sample in values]),
+    } for city in COUNTIES.values()}
     output = {
         "schema_version": 1, "checked_on": args.as_of.isoformat(), "filing_since": cutoff.isoformat(),
         "sale_period": {"from": start.isoformat(), "to": end.isoformat(),
                         "registration_from": spans[0][0].isoformat(), "registration_to": end.isoformat()},
+        "presale_period": {"from": presale_start.isoformat(), "to": presale_end.isoformat()},
+        "cities": cities,
+        "national": {"price": stats([sample for values in sales.values() for sample in values]),
+                     "presale_price": stats([sample for values in presales.values() for _, _, sample in values])},
         "districts": districts, "areas": areas, "filings": {k: row[2] for k, row in filings.items()},
     }
     args.output.write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"{len(districts)} districts, {len(filings)} filings, {len(seen)} comparable sales, {len(points)} address matches")
+    print(f"{len(districts)} districts, {len(filings)} filings, {len(seen)} comparable sales, "
+          f"{len(presale_seen)} comparable presales, {len(points)} address matches")
+    print({key: areas[key]["presale_price"] for key in vicinity})
     print({k: (len(v["filings"]), v["price"], len(v.get("nearby", [])), v.get("nearby_price"))
            for k, v in areas.items() if k in vicinity})
 

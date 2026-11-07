@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import unittest
 
-from build_national_market import address_key, comparable, stats
+from build_national_market import address_key, comparable, comparable_presale, presale_name_corrections, stats
 from refresh_national_market import seasons, links
 
 
@@ -40,6 +40,25 @@ class NationalMarketTest(unittest.TestCase):
             row[i] = value
             self.assertIsNone(self.comparable(row))
 
+    def test_presale_is_separate_from_completed_and_excludes_cancellations(self):
+        start, end = date(2026, 2, 11), date(2026, 8, 10)
+        row = self.record()
+        row[9], row[12], row[14], row[28] = "十層", "住商用", "", "測試案"
+        self.assertEqual(comparable_presale(row, start, end), ("2026-06-03", 10000000, 100))
+        self.assertIsNone(self.comparable(row))
+        for column, value in [(30, "1150701全部解約"), (9, "一層"), (12, "商業用"), (7, "1150811"),
+                              (24, "0"), (26, "特殊交易"), (28, "")]:
+            changed = list(row)
+            changed[column] = value
+            self.assertIsNone(comparable_presale(changed, start, end))
+
+    def test_encoding_correction_requires_matching_official_filing(self):
+        town = "桃園市/龜山區"
+        filed = {"name":"丰嶺?林", "address":"文化村2鄰文昌一街30號等", "permit":"桃市都建執照字第會龜00076-01號"}
+        self.assertEqual(presale_name_corrections({"id":(town, date(2026, 2, 11), filed)}),
+                         {(town, "丰嶺?林", "文昌一街30號"): "丰嶺彡林"})
+        self.assertEqual(presale_name_corrections({"id":(town, date(2026, 2, 11), {**filed,"permit":"不同建照"})}), {})
+
     def test_addresses(self):
         self.assertEqual(address_key("桃園市龜山區文化三路一段３８５號十二樓之２", "桃園市", "龜山區"),
                          "文化三路1段385號")
@@ -54,9 +73,15 @@ class NationalMarketTest(unittest.TestCase):
         for scope in [*data["districts"].values(), *data["areas"].values()]:
             for key in scope["filings"] + scope.get("nearby", []):
                 self.assertIn(key, data["filings"])
-            for stats_ in (scope.get("price"), scope.get("nearby_price")):
+            for stats_ in (scope.get("price"), scope.get("nearby_price"), scope.get("presale_price"),
+                           scope.get("nearby_presale_price"), *scope.get("presale_projects", [])):
                 if stats_ and stats_["count"] < 5:
                     self.assertIsNone(stats_["mean"])
+            self.assertEqual(sum(p["count"] for p in scope["presale_projects"]), scope["presale_price"]["count"])
+            for project in scope["presale_projects"]:
+                self.assertLessEqual(project.keys(), {"name", "count", "mean", "first", "last"})
+        self.assertEqual(data["national"]["presale_price"]["count"],
+                         sum(d["presale_price"]["count"] for d in data["districts"].values()))
         for station in ("a7", "a8", "a9"):
             self.assertTrue(data["areas"][station]["filings"] or data["areas"][station]["nearby"])
 

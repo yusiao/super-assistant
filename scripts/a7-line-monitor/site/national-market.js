@@ -30,18 +30,51 @@ const NationalMarket = (() => {
     const p=text("p",failed?"全台資料讀取失敗，請重新整理。不顯示成 0 案。":"正在讀取全台官方資料…");
     p.setAttribute("role","status");return p;
   }
-  function priceCard(price, scope){
-    const box=text("section","");box.className="national-price";
-    box.append(text("h3",scope+"｜新成屋均價"));
-    if(Number.isFinite(price?.mean)&&price.count>=5){
-      box.append(text("strong",price.mean.toFixed(2)+" 萬元／坪"),
-        text("p",price.count+" 筆 · 交易日 "+price.first+" 至 "+price.last));
-    }else{
-      box.append(text("p",price?.count?("僅 "+price.count+" 筆合格樣本，不顯示均價。"):"無足夠合格或可定位樣本，不顯示均價。"));
+  const enough=price=>Number.isFinite(price?.mean)&&price.count>=5;
+  const unitPrice=price=>price.mean.toFixed(2)+" 萬元／坪";
+  const priceTypes=[["price","新成屋","成交時屋齡 5 年內"],["presale_price","預售屋","依預售契約成交登錄"]];
+  function priceBoard(scope={},title,reference=false){
+    const box=text("section","");box.className="national-price"+(reference?" national-price-reference":"");
+    box.append(text("h3",title));
+    const grid=text("div","");grid.className="national-price-grid";
+    for(const [key,label,description] of priceTypes){
+      const metric=text("div","");metric.className="national-price-metric";
+      const price=scope[key];
+      metric.append(text("h4",label+"成交均價"));
+      if(enough(price)){
+        metric.append(text("strong",unitPrice(price)),text("p",`${price.count.toLocaleString("zh-TW")} 筆 · ${price.first} 至 ${price.last}`));
+      }else{
+        metric.append(text("p",price?.count?`樣本不足（${price.count} 筆），不顯示均價。`:"無足夠合格或可定位樣本，不顯示均價。"));
+      }
+      if(!reference)metric.append(text("small",description+(key==="presale_price"&&scope.presale_projects?.length?` · ${scope.presale_projects.length} 案`:"")));
+      grid.append(metric);
     }
-    box.append(text("small","成交時屋齡 5 年內 · 扣車位 · 按面積加權"),
-      text("small","登記批次 "+data.sale_period.registration_from+" 至 "+data.sale_period.registration_to),note());
+    box.append(grid);
+    if(!reference){
+      const method=text("details","");method.className="national-price-method";
+      method.append(text("summary","樣本期間與統計口徑"),
+        text("p","來源：內政部實價登錄。成交價扣除車位，按面積加權，至少 5 筆才計均價；不是待售開價。"),
+        text("p",`新成屋登記批次：${data.sale_period.registration_from} 至 ${data.sale_period.registration_to}。`));
+      if(data.presale_period)method.append(text("p",`預售屋契約批次：${data.presale_period.from} 至 ${data.presale_period.to}，排除解約。`));
+      box.append(method);
+    }
     return box;
+  }
+  function benchmark(box,scope,{city,district}){
+    const reference=data.districts[`${city}/${district}`];
+    if(reference&&(!enough(scope?.price)||!enough(scope?.presale_price))&&(enough(reference.price)||enough(reference.presale_price))){
+      box.append(priceBoard(reference,`${district}行政區參考（非本圖框均價）`,true));
+    }
+  }
+  function projectPrices(scope){
+    if(!scope?.presale_projects?.length)return null;
+    const details=text("details","");details.className="national-project-prices";
+    details.append(text("summary",`各建案預售成交 · ${scope.presale_projects.length} 案`));
+    const list=text("dl","");
+    for(const project of scope.presale_projects){
+      list.append(text("dt",project.name),text("dd",enough(project)?`${unitPrice(project)} · ${project.count} 筆`:`樣本不足 · ${project.count} 筆`));
+    }
+    details.append(list);return details;
   }
   function listing(ids, title, districtById=new Map()){
     const section=text("section","");section.className="national-list";
@@ -82,16 +115,23 @@ const NationalMarket = (() => {
     if(place){
       const area=data.areas["official:"+place];
       if(area){
-        box.append(priceCard(area.price,"圖框內已定位成交"));
+        box.append(priceBoard(area,"圖框內｜已定位成交"));
+        benchmark(box,area,{city,district});
+        const prices=projectPrices(area);if(prices)box.append(prices);
         if(area.filings.length)box.append(listing(area.filings,"圖框內對應建案"));
         else box.append(text("p","本次沒有能定位到圖框內的備查建案；不等於沒有建案。"));
-      }else box.append(text("p","此生活圈尚無已核對的範圍或成交定位，不能用行政區平均代替。"));
+      }else{
+        box.append(text("p","此生活圈尚無已核對的範圍或成交定位，不能用行政區平均代替。"));
+        benchmark(box,null,{city,district});
+      }
       box.append(button("改看 "+district+" 的建案與均價",()=>open({city,district})),note());
       if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry}));
       return box;
     }
     const districts=Object.entries(data.districts).filter(([key])=>!city||(district?key===city+"/"+district:key.startsWith(city+"/")));
-    if(district)box.append(priceCard(districts[0]?.[1].price,"行政區"));
+    const scope=district?districts[0]?.[1]:city?data.cities?.[city]:data.national;
+    if(scope)box.append(priceBoard(scope,`${district||city||"全台"}｜成交均價`));
+    const prices=projectPrices(scope);if(prices)box.append(prices);
     if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district}));
     const byId=new Map(districts.flatMap(([key,d])=>d.filings.map(id=>[id,key.replace("/"," ")])));
     const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());box.append(registry);
@@ -103,11 +143,13 @@ const NationalMarket = (() => {
     const box=text("div","");
     if(!data){box.append(status());return box;}
     const area=data.areas[id];
-    box.append(priceCard(area?.price,"圖框內已定位成交"));
-    if(area?.nearby_price?.count>0&&(!area.price?.count||area.nearby_price.count!==area.price.count)){
+    box.append(priceBoard(area,"圖框內｜已定位成交"));
+    benchmark(box,area,district);
+    const prices=projectPrices(area);if(prices)box.append(prices);
+    const expanded={price:area?.nearby_price,presale_price:area?.nearby_presale_price};
+    if(priceTypes.some(([key])=>expanded[key]?.count>0&&expanded[key].count!==area[key]?.count)){
       const nearby=text("details","");nearby.className="atlas-source-notes";
-      const price=area.nearby_price;
-      nearby.append(text("summary",`含外擴 500 公尺：${price.mean===null?"樣本不足":price.mean.toFixed(2)+" 萬元／坪"} · ${price.count} 筆`),priceCard(price,"含圖框及外擴 500 公尺"));
+      nearby.append(text("summary","查看含外擴 500 公尺的成交參考"),priceBoard(expanded,"含圖框及外擴 500 公尺"));
       box.append(nearby);
     }
     box.append(button("看 "+district.district+" 全部新建案",()=>open(district)));
