@@ -179,7 +179,7 @@ const RegionMap = (() => {
     try{const r=await fetch('districts.geojson',{signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('boundary');data=await r.json();if(!Array.isArray(data.features)||!Array.isArray(data.cities))throw Error('schema');}catch{$('tile-status').textContent='行政區界線載入失敗，仍可使用下方選單。';return false;}
     if(typeof NationalMarket!=="undefined")NationalMarket.configure(data.features,pickDirectory).then(StationAtlas.nationalReady);
     if(typeof L==='undefined'){$('tile-status').textContent='地圖程式未載入，仍可使用行政區選單。';return true;}
-    map=L.map('road-map',{minZoom:6,maxZoom:19,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
+    map=L.map('road-map',{minZoom:5,maxZoom:19,zoomSnap:.25,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
     void loadTerrain(map);
     placeLayer=L.layerGroup().addTo(map);
     const panel=document.createElement('section');panel.id='map-drill';panel.className='map-drill';panel.hidden=true;panel.setAttribute('aria-label','行政區內分區導覽');panel.setAttribute('aria-live','polite');$('map-navigation').append(panel);

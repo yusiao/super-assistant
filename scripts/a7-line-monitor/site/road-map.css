@@ -8,7 +8,7 @@
 /* Observation polygons are independent of the official district layer. */
 .map-heading p{font-size:14px;line-height:1.7;color:var(--muted);margin:10px 0 0}
 #atlas-corridor[aria-pressed="true"]{background:var(--green);color:var(--paper)}
-#road-map{height:620px;background:#e7eadd}
+#road-map{height:620px;background:#e2eded}
 .region-map:has(.atlas-active) :is(.catalog-toolbar,.catalog-index,.map-local,#map-city){display:none}
 .atlas-map-label{display:block;border:1px solid #546358;border-radius:4px;background:#fffdf5;color:#263e34;box-shadow:0 2px 8px #1f372a24;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:600;line-height:1.4;white-space:nowrap;transform:translate(-50%,-50%);cursor:pointer}
 .atlas-map-label:hover,.atlas-map-label:focus-visible{background:#264e3c;color:#fff;outline:3px solid #d8ad69;outline-offset:2px}
