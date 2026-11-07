@@ -78,10 +78,9 @@
 .project-pin{display:grid;place-items:center;width:34px;height:34px;padding:0;border:2px solid #fffdf8;border-radius:50%;box-shadow:0 2px 6px #173d3066;background:#254b3b;color:white;font:700 17px/1 var(--sans);cursor:pointer}
 .project-pin-pending{background:#98501d}.project-pin-group{background:#29465b;font-size:14px}
 .project-pin:hover,.project-pin[aria-pressed=true],.project-pin:focus-visible{outline:3px solid #e0a747;outline-offset:1px;background:#172e24}
-.atlas-settings .administrative-info{margin:0 24px;padding-bottom:12px}.map-navigation .map-drill,#map-navigation .map-drill{position:static;width:auto;max-width:none;max-height:none;margin-top:10px;box-shadow:none}
+.atlas-settings .administrative-info{margin:0 24px;padding-bottom:12px}#map-navigation .map-drill{position:static;width:auto;max-width:none;max-height:none;margin-top:10px;box-shadow:none}
 @media(max-width:740px){
-  .map-body{--map-height:clamp(235px,47svh,400px);grid-template-columns:minmax(0,1fr)}
-  .map-canvas{position:sticky;top:0;z-index:1;background:#fffdf8}
+  .map-body{--map-height:clamp(210px,44svh,400px);grid-template-columns:minmax(0,1fr)}
   #atlas-results{height:auto;min-height:160px;border-left:0;border-top:1px solid var(--line)}
-  #atlas-results-body{max-height:310px}
+  #atlas-results-body{max-height:clamp(140px,34svh,280px)}
 }
