@@ -6,13 +6,18 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>房市觀測室｜從區域，看見變化</title>
-  <link rel="stylesheet" href="leaflet.css"><link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="road-map.css?v=15"><script src="leaflet.js" defer></script><script src="redevelopment-areas.js?v=4" defer></script><script src="station-atlas.js?v=3" defer></script><script src="road-map.js?v=17" defer></script><script src="app.js?v=11" defer></script>
+  <link rel="stylesheet" href="leaflet.css"><link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="road-map.css?v=16"><script src="leaflet.js" defer></script><script src="redevelopment-areas.js?v=4" defer></script><script src="national-market.js?v=1" defer></script><script src="station-atlas.js?v=4" defer></script><script src="road-map.js?v=18" defer></script><script src="app.js?v=11" defer></script>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">▥</span>房市觀測室<span class="brand-en">PROPERTY OBSERVATORY</span></a><span class="edition">個人選區 · 公開資料</span></header>
   <main>
     <section class="region-map" aria-label="行政區地圖選擇">
-      <div class="map-heading"><div><div class="section-no">機捷沿線 / 預售建案</div><h1>選區域，看建案</h1><p>點下方區域或地圖色塊，直接開啟建案清單。</p></div><div class="map-controls"><button id="atlas-corridor" type="button" disabled>A7–A9 總覽</button><button id="map-overview" type="button">全臺地圖</button><button id="map-city" type="button">放大所選縣市</button></div></div>
+      <div class="map-heading"><div><div class="section-no">全台建案 / 實價登錄</div><h1>全台新建案與新成屋均價</h1><p>選縣市、行政區，或直接點地圖。生活圈均價只用定位到圖框內的成交。</p></div><div class="map-controls"><button id="atlas-corridor" type="button" disabled>A7–A9 總覽</button><button id="map-overview" type="button">全臺地圖</button><button id="map-city" type="button">放大所選縣市</button></div></div>
+      <div class="national-picker" aria-label="全台選區">
+        <select id="national-city" aria-label="全台建案縣市"><option value="">全台縣市</option></select>
+        <select id="national-district" aria-label="全台建案行政區" disabled><option value="">全縣市</option></select>
+        <button id="national-view" class="atlas-secondary" type="button" disabled>查看新建案</button>
+      </div>
       <section id="atlas-detail" class="atlas-stations" aria-label="快速選區"><p role="status">正在載入 A7–A9 區域…</p></section>
       <div class="catalog-toolbar"><label for="place-type">地圖區域類型</label><select id="place-type"><option value="all">全部類型</option><option value="development">重劃／開發區</option><option value="established">既有生活圈／次分區</option><option value="planned">開發計畫</option></select><p id="catalog-coverage" role="status"></p></div>
       <div class="map-body"><div class="map-canvas"><div id="road-map" role="region" aria-label="區域地形與生活圈範圍圖"></div><p id="tile-status" role="status"></p></div><div class="map-detail"><details class="administrative-info"><summary>行政區與官方開發圖層</summary><span class="section-no">SELECTED REGION</span><h3 id="map-selection">桃園市</h3><p id="map-status" role="status">正在載入行政區界線…</p><label class="check"><input id="district-toggle" type="checkbox" checked>行政區界線</label><label class="check"><input id="life-toggle" type="checkbox" checked disabled>已核對的官方開發範圍</label><p id="boundary-status" role="status">正在讀取官方範圍</p><p class="map-hint">生活圈觀察框與官方開發區分開顯示。可以取消行政區線，彩色範圍仍可點選。</p><div id="map-district-buttons" class="map-district-buttons" aria-label="行政區快速選擇"></div></details></div></div>

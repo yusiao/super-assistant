@@ -63,7 +63,7 @@ async function main(){
  const shapes=layers.find(l=>l.opts.pane==='atlasAreas');
  const dialog=get('atlas-results'),panel=get('atlas-results-body'),quick=get('atlas-detail');
  atlas.setMarketData(market);
- assert.match(text(quick.children[0]),/看 2 案/);
+ assert.match(text(quick.children[0]),/已核對 2 案/);
  assert.match(text(quick.children[1]),/尚未接入/);
  assert.ok(!dialog.open,'Landing on the map must not open a dialog');
  assert.equal(shapes.opts.bubblingMouseEvents,false);

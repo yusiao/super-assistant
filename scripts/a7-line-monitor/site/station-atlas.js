@@ -3,6 +3,7 @@ const StationAtlas = (() => {
   const $ = id => document.getElementById(id);
   let map, data, shapes, labels, focus = "", active = false, onNavigate=()=>{};
   let market = null, marketError = "";
+  let dialogMode = "atlas", directoryRequest = 0, dialogWired = false;
   const stationButtons = new Map();
   const stages = {active:"銷售中預售",pending:"未開賣預售",sold_out:"完銷預售"};
   const colors = {a7:"#ad5929",a8:"#276b66",a9:"#3b6592"};
@@ -111,7 +112,7 @@ const StationAtlas = (() => {
   function setMarketData(body,error=""){
     if(market===body&&marketError===error)return;
     market=body;marketError=error;
-    if(active&&data){info();if($("atlas-results").open)renderResults(find(focus));}
+    if(active&&data){info();if($("atlas-results").open&&dialogMode==="atlas")renderResults(find(focus));}
   }
   function draw(){
     if(!data)return;
@@ -136,7 +137,8 @@ const StationAtlas = (() => {
     stationButtons.clear();
     for(const f of roots()){
       const {id,name}=f.properties,areas=marketScope(f).areas,count=projects(areas).length;
-      const status=marketError?"讀取失敗":!market?"讀取中":count?`看 ${count} 案`:!areas.length?"尚未接入":"本次未取得建案";
+      const official=typeof NationalMarket!=="undefined"?NationalMarket.count(id):0;
+      const status=official?`官方資料 ${official} 案`:count?`已核對 ${count} 案`:typeof NationalMarket!=="undefined"?"查看區域":marketError?"讀取失敗":!market?"讀取中":!areas.length?"尚未接入":"本次未取得建案";
       const b=button("",()=>show(id),`atlas-station ${id}`);
       b.setAttribute("aria-pressed",String(selected===id));b.setAttribute("aria-haspopup","dialog");
       b.append(node("strong",name),node("span",status));panel.append(b);stationButtons.set(id,b);
@@ -159,8 +161,39 @@ const StationAtlas = (() => {
     more.append(node("summary","地圖範圍與圖資來源"),node("p",p.note));
     if(p.roads.length)more.append(node("p","沿線道路："+p.roads.join("、")));
     const a=node("a","查看範圍依據");a.href=p.source_url;a.target="_blank";a.rel="noopener noreferrer";more.append(a);
-    body.replaceChildren(control,projectPanel(feature),more);
+    dialogMode="atlas";directoryRequest++;
+    const sections=[control];
+    if(typeof NationalMarket!=="undefined"){
+      const district=root(feature)==="a9"?{city:"新北市",district:"林口區"}:{city:"桃園市",district:"龜山區"};
+      sections.push(NationalMarket.areaPanel(p.id,district,openNational));
+    }
+    if(typeof NationalMarket==="undefined"||marketScope(feature).areas.some(a=>projects([a]).length||a.transactions?.length)){
+      if(typeof NationalMarket!=="undefined")sections.push(node("h3","另有已核對的銷售與成交資料"));
+      sections.push(projectPanel(feature));
+    }
+    body.replaceChildren(...sections,more);
     body.scrollTop=0;
+  }
+  function openNational(selection={}){
+    if(typeof NationalMarket==="undefined")return;
+    wireDialog();
+    dialogMode="national";
+    const request=++directoryRequest,dialog=$("atlas-results"),body=$("atlas-results-body");
+    $("atlas-result-title").textContent=selection.title||(selection.city?selection.city+(selection.district||""):"全台新建案");
+    const render=()=>body.replaceChildren(NationalMarket.districtPanel(selection,openNational));
+    render();body.scrollTop=0;
+    if(!dialog.open)dialog.showModal();
+    NationalMarket.load().then(()=>{if(dialog.open&&request===directoryRequest)render();});
+  }
+  function wireDialog(){
+    if(dialogWired)return;
+    dialogWired=true;
+    const dialog=$("atlas-results");
+    $("atlas-close").addEventListener("click",()=>dialog.close());
+    dialog.addEventListener("close",()=>{if(dialogMode==="atlas"&&active&&focus&&!dialog.open)stationButtons.get(root(find(focus)))?.focus({preventScroll:true});});
+  }
+  function nationalReady(){
+    if(active&&data){info();if($("atlas-results").open&&dialogMode==="atlas")renderResults(find(focus));}
   }
   function show(id){
     if(!data||id&&!find(id))return;
@@ -184,9 +217,7 @@ const StationAtlas = (() => {
   async function init(instance,onFocus=()=>{}){
     map=instance;onNavigate=onFocus;
     $("atlas-corridor").addEventListener("click",()=>show(""));
-    const dialog=$("atlas-results");
-    $("atlas-close").addEventListener("click",()=>dialog.close());
-    dialog.addEventListener("close",()=>{if(active&&focus&&!dialog.open)stationButtons.get(root(find(focus)))?.focus({preventScroll:true});});
+    wireDialog();
     try{
       const r=await fetch("station-atlas.geojson",{signal:AbortSignal.timeout(10000)});
       if(!r.ok)throw Error("atlas");const body=await r.json();if(!valid(body))throw Error("schema");data=body;
@@ -219,5 +250,5 @@ const StationAtlas = (() => {
       $("atlas-corridor").disabled=true;return false;
     }
   }
-  return {init,show,leave,isActive:()=>active,valid,setMarketData};
+  return {init,show,leave,isActive:()=>active,valid,setMarketData,openNational,nationalReady};
 })();

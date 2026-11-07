@@ -20,7 +20,7 @@ const RegionMap = (() => {
   function placeName(p){return p.name+(p.districts.includes(district)?'':'（鄰近關聯）');}
   function localPlaces(filtered=false){return catalog.filter(p=>matchesDistrict(p,city,district)&&(!filtered||placeType==='all'||p.type===placeType));}
   function inScope(f){const p=f.properties;return p.city===city&&(!district||[...(p.districts||[p.district]),...(p.navigation_districts||[])].includes(district));}
-  function openPlace(p){overview=false;selectedPlace=p;paintPlaces();const shapes=verified.filter(f=>f.properties.catalog_id===p.id);const bounds=shapes.length?L.geoJSON(shapes).getBounds():[[p.lat-.008,p.lon-.010],[p.lat+.008,p.lon+.010]];map.fitBounds(bounds,{padding:[40,40],animate:false});drillPanel();$('road-map').scrollIntoView?.({block:'center'});}
+  function openPlace(p){overview=false;selectedPlace=p;paintPlaces();const shapes=verified.filter(f=>f.properties.catalog_id===p.id);const bounds=shapes.length?L.geoJSON(shapes).getBounds():[[p.lat-.008,p.lon-.010],[p.lat+.008,p.lon+.010]];map.fitBounds(bounds,{padding:[40,40],animate:false});drillPanel();$('road-map').scrollIntoView?.({block:'center'});if(typeof NationalMarket!=="undefined")StationAtlas.openNational({city:p.city,district,place:p.id,title:placeName(p)});}
   function coverage(){
     const list=$('catalog-places');list.replaceChildren();
     const entries=localPlaces(),shown=localPlaces(true);
@@ -69,6 +69,7 @@ const RegionMap = (() => {
     if(c!==city||d!==district)placeLevel='area';
     drill=!overview&&c===city&&d===district?'subareas':'district';
     choose(c,d);
+    if(typeof NationalMarket!=="undefined")StationAtlas.openNational({city:c,district:d});
   }
   function drillPanel(){
     const panel=$('map-drill');panel.replaceChildren();panel.hidden=overview||!district||(!selectedPlace&&!selectedArea&&(localPlaces().length>0||(city==='桃園市'&&district==='龜山區')));if(panel.hidden)return;
@@ -147,6 +148,7 @@ const RegionMap = (() => {
     $('place-type').addEventListener('change',()=>{placeType=$('place-type').value;selectedPlace=null;paintPlaces();coverage();drillPanel();});
     callback=onSelect;$('map-overview').addEventListener('click',()=>{if(typeof StationAtlas!=='undefined')StationAtlas.leave();overview=true;frame='';render(city,district,areas,selectedArea);});$('map-city').addEventListener('click',()=>{frame='';choose(city,'');});
     try{const r=await fetch('districts.geojson',{signal:AbortSignal.timeout(12000)});if(!r.ok)throw Error('boundary');data=await r.json();if(!Array.isArray(data.features)||!Array.isArray(data.cities))throw Error('schema');}catch{$('tile-status').textContent='行政區界線載入失敗，仍可使用下方選單。';return false;}
+    if(typeof NationalMarket!=="undefined")NationalMarket.configure(data.features,StationAtlas.openNational).then(StationAtlas.nationalReady);
     if(typeof L==='undefined'){$('tile-status').textContent='地圖程式未載入，仍可使用行政區選單。';return true;}
     map=L.map('road-map',{minZoom:6,maxZoom:19,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
     placeLayer=L.layerGroup().addTo(map);
@@ -161,7 +163,7 @@ const RegionMap = (() => {
     });
     districtLayer=L.geoJSON(data.features.map(mainGeometry),{bubblingMouseEvents:false,onEachFeature:(f,layer)=>{layer.bindTooltip(text('span',f.properties.city+f.properties.district));layer.on('click',()=>pickDistrict(f.properties.city,f.properties.district));}}).addTo(map);
     lifeLayer=L.geoJSON([],{bubblingMouseEvents:false,style:{color:'#a56822',weight:3,fillOpacity:.12},onEachFeature:(f,layer)=>{
-      const p=f.properties,box=document.createElement('div'),a=text('a','查看市府原始圖資');a.href=p.source_url;a.target='_blank';a.rel='noopener noreferrer';box.append(text('strong',p.name),text('p',`${p.boundary_kind} · 核對日期：${p.checked_at}`),a);layer.bindTooltip(text('span',p.name));layer.on('click',()=>{if(overview||!district||city!==p.city)choose(p.city,p.district);L.popup().setLatLng(layer.getBounds().getCenter()).setContent(box).openOn(map);});
+      const p=f.properties,box=document.createElement('div'),a=text('a','查看市府原始圖資');a.href=p.source_url;a.target='_blank';a.rel='noopener noreferrer';box.append(text('strong',p.name),text('p',`${p.boundary_kind} · 核對日期：${p.checked_at}`),a);layer.bindTooltip(text('span',p.name));layer.on('click',()=>{if(overview||!district||city!==p.city)choose(p.city,p.district);if(typeof NationalMarket!=="undefined"&&p.catalog_id)StationAtlas.openNational({city:p.city,district:p.district,place:p.catalog_id,title:p.name});else L.popup().setLatLng(layer.getBounds().getCenter()).setContent(box).openOn(map);});
     }}).addTo(map);
     $('district-toggle').addEventListener('change',()=>{$('district-toggle').checked?districtLayer.addTo(map):map.removeLayer(districtLayer);});$('life-toggle').addEventListener('change',paint);fit();
     try{const r=await fetch('life-boundaries.geojson',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('life');const body=await r.json();if(body.type!=='FeatureCollection'||!Array.isArray(body.features))throw Error('schema');verified=body.features.filter(validLife);}catch{$('tile-status').textContent='生活圈圖層未載入；道路與行政區仍可使用。';}
