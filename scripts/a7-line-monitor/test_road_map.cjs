@@ -2,14 +2,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 class Element{constructor(){this.children=[];this.events={};this.attributes={};this.checked=true;this.textContent='';}append(...n){this.children.push(...n);}replaceChildren(...n){this.children=n;}setAttribute(k,v){this.attributes[k]=v;}addEventListener(k,fn){this.events[k]=fn;}click(){this.events.click?.({});}}
 const ids=new Map(),get=id=>{if(!ids.has(id))ids.set(id,new Element());return ids.get(id);},fits=[],tiles=[];
 function layer(features=[]){return {features,on(){return this;},addTo(){return this;},setStyle(){},clearLayers(){this.features=[];},addData(f){this.features.push(...f);},getBounds(){return {isValid:()=>true,features:this.features};}};}
-const mapEvents={},markers=[];
-const L={DomEvent:{disableClickPropagation(){},disableScrollPropagation(){}},map:()=>({on:(k,fn)=>{mapEvents[k]=fn;},zoomControl:{setPosition(){}},fitBounds:b=>fits.push(b),removeLayer(){}}),geoJSON:layer,tileLayer:(url,options)=>{tiles.push({url,options});return layer();}};
+const mapEvents={},markers=[],panes={},images=[],removed=[];
+const L={DomEvent:{disableClickPropagation(){},disableScrollPropagation(){}},map:()=>({on:(k,fn)=>{mapEvents[k]=fn;},zoomControl:{setPosition(){}},fitBounds:b=>fits.push(b),createPane:k=>(panes[k]={style:{}}),removeLayer:l=>removed.push(l)}),geoJSON:layer,tileLayer:(url,options)=>{tiles.push({url,options});return {...layer(),setOpacity(value){options.opacity=value;}};}};
+L.imageOverlay=(url,bounds,options)=>{const image={...layer(),url,bounds,options,events:{},on(k,fn){this.events[k]=fn;return this;}};images.push(image);return image;};
 const geo=JSON.parse(fs.readFileSync(path.join(__dirname,'site/districts.geojson'),'utf8'));
 L.layerGroup=()=>({...layer(),clearLayers(){markers.length=0;}});
 L.divIcon=options=>options;
 L.marker=(position,options)=>({addTo(){markers.push({position,...options});return this;}});
 const boundaries=JSON.parse(fs.readFileSync(path.join(__dirname,'site/life-boundaries.geojson'),'utf8'));
-const context=vm.createContext({document:{getElementById:get,createElement:()=>new Element()},L,fetch:async url=>({ok:true,json:async()=>url==='districts.geojson'?geo:boundaries}),AbortSignal,URL,console});
+const terrain=JSON.parse(fs.readFileSync(path.join(__dirname,'site/taiwan-terrain.json'),'utf8'));
+const context=vm.createContext({document:{getElementById:get,createElement:()=>new Element()},L,fetch:async url=>({ok:true,json:async()=>({'districts.geojson':geo,'life-boundaries.geojson':boundaries,'taiwan-terrain.json':terrain}[url])}),AbortSignal,URL,console});
 const run=s=>vm.runInContext(s,context);
 async function main(){
  run(fs.readFileSync(path.join(__dirname,'site/redevelopment-areas.js'),'utf8'));
@@ -17,7 +19,12 @@ async function main(){
  context.scopes=['郵政物流','樂善國小','文青國小','中心商業區','體育大學'].map((name,id)=>({id:String(id),name:`A7站重劃區-${name}`,city:'桃園市',district:'龜山區'}));
  await run("RegionMap.init((c,d,a)=>RegionMap.render(c,d,scopes,a))");run("RegionMap.render('桃園市','',scopes)");
  assert.equal(run('RegionMap.cities().length'),22);assert.equal(geo.features.length,368);assert.equal(tiles.length,0);
+ assert.equal(images.length,1);const relief=images[0];assert.equal(relief.url,'taiwan-terrain.webp');assert.equal(relief.options.interactive,false);
+ assert.equal(panes.nationalTerrain.style.pointerEvents,'none');assert.ok(Number(panes.nationalTerrain.style.zIndex)<190);
+ assert.deepEqual(relief.bounds,terrain.bounds);
+ const [[south,west],[north,east]]=relief.bounds;assert.ok(south<=21.8&&west<=118&&north>=26.5&&east>=122.3);
  get('enable-roads').click();get('enable-roads').click();assert.equal(tiles.length,1);assert.equal(tiles[0].options.referrerPolicy,'origin');
+ assert.equal(tiles[0].options.opacity,1,'Roads remain readable while the relief loads');relief.events.load();assert.equal(tiles[0].options.opacity,.65);
  assert.equal(boundaries.features.length,20);context.realBoundaries=boundaries.features;assert.ok(run('realBoundaries.every(RegionMap.validLife)'));
  assert.equal(get('life-toggle').disabled,false);assert.match(get('boundary-status').textContent,/20 個官方區段徵收/);
  run("RegionMap.render('新北市','汐止區',[])");assert.equal(fits.at(-1).features[0].properties.district,'汐止區');
@@ -62,6 +69,7 @@ async function main(){
  context.feature={type:'Feature',properties:{verification:'verified',city:'新北市',district:'汐止區',name:'Test',source_url:'https://example.org/boundary',checked_at:'2026-10-25'},geometry:{type:'Polygon',coordinates:[[[121,25],[121.01,25],[121.01,25.01],[121,25]]]}};
  assert.equal(run('RegionMap.validLife(feature)'),true);context.feature.properties.verification='estimated';assert.equal(run('RegionMap.validLife(feature)'),false);context.feature.properties.verification='verified';context.feature.geometry.coordinates[0].pop();assert.equal(run('RegionMap.validLife(feature)'),false);
  const html=fs.readFileSync(path.join(__dirname,'site/index.html'),'utf8');assert.ok(!html.includes('unsafe-inline'));assert.ok(html.includes('content="no-referrer"'));assert.ok(!html.includes('src="map.js'));
+ relief.events.error();assert.equal(removed.at(-1),relief);assert.match(get('terrain-status').textContent,/仍可點選行政區及建案/);
  console.log('PASS: nationwide road map selection, opt-in only, verified-boundary validation, unchanged strict CSP.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

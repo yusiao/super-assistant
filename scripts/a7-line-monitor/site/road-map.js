@@ -1,7 +1,26 @@
 "use strict";
 const RegionMap = (() => {
   const $=id=>document.getElementById(id),text=(tag,value)=>{const n=document.createElement(tag);n.textContent=value;return n;};
+  const overviewBounds=[[21.8,118.0],[26.5,122.3]];
   let data=null,map=null,districtLayer=null,lifeLayer=null,callback=()=>{},city='',district='',areas=[],selectedArea='',frame='',overview=true,verified=[];
+  let roadsLayer=null,terrainReady=false;
+  async function loadTerrain(target){
+    const unavailable=()=>{$('terrain-status').textContent='全臺地形陰影未載入，仍可點選行政區及建案。';};
+    try{
+      const r=await fetch('taiwan-terrain.json',{signal:AbortSignal.timeout(8000)});
+      if(!r.ok)throw Error('terrain metadata');
+      const {version,projection,bounds}=await r.json();
+      if(version!==1||projection!=='EPSG:3857'||!Array.isArray(bounds)||bounds.length!==2||
+        !bounds.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&p[0]>=21&&p[0]<=27&&p[1]>=117&&p[1]<=123)||
+        bounds[0][0]>=bounds[1][0]||bounds[0][1]>=bounds[1][1])throw Error('terrain bounds');
+      const pane=target.createPane('nationalTerrain');pane.style.zIndex='180';pane.style.pointerEvents='none';
+      const relief=L.imageOverlay('taiwan-terrain.webp',bounds,{pane:'nationalTerrain',interactive:false,alt:'',
+        attribution:'<a href="ATLAS-SOURCES.md">地形：Mapzen / USGS / NOAA</a>'});
+      relief.on('load',()=>{terrainReady=true;roadsLayer?.setOpacity(.65);});
+      relief.on('error',()=>{terrainReady=false;roadsLayer?.setOpacity(1);target.removeLayer(relief);unavailable();});
+      relief.addTo(target);
+    }catch{unavailable();}
+  }
   function cities(){return data?.cities||[];}
   function districts(c){return (data?.features||[]).filter(f=>f.properties.city===c).map(f=>f.properties.district);}
   function mainGeometry(f){return {...f,geometry:{type:'MultiPolygon',coordinates:f.geometry.coordinates.filter(p=>p[0].some(([x,y])=>x>=118&&x<=123.5&&y>=21.8&&y<=26.5))}};}
@@ -125,7 +144,7 @@ const RegionMap = (() => {
   }
   function districtAt(lng,lat){return data?.features.find(f=>f.geometry.coordinates.some(poly=>containsPoint(poly[0],lng,lat)&&!poly.slice(1).some(hole=>containsPoint(hole,lng,lat))));}
   function fit(){
-    if(!map||!data)return;if(overview){map.fitBounds([[21.8,118.2],[26.4,122.1]],{padding:[18,18],animate:false});return;}
+    if(!map||!data)return;if(overview){map.fitBounds(overviewBounds,{padding:[18,18],animate:false});return;}
     const features=data.features.filter(f=>f.properties.city===city&&(!district||f.properties.district===district)).map(mainGeometry);
     if(features.length){const bounds=L.geoJSON(features).getBounds();if(bounds.isValid())map.fitBounds(bounds,{padding:[24,24],maxZoom:14,animate:false});}
   }
@@ -151,7 +170,7 @@ const RegionMap = (() => {
     const next=overview?'all':`${city}/${district}`;if(next!==frame){frame=next;if(typeof StationAtlas==='undefined'||!StationAtlas.isActive())fit();}
     const boundaries=overview?verified:verified.filter(inScope),status=boundaries.length?`可查 ${boundaries.length} 個官方區段徵收範圍（非生活圈界線）`:'本範圍尚無已核對的開發區圖層';
     $('life-toggle').disabled=!boundaries.length;$('boundary-status').textContent=status+'；地圖標籤是概略定位入口，不是範圍或建案座標。';
-    $('map-selection').textContent=city+(district?' · '+district:'');$('map-status').textContent='全臺道路可瀏覽；行政區界線非生活圈界線。可用滾輪、雙指或＋／−繼續放大到街道。';
+    $('map-selection').textContent=city+(district?' · '+district:'');$('map-status').textContent='用滾輪、雙指或＋／−縮放地圖。行政區界線不等於生活圈範圍。';
     const list=$('map-district-buttons');list.replaceChildren();for(const name of districts(city)){const b=text('button',name);b.type='button';b.setAttribute('aria-pressed',String(name===district));b.addEventListener('click',()=>pickDistrict(city,name));list.append(b);}paint();details(status);coverage();paintPlaces();drillPanel();
   }
   async function init(onSelect){
@@ -161,6 +180,7 @@ const RegionMap = (() => {
     if(typeof NationalMarket!=="undefined")NationalMarket.configure(data.features,pickDirectory).then(StationAtlas.nationalReady);
     if(typeof L==='undefined'){$('tile-status').textContent='地圖程式未載入，仍可使用行政區選單。';return true;}
     map=L.map('road-map',{minZoom:6,maxZoom:19,zoomControl:true,scrollWheelZoom:true,zoomAnimation:false,markerZoomAnimation:false});map.zoomControl.setPosition('topright');
+    void loadTerrain(map);
     placeLayer=L.layerGroup().addTo(map);
     const panel=document.createElement('section');panel.id='map-drill';panel.className='map-drill';panel.hidden=true;panel.setAttribute('aria-label','行政區內分區導覽');panel.setAttribute('aria-live','polite');$('map-navigation').append(panel);
     // Picking stays available even when the visual boundary layer is hidden.
@@ -168,7 +188,7 @@ const RegionMap = (() => {
     $('enable-roads').addEventListener('click',()=>{
       if($('enable-roads').disabled)return;
       $('enable-roads').disabled=true;$('enable-roads').textContent='道路底圖已啟用';
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{referrerPolicy:'origin',maxZoom:19,keepBuffer:1,updateWhenIdle:true,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).on('tileerror',()=>{$('tile-status').textContent='部分道路圖磚未載入；空白不代表沒有道路。請檢查網路後重新整理。';}).addTo(map);
+      roadsLayer=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{referrerPolicy:'origin',maxZoom:19,opacity:terrainReady ? .65 : 1,keepBuffer:1,updateWhenIdle:true,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).on('tileerror',()=>{$('tile-status').textContent='部分道路圖磚未載入；空白不代表沒有道路。請檢查網路後重新整理。';}).addTo(map);
     });
     districtLayer=L.geoJSON(data.features.map(mainGeometry),{bubblingMouseEvents:false,onEachFeature:(f,layer)=>{layer.bindTooltip(text('span',f.properties.city+f.properties.district));layer.on('click',()=>pickDistrict(f.properties.city,f.properties.district));}}).addTo(map);
     lifeLayer=L.geoJSON([],{bubblingMouseEvents:false,style:{color:'#a56822',weight:3,fillOpacity:.12},onEachFeature:(f,layer)=>{

@@ -1,4 +1,4 @@
-# A7–A9 區域觀察圖
+# 全臺地形與 A7–A9 區域觀察圖
 
 查核日期：2026-11-04。此日期不是土地開發或圖資測量日期。
 
@@ -24,6 +24,16 @@
 
 ## 圖資與授權
 
+- 全臺地形陰影：同一公開高程資料集的 Terrarium zoom 10 圖磚，2026-11-07 下載。
+  使用 Web Mercator（EPSG:3857），臺灣緯度下每像元約 140 公尺。
+  涵蓋臺灣本島、澎湖、金門、馬祖、綠島、蘭嶼與小琉球，不含東沙、南沙。
+  色彩和光影由高程計算，不是等高線、空拍或精密測量；放大不增加資料精度。
+  圖片隨網站發布，不需要使用者連線第三方圖磚；與行政區、生活圈及建案分層。
+  https://registry.opendata.aws/terrain-tiles/
+  https://github.com/tilezen/joerd/blob/master/docs/formats.md
+  Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration.
+  Global GMTED2010 and SRTM terrain data courtesy of the U.S. Geological Survey.
+  https://github.com/tilezen/joerd/blob/master/docs/attribution.md
 - 道路、園區及商場圖形：© OpenStreetMap contributors，ODbL 1.0。
   下載來源：Geofabrik Taiwan extract，2026-11-04 下載。
   https://download.geofabrik.de/asia/taiwan.html
@@ -41,6 +51,16 @@
 
 網站與 GitHub Actions 只需已生成的靜態檔案，不會每次下載全臺 OSM。
 製圖環境另外需要 osmium、shapely、numpy、Pillow。
+
+全臺地形只需 numpy、Pillow。從 repo 根目錄執行：
+
+```powershell
+python scripts/a7-line-monitor/build_taiwan_terrain.py --cache tmp/taiwan-terrain-tiles --checked 2026-11-07
+```
+
+`taiwan-terrain.webp` 和 `taiwan-terrain.json` 同步發布，原始 PNG 快取不發布。
+
+A7–A9 區域圖重建：
 
 1. 下載 Geofabrik Taiwan PBF，執行 extract_station_roads.py 取得區域道路。
 2. 下載指定 Terrarium 高程圖磚。
