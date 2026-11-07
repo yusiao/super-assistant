@@ -8,7 +8,8 @@ from pathlib import Path
 import re
 
 import osmium
-from shapely.geometry import LineString, Polygon
+from shapely import set_precision
+from shapely.geometry import LineString, Polygon, mapping
 from shapely.wkb import loads
 
 
@@ -37,7 +38,8 @@ def landmark(tags, name, area):
     rail, amenity, shop = tags.get("railway"), tags.get("amenity"), tags.get("shop")
     if tags.get("aeroway") == "aerodrome" and tags.get("iata"):
         return "transport", 0, "airport"
-    if rail in {"station", "halt"} or (tags.get("public_transport") == "station" and
+    station_building = tags.get("building") == "train_station" and re.search(r"站$|Station$", name, re.I)
+    if rail in {"station", "halt"} or station_building or (tags.get("public_transport") == "station" and
             any(tags.get(key) == "yes" for key in ("train", "subway", "light_rail"))):
         operator = tags.get("operator", "") + tags.get("network", "")
         fast = "高鐵" in operator or "高鐵" in name or "THSR" in operator
@@ -80,12 +82,18 @@ def write_json(path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+def rounded_coordinates(value):
+    return [rounded_coordinates(v) for v in value] if isinstance(value, (list, tuple)) else round(value, 6)
+
+
 class Extract(osmium.SimpleHandler):
-    def __init__(self):
+    def __init__(self, footprints_only=False):
         super().__init__()
+        self.footprints_only = footprints_only
         self.main = []
         self.tiles = defaultdict(list)
         self.places = []
+        self.footprints = {}
         self.factory = osmium.geom.WKBFactory()
 
     def point(self, osm_id, tags, lat, lon, area=0):
@@ -94,10 +102,12 @@ class Extract(osmium.SimpleHandler):
         result = ("retail", 1, "mall") if verified else landmark(tags, name, area)
         if result and eligible(lat, lon):
             category, priority, kind = result
-            self.places.append([osm_id, category, priority, name, round(lat, 5), round(lon, 5), kind, round(area)])
+            row = [osm_id, category, priority, name, round(lat, 5), round(lon, 5), kind, round(area)]
+            self.places.append(row)
+            return row
 
     def node(self, node):
-        if node.tags.get("name") and node.location.valid():
+        if not self.footprints_only and node.tags.get("name") and node.location.valid():
             self.point(f"n{node.id}", dict(node.tags), node.location.lat, node.location.lon)
 
     def shape(self, osm_id, tags, shape):
@@ -105,13 +115,17 @@ class Extract(osmium.SimpleHandler):
             return
         point = shape.representative_point()
         area = shape.area * 111320**2 * math.cos(math.radians(point.y))
-        self.point(osm_id, tags, point.y, point.x, area)
+        row = self.point(osm_id, tags, point.y, point.x, area)
+        if row and area >= 100 and shape.is_valid:
+            compact = set_precision(shape.simplify(.000012, preserve_topology=True), .000001)
+            if not compact.is_empty and compact.geom_type in ("Polygon", "MultiPolygon"):
+                self.footprints[osm_id] = row, compact
 
     def area(self, area):
         if area.from_way() or not area.tags.get("name"):
             return
         tags = dict(area.tags)
-        if not any(k in tags for k in ("amenity", "shop", "landuse", "leisure", "aeroway", "tourism", "railway")):
+        if not any(k in tags for k in ("amenity", "shop", "landuse", "leisure", "aeroway", "tourism", "railway", "building", "public_transport")):
             return
         try:
             geometry = loads(self.factory.create_multipolygon(area), hex=True)
@@ -127,7 +141,9 @@ class Extract(osmium.SimpleHandler):
             tier = 6
         name = road_name(tags)
         polygon = title(tags) and (len(way.nodes) > 3 and way.nodes[0].ref == way.nodes[-1].ref)
-        candidate = polygon and any(k in tags for k in ("amenity", "shop", "landuse", "leisure", "aeroway", "tourism", "railway", "office"))
+        candidate = polygon and any(k in tags for k in ("amenity", "shop", "landuse", "leisure", "aeroway", "tourism", "railway", "office", "building", "public_transport"))
+        if self.footprints_only and not candidate:
+            return
         if not candidate and (tier is None or tier == 5 and not name):
             return
         coords = [(n.lon, n.lat) for n in way.nodes if n.location.valid()]
@@ -135,7 +151,7 @@ class Extract(osmium.SimpleHandler):
             return
         if candidate and len(coords) >= 4:
             self.shape(f"w{way.id}", tags, Polygon(coords))
-        if tier is None or tier == 5 and not name:
+        if self.footprints_only or tier is None or tier == 5 and not name:
             return
         line = LineString(coords)
         if line.length == 0:
@@ -158,24 +174,47 @@ class Extract(osmium.SimpleHandler):
             known[identity].append(row)
             yield row[:7]
 
+    def outline_features(self):
+        known = defaultdict(list)
+        for row, geometry in sorted(self.footprints.values(), key=lambda item: (-item[0][7], item[0][0])):
+            osm_id, category, priority, name, lat, lon, kind, square_m = row
+            key = (category, re.sub(r"\s+", "", name).replace("台", "臺").removesuffix("站"))
+            if any(g.intersects(geometry) and g.intersection(geometry).area >= .9 * geometry.area for g in known[key]):
+                continue
+            known[key].append(geometry)
+            geojson = mapping(geometry)
+            geojson["coordinates"] = rounded_coordinates(geojson["coordinates"])
+            yield {"type": "Feature", "id": osm_id,
+                   "properties": {"category": category, "priority": priority, "name": name,
+                                  "kind": kind, "area_m2": square_m, "point": [lat, lon]},
+                   "bbox": [round(v, 6) for v in geometry.bounds], "geometry": geojson}
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("--output", type=Path, default=Path(__file__).parent / "site" / "taiwan-context")
+    parser.add_argument("--footprints-only", action="store_true")
     args = parser.parse_args()
     with osmium.io.Reader(str(args.source)) as reader:
         stamp = reader.header().get("osmosis_replication_timestamp")
     if not stamp:
         raise ValueError("OSM extract needs a replication timestamp")
-    extract = Extract()
+    extract = Extract(args.footprints_only)
     print(f"Extracting roads and landmarks from OSM {stamp}", flush=True)
-    extract.apply_file(str(args.source), locations=True, idx="flex_mem",
-                       filters=[osmium.filter.KeyFilter("highway", "waterway", "name")])
+    keys = ("name",) if args.footprints_only else ("highway", "waterway", "name")
+    extract.apply_file(str(args.source), locations=True, idx="flex_mem", filters=[osmium.filter.KeyFilter(*keys)])
+    features = list(extract.outline_features())
+    if not features:
+        raise ValueError("Landmark footprints missing")
+    args.output.mkdir(parents=True, exist_ok=True)
+    write_json(args.output / "landmark-areas.geojson", {"type": "FeatureCollection", "date": stamp[:10], "features": features})
+    print(f"{len(features)} polygon landmark footprints", flush=True)
+    if args.footprints_only:
+        return
     places = list(extract.distinct_places())
     if not extract.main or not extract.tiles or not places:
         raise ValueError("Road or landmark data missing")
-    args.output.mkdir(parents=True, exist_ok=True)
     write_json(args.output / "index.json", {"version": 1, "date": stamp[:10], "grid": GRID,
                                            "tiles": sorted(extract.tiles), "places": places})
     write_json(args.output / "main.json", [r for r in extract.main if r[0] < 2])

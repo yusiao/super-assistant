@@ -89,7 +89,7 @@ def copy_public_assets(source, target):
         raise ValueError("Invalid Taiwan road tile index")
     destination = target / layers.name
     destination.mkdir(exist_ok=True)
-    for name in ("index.json", "main.json", "primary.json", *(f"roads-{key}.json" for key in keys)):
+    for name in ("index.json", "main.json", "primary.json", "landmark-areas.geojson", *(f"roads-{key}.json" for key in keys)):
         shutil.copyfile(layers / name, destination / name)
 
 

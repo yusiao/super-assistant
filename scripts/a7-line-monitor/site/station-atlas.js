@@ -119,10 +119,11 @@ const StationAtlas = (() => {
     shapes.clearLayers();labels.clearLayers();
     const selected=focus?find(focus):null;
     const visible=selected?[...new Set([...roots(),...children(root(selected)),selected,...children(focus)])]:[...roots(),...(map.getZoom()>=15?roots().flatMap(f=>children(f.properties.id)):[])];
-    shapes.addData(visible);
+    const zone=f=>typeof TaiwanContext==="undefined"||!TaiwanContext.isAtlasLandmark(f.properties.id);
+    shapes.addData(visible.filter(zone));
     if(map.getZoom()<12)return;
     const labelled=selected?[...roots().filter(f=>f.properties.id!==root(selected)),...(children(focus).length?children(focus):[selected])]:visible;
-    for(const f of labelled){
+    for(const f of labelled.filter(zone)){
       const p=f.properties,b=button(p.name+((children(p.id).length)?" ›":""),()=>show(p.id),"atlas-map-label");
       b.title=p.kind+"；點選查看建案與範圍";
       L.marker(p.label,{pane:"atlasLabels",keyboard:false,bubblingMouseEvents:false,

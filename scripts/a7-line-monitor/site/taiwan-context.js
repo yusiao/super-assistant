@@ -1,8 +1,9 @@
 "use strict";
 const TaiwanContext=(()=>{
   const root="taiwan-context/",$=id=>document.getElementById(id);
-  const kinds={transport:["交通","站"],medical:["醫療","醫"],education:["校園","學"],retail:["大型商場","商"],jobs:["產業園區","產"],leisure:["公園／公共地標","景"]};
-  const priority={transport:0,medical:1,jobs:2,retail:3,education:4,leisure:5};
+  const kinds={transport:"交通",medical:"醫療",education:"校園",retail:"大型商業",jobs:"產業園區",leisure:"公園／公共設施"};
+  const atlasScopes={w442135827:"a7-post",w1310794583:"a7-school",w364304008:"a9-mall1",w829516898:"a9-mall2"};
+  const isAtlasLandmark=id=>Object.values(atlasScopes).includes(id);
   const styles=[
     ["#ec9959","#fff8e4",3.6],["#e8b34e","#fff9df",3.0],["#f4d480","#fdf9df",2.4],
     ["#f9e9b5","#c8ad77",2.2],["#fff9ea","#b6b4a0",1.5],["#fffdf5","#c9c7ba",1.1],["#83bcd3",null,1.5]
@@ -12,7 +13,7 @@ const TaiwanContext=(()=>{
   let indexPromise;
   function load(){return indexPromise??=get("index.json").then(data=>{
     if(data.version!==1||data.grid!==4||!Array.isArray(data.places)||!Array.isArray(data.tiles))throw Error("context index");
-    const places=data.places.filter(p=>Object.hasOwn(kinds,p[1])).sort((a,b)=>a[2]-b[2]||priority[a[1]]-priority[b[1]]);
+    const places=data.places.filter(p=>Object.hasOwn(kinds,p[1]));
     return {...data,places,tiles:new Set(data.tiles.filter(key=>/^\d{3}-\d{2,3}$/.test(key)))};
   });}
   const placeName=p=>p[6]==="rail"&&!p[3].endsWith("站")?`${p[3]}站`:p[3];
@@ -39,7 +40,7 @@ const TaiwanContext=(()=>{
       load().then(({places,date})=>{
         const matches=nearby(places,point),list=el("ul");
         for(const {place:p,km} of matches){
-          const row=el("li");row.append(el("span",kinds[p[1]][0],`context-chip context-${p[1]}`),el("strong",placeName(p)),
+          const row=el("li");row.append(el("span",kinds[p[1]],`context-chip context-${p[1]}`),el("strong",placeName(p)),
             el("span",km<.01?"不到 10 公尺":km<1?`約 ${Math.round(km*100)*10} 公尺`:`約 ${km.toFixed(1)} 公里`));list.append(row);
         }
         content.replaceChildren(matches.length?list:el("p","這次圖資在 3 公里內未收錄符合條件的地標。"),
@@ -64,11 +65,35 @@ const TaiwanContext=(()=>{
   function init(map){
     const roads=map.createPane("contextRoads");roads.style.zIndex="310";roads.style.pointerEvents="none";
     const names=map.createPane("contextNames");names.style.zIndex="490";names.style.pointerEvents="none";
-    map.createPane("contextPlaces").style.zIndex="630";
+    map.createPane("contextFootprints").style.zIndex="475";
     const renderer=L.canvas({pane:"contextRoads",padding:.12});
-    const lines=L.layerGroup().addTo(map),labels=L.layerGroup().addTo(map),pins=L.layerGroup().addTo(map);
+    const lines=L.layerGroup().addTo(map),labels=L.layerGroup().addTo(map);
     const tiles=new Map(),status=$("context-status"),landmarks=$("show-landmarks"),roadsSwitch=$("show-context-roads");
-    let main=[],index,mainFailed=false,indexFailed=false,epoch=0,primaryTask;
+    let main=[],index,mainFailed=false,indexFailed=false,epoch=0,primaryTask,outlines,outlineTask,outlinesFailed=false;
+    const footprintRenderer=L.svg({pane:"contextFootprints"});
+    const footprints=L.geoJSON(null,{pane:"contextFootprints",renderer:footprintRenderer,bubblingMouseEvents:false,
+      style:f=>({className:`context-footprint context-${f.properties.category}`,weight:1.8,opacity:.94,fillOpacity:.27,smoothFactor:.45}),
+      onEachFeature:(feature,layer)=>{
+        const p=feature.properties,name=p.kind==="rail"&&!p.name.endsWith("站")?`${p.name}站`:p.name;
+        const open=position=>{
+          const box=el("div","","context-popup"),category=kinds[p.category];
+          box.append(el("strong",name),el("p",category),el("small",`地圖輪廓 · ${outlines.date} · 非地籍界線或營運證明`));
+          const scope=atlasScopes[feature.id];
+          if(scope&&typeof StationAtlas!=="undefined"){
+            const button=el("button","查看此範圍建案","atlas-secondary");button.type="button";
+            button.addEventListener("click",()=>{map.closePopup();StationAtlas.show(scope);});box.append(button);
+          }
+          L.popup({autoPan:false}).setLatLng(position).setContent(box).openOn(map);
+        };
+        layer.on("click",event=>open(event.latlng));
+        layer.on("add",()=>{
+          const path=layer.getElement();if(!path)return;
+          path.setAttribute("tabindex","0");path.setAttribute("role","button");
+          path.setAttribute("aria-label",`地標範圍：${name}（${kinds[p.category]}）`);
+          path.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open(p.point);}});
+        });
+      }
+    }).addTo(map);
     const norm=([tier,name,points],id)=>({tier,name,points,id,bounds:roadBounds(points)});
     const primary=()=>primaryTask??=get("primary.json").then(rows=>rows.map(row=>norm(row))).catch(()=>{primaryTask=null;return null;});
     function tile(key){
@@ -82,20 +107,27 @@ const TaiwanContext=(()=>{
       const icon=L.divIcon({className:"context-anchor",html:node,iconSize:size,iconAnchor:[size[0]/2,size[1]/2]});
       return L.marker(point,{pane,icon,interactive,keyboard:false,bubblingMouseEvents:false});
     }
-    function showPlace(p,position,compact){
-      const [label,symbol]=kinds[p[1]],name=placeName(p);
-      const button=el("button","",`context-pin context-${p[1]}${compact?" context-pin-compact":""}`);button.type="button";button.title=name;
-      button.setAttribute("aria-label",`地標：${name}（${label}）`);
-      button.append(el("span",symbol,"context-symbol"));if(!compact)button.append(el("span",name,"context-pin-name"));
-      button.addEventListener("click",e=>{
-        e.stopPropagation();
-        const box=el("div","","context-popup");box.append(el("strong",name),el("p",label),el("small",`圖資 ${index.date} · 不代表即時營運或開發進度`));
-        L.popup({autoPan:false}).setLatLng(position).setContent(box).openOn(map);
+    function drawFootprints(){
+      footprints.clearLayers();
+      const zoom=map.getZoom();
+      if(!landmarks.checked||!Number.isFinite(zoom)||zoom<10.5)return;
+      if(!outlines){
+        outlineTask??=get("landmark-areas.geojson").then(body=>{
+          if(body.type!=="FeatureCollection"||!Array.isArray(body.features))throw Error("landmark areas");
+          outlines=body;outlinesFailed=false;drawFootprints();note();
+        }).catch(()=>{outlineTask=null;outlinesFailed=true;note();});
+        return;
+      }
+      const b=map.getBounds(),minArea=zoom<12?100000:zoom<14?2500:100;
+      const selected=outlines.features.filter(f=>{
+        const [w,s,e,n]=f.bbox||[];
+        return Object.hasOwn(kinds,f.properties?.category)&&f.properties.area_m2>=minArea&&
+          e>=b.getWest()&&w<=b.getEast()&&n>=b.getSouth()&&s<=b.getNorth();
       });
-      return button;
+      footprints.addData(selected);
     }
     function draw(details=[]){
-      lines.clearLayers();labels.clearLayers();pins.clearLayers();
+      lines.clearLayers();labels.clearLayers();
       const zoom=map.getZoom(),view=map.getBounds(),b=view.pad(.12),size=map.getSize();
       const container=map.getContainer(),{left,top}=container.getBoundingClientRect();
       const used=[...container.querySelectorAll(".project-pin,.atlas-map-label,.place-map-button")].map(n=>n.getBoundingClientRect())
@@ -107,15 +139,6 @@ const TaiwanContext=(()=>{
            (rect[2]>size.x-52&&rect[1]<94)||used.some(r=>r[0]<rect[2]&&r[2]>rect[0]&&r[1]<rect[3]&&r[3]>rect[1]))return false;
         used.push(rect);return true;
       };
-      if(landmarks.checked&&index&&zoom>=8){
-        const tier=zoom<10?0:zoom<12?1:zoom<14?2:3;
-        for(const p of index.places){
-          if(p[2]>tier||!Object.hasOwn(kinds,p[1])||!inView(p[4],p[5]))continue;
-          const position=[p[4],p[5]],width=Math.min(168,Math.max(52,30+placeName(p).length*11));
-          if(reserve(position,width+8,32))annotate("contextPlaces",position,showPlace(p,position,false),[width,26],true).addTo(pins);
-          else if(reserve(position,24,24))annotate("contextPlaces",position,showPlace(p,position,true),[22,22],true).addTo(pins);
-        }
-      }
       if(!roadsSwitch.checked)return;
       const visible=Array.from({length:7},()=>[]),seen=new Set();
       const limit=zoom<8?1:zoom<11.5?2:zoom<12.5?3:zoom<14.75?4:5;
@@ -155,14 +178,18 @@ const TaiwanContext=(()=>{
         draw(parts.filter(Boolean).flat());note(parts.some(part=>!part));
       });
     }
-    function note(partial){
+    let roadsPartial=false;
+    function note(partial=roadsPartial){
+      roadsPartial=partial;
       status.textContent=mainFailed||indexFailed?"部分道路或地標圖資未載入，仍可查看地形及建案。":
+        landmarks.checked&&outlinesFailed?"大型地標範圍未載入，建案仍可查看。":
         partial?"部分街道未載入；移動或縮放後會重新讀取。":"";
     }
-    landmarks.addEventListener("change",refresh);roadsSwitch.addEventListener("change",refresh);map.on("moveend",refresh);
+    landmarks.addEventListener("change",()=>{drawFootprints();note();});roadsSwitch.addEventListener("change",refresh);
+    map.on("moveend",()=>{refresh();drawFootprints();});drawFootprints();
     map.attributionControl.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
     load().then(data=>{index=data;refresh();}).catch(()=>{indexFailed=true;note(false);});
     get("main.json").then(rows=>{main=rows.map(row=>norm(row));refresh();}).catch(()=>{mainFailed=true;note(false);});
   }
-  return {init,projectContext,nearby};
+  return {init,projectContext,nearby,isAtlasLandmark};
 })();

@@ -29,6 +29,8 @@
   地標依地段研究需求篩選：軌道站與機場、醫院、校園、大型商場、產業園區、大型公園及公共設施。
   不採用一般店家或僅規劃、施工、廢棄的標記。點位與名稱是地圖快照，不是營運或工程進度驗證；
   未收錄不等於沒有設施。建案附近距離是到圖上地標代表點的直線距離，不等於出入口、步行路程或學區。
+  `landmark-areas.geojson` 只使用有封閉多邊形或多面關聯的設施，保留不相連的區塊及內孔，依種類上色。
+  只有點位的地標仍可在建案周邊清單看到，不以圓圈、矩形或緩衝區代替輪廓。圖形不等於法定界址。
   林口三井二館的 OSM 施工標籤與官網現況不符，依官網列出的一、二館營運資訊補正；點位仍取 OSM 基地圖形。
   https://www.mitsui-shopping-park.com.tw/mop/linkou/tw/index.html
   `taiwan-context/` 的衍生資料為 © OpenStreetMap contributors，適用 ODbL 1.0。
@@ -73,6 +75,7 @@ python scripts/a7-line-monitor/build_taiwan_terrain.py --cache tmp/taiwan-terrai
 
 道路與地標更新：使用 Geofabrik 的臺灣 PBF，安裝 osmium 和 shapely 後執行
 `python scripts/a7-line-monitor/build_taiwan_context.py tmp/atlas-taiwan.osm.pbf`。
+若只重建地標輪廓，在指令末尾加上 `--footprints-only`。
 `taiwan-context/index.json` 列出發布圖塊；原始 PBF 不發布。地標點位標示獨立於生活圈外框。
 
 A7–A9 區域圖重建：
