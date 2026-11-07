@@ -137,7 +137,7 @@ const StationAtlas = (() => {
       const {id,name}=f.properties,areas=marketScope(f).areas,count=projects(areas).length;
       const official=typeof NationalMarket!=="undefined"?NationalMarket.count(id):0;
       const live=typeof LiveProjects!=="undefined"?LiveProjects.count({geometry:f.geometry}):0;
-      const status=live?`預售／預推 ${live} 案`:official?`備查紀錄 ${official} 筆`:count?`已核對 ${count} 案`:typeof NationalMarket!=="undefined"?"查看區域":marketError?"讀取失敗":!market?"讀取中":!areas.length?"尚未接入":"本次未取得建案";
+      const status=live?`地圖建案 ${live} 案`:official?`備查紀錄 ${official} 筆`:count?`已核對 ${count} 案`:typeof NationalMarket!=="undefined"?"查看區域":marketError?"讀取失敗":!market?"讀取中":!areas.length?"尚未接入":"本次未取得建案";
       const b=button("",()=>show(id),`atlas-station ${id}`);
       b.setAttribute("aria-pressed",String(selected===id));b.setAttribute("aria-controls","atlas-results");
       b.append(node("strong",name),node("span",status));panel.append(b);
@@ -208,6 +208,7 @@ const StationAtlas = (() => {
     NationalMarket.load().then(()=>{if(request===directoryRequest)$("atlas-results-body").replaceChildren(render());});
   }
   function nationalReady(){
+    mapPins?.refresh?.();
     if(!data)return;
     info();
     if(panelMode==="atlas"&&focus)renderResults(find(focus));
@@ -237,6 +238,8 @@ const StationAtlas = (() => {
     try{
       const r=await fetch("station-atlas.geojson",{signal:AbortSignal.timeout(10000)});
       if(!r.ok)throw Error("atlas");const body=await r.json();if(!valid(body))throw Error("schema");data=body;
+      if(typeof NationalMarket!=="undefined")NationalMarket.setComparisonScopes?.([...officialScopes,...roots().map(marketBoundary)]);
+      mapPins?.refresh?.();
       for(const [name,z] of [["atlasTerrain",190],["atlasRoads",360],["atlasAreas",450],["atlasLabels",650]]){
         map.createPane(name).style.zIndex=String(z);
       }

@@ -14,6 +14,7 @@ from listing_payload import payload, objects
 
 BASE = "https://newhouse.591.com.tw"
 API = "https://bff-newhouse.591.com.tw/v1/list-search"
+COMPARABLE_STYLES = {"住宅大樓", "華廈", "公寓"}
 
 
 class Reader:
@@ -77,7 +78,7 @@ def card(item, city):
     if not isinstance(item, dict) or not {"hid", "build_name", "address", "section"} <= item.keys():
         return None
     hid = str(item["hid"])
-    if not re.fullmatch(r"\d+", hid) or item.get("region") != city:
+    if not re.fullmatch(r"\d+", hid) or str(item.get("region", "")).replace("台", "臺") != city.replace("台", "臺"):
         return None
     return {"id": "591-" + hid, "name": item["build_name"], "city": city.replace("台", "臺"),
             "district": item["section"], "address": item["address"], "url": BASE + "/" + hid,
@@ -86,7 +87,7 @@ def card(item, city):
             "price": str(item.get("price") or ""), "price_unit": str(item.get("price_unit") or ""),
             "area": str(item.get("area") or ""), "layout": str(item.get("room") or ""),
             "platform_type": item.get("build_type_val"),
-            "category": "listed_pending" if item.get("build_type_val") == 4 else "listed_presale"}
+            "category": {2: "listed_new_home", 4: "listed_pending"}.get(item.get("build_type_val"), "listed_presale")}
 
 
 def updated_ordinal(project):
@@ -100,6 +101,19 @@ def recent(project, today):
     return updated_ordinal(project) >= (today - timedelta(days=365)).toordinal()
 
 
+def likely_price_watch(project, districts, completed, today):
+    if project.get("price_unit") != "萬/坪" or updated_ordinal(project) < (today - timedelta(days=60)).toordinal():
+        return False
+    offer = re.fullmatch(r"(\d{1,3}(?:\.\d{1,3})?)(?:\s*[~～–—-]\s*(\d{1,3}(?:\.\d{1,3})?))?", project.get("price", "").strip())
+    if not offer:
+        return False
+    summary = districts.get(f"{project['city']}/{project['district']}", {}).get("price" if completed else "presale_price") or {}
+    mean = summary.get("mean")
+    low, high = float(offer[1]), float(offer[2] or offer[1])
+    # This only prioritizes source checks; it does not create a public badge.
+    return isinstance(mean, (int, float)) and summary.get("count", 0) >= 10 and 0 < low <= high <= mean * .8
+
+
 def detail(tree, project, today):
     hid = int(project["id"].split("-")[1])
     matches = [i for i in objects(tree) if i.get("hid") == hid and {"build_type_name", "deal_time_v2", "map", "sell_time"} <= i.keys()]
@@ -110,12 +124,24 @@ def detail(tree, project, today):
         raise ValueError("Project identity changed")
     project = dict(project, category="status_unknown", verified_on=today.isoformat())
     kind = item.get("build_type_name", "")
+    style = str(item.get("purpose_name") or "").strip()
+    project["property_style"] = style if style in COMPARABLE_STYLES else ""
     sale = item.get("sell_time") or {}
     completed = item.get("deal_time_v2") or {}
     project["construction"] = kind
     project["sales_evidence"] = str(sale.get("sell_status_txt") or "")
     project["completion"] = str(completed.get("date") or "")
     project["opening"] = str(sale.get("date") or "")
+    price = item.get("price_unit")
+    if isinstance(price, dict):
+        if not price.get("pending") and price.get("price"):
+            project["price"], project["price_unit"] = str(price["price"]), str(price.get("unit") or "")
+        else:
+            total = item.get("price_total")
+            if isinstance(total, dict) and not total.get("pending") and total.get("price") and total.get("unit") == "萬/戶":
+                project["price"], project["price_unit"] = str(total["price"]), "萬/戶"
+            elif project.get("price_unit") != "萬/戶":
+                project["price"], project["price_unit"] = "", ""
     coordinates = item.get("map") or {}
     try:
         lng, lat = float(coordinates["lng"]), float(coordinates["lat"])
@@ -137,6 +163,10 @@ def detail(tree, project, today):
     future_or_unknown = not end or end > (today.year, today.month)
     if "新成屋" in kind or "中古" in kind:
         project["category"] = "completed"
+        if (kind.strip() == "新成屋" and sales in {"在售", "銷售中"} and completed.get("type") == "handover"
+                and completed.get("deal") == 1 and end and (today.year - 5, today.month) < end <= (today.year, today.month)
+                and not any(word in str(item.get("purpose_name", "")) for word in ("透天", "店面", "辦公"))):
+            project["category"] = "new_home"
     elif "預推" in kind and (not sales or sales in unopened) and future_or_unknown:
         project["category"] = "pending"
     elif "預售" in kind:
@@ -156,11 +186,22 @@ def collect(args):
     previous = json.loads(args.output.read_text(encoding="utf-8")) if args.output.exists() else {}
     old = {p["id"]: p for p in previous.get("projects", [])}
     verify_only = getattr(args, "verify_only", False)
+    new_homes = getattr(args, "new_homes_only", False)
+    region_index = getattr(args, "region_index", None)
     if verify_only:
         city_index = {k: v["city"] for k, v in previous.get("regions", {}).items()}
+    elif region_index:
+        known = json.loads(region_index.read_text(encoding="utf-8"))
+        city_index = {k: v["city"] for k, v in known["regions"].items()}
+        if len(city_index) != 22 or not all(k.isdigit() for k in city_index):
+            raise ValueError("Incomplete city index")
     else:
-        first = reader(BASE + "/list?regionid=1")
-        city_index = regions(first)
+        try:
+            city_index = regions(reader(BASE + "/list?regionid=1"))
+        except (ValueError, KeyError):
+            city_index = {k: v["city"] for k, v in previous.get("regions", {}).items()}
+            if len(city_index) != 22 or not all(k.isdigit() for k in city_index):
+                raise
     selected = {k: v for k, v in city_index.items() if not args.regions or k in args.regions}
     output = {"schema_version": 1, "observed_at": now.isoformat(), "regions": {}, "projects": []}
     projects = {}
@@ -180,7 +221,7 @@ def collect(args):
                   "expected_pages": None, "discovered": 0, "verified": 0}
         output["regions"][key] = report
         try:
-            query = {"regionid": key, "device": "pc", "build_type": "1,4", "no_random_sort": "1"}
+            query = {"regionid": key, "device": "pc", "build_type": "2" if new_homes else "1,4", "no_random_sort": "1"}
             tree = reader(API + "?" + urlencode({**query, "page": 1}))
             meta = index(tree)
             report["expected_pages"] = int(meta["total_page"])
@@ -198,7 +239,7 @@ def collect(args):
                     meta = index(tree)
                 if int(meta["page"]) != page:
                     raise ValueError("Pagination not applied")
-                candidates = [p for i in meta["items"] if isinstance(i, dict) and i.get("build_type_val") in (1, 4)
+                candidates = [p for i in meta["items"] if isinstance(i, dict) and i.get("build_type_val") in ((2,) if new_homes else (1, 4))
                               and "住" in (i.get("purpose_str") or "") and (p := card(i, city))]
                 signature = tuple(sorted(p["id"] for p in candidates))
                 if signature and signature in page_signatures:
@@ -213,7 +254,7 @@ def collect(args):
                             p["last_attempted_on"] = prior.get("last_attempted_on") or prior["verified_on"]
                         checked = prior.get("verified_on", "")
                         if checked >= (now.date() - timedelta(days=7)).isoformat() and prior.get("source_updated") == p["source_updated"]:
-                            p = {**prior, **{k: p[k] for k in ("price", "price_unit", "source_updated")}}
+                            p = prior.copy()
                         p["listed_on"] = now.date().isoformat()
                         projects[p["id"]] = p
                 print(key, "page", page, "/", report["expected_pages"], "projects", len(seen), flush=True)
@@ -231,13 +272,22 @@ def collect(args):
     # Check every district, with station-corridor candidates first. Reuse only
     # unchanged checks <=7 days old; unverified records never become on-sale cases.
     if not args.probe and not args.index_only and not reader.blocked:
+        market = getattr(args, "market_index", None)
+        benchmarks = json.loads(market.read_text(encoding="utf-8")).get("districts", {}) if market else {}
+        cutoff = (now.date() - timedelta(days=7)).isoformat()
+        def needs_check(project):
+            return project.get("verified_on", "") < cutoff or (
+                "property_style" not in project and likely_price_watch(project, benchmarks, new_homes, now.date())
+            )
         candidates = sorted((p for p in projects.values() if recent(p, now.date()) or p.get("verified_on")), key=lambda p: (
-            p.get("verified_on", "") >= (now.date() - timedelta(days=7)).isoformat(),
+            not needs_check(p),
+            not likely_price_watch(p, benchmarks, new_homes, now.date()),
             p.get("last_attempted_on", ""),
+            new_homes and p.get("price_unit") != "萬/坪",
             p["district"] not in {"龜山區", "林口區"},
             p["category"] != "listed_pending", -updated_ordinal(p), p["city"], p["id"]))
         for p in candidates[:args.detail_limit]:
-            if p.get("verified_on", "") >= (now.date() - timedelta(days=7)).isoformat():
+            if not needs_check(p):
                 continue
             try:
                 projects[p["id"]] = detail(reader(p["url"]), p, now.date())
@@ -269,4 +319,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-pages", type=int, default=500)
     parser.add_argument("--detail-limit", type=int, default=300)
     parser.add_argument("--verify-only", action="store_true")
+    parser.add_argument("--new-homes-only", action="store_true")
+    parser.add_argument("--region-index", type=Path)
+    parser.add_argument("--market-index", type=Path)
     collect(parser.parse_args())

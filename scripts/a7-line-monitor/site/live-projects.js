@@ -2,16 +2,20 @@
 const LiveProjects = (() => {
   const node=(tag,value="")=>{const e=document.createElement(tag);e.textContent=value;return e;};
   const phases={active:"銷售中預售 · 已核對工期",pending:"未開賣預售 · 已核對",sold_out:"完銷預售 · 已核對工期",
-    listed_presale:"平台預售索引 · 工期待核對",listed_pending:"平台預推索引 · 開賣狀態待核對"};
-  let data,failed=false,promise;
+    listed_presale:"平台預售索引 · 工期待核對",listed_pending:"平台預推索引 · 開賣狀態待核對",new_home:"在售新成屋 · 五年內交屋"};
+  let data,newHomes,failed=false,homesFailed=false,promise;
   const url=value=>{try{const u=new URL(value);return u.protocol==="https:"&&u.hostname==="newhouse.591.com.tw"&&!u.username&&!u.password&&!u.port&&/^\/\d+$/.test(u.pathname)&&!u.search&&!u.hash?u.href:"";}catch{return "";}};
-  function load(){return promise??=(async()=>{try{
-    const response=await fetch("national-listings.json",{signal:AbortSignal.timeout(12000)});
+  async function read(file){
+    const response=await fetch(file,{signal:AbortSignal.timeout(12000)});
     if(!response.ok)throw Error("source");
     const body=await response.json();
     if(body.schema_version!==1||!Array.isArray(body.projects)||!body.regions||!Number.isFinite(Date.parse(body.observed_at)))throw Error("schema");
-    data=body;
-  }catch{failed=true;}})();}
+    return body;
+  }
+  function load(){return promise??=Promise.all([
+    read("national-listings.json").then(body=>{data=body;}).catch(()=>{failed=true;}),
+    read("national-new-homes.json").then(body=>{newHomes=body;}).catch(()=>{homesFailed=true;})
+  ]);}
   function inside(point,geometry){
     if(geometry.type==="GeometryCollection")return geometry.geometries.some(g=>inside(point,g));
     const ring=points=>{let yes=false;for(let i=0,j=points.length-1;i<points.length;j=i++){
@@ -20,12 +24,19 @@ const LiveProjects = (() => {
     const polygons=geometry.type==="Polygon"?[geometry.coordinates]:geometry.type==="MultiPolygon"?geometry.coordinates:[];
     return polygons.some(p=>ring(p[0])&&!p.slice(1).some(ring));
   }
+  const fresh=(value,days)=>{const age=Date.now()-Date.parse(value);return age>=-86400000&&age<=days*86400000;};
   function matching({city="",district="",geometry}={}){
-    if(!data||Date.now()-Date.parse(data.observed_at)>8*86400000)return [];
-    const fresh=(value,days)=>{const age=Date.now()-Date.parse(value);return age>=-86400000&&age<=days*86400000;};
     const inScope=p=>geometry?p.coordinates&&inside(p.coordinates,geometry):
       (!city||p.city.replaceAll("台","臺")===city.replaceAll("台","臺"))&&(!district||p.district===district);
-    return data.projects.filter(p=>Object.hasOwn(phases,p.category)&&url(p.url)&&(["listed_presale","listed_pending"].includes(p.category)?fresh(p.source_updated,365):fresh(p.verified_on,7))&&inScope(p));
+    const rows=new Map();
+    for(const source of [data,newHomes]){
+      if(!fresh(source?.observed_at,8))continue;
+      for(const p of source.projects){
+        if(source===newHomes&&p.category!=="new_home")continue;
+        if(Object.hasOwn(phases,p.category)&&url(p.url)&&(["listed_presale","listed_pending"].includes(p.category)?fresh(p.source_updated,365):fresh(p.verified_on,7))&&inScope(p))rows.set(p.id,p);
+      }
+    }
+    return [...rows.values()];
   }
   function count(query){return matching(query).length;}
   function location(p){
@@ -34,9 +45,18 @@ const LiveProjects = (() => {
   }
   const asking=p=>p.price&&p.price!=="價格待定"?`${p.price}${p.price_unit||""}`:"待定／未提供";
   const areaLabel=p=>`${p.city} ${p.district}${p.circle?` · ${p.circle}`:""}`;
+  const compare=p=>typeof NationalMarket!=="undefined"&&typeof NationalMarket.priceComparison==="function"?NationalMarket.priceComparison(p):null;
+  function priceMark(p,details=false){
+    const c=compare(p);if(!c)return null;
+    const box=node("div"),mark=node("strong",`開價低 ${c.discount.toFixed(1)}%`);mark.className="price-watch-badge";box.className="price-watch";
+    box.append(mark,node("small",`${c.scope} · ${c.label}成交`));
+    if(details)box.append(node("p",`公開開價上緣 ${c.high} vs. 成交均價 ${c.mean.toFixed(2)} 萬元／坪`),
+      node("small",`實登 ${c.count} 筆，${c.first} 至 ${c.last}，成交扣車位。開價不是成交價；車位、樓層及戶別須另核對。`));
+    return box;
+  }
   function facts(p){
     const list=node("dl");list.className="project-facts";
-    for(const [label,value] of [["格局",p.layout],["規劃坪數",p.area],["公開銷售時間",p.opening],["完工／交屋期（來源）",p.completion]]){
+    for(const [label,value] of [["產品類型",p.property_style],["格局",p.layout],["規劃坪數",p.area],["公開銷售時間",p.opening],["完工／交屋期（來源）",p.completion]]){
       list.append(node("dt",label),node("dd",value||"未提供"));
     }
     return list;
@@ -48,7 +68,9 @@ const LiveProjects = (() => {
     const stage=node("span",phases[p.category]||"銷售狀態待核對");stage.className="badge";
     basics.append(stage,node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("strong",`建案開價 ${asking(p)}`));
     overview.append(basics);if(benchmark)overview.append(benchmark);
-    box.append(overview,node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
+    box.append(overview);
+    const mark=priceMark(p,true);if(mark)box.append(mark);
+    box.append(node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
     if(p.verified_on)box.append(node("small",`工期與狀態核對：${p.verified_on}`));
     const point=location(p);
     if(point&&typeof TaiwanContext!=="undefined")box.append(TaiwanContext.projectContext(point));
@@ -58,6 +80,7 @@ const LiveProjects = (() => {
     const box=node("article");box.className="atlas-project-card national-filing";
     const badge=node("span",phases[p.category]);badge.className="badge";
     box.append(badge,node("h4",p.name),node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("p",`開價 ${asking(p)} · ${p.area||"坪數未提供"}`));
+    const mark=priceMark(p);if(mark)box.append(mark);
     const actions=node("div");actions.className="project-card-actions";
     if(onProject){
       const button=node("button","查看建案資料");button.type="button";button.className="atlas-primary";
@@ -92,13 +115,17 @@ const LiveProjects = (() => {
         if(group){group.rows.push(p);group.positions.push(position);}
         else groups.push({xy,rows:[p],positions:[position]});
       }
-      layer.clearLayers();displayed=[];
+      layer.clearLayers();displayed=[];let watches=0;
       for(const {rows,positions} of groups){
         const multiple=rows.length>1,p=rows[0];
         const button=node("button",multiple?String(rows.length):"▥");button.type="button";
-        button.className="project-pin"+(multiple?" project-pin-group":p.category.includes("pending")?" project-pin-pending":"");
-        button.title=multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`;
-        button.setAttribute("aria-label",multiple?`查看附近 ${rows.length} 個建案`:`建案：${p.name}`);
+        const lowCount=rows.filter(compare).length;watches+=lowCount;
+        const label=multiple?`查看附近 ${rows.length} 個建案`:`建案：${p.name}`;
+        button.className="project-pin"+(multiple?" project-pin-group":p.category==="new_home"?" project-pin-new-home":p.category.includes("pending")?" project-pin-pending":"")+(lowCount?" project-pin-watch":"");
+        const note=lowCount?multiple?` · 其中 ${lowCount} 案開價低於區域成交 20% 以上`:` · 開價低 ${compare(p).discount.toFixed(1)}%`:"";
+        button.title=(multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`)+note;
+        button.setAttribute("aria-label",label+note);
+        if(lowCount){const flag=node("span","低");flag.className="project-watch-flag";flag.setAttribute("aria-hidden","true");button.append(flag);}
         button.addEventListener("click",e=>{
           e.stopPropagation();open(rows);
           if(multiple&&map.getZoom()<17&&positions.some(v=>v[0]!==positions[0][0]||v[1]!==positions[0][1])){
@@ -111,30 +138,30 @@ const LiveProjects = (() => {
       }
       highlight();
       const count=groups.reduce((n,g)=>n+g.rows.length,0);
-      if(status)status.textContent=count?`畫面內 ${count} 案有定位 · 數字為多案群組`:
-        !data?(failed?"建案標記讀取失敗":"正在讀取建案標記…"):
-        Date.now()-Date.parse(data.observed_at)>8*86400000?"建案索引已過期，暫不顯示舊標記。":"此畫面沒有可定位的建案；未定位案件仍可查清單。";
+      if(status)status.textContent=count?`畫面內 ${count} 案有定位${watches?` · ${watches} 案符合低價標記`:""} · 數字為多案群組`:
+        !data&&!newHomes?(failed?"建案標記讀取失敗":"正在讀取建案標記…"):
+        !fresh(data?.observed_at,8)&&!fresh(newHomes?.observed_at,8)?"建案索引已過期，暫不顯示舊標記。":"此畫面沒有可定位的建案；未定位案件仍可查清單。";
     }
     map.on("moveend",draw);load().then(draw);
-    return {select:rows=>{selected=new Set(rows.map(p=>p.id));highlight();}};
+    return {refresh:draw,select:rows=>{selected=new Set(rows.map(p=>p.id));highlight();}};
   }
   function panel(query={}){
-    const box=node("section");box.className="live-projects";box.setAttribute("aria-label","全台預售與預推建案");
-    box.append(node("h3",query.geometry?"圖框內可定位的預售／預推建案":`${query.district||query.city||"全台"}｜預售與預推建案`));
-    if(!data){box.append(node("p",failed?"公開建案資料讀取失敗，不顯示成 0 案。":"正在讀取公開建案…"));return box;}
-    const age=Date.now()-Date.parse(data.observed_at);
-    if(age>8*86400000){box.append(node("p","建案索引超過 8 天未更新，暫不列出，避免把舊案當作在售。"));return box;}
-    const date=data.observed_at.slice(0,10),rows=matching(query);
-    const reports=Object.values(data.regions).filter(r=>!query.city||r.city.replaceAll("台","臺")===query.city.replaceAll("台","臺"));
+    const box=node("section");box.className="live-projects";box.setAttribute("aria-label","預售與新成屋建案");
+    box.append(node("h3",query.geometry?"圖框內｜預售、預推與新成屋":`${query.district||query.city||"全台"}｜預售、預推與新成屋`));
+    if(!data&&!newHomes){box.append(node("p",failed?"公開建案資料讀取失敗，不顯示成 0 案。":"正在讀取公開建案…"));return box;}
+    if(!fresh(data?.observed_at,8)&&!fresh(newHomes?.observed_at,8)){box.append(node("p","建案索引超過 8 天未更新，暫不列出，避免把舊案當作在售。"));return box;}
+    const date=(data||newHomes).observed_at.slice(0,10),rows=matching(query);
+    const reports=Object.values(data?.regions||{}).filter(r=>!query.city||r.city.replaceAll("台","臺")===query.city.replaceAll("台","臺"));
     const checked=reports.filter(r=>r.status==="indexed").length;
-    box.append(node("p",`${date} 讀取 · ${rows.length} 案 · 已走訪 ${checked}/${reports.length} 個縣市索引的全部分頁`),
-      node("small","非全市場完整供給；平台索引可能含歷史案。已完工案不列入；未核實案獨立標示，不宣稱仍在售。來源開價不是成交價。"));
+    box.append(node("p",`${date} 讀取 · ${rows.length} 案 · 預售索引 ${checked}/${reports.length} 縣市完整分頁`),
+      node("small","新成屋僅列分批核對的在售案，未核實預售另標示。開價不是成交價，未標低價不代表不便宜。"));
+    if(homesFailed||!fresh(newHomes?.observed_at,8))box.append(node("small","新成屋索引未載入或已過期，不代表沒有在售案。"));
     if(!rows.length){box.append(node("p",reports.some(r=>r.status!=="indexed")?"本次來源受限或尚未完成蒐集，不代表零供給。":query.geometry?"本次未取得可定位到此圖框的合格預售案。可改看整個行政區，不代表區內無案。":"本次沒有符合條件的可展示紀錄，不代表沒有預售屋。"));return box;}
     const controls=node("div");controls.className="live-filters";
     const phase=node("select"),search=node("input"),circle=node("select");
     const option=(label,value)=>{const e=node("option",label);e.value=value;return e;};
     phase.setAttribute("aria-label","建案階段");
-    phase.append(option("全部預售／預推索引",""),option("核實銷售中","active"),option("未開賣／預推","pending"),option("核實完銷預售","sold_out"));
+    phase.append(option("所有建案",""),option("核實銷售中預售","active"),option("未開賣／預推","pending"),option("核實完銷預售","sold_out"),option("在售新成屋","new_home"));
     search.type="search";search.placeholder="搜尋建案或路段";search.setAttribute("aria-label","搜尋建案或路段");
     circle.setAttribute("aria-label","生活圈（來源分類）");circle.append(option("全部生活圈（來源分類）",""));
     for(const c of [...new Set(rows.map(p=>p.circle).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant")))circle.append(option(c,c));
@@ -149,7 +176,7 @@ const LiveProjects = (() => {
     function render(){
       const q=search.value.trim();
       selected=rows.filter(p=>(!phase.value||(phase.value==="pending"?["pending","listed_pending"].includes(p.category):p.category===phase.value))&&(!circle.value||p.circle===circle.value)&&(!q||(p.name+p.address).includes(q)))
-        .sort((a,b)=>Number(!a.verified_on)-Number(!b.verified_on)||(b.source_updated||"").localeCompare(a.source_updated||""));
+        .sort((a,b)=>Number(!!compare(b))-Number(!!compare(a))||Number(!a.verified_on)-Number(!b.verified_on)||(b.source_updated||"").localeCompare(a.source_updated||""));
       circleNote.textContent=circle.value?`${circle.value} 為來源平台的生活圈分類，並非已核對的地界。新成屋均價：缺少對應範圍／足夠可定位成交樣本，不以行政區均價代替。`:"";
       result.textContent=`符合 ${selected.length} 案`;shown=0;list.replaceChildren();add();
     }

@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>房市觀測室｜從區域，看見變化</title>
-  <link rel="stylesheet" href="leaflet.css"><link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="road-map.css?v=25"><script src="leaflet.js" defer></script><script src="redevelopment-areas.js?v=4" defer></script><script src="taiwan-context.js?v=3" defer></script><script src="live-projects.js?v=4" defer></script><script src="national-market.js?v=5" defer></script><script src="station-atlas.js?v=8" defer></script><script src="road-map.js?v=24" defer></script><script src="app.js?v=11" defer></script>
+  <link rel="stylesheet" href="leaflet.css"><link rel="stylesheet" href="style.css?v=8"><link rel="stylesheet" href="road-map.css?v=26"><script src="leaflet.js" defer></script><script src="redevelopment-areas.js?v=4" defer></script><script src="taiwan-context.js?v=3" defer></script><script src="live-projects.js?v=5" defer></script><script src="national-market.js?v=6" defer></script><script src="station-atlas.js?v=9" defer></script><script src="road-map.js?v=24" defer></script><script src="app.js?v=11" defer></script>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="./"><span class="brand-icon" aria-hidden="true">▥</span>房市觀測室<span class="brand-en">PROPERTY OBSERVATORY</span></a><span class="edition">個人選區 · 公開資料</span></header>
@@ -23,7 +23,7 @@
       <div class="context-toolbar" aria-label="彩色底圖圖層">
         <label><input id="show-context-roads" type="checkbox" checked> 道路</label><label><input id="show-landmarks" type="checkbox" checked> 地標範圍</label>
         <span class="context-footprint-key" aria-label="地標範圍色彩"><span class="context-transport">交通</span><span class="context-medical">醫療</span><span class="context-education">校園</span><span class="context-retail">商業</span><span class="context-jobs">產業</span><span class="context-leisure">公園／公共設施</span></span>
-        <small>放大看彩色範圍，點框看名稱</small>
+        <small><strong class="price-watch-badge">低</strong> 開價較同區同類成交低 20% 以上</small>
       </div>
       <div class="map-body">
         <div class="map-canvas"><div id="road-map" role="region" aria-label="可點選建案、生活圈與大型地標的地圖"></div><p id="project-map-status" class="project-map-status" role="status">正在讀取建案標記…</p><p id="terrain-status" class="tile-status" role="status"></p><p id="context-status" class="tile-status" role="status"></p><p id="tile-status" class="tile-status" role="status"></p></div>

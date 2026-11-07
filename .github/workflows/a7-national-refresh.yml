@@ -57,7 +57,9 @@ jobs:
           python -m unittest discover -s scripts/a7-line-monitor -p 'test_national*.py'
           node scripts/a7-line-monitor/test_live_projects.cjs
       - name: Read public indexes and progressively verify project stages
-        run: python scripts/a7-line-monitor/collect_national_listings.py --output scripts/a7-line-monitor/site/national-listings.json --detail-limit 600
+        run: python scripts/a7-line-monitor/collect_national_listings.py --output scripts/a7-line-monitor/site/national-listings.json --market-index scripts/a7-line-monitor/site/national-market.json --detail-limit 600
+      - name: Refresh separately verified new-home listings
+        run: python scripts/a7-line-monitor/collect_national_listings.py --new-homes-only --max-pages 8 --detail-limit 150 --region-index scripts/a7-line-monitor/site/national-listings.json --market-index scripts/a7-line-monitor/site/national-market.json --output scripts/a7-line-monitor/site/national-new-homes.json
       - name: Refresh weekly official aggregates
         if: ${{ inputs.refresh_prices || (github.event_name == 'schedule') }}
         env:
@@ -74,7 +76,7 @@ jobs:
           node scripts/a7-line-monitor/test_live_projects.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add scripts/a7-line-monitor/site/national-listings.json scripts/a7-line-monitor/site/national-market.json
+          git add scripts/a7-line-monitor/site/national-listings.json scripts/a7-line-monitor/site/national-new-homes.json scripts/a7-line-monitor/site/national-market.json
           if ! git diff --cached --quiet; then
             git commit -m 'Refresh public nationwide property datasets'
             git push origin HEAD:main

@@ -6,7 +6,7 @@ const NationalMarket = (() => {
     const b=text("button",label); b.type="button"; b.className="atlas-secondary";
     b.addEventListener("click",run); return b;
   };
-  let data, pending, failed=false;
+  let data, pending, failed=false, comparisonScopes=[];
 
   function load(){
     if(!pending)pending=(async()=>{
@@ -32,6 +32,30 @@ const NationalMarket = (() => {
   }
   const enough=price=>Number.isFinite(price?.mean)&&price.count>=5;
   const unitPrice=price=>price.mean.toFixed(2)+" 萬元／坪";
+  const recent=(value,days)=>{
+    const age=Date.now()-Date.parse(value);
+    return age>=-86400000&&age<=days*86400000;
+  };
+  function setComparisonScopes(scopes){comparisonScopes=scopes;}
+  function priceComparison(project){
+    const completed=project.category==="new_home";
+    if(!data||(!completed&&!['active','pending'].includes(project.category))||!recent(project.verified_on,7)||
+      !recent(project.source_updated,60)||!project.city||!project.district||!['住宅大樓','華廈','公寓'].includes(project.property_style)||
+      /透天|店面|辦公/.test(project.name)||!/^萬(?:元)?[／/]坪$/.test((project.price_unit||"").trim()))return null;
+    const match=String(project.price||"").trim().match(/^(\d{1,3}(?:\.\d{1,3})?)(?:\s*[~～–—-]\s*(\d{1,3}(?:\.\d{1,3})?))?$/);
+    if(!match)return null;
+    const low=Number(match[1]),high=Number(match[2]||match[1]);
+    if(low<=0||high<low)return null;
+    const key=completed?"price":"presale_price",label=completed?"新成屋":"預售屋";
+    const district=data.districts[`${project.city.replaceAll("台","臺")}/${project.district}`];
+    const reference=price=>enough(price)&&price.mean>0&&price.count>=10&&recent(price.last,183);
+    const area=Array.isArray(project.coordinates)&&typeof LiveProjects!=="undefined"?
+      comparisonScopes.find(s=>reference(data.areas[s.id]?.[key])&&LiveProjects.inside(project.coordinates,s.geometry)):null;
+    const price=area?data.areas[area.id][key]:district?.[key];
+    if(!reference(price)||high>price.mean*.8+Number.EPSILON*price.mean)return null;
+    return {low,high,mean:price.mean,count:price.count,first:price.first,last:price.last,label,
+      scope:area?`${area.name}圖框內`:`${project.district}行政區`,discount:(1-high/price.mean)*100};
+  }
   function projectBenchmark(project,scopes=[]){
     const box=text("section","");box.className="project-benchmark";
     box.append(text("h3","區域新成屋均價"));
@@ -207,5 +231,5 @@ const NationalMarket = (() => {
     $("national-view").disabled=false;
     return load();
   }
-  return {configure,load,areaPanel,districtPanel,count,projectBenchmark};
+  return {configure,load,areaPanel,districtPanel,count,projectBenchmark,priceComparison,setComparisonScopes};
 })();

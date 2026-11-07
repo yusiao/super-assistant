@@ -99,6 +99,8 @@
 .project-pin{display:grid;place-items:center;width:34px;height:34px;padding:0;border:2px solid #fffdf8;border-radius:50%;box-shadow:0 2px 6px #173d3066;background:#254b3b;color:white;font:700 17px/1 var(--sans);cursor:pointer}
 .project-pin-pending{background:#98501d}.project-pin-group{background:#29465b;font-size:14px}
 .project-pin:hover,.project-pin[aria-pressed=true],.project-pin:focus-visible{outline:3px solid #e0a747;outline-offset:1px;background:#172e24}
+.project-pin-new-home{background:#526c87}.project-pin-watch{position:relative;box-shadow:0 0 0 2px #a51e42,0 2px 6px #173d3066}.project-watch-flag{position:absolute;top:-9px;right:-9px;display:grid;place-items:center;border:1px solid #fffdf8;border-radius:50%;width:17px;height:17px;background:#a51e42;color:#fff;font:800 10px/1 var(--sans);pointer-events:none}
+.price-watch{margin:8px 0;padding:8px 10px;background:#fff4f3;border-left:3px solid #a51e42}.price-watch-badge{display:inline-block;background:#a51e42;color:white;border-radius:4px;padding:2px 6px;font-size:11px;white-space:nowrap}.price-watch small{display:block;margin-top:4px;color:#653146}.price-watch p{margin:5px 0;font-size:12px}
 .atlas-settings .administrative-info{margin:0 24px;padding-bottom:12px}#map-navigation .map-drill{position:static;width:auto;max-width:none;max-height:none;margin-top:10px;box-shadow:none}
 @media(max-width:740px){
   .map-body{--map-height:clamp(210px,44svh,400px);grid-template-columns:minmax(0,1fr)}

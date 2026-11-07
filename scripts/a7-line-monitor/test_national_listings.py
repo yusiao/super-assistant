@@ -45,16 +45,32 @@ class ListingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             index({"data":{"items":[]}})
 
+    def test_new_home_needs_actual_recent_handover_and_current_sale(self):
+        completed = {"type": "handover", "deal": 1, "date": "2025年第三季度"}
+        price = {"price": "48~52", "unit": "萬/坪", "pending": 0}
+        item = self.item(build_type_name="新成屋", deal_time_v2=completed, price_unit=price, purpose_name="住宅大樓")
+        today = date(2026, 11, 7)
+        verified = detail({"housing": item}, self.project(), today)
+        self.assertEqual((verified["category"], verified["price"], verified["price_unit"]), ("new_home", "48~52", "萬/坪"))
+        self.assertEqual(verified["property_style"], "住宅大樓")
+        for change in ({"build_type_name": "中古屋"}, {"deal_time_v2": {**completed, "date": "2020年03月"}},
+                       {"deal_time_v2": {**completed, "deal": 0}}, {"sell_time": {"sell_status_txt": "完銷"}}):
+            self.assertEqual(detail({"housing": {**item, **change}}, self.project(), today)["category"], "completed")
+        self.assertEqual(detail({"housing": {**item, "price_unit": {**price, "pending": 1}}}, self.project(), today)["price"], "")
+        self.assertEqual(card({"hid":123,"build_name":"測試","region":"台北市","section":"大同區",
+                               "address":"某路","build_type_val":2}, "臺北市")["category"], "listed_new_home")
+
     def test_public_file_has_only_curated_fields(self):
         file=Path(__file__).with_name("site")/"national-listings.json"
         if not file.exists():
             self.skipTest("No generated public snapshot")
-        output=json.loads(file.read_text(encoding="utf-8"))
-        allowed={"id","name","city","district","address","url","source","source_updated","circle_id","circle","price","price_unit","area","layout","platform_type","category","listed_on","verified_on","last_attempted_on","coordinates","construction","sales_evidence","completion","opening"}
-        for p in output["projects"]:
-            self.assertLessEqual(p.keys(),allowed)
-            self.assertRegex(p["url"],r"^https://newhouse\.591\.com\.tw/\d+$")
-            self.assertIn(p["category"],{"active","pending","sold_out","completed","status_unknown","listed_presale","listed_pending"})
+        allowed={"id","name","city","district","address","url","source","source_updated","circle_id","circle","price","price_unit","area","layout","platform_type","category","listed_on","verified_on","last_attempted_on","coordinates","construction","sales_evidence","completion","opening","property_style"}
+        for source in (file,file.with_name("national-new-homes.json")):
+            output=json.loads(source.read_text(encoding="utf-8"))
+            for p in output["projects"]:
+                self.assertLessEqual(p.keys(),allowed)
+                self.assertRegex(p["url"],r"^https://newhouse\.591\.com\.tw/\d+$")
+                self.assertIn(p["category"],{"active","pending","sold_out","completed","status_unknown","listed_presale","listed_pending","listed_new_home","new_home"})
 
     def test_unapplied_pagination_is_not_success(self):
         meta={"total":2,"total_page":2,"page":1,"per_page":1,"items":[
