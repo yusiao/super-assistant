@@ -8,8 +8,6 @@ class Element{
  addEventListener(k,fn){this.events[k]=fn;}
  click(){this.events.click?.({preventDefault(){},stopPropagation(){}});}
  focus(){this.focused=true;}
- showModal(){this.open=true;}
- close(){this.open=false;this.events.close?.();}
 }
 const elements=new Map(),get=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
 const calls=[],overlays=[],panes={},events={},layers=[];
@@ -61,16 +59,15 @@ async function main(){
  assert.ok(+panes.atlasAreas.style.zIndex>400,'Polygon pane must intercept clicks ahead of districts');
  assert.ok(+panes.atlasTerrain.style.zIndex<200,'Opt-in external roads must not be covered by the terrain image');
  const shapes=layers.find(l=>l.opts.pane==='atlasAreas');
- const dialog=get('atlas-results'),panel=get('atlas-results-body'),quick=get('atlas-detail');
+ const panel=get('atlas-results-body'),quick=get('atlas-detail');
  atlas.setMarketData(market);
  assert.match(text(quick.children[0]),/已核對 2 案/);
  assert.match(text(quick.children[1]),/尚未接入/);
- assert.ok(!dialog.open,'Landing on the map must not open a dialog');
+ assert.equal(get('atlas-result-title').textContent,'A7–A9 地圖建案');
  assert.equal(shapes.opts.bubblingMouseEvents,false);
  shapes.paths[0].events.click();
  assert.equal(calls.at(-1)[0],'a7','A geographic polygon click opens its extent, not a point buffer');
- assert.equal(markers.length,3);
- assert.equal(dialog.open,true,'Selecting a polygon opens results immediately');
+ assert.equal(markers.length,5);
  assert.equal(get('atlas-result-title').textContent,'A7 開發區');
  assert.match(text(panel),/測試預售甲/);assert.match(text(panel),/測試周邊乙/);
  assert.match(text(panel),/子區待核對/);assert.match(text(panel),/僅有成交的建案/);
@@ -92,25 +89,24 @@ async function main(){
  descendants(panel).find(n=>n.textContent==='重新讀取').click();assert.equal(retries,1);
  atlas.setMarketData(market);
  const a7ids=shapes.features.map(f=>f.properties.id);assert.ok(a7ids.includes('a7-post')&&a7ids.includes('a7-school'));
- const fits=calls.length;get('atlas-close').click();assert.equal(dialog.open,false);assert.equal(calls.length,fits,'Closing preserves the map viewport');assert.equal(quick.children[0].focused,true);
- quick.children[2].click();assert.equal(dialog.open,true);assert.ok(markers.some(m=>m.icon.html.textContent==='三井周邊商業街廓 ›'));
- get('atlas-close').click();
- markers[0].icon.html.click();assert.equal(calls.at(-1)[0],'a9-mitsui');assert.equal(markers.length,2);
- get('atlas-close').click();
+ quick.children[2].click();assert.equal(get('atlas-result-title').textContent,'A9 林口站生活圈');
+ assert.ok(markers.some(m=>m.icon.html.textContent.startsWith('A8 長庚生活圈')),'Other regions remain accessible while the panel is open');
+ markers.find(m=>m.icon.html.textContent==='三井周邊商業街廓 ›').icon.html.click();assert.equal(calls.at(-1)[0],'a9-mitsui');
  markers.find(m=>m.icon.html.textContent==='三井 OUTLET 二館').icon.html.click();
  assert.equal(calls.at(-1)[0],'a9-mall2');
  assert.equal(get('atlas-result-title').textContent,'三井 OUTLET 二館');
  assert.match(text(panel),/尚未接入/);assert.doesNotMatch(text(panel),/測試預售甲|測試周邊乙/);
  const back=panel.children[0].children[1];back.value='a9';back.events.change();assert.equal(calls.at(-1)[0],'a9');
- get('atlas-corridor').click();assert.equal(markers.length,3);assert.equal(dialog.open,false);
+ get('atlas-corridor').click();assert.equal(markers.length,3);assert.equal(get('atlas-result-title').textContent,'A7–A9 地圖建案');
  zoom=16;events.zoomend();assert.ok(markers.length>3,'Zooming into an overview exposes neighborhood polygons');
- atlas.leave();assert.equal(atlas.isActive(),false);assert.equal(get('atlas-detail').hidden,true);
+ atlas.leave();assert.equal(atlas.isActive(),false);assert.equal(get('atlas-detail').hidden,false);
  zoom=8;events.zoomend();assert.equal(markers.length,0,'Station labels do not clutter nationwide overview');
  for(const f of data.features){
   assert.notEqual(f.geometry.type,'Point');
   assert.ok(f.properties.note&&f.properties.checked_at&&f.properties.kind);
  }
  assert.equal(data.features.length,11);
- console.log('PASS: polygon-to-project scope, source links, detail cards, trade-only records, refresh/error handling, no stale fallback, drilldown and privacy.');
+ assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'site/index.html'),'utf8'),/<dialog\b|返回地圖/);
+ console.log('PASS: continuous map drilldown and region switches, non-modal panel, source links, refresh and privacy.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

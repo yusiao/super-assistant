@@ -42,7 +42,7 @@ async function main(){
    assert.equal(markers.length,count,`${c}${d} has clickable redevelopment entries`);
    markers[0].icon.html.events.click(event);
    assert.ok(get('map-drill').children.some(n=>n.textContent==='查看區域分類來源'));
-   assert.ok(get('map-drill').children.some(n=>n.textContent.includes('建案資料尚未接入')));
+   assert.ok(get('map-drill').children.some(n=>n.textContent.includes('地圖上的建案標記為準')));
    get('map-drill').children.find(n=>n.textContent==='返回行政區地圖').events.click(event);
    assert.ok(get('map-drill').hidden,'Back closes place details without leaving stale selection');
  }

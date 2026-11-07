@@ -16,8 +16,8 @@ const NationalMarket = (() => {
         const body=await r.json();
         if(body.schema_version!==1||!body.districts||!body.areas||!body.filings||!body.sale_period)throw Error("schema");
         data=body;
-        if(typeof LiveProjects!=="undefined")await LiveProjects.load();
       }catch{failed=true;}
+      if(typeof LiveProjects!=="undefined")await LiveProjects.load();
     })();
     return pending;
   }
@@ -27,7 +27,7 @@ const NationalMarket = (() => {
     return a;
   }
   function status(){
-    const p=text("p",failed?"全台資料讀取失敗，請重新整理。不顯示成 0 案。":"正在讀取全台官方資料…");
+    const p=text("p",failed?"成交與備查資料讀取失敗，不影響建案標記。":"正在讀取官方成交與備查資料…");
     p.setAttribute("role","status");return p;
   }
   const enough=price=>Number.isFinite(price?.mean)&&price.count>=5;
@@ -76,6 +76,10 @@ const NationalMarket = (() => {
     }
     details.append(list);return details;
   }
+  function marketDetails(){
+    const box=text("details","");box.className="atlas-source-notes";
+    box.append(text("summary","成交均價與各案實登"));return box;
+  }
   function listing(ids, title, districtById=new Map()){
     const section=text("section","");section.className="national-list";
     section.append(text("h3",title+" · "+ids.length+" 筆"));
@@ -110,50 +114,55 @@ const NationalMarket = (() => {
   function headerNote(){
     return text("p","內政部公開備查／首次登記 "+data.filing_since+" 起；資料查核 "+data.checked_on+"。備查不等於已開賣，未列入不代表沒有新案。");
   }
-  function districtPanel({city="",district="",place="",title="",geometry},open){
-    const box=text("div","");if(!data){box.append(status());return box;}
+  function districtPanel({city="",district="",place="",title="",geometry,onLocate},open){
+    const box=text("div","");
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry,onLocate}));
+    if(!data){box.append(status());return box;}
     if(place){
       const area=data.areas["official:"+place];
+      const prices=marketDetails();
       if(area){
-        box.append(priceBoard(area,"圖框內｜已定位成交"));
-        benchmark(box,area,{city,district});
-        const prices=projectPrices(area);if(prices)box.append(prices);
-        if(area.filings.length)box.append(listing(area.filings,"圖框內對應建案"));
-        else box.append(text("p","本次沒有能定位到圖框內的備查建案；不等於沒有建案。"));
+        prices.append(priceBoard(area,"圖框內｜已定位成交"));
+        benchmark(prices,area,{city,district});
+        const projects=projectPrices(area);if(projects)prices.append(projects);
       }else{
-        box.append(text("p","此生活圈尚無已核對的範圍或成交定位，不能用行政區平均代替。"));
-        benchmark(box,null,{city,district});
+        prices.append(text("p","此生活圈尚無已核對的範圍或成交定位，不能用行政區平均代替。"));
+        benchmark(prices,null,{city,district});
+      }
+      box.append(prices);
+      if(area?.filings.length){
+        const registry=text("details","");registry.append(text("summary","官方備查紀錄"),listing(area.filings,"圖框內對應建案"));box.append(registry);
       }
       box.append(button("改看 "+district+" 的建案與均價",()=>open({city,district})),note());
-      if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry}));
       return box;
     }
     const districts=Object.entries(data.districts).filter(([key])=>!city||(district?key===city+"/"+district:key.startsWith(city+"/")));
     const scope=district?districts[0]?.[1]:city?data.cities?.[city]:data.national;
-    if(scope)box.append(priceBoard(scope,`${district||city||"全台"}｜成交均價`));
-    const prices=projectPrices(scope);if(prices)box.append(prices);
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district}));
+    if(scope){
+      const prices=marketDetails();prices.append(priceBoard(scope,`${district||city||"全台"}｜成交均價`));
+      const projects=projectPrices(scope);if(projects)prices.append(projects);box.append(prices);
+    }
     const byId=new Map(districts.flatMap(([key,d])=>d.filings.map(id=>[id,key.replace("/"," ")])));
     const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());box.append(registry);
     if(byId.size)registry.append(listing(ordered(byId.keys()),title||"近一年備查與首次登記紀錄",byId));
     else box.append(text("p",districts.some(([,d])=>d.registry)?"此區在本次官方檔案沒有符合期間的建案。":"本次官方備查檔未提供此區資料。"));
     box.append(note());return box;
   }
-  function areaPanel(id, district, open, geometry){
+  function areaPanel(id, district, open, geometry,onLocate){
     const box=text("div","");
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry,onLocate}));
     if(!data){box.append(status());return box;}
     const area=data.areas[id];
-    box.append(priceBoard(area,"圖框內｜已定位成交"));
-    benchmark(box,area,district);
-    const prices=projectPrices(area);if(prices)box.append(prices);
+    const prices=marketDetails();prices.append(priceBoard(area,"圖框內｜已定位成交"));
+    benchmark(prices,area,district);
+    const projects=projectPrices(area);if(projects)prices.append(projects);
     const expanded={price:area?.nearby_price,presale_price:area?.nearby_presale_price};
     if(priceTypes.some(([key])=>expanded[key]?.count>0&&expanded[key].count!==area[key]?.count)){
       const nearby=text("details","");nearby.className="atlas-source-notes";
       nearby.append(text("summary","查看含外擴 500 公尺的成交參考"),priceBoard(expanded,"含圖框及外擴 500 公尺"));
-      box.append(nearby);
+      prices.append(nearby);
     }
-    box.append(button("看 "+district.district+" 全部新建案",()=>open(district)));
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry}));
+    box.append(button("看 "+district.district+" 全部新建案",()=>open(district)),prices);
     const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());
     if(area?.filings.length)registry.append(listing(ordered(area.filings),"圖框內對應建案"));
     if(area?.nearby?.length)registry.append(listing(ordered(area.nearby),"圖框外 500 公尺內的周邊建案"));

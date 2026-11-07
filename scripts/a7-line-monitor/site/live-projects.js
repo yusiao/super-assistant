@@ -28,6 +28,71 @@ const LiveProjects = (() => {
     return data.projects.filter(p=>Object.hasOwn(phases,p.category)&&url(p.url)&&(["listed_presale","listed_pending"].includes(p.category)?fresh(p.source_updated,365):fresh(p.verified_on,7))&&inScope(p));
   }
   function count(query){return matching(query).length;}
+  function location(p){
+    const [lng,lat]=Array.isArray(p.coordinates)?p.coordinates:[];
+    return p.verified_on&&lng>=118&&lng<=124&&lat>=21&&lat<=27&&Number.isFinite(lng)&&Number.isFinite(lat)?[lat,lng]:null;
+  }
+  function card(p,onLocate){
+    const box=node("article");box.className="atlas-project-card national-filing";
+    const badge=node("span",phases[p.category]);badge.className="badge";
+    const link=node("a","開啟建案頁 ↗");link.href=url(p.url);link.target="_blank";link.rel="noopener noreferrer";link.className="atlas-primary";
+    const asking=p.price&&p.price!=="價格待定"?`開價 ${p.price}${p.price_unit||""}`:"開價待定";
+    box.append(badge,node("h4",p.name),node("p",`${p.city} ${p.district} · ${p.circle||"生活圈未提供"}`),node("p",p.address||"基地位置未提供"),node("p",`${asking} · ${p.area||"坪數未提供"}`));
+    if(onLocate&&location(p)){
+      const button=node("button","在地圖定位");button.type="button";button.className="atlas-secondary project-locate";
+      button.setAttribute("aria-label",`在地圖定位：${p.name}`);button.addEventListener("click",()=>onLocate(p));box.append(button);
+    }
+    box.append(link);
+    if(p.verified_on)box.append(node("small",`工期核對 ${p.verified_on} · ${p.completion||"完工期未提供"} · ${p.sales_evidence||p.construction||"狀態待核對"}`));
+    else box.append(node("small","僅來源平台分類，尚未核對工期及是否仍銷售。"));
+    box.append(node("small",`來源：${p.source} · 來源更新 ${p.source_updated||"未提供"}`));return box;
+  }
+  function selectionPanel(rows,onLocate){
+    const box=node("section");box.className="live-projects";
+    if(rows.length>1)box.append(node("p","這些建案在目前縮放下彼此靠近，可點定位選取單案。"));
+    for(const p of rows)box.append(card(p,rows.length>1?onLocate:null));
+    return box;
+  }
+  function mountMap(map,open){
+    map.createPane("projectPins").style.zIndex="680";
+    const layer=L.layerGroup().addTo(map),status=document.getElementById("project-map-status");
+    let displayed=[],selected=new Set();
+    function highlight(){for(const {button,rows} of displayed)button.setAttribute("aria-pressed",String(rows.some(p=>selected.has(p.id))));}
+    function draw(){
+      const bounds=map.getBounds().pad(0.04),groups=[];
+      for(const p of matching()){
+        const position=location(p);if(!position||!bounds.contains(position))continue;
+        const xy=map.project(position);
+        const group=groups.find(g=>(g.xy.x-xy.x)**2+(g.xy.y-xy.y)**2<34**2);
+        if(group){group.rows.push(p);group.positions.push(position);}
+        else groups.push({xy,rows:[p],positions:[position]});
+      }
+      layer.clearLayers();displayed=[];
+      for(const {rows,positions} of groups){
+        const multiple=rows.length>1,p=rows[0];
+        const button=node("button",multiple?String(rows.length):"▥");button.type="button";
+        button.className="project-pin"+(multiple?" project-pin-group":p.category.includes("pending")?" project-pin-pending":"");
+        button.title=multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`;
+        button.setAttribute("aria-label",multiple?`查看附近 ${rows.length} 個建案`:`建案：${p.name}`);
+        button.addEventListener("click",e=>{
+          e.stopPropagation();open(rows);
+          if(multiple&&map.getZoom()<17&&positions.some(v=>v[0]!==positions[0][0]||v[1]!==positions[0][1])){
+            map.fitBounds(positions,{padding:[35,35],maxZoom:17,animate:false});
+          }
+        });
+        const icon=L.divIcon({html:button,className:"project-pin-anchor",iconSize:[34,34],iconAnchor:[17,17]});
+        L.marker(positions[0],{icon,pane:"projectPins",keyboard:false,bubblingMouseEvents:false}).addTo(layer);
+        displayed.push({button,rows});
+      }
+      highlight();
+      const count=groups.reduce((n,g)=>n+g.rows.length,0);
+      if(status)status.textContent=count?`畫面內 ${count} 案有定位 · 數字為多案群組`:
+        !data?(failed?"建案標記讀取失敗":"正在讀取建案標記…"):
+        Date.now()-Date.parse(data.observed_at)>8*86400000?"建案索引已過期，暫不顯示舊標記。":"此畫面沒有可定位的建案；未定位案件仍可查清單。";
+    }
+    map.on("moveend",draw);load().then(draw);
+    return {select:rows=>{selected=new Set(rows.map(p=>p.id));highlight();}};
+  }
   function panel(query={}){
     const box=node("section");box.className="live-projects";box.setAttribute("aria-label","全台預售與預推建案");
     box.append(node("h3",query.geometry?"圖框內可定位的預售／預推建案":`${query.district||query.city||"全台"}｜預售與預推建案`));
@@ -53,17 +118,7 @@ const LiveProjects = (() => {
     circleNote.className="live-circle-note";more.type="button";more.className="atlas-secondary";
     box.append(circleNote,result,list,more);let selected=[],shown=0;
     function add(){
-      for(const p of selected.slice(shown,shown+12)){
-        const card=node("article");card.className="atlas-project-card national-filing";
-        const badge=node("span",phases[p.category]);badge.className="badge";
-        const link=node("a","開啟建案頁 ↗");link.href=url(p.url);link.target="_blank";link.rel="noopener noreferrer";link.className="atlas-primary";
-        const asking=p.price&&p.price!=="價格待定"?`開價 ${p.price}${p.price_unit||""}`:"開價待定";
-        card.append(badge,node("h4",p.name),node("p",`${p.city} ${p.district} · ${p.circle||"生活圈未提供"}`),node("p",p.address||"基地位置未提供"),
-          node("p",`${asking} · ${p.area||"坪數未提供"}`),link);
-        if(p.verified_on)card.append(node("small",`工期核對 ${p.verified_on} · ${p.completion||"完工期未提供"} · ${p.sales_evidence||p.construction||"狀態待核對"}`));
-        else card.append(node("small","僅來源平台分類，尚未核對工期及是否仍銷售；請開啟建案頁確認。"));
-        card.append(node("small",`來源：${p.source} · 來源更新 ${p.source_updated||"未提供"}`));list.append(card);
-      }
+      for(const p of selected.slice(shown,shown+12))list.append(card(p,query.onLocate));
       shown+=12;more.hidden=shown>=selected.length;
     }
     function render(){
@@ -75,5 +130,5 @@ const LiveProjects = (() => {
     }
     phase.addEventListener("change",render);circle.addEventListener("change",render);search.addEventListener("input",render);more.addEventListener("click",add);render();return box;
   }
-  return {load,panel,count,inside,url};
+  return {load,panel,count,inside,url,location,mountMap,selectionPanel};
 })();
