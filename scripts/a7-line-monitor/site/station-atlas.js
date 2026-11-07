@@ -4,6 +4,7 @@ const StationAtlas = (() => {
   let map, data, shapes, labels, focus = "", active = false, onNavigate=()=>{};
   let market = null, marketError = "";
   let panelMode = "", directoryRequest = 0, mapPins;
+  let priceScope=null, officialScopes=[];
   const stages = {active:"銷售中預售",pending:"未開賣預售",sold_out:"完銷預售"};
   const colors = {a7:"#ad5929",a8:"#276b66",a9:"#3b6592"};
   const node = (tag, value) => {const n=document.createElement(tag);n.textContent=value;return n;};
@@ -150,19 +151,28 @@ const StationAtlas = (() => {
     return request;
   }
   function openProjects(rows){
-    present("project",rows.length===1?rows[0].name:`附近 ${rows.length} 個建案`,[LiveProjects.selectionPanel(rows,locateProject)],rows);
+    const single=rows.length===1,compare=single&&typeof NationalMarket!=="undefined";
+    const scopes=[priceScope,...(data?roots().map(marketBoundary):[]),...officialScopes];
+    const render=()=>LiveProjects.selectionPanel(rows,{onLocate:locateProject,onProject:openProject,
+      benchmark:compare?NationalMarket.projectBenchmark(rows[0],scopes):null});
+    const request=present("project",single?rows[0].name:`附近 ${rows.length} 個建案`,[render()],rows);
+    if(compare)NationalMarket.load().then(()=>{if(request===directoryRequest)$("atlas-results-body").replaceChildren(render());});
   }
+  const openProject=project=>openProjects([project]);
+  const marketBoundary=f=>({id:f.properties.id,name:f.properties.name,geometry:f.geometry});
   function locateProject(project){
     const point=LiveProjects.location(project);if(!map||!point)return;
-    openProjects([project]);
+    openProject(project);
     if(map.getZoom()<15||!map.getBounds().contains(point))map.setView(point,Math.max(15,map.getZoom()),{animate:false});
   }
   function renderCorridor(){
-    const content=typeof LiveProjects!=="undefined"?LiveProjects.panel({geometry:{type:"GeometryCollection",geometries:roots().map(f=>f.geometry)},onLocate:locateProject}):node("p","點選地圖上的區域查看建案。");
+    priceScope=null;
+    const content=typeof LiveProjects!=="undefined"?LiveProjects.panel({geometry:{type:"GeometryCollection",geometries:roots().map(f=>f.geometry)},onLocate:locateProject,onProject:openProject}):node("p","點選地圖上的區域查看建案。");
     present("corridor","A7–A9 地圖建案",[content]);
   }
   function renderResults(feature){
     const p=feature.properties,station=find(root(feature));
+    priceScope=marketBoundary(feature);
     const select=node("select","");select.id="atlas-area-select";
     const label=node("label","切換生活圈");label.htmlFor=select.id;
     const addOptions=(f,depth=0)=>{
@@ -180,7 +190,7 @@ const StationAtlas = (() => {
     const sections=[control];
     if(typeof NationalMarket!=="undefined"){
       const district=root(feature)==="a9"?{city:"新北市",district:"林口區"}:{city:"桃園市",district:"龜山區"};
-      sections.push(NationalMarket.areaPanel(p.id,district,openNational,feature.geometry,locateProject));
+      sections.push(NationalMarket.areaPanel(p.id,district,openNational,feature.geometry,locateProject,openProject));
     }
     if(typeof LiveProjects==="undefined"&&(typeof NationalMarket==="undefined"||marketScope(feature).areas.some(a=>projects([a]).length||a.transactions?.length))){
       if(typeof NationalMarket!=="undefined")sections.push(node("h3","另有已核對的銷售與成交資料"));
@@ -190,8 +200,9 @@ const StationAtlas = (() => {
   }
   function openNational(selection={}){
     if(typeof NationalMarket==="undefined")return;
+    priceScope=selection.place&&selection.geometry?{id:"official:"+selection.place,name:selection.title||selection.district,geometry:selection.geometry}:null;
     const title=selection.title||(selection.city?selection.city+(selection.district||""):"全台新建案");
-    const render=()=>NationalMarket.districtPanel({...selection,onLocate:locateProject},openNational);
+    const render=()=>NationalMarket.districtPanel({...selection,onLocate:locateProject,onProject:openProject},openNational);
     const request=present("national",title,[render()]);
     NationalMarket.load().then(()=>{if(request===directoryRequest)$("atlas-results-body").replaceChildren(render());});
   }
@@ -218,8 +229,8 @@ const StationAtlas = (() => {
     $("atlas-corridor").setAttribute("aria-pressed","false");draw();
     map?.invalidateSize?.({pan:false});
   }
-  async function init(instance,onFocus=()=>{}){
-    map=instance;onNavigate=onFocus;
+  async function init(instance,onFocus=()=>{},official=[]){
+    map=instance;onNavigate=onFocus;officialScopes=official;
     $("atlas-corridor").addEventListener("click",()=>show(""));
     if(typeof LiveProjects!=="undefined")mapPins=LiveProjects.mountMap(map,openProjects);
     try{

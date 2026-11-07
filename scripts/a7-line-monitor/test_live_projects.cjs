@@ -7,6 +7,7 @@ class Element{
   addEventListener(k,f){this.events[k]=f;}
 }
 const text=n=>(n.textContent||"")+n.children.map(text).join(" ");
+const descendants=n=>[n,...n.children.flatMap(descendants)];
 const base={id:"a",name:"測試案",city:"桃園市",district:"龜山區",circle:"長庚生活圈",source:"591新建案",source_updated:new Date().toISOString().slice(0,10),verified_on:new Date().toISOString().slice(0,10),url:"https://newhouse.591.com.tw/123",category:"active",coordinates:[121.5,25.1]};
 const data={schema_version:1,observed_at:new Date().toISOString(),regions:{6:{city:"桃園市",status:"indexed"}},projects:[base,{...base,id:"b",name:"預推案",category:"listed_pending",url:"https://newhouse.591.com.tw/124"},{...base,category:"completed"},{...base,url:"https://evil.com/123"}]};
 const markers=[],status=new Element("p"),events={},opened=[];
@@ -25,7 +26,14 @@ const live=vm.runInContext("LiveProjects",context);
   const polygon={type:"Polygon",coordinates:[[[121,25],[122,25],[122,26],[121,26],[121,25]]]};
   assert.ok(live.inside([121.5,25.1],polygon));assert.ok(!live.inside([120.5,25.1],polygon));
   assert.equal(live.count({geometry:polygon}),2);
-  const panel=live.panel({district:"龜山區"});assert.match(text(panel),/開啟建案頁/);assert.match(text(panel),/2 案/);
+  let selected;
+  const panel=live.panel({district:"龜山區",onProject:p=>selected=p});assert.match(text(panel),/查看建案資料/);assert.match(text(panel),/2 案/);
+  const action=descendants(panel).find(e=>e["aria-label"]==="查看建案資料：測試案");action.events.click();assert.equal(selected.id,"a");
+  assert.ok(!descendants(panel).some(e=>e.tag==="a"),"Listings do not send users to external project pages");
+  const benchmark=new Element("section");benchmark.textContent="區域新成屋均價 45.27";
+  const inspection=live.selectionPanel([{...base,layout:"二房",area:"25坪",opening:"2026年07月",completion:"預計2029年第三季度"}],{benchmark});
+  assert.match(text(inspection),/區域新成屋均價 45.27/);assert.match(text(inspection),/二房.*25坪.*2026年07月.*預計2029年第三季度/);
+  assert.ok(!descendants(inspection).some(e=>e.tag==="a"),"Project details and benchmark render without external links");
   const controls=panel.children.find(e=>e.className==="live-filters");
   controls.children[0].value="pending";controls.children[0].events.change();assert.match(text(panel),/符合 1 案/);
   controls.children[1].value="長庚生活圈";controls.children[1].events.change();assert.match(text(panel),/不以行政區均價代替/);

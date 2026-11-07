@@ -32,25 +32,48 @@ const LiveProjects = (() => {
     const [lng,lat]=Array.isArray(p.coordinates)?p.coordinates:[];
     return p.verified_on&&lng>=118&&lng<=124&&lat>=21&&lat<=27&&Number.isFinite(lng)&&Number.isFinite(lat)?[lat,lng]:null;
   }
-  function card(p,onLocate){
+  const asking=p=>p.price&&p.price!=="價格待定"?`${p.price}${p.price_unit||""}`:"待定／未提供";
+  const areaLabel=p=>`${p.city} ${p.district}${p.circle?` · ${p.circle}`:""}`;
+  function facts(p){
+    const list=node("dl");list.className="project-facts";
+    for(const [label,value] of [["格局",p.layout],["規劃坪數",p.area],["公開銷售時間",p.opening],["完工／交屋期（來源）",p.completion]]){
+      list.append(node("dt",label),node("dd",value||"未提供"));
+    }
+    return list;
+  }
+  function inspection(p,benchmark){
+    const box=node("article");box.className="project-inspection";
+    const overview=node("div");overview.className="project-overview";
+    const basics=node("div");basics.className="project-overview-main";
+    const stage=node("span",phases[p.category]||"銷售狀態待核對");stage.className="badge";
+    basics.append(stage,node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("strong",`建案開價 ${asking(p)}`));
+    overview.append(basics);if(benchmark)overview.append(benchmark);
+    box.append(overview,node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
+    if(p.verified_on)box.append(node("small",`工期與狀態核對：${p.verified_on}`));
+    return box;
+  }
+  function card(p,{onLocate,onProject}={}){
     const box=node("article");box.className="atlas-project-card national-filing";
     const badge=node("span",phases[p.category]);badge.className="badge";
-    const link=node("a","開啟建案頁 ↗");link.href=url(p.url);link.target="_blank";link.rel="noopener noreferrer";link.className="atlas-primary";
-    const asking=p.price&&p.price!=="價格待定"?`開價 ${p.price}${p.price_unit||""}`:"開價待定";
-    box.append(badge,node("h4",p.name),node("p",`${p.city} ${p.district} · ${p.circle||"生活圈未提供"}`),node("p",p.address||"基地位置未提供"),node("p",`${asking} · ${p.area||"坪數未提供"}`));
+    box.append(badge,node("h4",p.name),node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("p",`開價 ${asking(p)} · ${p.area||"坪數未提供"}`));
+    const actions=node("div");actions.className="project-card-actions";
+    if(onProject){
+      const button=node("button","查看建案資料");button.type="button";button.className="atlas-primary";
+      button.setAttribute("aria-label",`查看建案資料：${p.name}`);button.addEventListener("click",()=>onProject(p));actions.append(button);
+    }else{
+      const details=node("details");details.append(node("summary","建案資料"),facts(p));box.append(details);
+    }
     if(onLocate&&location(p)){
       const button=node("button","在地圖定位");button.type="button";button.className="atlas-secondary project-locate";
-      button.setAttribute("aria-label",`在地圖定位：${p.name}`);button.addEventListener("click",()=>onLocate(p));box.append(button);
+      button.setAttribute("aria-label",`在地圖定位：${p.name}`);button.addEventListener("click",()=>onLocate(p));actions.append(button);
     }
-    box.append(link);
-    if(p.verified_on)box.append(node("small",`工期核對 ${p.verified_on} · ${p.completion||"完工期未提供"} · ${p.sales_evidence||p.construction||"狀態待核對"}`));
-    else box.append(node("small","僅來源平台分類，尚未核對工期及是否仍銷售。"));
-    box.append(node("small",`來源：${p.source} · 來源更新 ${p.source_updated||"未提供"}`));return box;
+    box.append(actions);return box;
   }
-  function selectionPanel(rows,onLocate){
+  function selectionPanel(rows,options={}){
+    if(rows.length===1)return inspection(rows[0],options.benchmark);
     const box=node("section");box.className="live-projects";
-    if(rows.length>1)box.append(node("p","這些建案在目前縮放下彼此靠近，可點定位選取單案。"));
-    for(const p of rows)box.append(card(p,rows.length>1?onLocate:null));
+    box.append(node("p","這些建案在目前縮放下彼此靠近，可直接選案查看資料。"));
+    for(const p of rows)box.append(card(p,options));
     return box;
   }
   function mountMap(map,open){
@@ -118,7 +141,7 @@ const LiveProjects = (() => {
     circleNote.className="live-circle-note";more.type="button";more.className="atlas-secondary";
     box.append(circleNote,result,list,more);let selected=[],shown=0;
     function add(){
-      for(const p of selected.slice(shown,shown+12))list.append(card(p,query.onLocate));
+      for(const p of selected.slice(shown,shown+12))list.append(card(p,query));
       shown+=12;more.hidden=shown>=selected.length;
     }
     function render(){

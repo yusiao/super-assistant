@@ -176,7 +176,8 @@ const RegionMap = (() => {
     }}).addTo(map);
     $('district-toggle').addEventListener('change',()=>{$('district-toggle').checked?districtLayer.addTo(map):map.removeLayer(districtLayer);});$('life-toggle').addEventListener('change',paint);fit();
     try{const r=await fetch('life-boundaries.geojson',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('life');const body=await r.json();if(body.type!=='FeatureCollection'||!Array.isArray(body.features))throw Error('schema');verified=body.features.filter(validLife);}catch{$('tile-status').textContent='生活圈圖層未載入；道路與行政區仍可使用。';}
-    if(typeof StationAtlas!=='undefined')await StationAtlas.init(map,()=>{placeLayer.clearLayers();$('map-drill').hidden=true;});
+    if(typeof StationAtlas!=='undefined')await StationAtlas.init(map,()=>{placeLayer.clearLayers();$('map-drill').hidden=true;},
+      verified.filter(f=>f.properties.catalog_id).map(f=>({id:'official:'+f.properties.catalog_id,name:f.properties.name,geometry:f.geometry})));
     return true;
   }
   return {init,render,cities,districts};

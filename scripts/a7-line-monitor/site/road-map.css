@@ -74,6 +74,19 @@
 #atlas-results{display:flex;flex-direction:column;min-width:0;height:var(--map-height);border-left:1px solid var(--line);background:#fffdf8;color:var(--ink)}
 #atlas-results .live-projects{margin:0 0 14px}#atlas-results .live-projects>h3{font-size:16px;margin:0 0 8px}
 #atlas-results .atlas-project-card h4{font-size:19px}.project-locate{margin-top:8px}
+.project-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.project-card-actions :is(.atlas-primary,.project-locate){margin:0;width:auto;min-height:40px}
+.project-overview{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:10px;align-items:start}
+.project-overview-main,.project-benchmark{min-width:0;overflow-wrap:anywhere}
+.project-overview-main p{font-size:13px;margin:7px 0}.project-overview-main .badge{display:inline-block}
+.project-overview-main>strong{display:block;margin-top:8px;color:var(--ink);font-size:14px}
+.project-benchmark{padding:10px;border-left:3px solid var(--green);background:var(--soft)}
+.project-benchmark h3,.project-inspection>h3{font-size:14px;margin:0 0 6px}
+.project-benchmark strong{display:block;font:700 clamp(21px,4vw,27px) var(--sans);color:var(--green);margin-top:4px}
+.project-benchmark p,.project-benchmark small,.project-inspection>small{font-size:11px;line-height:1.55}
+.project-benchmark p{margin:4px 0}.project-benchmark small,.project-inspection>small{display:block;color:var(--muted)}
+.project-inspection>h3{margin-top:15px}.project-facts{display:grid;grid-template-columns:minmax(86px,1fr) minmax(0,2fr);gap:0;margin:0 0 12px;font-size:13px}
+.project-facts dt,.project-facts dd{padding:6px 0;border-bottom:1px solid var(--line);margin:0}.project-facts dt{color:var(--muted);padding-right:8px}.project-facts dd{overflow-wrap:anywhere}
 .project-map-status{padding:8px 12px;margin:0;color:var(--muted);font-size:12px;background:#f5f6ed;border-top:1px solid var(--line)}
 .project-pin{display:grid;place-items:center;width:34px;height:34px;padding:0;border:2px solid #fffdf8;border-radius:50%;box-shadow:0 2px 6px #173d3066;background:#254b3b;color:white;font:700 17px/1 var(--sans);cursor:pointer}
 .project-pin-pending{background:#98501d}.project-pin-group{background:#29465b;font-size:14px}

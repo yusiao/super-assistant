@@ -32,6 +32,23 @@ const NationalMarket = (() => {
   }
   const enough=price=>Number.isFinite(price?.mean)&&price.count>=5;
   const unitPrice=price=>price.mean.toFixed(2)+" 萬元／坪";
+  function projectBenchmark(project,scopes=[]){
+    const box=text("section","");box.className="project-benchmark";
+    box.append(text("h3","區域新成屋均價"));
+    if(!data){box.append(status());return box;}
+    const located=typeof LiveProjects!=="undefined"&&LiveProjects.location(project);
+    const area=located?scopes.find(scope=>scope&&data.areas[scope.id]&&LiveProjects.inside(project.coordinates,scope.geometry)):null;
+    const exact=area&&data.areas[area.id].price;
+    const district=data.districts[`${project.city.replaceAll("台","臺")}/${project.district}`]?.price;
+    if(area&&!enough(exact))box.append(text("p",`${area.name}：圖框內樣本不足`));
+    const price=enough(exact)?exact:district;
+    box.append(text("small",enough(exact)?`${area.name} · 圖框內`:`${project.district} · 行政區參考`));
+    if(enough(price)){
+      box.append(text("strong",price.mean.toFixed(2)),text("small","萬元／坪"),text("p",`${price.count} 筆 · ${price.first} 至 ${price.last}`));
+    }else box.append(text("p","合格樣本不足，不顯示均價。"));
+    box.append(text("small","實價登錄 · 屋齡 5 年內 · 扣車位"));
+    return box;
+  }
   const priceTypes=[["price","新成屋","成交時屋齡 5 年內"],["presale_price","預售屋","依預售契約成交登錄"]];
   function priceBoard(scope={},title,reference=false){
     const box=text("section","");box.className="national-price"+(reference?" national-price-reference":"");
@@ -114,9 +131,9 @@ const NationalMarket = (() => {
   function headerNote(){
     return text("p","內政部公開備查／首次登記 "+data.filing_since+" 起；資料查核 "+data.checked_on+"。備查不等於已開賣，未列入不代表沒有新案。");
   }
-  function districtPanel({city="",district="",place="",title="",geometry,onLocate},open){
+  function districtPanel({city="",district="",place="",title="",geometry,onLocate,onProject},open){
     const box=text("div","");
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry,onLocate}));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry,onLocate,onProject}));
     if(!data){box.append(status());return box;}
     if(place){
       const area=data.areas["official:"+place];
@@ -148,9 +165,9 @@ const NationalMarket = (() => {
     else box.append(text("p",districts.some(([,d])=>d.registry)?"此區在本次官方檔案沒有符合期間的建案。":"本次官方備查檔未提供此區資料。"));
     box.append(note());return box;
   }
-  function areaPanel(id, district, open, geometry,onLocate){
+  function areaPanel(id, district, open, geometry,onLocate,onProject){
     const box=text("div","");
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry,onLocate}));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry,onLocate,onProject}));
     if(!data){box.append(status());return box;}
     const area=data.areas[id];
     const prices=marketDetails();prices.append(priceBoard(area,"圖框內｜已定位成交"));
@@ -190,5 +207,5 @@ const NationalMarket = (() => {
     $("national-view").disabled=false;
     return load();
   }
-  return {configure,load,areaPanel,districtPanel,count};
+  return {configure,load,areaPanel,districtPanel,count,projectBenchmark};
 })();
