@@ -51,6 +51,12 @@ html:has(#atlas-results[open]){overflow:hidden}
 .national-price small,.national-filing small{display:block;font-size:12px;color:var(--muted);margin-top:5px}
 .national-price a{font-size:12px}.national-list{margin:14px 0}.national-filing h4{font-size:19px}
 .national-filing .badge{float:none;display:inline-block;margin:0 0 6px;font-size:11px}
+.live-projects{margin:14px 0 24px}.live-projects>h3{font:700 22px var(--serif)}
+.live-projects small{display:block;color:var(--muted);font-size:12px;line-height:1.6}
+.live-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.live-filters select,.live-filters input{min-width:0;width:100%;min-height:44px;padding:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:16px;border-radius:4px}
+.live-filters input{grid-column:1/-1}.live-circle-note{background:var(--soft);padding:10px;font-size:13px}.live-circle-note:empty{display:none}
+.live-projects .atlas-primary{margin-top:10px;width:100%;background:var(--green);color:white;border-color:var(--green)}
 @media(max-width:420px){.national-picker{padding:8px;gap:6px}.national-picker button{padding-inline:8px;font-size:12px}}
 .atlas-settings>summary,.report-workspace>summary{padding:12px 16px;cursor:pointer;color:var(--green);font-weight:700;font-size:14px}
 .report-workspace{margin-top:16px;border:1px solid var(--line);background:#fffdf8;padding:0 16px 0}.report-workspace[open]{padding-bottom:16px}

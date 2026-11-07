@@ -1,0 +1,90 @@
+name: Refresh Nationwide Property Map
+
+on:
+  schedule:
+    # Taiwan 17:27 daily. Weekly free official-price refresh is on Sunday.
+    - cron: '27 9 * * *'
+  workflow_dispatch:
+    inputs:
+      check_only:
+        description: Check cloud access to the public source without publishing
+        type: boolean
+        default: false
+      refresh_prices:
+        description: Refresh official sale aggregates as well
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  source-check:
+    if: ${{ inputs.check_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check three public regional indexes
+        run: |
+          python scripts/a7-line-monitor/collect_national_listings.py --probe --regions 1 3 6 --output "$RUNNER_TEMP/probe.json"
+          python -c 'import json,os,pathlib; d=json.loads((pathlib.Path(os.environ["RUNNER_TEMP"])/"probe.json").read_text()); assert len(d["regions"])==3 and all(r["status"]=="probe" for r in d["regions"].values()), "Public source unavailable"'
+  refresh:
+    if: ${{ !inputs.check_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test public collectors
+        run: |
+          python -m unittest discover -s scripts/a7-line-monitor -p 'test_national*.py'
+          node scripts/a7-line-monitor/test_live_projects.cjs
+      - name: Read public indexes and progressively verify project stages
+        run: python scripts/a7-line-monitor/collect_national_listings.py --output scripts/a7-line-monitor/site/national-listings.json --detail-limit 600
+      - name: Refresh weekly official aggregates
+        if: ${{ inputs.refresh_prices || (github.event_name == 'schedule') }}
+        env:
+          FORCE_PRICE_REFRESH: ${{ inputs.refresh_prices }}
+        run: |
+          if [ "$FORCE_PRICE_REFRESH" = "true" ] || [ "$(TZ=Asia/Taipei date +%u)" = "7" ]; then
+            pip install 'shapely>=2,<3' 'pyproj>=3.6,<4'
+            python scripts/a7-line-monitor/refresh_national_market.py --workdir "$RUNNER_TEMP/official-market"
+          fi
+        continue-on-error: true
+      - name: Validate and persist only public datasets
+        run: |
+          python -m unittest discover -s scripts/a7-line-monitor -p 'test_national*.py'
+          node scripts/a7-line-monitor/test_live_projects.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/a7-line-monitor/site/national-listings.json scripts/a7-line-monitor/site/national-market.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refresh public nationwide property datasets'
+            git push origin HEAD:main
+          fi
+      - name: Stage website without LINE side effects
+        run: python scripts/a7-line-monitor/publish_site.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4

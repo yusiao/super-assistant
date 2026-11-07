@@ -16,6 +16,7 @@ const NationalMarket = (() => {
         const body=await r.json();
         if(body.schema_version!==1||!body.districts||!body.areas||!body.filings||!body.sale_period)throw Error("schema");
         data=body;
+        if(typeof LiveProjects!=="undefined")await LiveProjects.load();
       }catch{failed=true;}
     })();
     return pending;
@@ -76,7 +77,7 @@ const NationalMarket = (() => {
   function headerNote(){
     return text("p","內政部公開備查／首次登記 "+data.filing_since+" 起；資料查核 "+data.checked_on+"。備查不等於已開賣，未列入不代表沒有新案。");
   }
-  function districtPanel({city="",district="",place="",title=""},open){
+  function districtPanel({city="",district="",place="",title="",geometry},open){
     const box=text("div","");if(!data){box.append(status());return box;}
     if(place){
       const area=data.areas["official:"+place];
@@ -86,30 +87,37 @@ const NationalMarket = (() => {
         else box.append(text("p","本次沒有能定位到圖框內的備查建案；不等於沒有建案。"));
       }else box.append(text("p","此生活圈尚無已核對的範圍或成交定位，不能用行政區平均代替。"));
       box.append(button("改看 "+district+" 的建案與均價",()=>open({city,district})),note());
+      if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry}));
       return box;
     }
     const districts=Object.entries(data.districts).filter(([key])=>!city||(district?key===city+"/"+district:key.startsWith(city+"/")));
     if(district)box.append(priceCard(districts[0]?.[1].price,"行政區"));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district}));
     const byId=new Map(districts.flatMap(([key,d])=>d.filings.map(id=>[id,key.replace("/"," ")])));
-    box.append(headerNote());
-    if(byId.size)box.append(listing(ordered(byId.keys()),title||"近一年新建案",byId));
+    const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());box.append(registry);
+    if(byId.size)registry.append(listing(ordered(byId.keys()),title||"近一年備查與首次登記紀錄",byId));
     else box.append(text("p",districts.some(([,d])=>d.registry)?"此區在本次官方檔案沒有符合期間的建案。":"本次官方備查檔未提供此區資料。"));
     box.append(note());return box;
   }
-  function areaPanel(id, district, open){
+  function areaPanel(id, district, open, geometry){
     const box=text("div","");
     if(!data){box.append(status());return box;}
     const area=data.areas[id];
     box.append(priceCard(area?.price,"圖框內已定位成交"));
     if(area?.nearby_price?.count>0&&(!area.price?.count||area.nearby_price.count!==area.price.count)){
-      box.append(priceCard(area.nearby_price,"含圖框及外擴 500 公尺"));
+      const nearby=text("details","");nearby.className="atlas-source-notes";
+      const price=area.nearby_price;
+      nearby.append(text("summary",`含外擴 500 公尺：${price.mean===null?"樣本不足":price.mean.toFixed(2)+" 萬元／坪"} · ${price.count} 筆`),priceCard(price,"含圖框及外擴 500 公尺"));
+      box.append(nearby);
     }
-    box.append(headerNote());
-    if(area?.filings.length)box.append(listing(ordered(area.filings),"圖框內對應建案"));
-    if(area?.nearby?.length)box.append(listing(ordered(area.nearby),"圖框外 500 公尺內的周邊建案"));
-    if(area?.filings.length||area?.nearby?.length)box.append(text("small","按備查門牌或附近門牌比對，不是基地界址。"));
-    if(!area?.filings.length&&!area?.nearby?.length)box.append(text("p","本次沒有能對到此範圍的備查位置，仍可查整個行政區。"));
-    box.append(button("看 "+district.district+" 全部新建案",()=>open(district)),note());
+    box.append(button("看 "+district.district+" 全部新建案",()=>open(district)));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry}));
+    const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());
+    if(area?.filings.length)registry.append(listing(ordered(area.filings),"圖框內對應建案"));
+    if(area?.nearby?.length)registry.append(listing(ordered(area.nearby),"圖框外 500 公尺內的周邊建案"));
+    if(area?.filings.length||area?.nearby?.length)registry.append(text("small","按備查門牌或附近門牌比對，不是基地界址。"));
+    if(!area?.filings.length&&!area?.nearby?.length)registry.append(text("p","本次沒有能對到此範圍的備查位置，仍可查整個行政區。"));
+    box.append(registry,note());
     return box;
   }
   function count(id){const a=data?.areas[id];return (a?.filings?.length||0)+(a?.nearby?.length||0);}

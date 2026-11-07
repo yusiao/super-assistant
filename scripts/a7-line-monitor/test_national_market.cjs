@@ -27,7 +27,7 @@ const national=vm.runInContext("NationalMarket",context);
   assert.match(text(district),/行政區｜新成屋均價/);
   assert.ok(data.districts["高雄市/左營區"].filings.length);
   const all=national.districtPanel({},()=>{});
-  assert.match(text(all),/近一年新建案/);
+  assert.match(text(all),/近一年備查與首次登記紀錄/);
   assert.match(text(all),/查看備查詳情/);
   const linked=new Set([...data.areas.a8.filings,...data.areas.a8.nearby]);
   assert.ok(linked.size);

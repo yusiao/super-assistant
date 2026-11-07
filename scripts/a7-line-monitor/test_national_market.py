@@ -4,9 +4,16 @@ from pathlib import Path
 import unittest
 
 from build_national_market import address_key, comparable, stats
+from refresh_national_market import seasons, links
 
 
 class NationalMarketTest(unittest.TestCase):
+    def test_public_resource_discovery(self):
+        html = ''.join('<a href="https://plvr.land.moi.gov.tw//DownloadSeason?season='+s+'&amp;type=zip&amp;fileName=lvr_landcsv.zip">CSV</a>' for s in ("115S2","113S4","115S3"))
+        self.assertEqual([s for s,_ in seasons(html)], ["115S2","115S3"])
+        self.assertEqual(links('<a href="https://evil.com/f.csv">bad</a>',"data.taipei"),[])
+        with self.assertRaises(ValueError):
+            seasons('<a href="https://evil.com/115S3">bad</a>')
     def record(self):
         row = [""] * 34
         values = {1: "房地(土地+建物)+車位", 7: "1150603", 8: "土地1建物1車位1",

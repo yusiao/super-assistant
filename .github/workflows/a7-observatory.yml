@@ -35,11 +35,14 @@ jobs:
         run: |
           python -m unittest discover -s scripts/a7-line-monitor -p 'test_public_site.py'
           python -m unittest discover -s scripts/a7-line-monitor -p 'test_national_market.py'
+          python -m unittest discover -s scripts/a7-line-monitor -p 'test_national_listings.py'
       - name: Test geographic navigation
         run: |
           node scripts/a7-line-monitor/test_road_map.cjs
           node scripts/a7-line-monitor/test_station_atlas.cjs
           node scripts/a7-line-monitor/test_national_market.cjs
+          node scripts/a7-line-monitor/test_live_projects.cjs
+          node scripts/a7-line-monitor/test_site_ui.cjs
       - name: Build public website without sending LINE
         run: python scripts/a7-line-monitor/publish_site.py
       - uses: actions/configure-pages@v5

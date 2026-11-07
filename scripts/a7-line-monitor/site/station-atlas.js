@@ -138,7 +138,8 @@ const StationAtlas = (() => {
     for(const f of roots()){
       const {id,name}=f.properties,areas=marketScope(f).areas,count=projects(areas).length;
       const official=typeof NationalMarket!=="undefined"?NationalMarket.count(id):0;
-      const status=official?`官方資料 ${official} 案`:count?`已核對 ${count} 案`:typeof NationalMarket!=="undefined"?"查看區域":marketError?"讀取失敗":!market?"讀取中":!areas.length?"尚未接入":"本次未取得建案";
+      const live=typeof LiveProjects!=="undefined"?LiveProjects.count({geometry:f.geometry}):0;
+      const status=live?`預售／預推 ${live} 案`:official?`備查紀錄 ${official} 筆`:count?`已核對 ${count} 案`:typeof NationalMarket!=="undefined"?"查看區域":marketError?"讀取失敗":!market?"讀取中":!areas.length?"尚未接入":"本次未取得建案";
       const b=button("",()=>show(id),`atlas-station ${id}`);
       b.setAttribute("aria-pressed",String(selected===id));b.setAttribute("aria-haspopup","dialog");
       b.append(node("strong",name),node("span",status));panel.append(b);stationButtons.set(id,b);
@@ -165,9 +166,9 @@ const StationAtlas = (() => {
     const sections=[control];
     if(typeof NationalMarket!=="undefined"){
       const district=root(feature)==="a9"?{city:"新北市",district:"林口區"}:{city:"桃園市",district:"龜山區"};
-      sections.push(NationalMarket.areaPanel(p.id,district,openNational));
+      sections.push(NationalMarket.areaPanel(p.id,district,openNational,feature.geometry));
     }
-    if(typeof NationalMarket==="undefined"||marketScope(feature).areas.some(a=>projects([a]).length||a.transactions?.length)){
+    if(typeof LiveProjects==="undefined"&&(typeof NationalMarket==="undefined"||marketScope(feature).areas.some(a=>projects([a]).length||a.transactions?.length))){
       if(typeof NationalMarket!=="undefined")sections.push(node("h3","另有已核對的銷售與成交資料"));
       sections.push(projectPanel(feature));
     }
