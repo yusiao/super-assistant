@@ -84,6 +84,7 @@ const LiveProjects = (() => {
     box.append(overview);
     const priority=advantageMark(p,true);if(priority)box.append(priority);
     const mark=priceMark(p,true);if(mark)box.append(mark);
+    if(typeof BuilderDetails!=="undefined")box.append(BuilderDetails.panel(p));
     box.append(node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
     if(p.verified_on)box.append(node("small",`工期與狀態核對：${p.verified_on}`));
     const point=location(p);
@@ -102,6 +103,7 @@ const LiveProjects = (() => {
       button.setAttribute("aria-label",`查看建案資料：${p.name}`);button.addEventListener("click",()=>onProject(p));actions.append(button);
     }else{
       const details=node("details");details.append(node("summary","建案資料"),facts(p));box.append(details);
+      if(typeof BuilderDetails!=="undefined")box.append(BuilderDetails.panel(p));
     }
     if(onLocate&&location(p)){
       const button=node("button","在地圖定位");button.type="button";button.className="atlas-secondary project-locate";

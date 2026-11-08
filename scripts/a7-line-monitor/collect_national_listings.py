@@ -114,6 +114,18 @@ def likely_price_watch(project, districts, completed, today):
     return isinstance(mean, (int, float)) and summary.get("count", 0) >= 10 and 0 < low <= high <= mean * .8
 
 
+def investment_companies(raw):
+    if not isinstance(raw, str):
+        return []
+    result = []
+    for segment in re.split(r"[、,，;；/／\n]|(?<=有限公司)[及與]", raw):
+        segment = re.sub(r"^[^－–—-]*(?:營建機構|建設集團)\s*[－–—-]\s*", "", segment.strip())
+        found = re.match(r"^([\w．· .（）()\-]{2,72}?(?:股份有限公司|有限公司))(?=$|[\s（(]|等)", segment)
+        if found and found[1] not in result:
+            result.append(found[1])
+    return result[:8]
+
+
 def detail(tree, project, today):
     hid = int(project["id"].split("-")[1])
     matches = [i for i in objects(tree) if i.get("hid") == hid and {"build_type_name", "deal_time_v2", "map", "sell_time"} <= i.keys()]
@@ -132,6 +144,14 @@ def detail(tree, project, today):
     project["sales_evidence"] = str(sale.get("sell_status_txt") or "")
     project["completion"] = str(completed.get("date") or "")
     project["opening"] = str(sale.get("date") or "")
+    project.pop("development_companies", None)
+    project.pop("building_permit", None)
+    builders = investment_companies(item.get("company"))
+    if builders:
+        project["development_companies"] = builders
+    permit = item.get("license")
+    if isinstance(permit, str) and 5 <= len(permit) <= 90 and re.search(r"建|執照", permit) and re.search(r"\d", permit):
+        project["building_permit"] = permit.strip()
     price = item.get("price_unit")
     if isinstance(price, dict):
         if not price.get("pending") and price.get("price"):

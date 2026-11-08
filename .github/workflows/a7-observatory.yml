@@ -44,6 +44,7 @@ jobs:
           node scripts/a7-line-monitor/test_national_market.cjs
           node scripts/a7-line-monitor/test_live_projects.cjs
           node scripts/a7-line-monitor/test_property_advantage.cjs
+          node scripts/a7-line-monitor/test_builder_details.cjs
           node scripts/a7-line-monitor/test_site_ui.cjs
       - name: Build public website without sending LINE
         run: python scripts/a7-line-monitor/publish_site.py

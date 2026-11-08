@@ -154,6 +154,7 @@ const NationalMarket = (() => {
           text("p","申報銷售期間："+(p.selling_period||"未提供")),
           text("small","備查申報期間不是即時銷售狀態；此紀錄未提供已核實的建案官網連結。"));
         card.append(detail);
+        if(typeof BuilderDetails!=="undefined")card.append(BuilderDetails.panel(p,p));
         list.append(card);
       }
       shown+=12;more.hidden=shown>=ids.length;
@@ -223,6 +224,11 @@ const NationalMarket = (() => {
     return box;
   }
   function count(id){const a=data?.areas[id];return (a?.filings?.length||0)+(a?.nearby?.length||0);}
+  function builderFilings(project){
+    if(!data||!project.city||!project.district)return [];
+    const scope=data.districts[`${project.city.replaceAll("台","臺")}/${project.district}`];
+    return (scope?.filings||[]).map(id=>data.filings[id]).filter(Boolean);
+  }
   function configure(features, open){
     const city=$("national-city"),district=$("national-district");
     const groups=new Map();
@@ -241,5 +247,5 @@ const NationalMarket = (() => {
     $("national-view").disabled=false;
     return load();
   }
-  return {configure,load,areaPanel,districtPanel,count,projectBenchmark,priceComparison,comparableOffer,setComparisonScopes};
+  return {configure,load,areaPanel,districtPanel,count,projectBenchmark,priceComparison,comparableOffer,setComparisonScopes,builderFilings};
 })();

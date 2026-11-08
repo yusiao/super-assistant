@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-08",
+  "projects": {
+    "591-134320": {
+      "name": "織旅",
+      "city": "臺北市",
+      "district": "松山區",
+      "role": "development",
+      "companies": ["建基建設有限公司", "亦安建設有限公司"],
+      "source": {"label": "公開建案詳情", "url": "https://newhouse.591.com.tw/134320/detail"}
+    },
+    "591-140606": {
+      "name": "翠嶺2號",
+      "city": "臺北市",
+      "district": "北投區",
+      "role": "filed_company",
+      "companies": ["建華城建設股份有限公司"],
+      "source": {"label": "臺北市地政局備查名單", "url": "https://land.gov.taipei/News.aspx?PageSize=20&n=E8D96FA6BB2B310E&page=2&sms=06A4332DF37FE327"}
+    },
+    "591-140281": {
+      "name": "境三千",
+      "city": "新竹縣",
+      "district": "竹北市",
+      "role": "development",
+      "companies": ["昌禾開發建設股份有限公司"],
+      "source": {"label": "公開建案詳情", "url": "https://newhouse.591.com.tw/140281/detail"}
+    },
+    "591-130974": {
+      "name": "登陽釀時光",
+      "city": "臺中市",
+      "district": "北屯區",
+      "role": "development",
+      "companies": ["登仰建設有限公司"],
+      "source": {"label": "公開建案詳情", "url": "https://newhouse.591.com.tw/130974/detail"}
+    }
+  },
+  "companies": {
+    "建基建設有限公司": {"registration": "93548264"},
+    "亦安建設有限公司": {"registration": "93548047"},
+    "建華城建設股份有限公司": {"registration": "97446886"},
+    "昌禾開發建設股份有限公司": {
+      "registration": "28923960",
+      "relation": {
+        "kind": "brand",
+        "name": "昌禾營建機構",
+        "source": {"label": "昌禾官網", "url": "https://ch-arch.com.tw/about/"}
+      }
+    },
+    "登仰建設有限公司": {
+      "relation": {
+        "kind": "brand",
+        "project_id": "591-130974",
+        "name": "登陽營建機構",
+        "note": "登陽官網收錄本案，不據此判定股權。",
+        "source": {"label": "登陽官網建案", "url": "https://www.dengyang.com.tw/hot-case-pages.php?ID=72&areas=&cities="}
+      }
+    },
+    "國泰建設股份有限公司": {
+      "relation": {
+        "kind": "group",
+        "name": "霖園集團／國泰地產集團",
+        "note": "建商官網列為集團成員；未據此判定持股比例。",
+        "source": {"label": "國泰建設官網", "url": "https://www.cathay-red.com.tw/tw/About/Linyuan"}
+      }
+    },
+    "三井工程股份有限公司": {
+      "relation": {
+        "kind": "subsidiary",
+        "name": "國泰建設股份有限公司",
+        "note": "國泰建設公開披露的子公司。",
+        "source": {"label": "國泰建設公開沿革", "url": "https://www.cathay-red.com.tw/sixty/article_page_ch3-3.html"}
+      }
+    },
+    "興富發建設股份有限公司": {
+      "relation": {
+        "kind": "group",
+        "name": "興富發集團",
+        "source": {"label": "興富發建設官網", "url": "https://www.highwealth.com.tw/about.php"}
+      }
+    },
+    "潤隆建設股份有限公司": {
+      "relation": {
+        "kind": "group",
+        "name": "興富發集團",
+        "note": "公司公開資料列為集團公司；不據此判定直接持股。",
+        "source": {"label": "興富發建設官網", "url": "https://www.highwealth.com.tw/about.php"}
+      }
+    },
+    "遠雄建設股份有限公司": {
+      "relation": {
+        "kind": "group",
+        "name": "遠雄企業團",
+        "note": "企業團永續報告列為主要關係企業；不據此判定直接持股。",
+        "source": {"label": "遠雄企業團永續報告", "url": "https://www.farglory.com.tw/upload/report_top_files/twL_report_top_25H20_QqP21IQOlV.pdf"}
+      }
+    }
+  }
+}

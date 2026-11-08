@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from collect_national_listings import card, detail, collect, index
+from collect_national_listings import card, detail, collect, index, investment_companies
 from listing_payload import payload, objects
 
 
@@ -45,6 +45,19 @@ class ListingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             index({"data":{"items":[]}})
 
+    def test_investment_company_and_permit_are_independent_of_other_roles(self):
+        names = "示例營建機構－甲乙建設有限公司及丙丁開發股份有限公司、甲乙建設有限公司、王小明"
+        expected = ["甲乙建設有限公司", "丙丁開發股份有限公司"]
+        self.assertEqual(investment_companies(names), expected)
+        permit = "(115)府建字第00009號"
+        raw = self.item(company=names, build_company="營造公司有限公司", sell_company="行銷有限公司", license=permit)
+        p = detail({"housing":raw}, self.project(), date(2026,11,8))
+        self.assertEqual(p["development_companies"], expected)
+        self.assertEqual(p["building_permit"], permit)
+        updated = detail({"housing":self.item(company="尚未公開", license="待定")}, p, date(2026,11,8))
+        self.assertNotIn("development_companies", updated)
+        self.assertNotIn("building_permit", updated)
+
     def test_new_home_needs_actual_recent_handover_and_current_sale(self):
         completed = {"type": "handover", "deal": 1, "date": "2025年第三季度"}
         price = {"price": "48~52", "unit": "萬/坪", "pending": 0}
@@ -64,7 +77,7 @@ class ListingTests(unittest.TestCase):
         file=Path(__file__).with_name("site")/"national-listings.json"
         if not file.exists():
             self.skipTest("No generated public snapshot")
-        allowed={"id","name","city","district","address","url","source","source_updated","circle_id","circle","price","price_unit","area","layout","platform_type","category","listed_on","verified_on","last_attempted_on","coordinates","construction","sales_evidence","completion","opening","property_style"}
+        allowed={"id","name","city","district","address","url","source","source_updated","circle_id","circle","price","price_unit","area","layout","platform_type","category","listed_on","verified_on","last_attempted_on","coordinates","construction","sales_evidence","completion","opening","property_style","development_companies","building_permit"}
         for source in (file,file.with_name("national-new-homes.json")):
             output=json.loads(source.read_text(encoding="utf-8"))
             for p in output["projects"]:

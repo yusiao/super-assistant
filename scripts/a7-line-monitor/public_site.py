@@ -15,7 +15,8 @@ SITE_ASSETS = ("index.html", "style.css", "app.js", "robots.txt", "road-map.js",
                "taiwan-context.js",
                "national-market.js", "national-market.json", "NATIONAL-SOURCES.md",
                "live-projects.js", "national-listings.json", "national-new-homes.json",
-               "property-advantage.js", "advantage-rail.json")
+               "property-advantage.js", "advantage-rail.json",
+               "builder-details.js", "builder-profiles.json")
 
 
 def public_url(value):

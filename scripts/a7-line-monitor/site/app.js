@@ -33,12 +33,13 @@ function syncAreas(preferred=""){
   options($("area"),areas.map(a=>[a.id,a.name.replace("A7站重劃區-","A7 · ")]),areas.length?"全部已接入子區":"尚未接入子區",preferred);
 }
 function selectedAreas(){return(state.data?.areas||[]).filter(a=>a.city===$("city").value&&(!$("district").value||a.district===$("district").value)&&(!$("area").value||a.id===$("area").value));}
-function projectList(areas){const unique=new Map();for(const area of areas){if(area.availability==="unavailable")continue;for(const p of area.projects||[]){if(!unique.has(p.id))unique.set(p.id,{...p,areaNames:[area.name]});else unique.get(p.id).areaNames.push(area.name);}}return[...unique.values()];}
+function projectList(areas){const unique=new Map();for(const area of areas){if(area.availability==="unavailable")continue;for(const p of area.projects||[]){if(!unique.has(p.id))unique.set(p.id,{...p,city:area.city,district:area.district,areaNames:[area.name]});else unique.get(p.id).areaNames.push(area.name);}}return[...unique.values()];}
 function empty(title,body){const box=el("div","empty");box.append(el("span","empty-icon","◎"),el("h3","",title),el("p","",body));return box;}
 function statusRows(areas){const box=el("div","availability");for(const area of areas){const row=el("div","availability-row");row.append(el("span","",area.name.replace("A7站重劃區-","")),el("span","",availability[area.availability]||"狀態未確認"));box.append(row);}return box;}
 function projectCard(p){const card=el("article","card");const top=el("div","card-top");const star=el("button","star",state.favorites.has(p.id)?"★":"☆");star.type="button";star.setAttribute("aria-label",`${state.favorites.has(p.id)?"取消關注":"關注"}${p.name}`);star.setAttribute("aria-pressed",String(state.favorites.has(p.id)));star.addEventListener("click",()=>{if(state.favorites.has(p.id))state.favorites.delete(p.id);else state.favorites.add(p.id);save();render();});top.append(el("span",`badge ${p.category}`,labels[p.category]||"階段待確認"),star);const bottom=el("div","card-bottom");bottom.append(link(p.url,"查看建案 ↗"),el("span","",p.source||"來源未標示"));card.append(top,el("h3","",p.name),el("div","location",p.areaNames.map(a=>a.replace("A7站重劃區-","")).join(" / ")),el("p","status",p.status||"價格／階段未取得"));
   if(p.address)card.append(el("p","location",`基地：${p.address}`));
   if(p.observed_at)card.append(el("p","location",`本次讀取：${p.observed_at.slice(0,10)}，非來源更新日期`));
+  if(typeof BuilderDetails!=="undefined")card.append(BuilderDetails.panel(p));
   card.append(bottom);
   for(const s of p.sources||[])if(s.url!==p.url)card.append(link(s.url,`交叉來源：${s.name} ↗`));
   return card;

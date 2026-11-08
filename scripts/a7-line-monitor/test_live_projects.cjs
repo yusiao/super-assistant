@@ -21,6 +21,7 @@ const map={createPane:()=>({style:{}}),getBounds:()=>({pad(){return this;},conta
 const context=vm.createContext({document:{createElement:t=>new Element(t),getElementById:()=>status},URL,Date,AbortSignal,L,
   NationalMarket:{priceComparison:p=>p.id==="a"?{...price,kind:"presale",label:"預售屋"}:
     p.id==="home"?{...price,kind:"completed",label:"新成屋"}:null},
+  BuilderDetails:{panel:()=>{const details=new Element("details");details.textContent="建商資料 · 品牌與集團";return details;}},
   PropertyAdvantage:{evaluate:p=>p.id==="a"?{anchor:"測試站",price,reasons:["可比成交與附近車站"]}:null},
   fetch:async url=>{assert.ok(["national-listings.json","national-new-homes.json"].includes(url));return {ok:true,json:async()=>url.includes("new-homes")?homes:data};}});
 vm.runInContext(fs.readFileSync(path.join(__dirname,"site/live-projects.js"),"utf8"),context);
@@ -41,6 +42,7 @@ const live=vm.runInContext("LiveProjects",context);
   assert.match(text(inspection),/預售↓ 24.0%.*公開開價上緣 38.*成交均價 50.00/);
   assert.ok(descendants(inspection).some(e=>e.className==="price-watch price-watch-presale"));
   assert.match(text(inspection),/優勢觀察.*可比成交與附近車站/);
+  assert.match(text(inspection),/建商資料 · 品牌與集團/);
   assert.ok(!descendants(inspection).some(e=>e.tag==="a"),"Project details and benchmark render without external links");
   const controls=panel.children.find(e=>e.className==="live-filters");
   const only=panel.children.find(e=>e.className==="atlas-secondary advantage-filter");
