@@ -191,5 +191,5 @@ const TaiwanContext=(()=>{
     load().then(data=>{index=data;refresh();}).catch(()=>{indexFailed=true;note(false);});
     get("main.json").then(rows=>{main=rows.map(row=>norm(row));refresh();}).catch(()=>{mainFailed=true;note(false);});
   }
-  return {init,projectContext,nearby,isAtlasLandmark};
+  return {init,projectContext,nearby,isAtlasLandmark,load,distance};
 })();

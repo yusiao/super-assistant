@@ -47,6 +47,17 @@ const LiveProjects = (() => {
   const areaLabel=p=>`${p.city} ${p.district}${p.circle?` · ${p.circle}`:""}`;
   const watchTypes={completed:{flag:"低",title:"成屋價差",badge:"開價低"},presale:{flag:"預售↓",title:"預售價差",badge:"預售↓"}};
   const compare=p=>typeof NationalMarket!=="undefined"&&typeof NationalMarket.priceComparison==="function"?NationalMarket.priceComparison(p):null;
+  const advantage=p=>typeof PropertyAdvantage!=="undefined"?PropertyAdvantage.evaluate(p):null;
+  function advantageMark(p,details=false){
+    const signal=advantage(p);if(!signal)return null;
+    const box=node(details?"section":"div"),badge=node("strong","優勢觀察");
+    box.className="project-advantage";badge.className="advantage-badge";box.append(badge);
+    if(details){
+      const reasons=node("ul");for(const reason of signal.reasons)reasons.append(node("li",reason));
+      box.append(reasons,node("small","優先實地比較，不是買進建議。餘屋、競爭供給、租金空置、持有成本及淹水／嫌惡風險仍待核對。"));
+    }else box.append(node("small",`區位 ${signal.anchor} · 同類實登 ${signal.price.count} 筆`));
+    return box;
+  }
   function priceMark(p,details=false){
     const c=compare(p);if(!c)return null;
     const box=node("div"),mark=node("strong",`${watchTypes[c.kind].badge} ${c.discount.toFixed(1)}%`);
@@ -71,6 +82,7 @@ const LiveProjects = (() => {
     basics.append(stage,node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("strong",`建案開價 ${asking(p)}`));
     overview.append(basics);if(benchmark)overview.append(benchmark);
     box.append(overview);
+    const priority=advantageMark(p,true);if(priority)box.append(priority);
     const mark=priceMark(p,true);if(mark)box.append(mark);
     box.append(node("h3","建案規劃"),facts(p),node("small",`建案來源：${p.source||"未標示"} · 來源更新 ${p.source_updated||"未提供"}`));
     if(p.verified_on)box.append(node("small",`工期與狀態核對：${p.verified_on}`));
@@ -82,6 +94,7 @@ const LiveProjects = (() => {
     const box=node("article");box.className="atlas-project-card national-filing";
     const badge=node("span",phases[p.category]);badge.className="badge";
     box.append(badge,node("h4",p.name),node("p",areaLabel(p)),node("p",p.address||"基地位置未提供"),node("p",`開價 ${asking(p)} · ${p.area||"坪數未提供"}`));
+    const priority=advantageMark(p);if(priority)box.append(priority);
     const mark=priceMark(p);if(mark)box.append(mark);
     const actions=node("div");actions.className="project-card-actions";
     if(onProject){
@@ -117,24 +130,27 @@ const LiveProjects = (() => {
         if(group){group.rows.push(p);group.positions.push(position);}
         else groups.push({xy,rows:[p],positions:[position]});
       }
-      layer.clearLayers();displayed=[];const watches={completed:0,presale:0};
+      layer.clearLayers();displayed=[];const watches={completed:0,presale:0};let advantageTotal=0;
       for(const {rows,positions} of groups){
         const multiple=rows.length>1,p=rows[0];
         const button=node("button",multiple?String(rows.length):"▥");button.type="button";
         const comparisons=rows.map(compare).filter(Boolean);
+        const advantageCount=rows.filter(advantage).length;advantageTotal+=advantageCount;
         const flags=Object.keys(watchTypes).map(kind=>({kind,count:comparisons.filter(c=>c.kind===kind).length})).filter(f=>f.count);
         const label=multiple?`查看附近 ${rows.length} 個建案`:`建案：${p.name}`;
         button.className="project-pin"+(multiple?" project-pin-group":p.category==="new_home"?" project-pin-new-home":p.category.includes("pending")?" project-pin-pending":"")+
-          flags.map(({kind})=>` project-pin-watch-${kind}`).join("");
+          flags.map(({kind})=>` project-pin-watch-${kind}`).join("")+(advantageCount?" project-pin-advantage":"");
         const note=!comparisons.length?"":multiple?` · 其中 ${flags.map(f=>`${watchTypes[f.kind].title} ${f.count} 案`).join("、")}`:
           ` · ${watchTypes[comparisons[0].kind].title}，開價低 ${comparisons[0].discount.toFixed(1)}%`;
-        button.title=(multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`)+note;
-        button.setAttribute("aria-label",label+note);
+        const highlightNote=advantageCount?` · 優勢觀察${multiple?` ${advantageCount} 案`:""}`:"";
+        button.title=(multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`)+note+highlightNote;
+        button.setAttribute("aria-label",label+note+highlightNote);
         for(const {kind,count} of flags){
           watches[kind]+=count;
           const flag=node("span",watchTypes[kind].flag);flag.className=`project-watch-flag price-watch-${kind}`;
           flag.setAttribute("aria-hidden","true");button.append(flag);
         }
+        if(advantageCount){const flag=node("span","優");flag.className="project-advantage-flag";flag.setAttribute("aria-hidden","true");button.append(flag);}
         button.addEventListener("click",e=>{
           e.stopPropagation();open(rows);
           if(multiple&&map.getZoom()<17&&positions.some(v=>v[0]!==positions[0][0]||v[1]!==positions[0][1])){
@@ -148,6 +164,7 @@ const LiveProjects = (() => {
       highlight();
       const count=groups.reduce((n,g)=>n+g.rows.length,0);
       const totals=Object.keys(watches).filter(kind=>watches[kind]).map(kind=>`${watchTypes[kind].title} ${watches[kind]} 案`);
+      if(advantageTotal)totals.unshift(`優勢觀察 ${advantageTotal} 案`);
       if(status)status.textContent=count?`畫面內 ${count} 案有定位${totals.length?` · ${totals.join("、")}`:""} · 數字為多案群組`:
         !data&&!newHomes?(failed?"建案標記讀取失敗":"正在讀取建案標記…"):
         !fresh(data?.observed_at,8)&&!fresh(newHomes?.observed_at,8)?"建案索引已過期，暫不顯示舊標記。":"此畫面沒有可定位的建案；未定位案件仍可查清單。";
@@ -176,6 +193,11 @@ const LiveProjects = (() => {
     circle.setAttribute("aria-label","生活圈（來源分類）");circle.append(option("全部生活圈（來源分類）",""));
     for(const c of [...new Set(rows.map(p=>p.circle).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant")))circle.append(option(c,c));
     controls.append(phase,circle,search);if(!query.geometry||rows.length>12)box.append(controls);
+    const priorities=new Set(rows.filter(advantage));let onlyAdvantage=false;
+    if(typeof PropertyAdvantage!=="undefined"){
+      const only=node("button",`清單只看優勢（${priorities.size}）`);only.type="button";only.className="atlas-secondary advantage-filter";only.setAttribute("aria-pressed","false");
+      only.addEventListener("click",()=>{onlyAdvantage=!onlyAdvantage;only.setAttribute("aria-pressed",String(onlyAdvantage));render();});box.append(only);
+    }
     const circleNote=node("p"),result=node("p"),list=node("div"),more=node("button","顯示更多建案");
     circleNote.className="live-circle-note";more.type="button";more.className="atlas-secondary";
     box.append(circleNote,result,list,more);let selected=[],shown=0;
@@ -185,8 +207,8 @@ const LiveProjects = (() => {
     }
     function render(){
       const q=search.value.trim();
-      selected=rows.filter(p=>(!phase.value||(phase.value==="pending"?["pending","listed_pending"].includes(p.category):p.category===phase.value))&&(!circle.value||p.circle===circle.value)&&(!q||(p.name+p.address).includes(q)))
-        .sort((a,b)=>Number(!!compare(b))-Number(!!compare(a))||Number(!a.verified_on)-Number(!b.verified_on)||(b.source_updated||"").localeCompare(a.source_updated||""));
+      selected=rows.filter(p=>(!onlyAdvantage||priorities.has(p))&&(!phase.value||(phase.value==="pending"?["pending","listed_pending"].includes(p.category):p.category===phase.value))&&(!circle.value||p.circle===circle.value)&&(!q||(p.name+p.address).includes(q)))
+        .sort((a,b)=>Number(priorities.has(b))-Number(priorities.has(a))||Number(!!compare(b))-Number(!!compare(a))||Number(!a.verified_on)-Number(!b.verified_on)||(b.source_updated||"").localeCompare(a.source_updated||""));
       circleNote.textContent=circle.value?`${circle.value} 為來源平台的生活圈分類，並非已核對的地界。新成屋均價：缺少對應範圍／足夠可定位成交樣本，不以行政區均價代替。`:"";
       result.textContent=`符合 ${selected.length} 案`;shown=0;list.replaceChildren();add();
     }

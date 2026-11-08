@@ -21,6 +21,7 @@ const map={createPane:()=>({style:{}}),getBounds:()=>({pad(){return this;},conta
 const context=vm.createContext({document:{createElement:t=>new Element(t),getElementById:()=>status},URL,Date,AbortSignal,L,
   NationalMarket:{priceComparison:p=>p.id==="a"?{...price,kind:"presale",label:"預售屋"}:
     p.id==="home"?{...price,kind:"completed",label:"新成屋"}:null},
+  PropertyAdvantage:{evaluate:p=>p.id==="a"?{anchor:"測試站",price,reasons:["可比成交與附近車站"]}:null},
   fetch:async url=>{assert.ok(["national-listings.json","national-new-homes.json"].includes(url));return {ok:true,json:async()=>url.includes("new-homes")?homes:data};}});
 vm.runInContext(fs.readFileSync(path.join(__dirname,"site/live-projects.js"),"utf8"),context);
 const live=vm.runInContext("LiveProjects",context);
@@ -39,8 +40,11 @@ const live=vm.runInContext("LiveProjects",context);
   assert.match(text(inspection),/區域新成屋均價 45.27/);assert.match(text(inspection),/二房.*25坪.*2026年07月.*預計2029年第三季度/);
   assert.match(text(inspection),/預售↓ 24.0%.*公開開價上緣 38.*成交均價 50.00/);
   assert.ok(descendants(inspection).some(e=>e.className==="price-watch price-watch-presale"));
+  assert.match(text(inspection),/優勢觀察.*可比成交與附近車站/);
   assert.ok(!descendants(inspection).some(e=>e.tag==="a"),"Project details and benchmark render without external links");
   const controls=panel.children.find(e=>e.className==="live-filters");
+  const only=panel.children.find(e=>e.className==="atlas-secondary advantage-filter");
+  only.events.click();assert.match(text(panel),/符合 1 案/);assert.equal(only["aria-pressed"],"true");only.events.click();
   controls.children[0].value="pending";controls.children[0].events.change();assert.match(text(panel),/符合 1 案/);
   controls.children[1].value="長庚生活圈";controls.children[1].events.change();assert.match(text(panel),/不以行政區均價代替/);
   controls.children[2].value="找不到";controls.children[2].events.input();assert.match(text(panel),/符合 0 案/);
@@ -51,6 +55,7 @@ const live=vm.runInContext("LiveProjects",context);
   assert.equal(markers.length,2,"Two coincident projects share a marker; missing coordinates never produce a pin");
   assert.match(status.textContent,/3 案有定位/);
   assert.match(markers[0].icon.html["aria-label"],/其中 預售價差 1 案/);
+  assert.match(markers[0].icon.html["aria-label"],/優勢觀察 1 案/);
   assert.equal(markers[0].icon.html.children[0].textContent,"預售↓");
   assert.equal(markers[1].icon.html.children.length,0);
   let stopped=0;
@@ -64,7 +69,7 @@ const live=vm.runInContext("LiveProjects",context);
   assert.equal(live.count(),5);assert.match(text(live.panel()),/在售新成屋/);
   assert.ok(descendants(live.selectionPanel([homes.projects[0]])).some(e=>e.className==="price-watch price-watch-completed"));
   pins.refresh();
-  assert.deepEqual(markers[0].icon.html.children.map(e=>e.textContent),["低","預售↓"]);
+  assert.deepEqual(markers[0].icon.html.children.map(e=>e.textContent),["低","預售↓","優"]);
   assert.match(markers[0].icon.html["aria-label"],/成屋價差 1 案、預售價差 1 案/);
   data.observed_at=homes.observed_at="2020-01-01";assert.equal(live.count(),0);assert.match(text(live.panel()),/超過 8 天/);
   events.moveend();assert.equal(markers.length,0);

@@ -17,7 +17,10 @@ const NationalMarket = (() => {
         if(body.schema_version!==1||!body.districts||!body.areas||!body.filings||!body.sale_period)throw Error("schema");
         data=body;
       }catch{failed=true;}
-      if(typeof LiveProjects!=="undefined")await LiveProjects.load();
+      await Promise.all([
+        typeof LiveProjects!=="undefined"?LiveProjects.load():null,
+        typeof PropertyAdvantage!=="undefined"?PropertyAdvantage.load():null
+      ]);
     })();
     return pending;
   }
@@ -37,7 +40,7 @@ const NationalMarket = (() => {
     return age>=-86400000&&age<=days*86400000;
   };
   function setComparisonScopes(scopes){comparisonScopes=scopes;}
-  function priceComparison(project){
+  function comparableOffer(project){
     const completed=project.category==="new_home";
     if(!data||(!completed&&project.category!=="active")||!recent(project.verified_on,7)||
       !recent(project.source_updated,60)||!project.city||!project.district||!['住宅大樓','華廈','公寓'].includes(project.property_style)||
@@ -51,10 +54,17 @@ const NationalMarket = (() => {
     const reference=price=>enough(price)&&price.mean>0&&price.count>=10&&recent(price.last,183);
     const area=Array.isArray(project.coordinates)&&typeof LiveProjects!=="undefined"?
       comparisonScopes.find(s=>reference(data.areas[s.id]?.[key])&&LiveProjects.inside(project.coordinates,s.geometry)):null;
-    const price=area?data.areas[area.id][key]:district?.[key];
-    if(!reference(price)||high>price.mean*.8+Number.EPSILON*price.mean)return null;
-    return {kind:completed?"completed":"presale",low,high,mean:price.mean,count:price.count,first:price.first,last:price.last,label,
+    const summary=area?data.areas[area.id]:district,price=summary?.[key];
+    if(!reference(price))return null;
+    const nameKey=s=>String(s||"").normalize("NFKC").replace(/\s+/g,"").replaceAll("台","臺");
+    const peers=completed?null:new Set((summary.presale_projects||[]).filter(p=>p.count>=3&&recent(p.last,183))
+      .map(p=>nameKey(p.name)).filter(name=>name&&name!==nameKey(project.name))).size;
+    return {kind:completed?"completed":"presale",low,high,mean:price.mean,count:price.count,first:price.first,last:price.last,label,peers,
       scope:area?`${area.name}圖框內`:`${project.district}行政區`,discount:(1-high/price.mean)*100};
+  }
+  function priceComparison(project){
+    const c=comparableOffer(project);
+    return c&&c.high<=c.mean*.8+Number.EPSILON*c.mean?c:null;
   }
   function projectBenchmark(project,scopes=[]){
     const box=text("section","");box.className="project-benchmark";
@@ -231,5 +241,5 @@ const NationalMarket = (() => {
     $("national-view").disabled=false;
     return load();
   }
-  return {configure,load,areaPanel,districtPanel,count,projectBenchmark,priceComparison,setComparisonScopes};
+  return {configure,load,areaPanel,districtPanel,count,projectBenchmark,priceComparison,comparableOffer,setComparisonScopes};
 })();

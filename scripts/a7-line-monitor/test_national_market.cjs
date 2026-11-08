@@ -61,10 +61,14 @@ const national=vm.runInContext("NationalMarket",context);
   assert.doesNotMatch(text(national.projectBenchmark({...pinA9,coordinates:null},scopes)),/圖框內/);
   const today=new Date().toISOString().slice(0,10),sample={mean:50,count:10,first:today,last:today};
   data.districts["新北市/林口區"].presale_price=sample;
+  data.districts["新北市/林口區"].presale_projects=[{name:"甲案",count:3,last:today},{name:"甲 案",count:4,last:today},
+    {name:"測試案",count:30,last:today},{name:"乙案",count:2,last:today},{name:"丙案",count:5,last:"2020-01-01"}];
   data.districts["新北市/林口區"].price={...sample,mean:60};
   const offer={...pinA9,verified_on:today,source_updated:today,name:"測試案",property_style:"住宅大樓",price_unit:"萬/坪",price:"36~40",category:"active"};
   assert.equal(national.priceComparison(offer).discount.toFixed(1),"20.0");
   assert.equal(national.priceComparison(offer).kind,"presale");
+  assert.equal(national.comparableOffer(offer).peers,1);
+  assert.equal(national.comparableOffer({...offer,price:"48~49"}).high,49,"Offers above the red/blue cutoff can still be compared");
   assert.match(national.priceComparison(offer).scope,/行政區/);
   assert.equal(national.priceComparison({...offer,price:"36~41"}),null,"Do not mark the low end alone");
   assert.equal(national.priceComparison({...offer,price:"36~41",category:"new_home"}).mean,60);
