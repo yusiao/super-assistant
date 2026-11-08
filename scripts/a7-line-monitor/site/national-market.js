@@ -39,7 +39,7 @@ const NationalMarket = (() => {
   function setComparisonScopes(scopes){comparisonScopes=scopes;}
   function priceComparison(project){
     const completed=project.category==="new_home";
-    if(!data||(!completed&&!['active','pending'].includes(project.category))||!recent(project.verified_on,7)||
+    if(!data||(!completed&&project.category!=="active")||!recent(project.verified_on,7)||
       !recent(project.source_updated,60)||!project.city||!project.district||!['住宅大樓','華廈','公寓'].includes(project.property_style)||
       /透天|店面|辦公/.test(project.name)||!/^萬(?:元)?[／/]坪$/.test((project.price_unit||"").trim()))return null;
     const match=String(project.price||"").trim().match(/^(\d{1,3}(?:\.\d{1,3})?)(?:\s*[~～–—-]\s*(\d{1,3}(?:\.\d{1,3})?))?$/);
@@ -53,7 +53,7 @@ const NationalMarket = (() => {
       comparisonScopes.find(s=>reference(data.areas[s.id]?.[key])&&LiveProjects.inside(project.coordinates,s.geometry)):null;
     const price=area?data.areas[area.id][key]:district?.[key];
     if(!reference(price)||high>price.mean*.8+Number.EPSILON*price.mean)return null;
-    return {low,high,mean:price.mean,count:price.count,first:price.first,last:price.last,label,
+    return {kind:completed?"completed":"presale",low,high,mean:price.mean,count:price.count,first:price.first,last:price.last,label,
       scope:area?`${area.name}圖框內`:`${project.district}行政區`,discount:(1-high/price.mean)*100};
   }
   function projectBenchmark(project,scopes=[]){

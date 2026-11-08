@@ -45,10 +45,12 @@ const LiveProjects = (() => {
   }
   const asking=p=>p.price&&p.price!=="價格待定"?`${p.price}${p.price_unit||""}`:"待定／未提供";
   const areaLabel=p=>`${p.city} ${p.district}${p.circle?` · ${p.circle}`:""}`;
+  const watchTypes={completed:{flag:"低",title:"成屋價差",badge:"開價低"},presale:{flag:"預售↓",title:"預售價差",badge:"預售↓"}};
   const compare=p=>typeof NationalMarket!=="undefined"&&typeof NationalMarket.priceComparison==="function"?NationalMarket.priceComparison(p):null;
   function priceMark(p,details=false){
     const c=compare(p);if(!c)return null;
-    const box=node("div"),mark=node("strong",`開價低 ${c.discount.toFixed(1)}%`);mark.className="price-watch-badge";box.className="price-watch";
+    const box=node("div"),mark=node("strong",`${watchTypes[c.kind].badge} ${c.discount.toFixed(1)}%`);
+    mark.className="price-watch-badge";box.className=`price-watch price-watch-${c.kind}`;
     box.append(mark,node("small",`${c.scope} · ${c.label}成交`));
     if(details)box.append(node("p",`公開開價上緣 ${c.high} vs. 成交均價 ${c.mean.toFixed(2)} 萬元／坪`),
       node("small",`實登 ${c.count} 筆，${c.first} 至 ${c.last}，成交扣車位。開價不是成交價；車位、樓層及戶別須另核對。`));
@@ -115,17 +117,24 @@ const LiveProjects = (() => {
         if(group){group.rows.push(p);group.positions.push(position);}
         else groups.push({xy,rows:[p],positions:[position]});
       }
-      layer.clearLayers();displayed=[];let watches=0;
+      layer.clearLayers();displayed=[];const watches={completed:0,presale:0};
       for(const {rows,positions} of groups){
         const multiple=rows.length>1,p=rows[0];
         const button=node("button",multiple?String(rows.length):"▥");button.type="button";
-        const lowCount=rows.filter(compare).length;watches+=lowCount;
+        const comparisons=rows.map(compare).filter(Boolean);
+        const flags=Object.keys(watchTypes).map(kind=>({kind,count:comparisons.filter(c=>c.kind===kind).length})).filter(f=>f.count);
         const label=multiple?`查看附近 ${rows.length} 個建案`:`建案：${p.name}`;
-        button.className="project-pin"+(multiple?" project-pin-group":p.category==="new_home"?" project-pin-new-home":p.category.includes("pending")?" project-pin-pending":"")+(lowCount?" project-pin-watch":"");
-        const note=lowCount?multiple?` · 其中 ${lowCount} 案開價低於區域成交 20% 以上`:` · 開價低 ${compare(p).discount.toFixed(1)}%`:"";
+        button.className="project-pin"+(multiple?" project-pin-group":p.category==="new_home"?" project-pin-new-home":p.category.includes("pending")?" project-pin-pending":"")+
+          flags.map(({kind})=>` project-pin-watch-${kind}`).join("");
+        const note=!comparisons.length?"":multiple?` · 其中 ${flags.map(f=>`${watchTypes[f.kind].title} ${f.count} 案`).join("、")}`:
+          ` · ${watchTypes[comparisons[0].kind].title}，開價低 ${comparisons[0].discount.toFixed(1)}%`;
         button.title=(multiple?`${rows.length} 案 · 點選查看`:`${p.name} · ${phases[p.category]}`)+note;
         button.setAttribute("aria-label",label+note);
-        if(lowCount){const flag=node("span","低");flag.className="project-watch-flag";flag.setAttribute("aria-hidden","true");button.append(flag);}
+        for(const {kind,count} of flags){
+          watches[kind]+=count;
+          const flag=node("span",watchTypes[kind].flag);flag.className=`project-watch-flag price-watch-${kind}`;
+          flag.setAttribute("aria-hidden","true");button.append(flag);
+        }
         button.addEventListener("click",e=>{
           e.stopPropagation();open(rows);
           if(multiple&&map.getZoom()<17&&positions.some(v=>v[0]!==positions[0][0]||v[1]!==positions[0][1])){
@@ -138,7 +147,8 @@ const LiveProjects = (() => {
       }
       highlight();
       const count=groups.reduce((n,g)=>n+g.rows.length,0);
-      if(status)status.textContent=count?`畫面內 ${count} 案有定位${watches?` · ${watches} 案符合低價標記`:""} · 數字為多案群組`:
+      const totals=Object.keys(watches).filter(kind=>watches[kind]).map(kind=>`${watchTypes[kind].title} ${watches[kind]} 案`);
+      if(status)status.textContent=count?`畫面內 ${count} 案有定位${totals.length?` · ${totals.join("、")}`:""} · 數字為多案群組`:
         !data&&!newHomes?(failed?"建案標記讀取失敗":"正在讀取建案標記…"):
         !fresh(data?.observed_at,8)&&!fresh(newHomes?.observed_at,8)?"建案索引已過期，暫不顯示舊標記。":"此畫面沒有可定位的建案；未定位案件仍可查清單。";
     }

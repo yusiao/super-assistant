@@ -64,10 +64,12 @@ const national=vm.runInContext("NationalMarket",context);
   data.districts["新北市/林口區"].price={...sample,mean:60};
   const offer={...pinA9,verified_on:today,source_updated:today,name:"測試案",property_style:"住宅大樓",price_unit:"萬/坪",price:"36~40",category:"active"};
   assert.equal(national.priceComparison(offer).discount.toFixed(1),"20.0");
+  assert.equal(national.priceComparison(offer).kind,"presale");
   assert.match(national.priceComparison(offer).scope,/行政區/);
   assert.equal(national.priceComparison({...offer,price:"36~41"}),null,"Do not mark the low end alone");
   assert.equal(national.priceComparison({...offer,price:"36~41",category:"new_home"}).mean,60);
-  for(const change of [{category:"sold_out"},{category:"listed_presale"},{price:"39起"},{price:"待定"},
+  assert.equal(national.priceComparison({...offer,category:"new_home"}).kind,"completed");
+  for(const change of [{category:"sold_out"},{category:"listed_presale"},{category:"pending"},{category:"listed_pending"},{price:"39起"},{price:"待定"},
     {price_unit:"萬/戶"},{verified_on:"2020-01-01"},{source_updated:"2020-01-01"},{name:"透天測試"},{property_style:""}])assert.equal(national.priceComparison({...offer,...change}),null);
   national.setComparisonScopes(scopes);
   data.areas.a9.presale_price={...sample,mean:55,count:9};
