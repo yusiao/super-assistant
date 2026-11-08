@@ -1,1144 +1,1143 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-01T21:48:39.007Z",
+  "generatedAt": "2026-11-08T21:46:57.454Z",
   "baselineCreated": false,
   "thresholds": {
     "minPopularity": 10,
     "minPopularityIncrease": 10,
     "popularityGrowthRatio": 1.5
   },
-  "monitoredProducts": 1080,
+  "monitoredProducts": 1182,
   "requestedCodes": 126,
   "unresolvedCount": 0,
   "alerts": [
     {
       "type": "new_active_product",
       "current": {
-        "code": "3ATE",
-        "name": "金佳多利利率變動型還本終身保險定期給付型",
+        "code": "1HIR",
+        "name": "日臻幸福住院日額健康保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 29,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1HIR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%97%A5%E8%87%BB%E5%B9%B8%E7%A6%8F%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "1HS",
+        "name": "實踐幸福住院醫療健康保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 70,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1HS-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%AF%A6%E8%B8%90%E5%B9%B8%E7%A6%8F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "1HSCO",
+        "name": "實現幸福部分負擔住院醫療健康保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 25,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1HSCO-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%AF%A6%E7%8F%BE%E5%B9%B8%E7%A6%8F%E9%83%A8%E5%88%86%E8%B2%A0%E6%93%94%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "1HSD",
+        "name": "超實踐幸福自負額住院醫療健康保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 23,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1HSD-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E8%B6%85%E5%AF%A6%E8%B8%90%E5%B9%B8%E7%A6%8F%E8%87%AA%E8%B2%A0%E9%A1%8D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "1NHI",
+        "name": "新日溢幸福住院日額健康保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 15,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1NHI-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%96%B0%E6%97%A5%E6%BA%A2%E5%B9%B8%E7%A6%8F%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "1SIR",
+        "name": "手握幸福手術醫療健康保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 30,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/1SIR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%89%8B%E6%8F%A1%E5%B9%B8%E7%A6%8F%E6%89%8B%E8%A1%93%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "ACLCN001",
+        "name": "豐利雙收終身保險定期給付型",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2026-05-20",
+        "sourceUrl": "https://finfo.tw/products/ACLCN001-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%B1%90%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2026-05-20"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "AMTNTR2",
+        "name": "微E保倍微型個人傷害醫療保險附約",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/AMTNTR2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%BE%AEE%E4%BF%9D%E5%80%8D%E5%BE%AE%E5%9E%8B%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTB12",
+        "name": "微E保倍微型個人傷害保險",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTB12-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%BE%AEE%E4%BF%9D%E5%80%8D%E5%BE%AE%E5%9E%8B%E5%80%8B%E4%BA%BA%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTB14",
+        "name": "新平安御守意外傷害保險",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTB14-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%B9%B3%E5%AE%89%E5%BE%A1%E5%AE%88%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTB15",
+        "name": "乘車守護意外傷害保險",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTB15-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%B9%98%E8%BB%8A%E5%AE%88%E8%AD%B7%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTB4",
+        "name": "平安護守意外傷害保險",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTB4-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%B9%B3%E5%AE%89%E8%AD%B7%E5%AE%88%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTR3",
+        "name": "E騎幸福意外傷害保險附約",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTR3-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E9%A8%8E%E5%B9%B8%E7%A6%8F%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTR4",
+        "name": "阿里叭叭意外傷害保險附約",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTR4-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%98%BF%E9%87%8C%E5%8F%AD%E5%8F%AD%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTR5",
+        "name": "卡達安心意外傷害保險附約",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTR5-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%8D%A1%E9%81%94%E5%AE%89%E5%BF%83%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "APANTR8",
+        "name": "新嗶嗶守護意外傷害保險",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/APANTR8-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%97%B6%E5%97%B6%E5%AE%88%E8%AD%B7%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "BBMR",
+        "name": "意外骨折暨傷害醫療保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 33,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/BBMR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%A4%96%E9%AA%A8%E6%8A%98%E6%9A%A8%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "BYAR2",
+        "name": "珍安康2意外傷害保險附約",
         "insurer": "南山人壽",
         "saleStatus": "active",
         "rateStatus": "missing",
         "popularity": 0,
-        "effectiveDate": "2025-08-09",
-        "sourceUrl": "https://finfo.tw/products/3ATE-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%87%91%E4%BD%B3%E5%A4%9A%E5%88%A9%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E9%82%84%E6%9C%AC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-08-09"
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/BYAR2-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%8F%8D%E5%AE%89%E5%BA%B72%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACCNTR1",
-        "name": "愛寶貝定期癌症健康保險附約",
-        "insurer": "保誠人壽",
+        "code": "CHR2",
+        "name": "一年定期癌症醫療健康保險附約109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 6,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/CHR2-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "CLQ",
+        "name": "樂齡增福防癌定期健康保險",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 15,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/CLQ-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%A8%82%E9%BD%A1%E5%A2%9E%E7%A6%8F%E9%98%B2%E7%99%8C%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "CMR",
+        "name": "愛精準防癌定期健康保險附約",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 7,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/CMR-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%84%9B%E7%B2%BE%E6%BA%96%E9%98%B2%E7%99%8C%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "CNR",
+        "name": "真愛安康防癌定期健康保險附約",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 3,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/CNR-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%9C%9F%E6%84%9B%E5%AE%89%E5%BA%B7%E9%98%B2%E7%99%8C%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "CR2C",
+        "name": "新一年定期癌症健康保險附約109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 10,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/CR2C-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "DAR",
+        "name": "安心智在認知照護健康保險附約",
+        "insurer": "安聯人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
         "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ACCNTR1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%84%9B%E5%AF%B6%E8%B2%9D%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/DAR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%BF%83%E6%99%BA%E5%9C%A8%E8%AA%8D%E7%9F%A5%E7%85%A7%E8%AD%B7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-25"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACCNTR2",
-        "name": "標靶守護防癌健康保險附約",
+        "code": "DDAR3",
+        "name": "安心寶重大疾病暨特定傷病健康保險附約109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/DDAR3-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%BF%83%E5%AF%B6%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E6%9A%A8%E7%89%B9%E5%AE%9A%E5%82%B7%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "DDNR2",
+        "name": "新一年定期重大疾病健康保險附約乙型109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/DDNR2-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E4%B9%99%E5%9E%8B109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "DDR2",
+        "name": "一年定期重大疾病暨特定傷病健康保險附約109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 8,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/DDR2-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E6%9A%A8%E7%89%B9%E5%AE%9A%E5%82%B7%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "DPAA",
+        "name": "人身意外傷害保險附約111",
         "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 2,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/DPAA-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%BA%E8%BA%AB%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84111-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "E1DH",
+        "name": "穩助糖醫療保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/E1DH-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%A9%A9%E5%8A%A9%E7%B3%96%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "ECPA1",
+        "name": "網路投保ILIKE相挺傷害保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/ECPA1-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%B6%B2%E8%B7%AF%E6%8A%95%E4%BF%9DILIKE%E7%9B%B8%E6%8C%BA%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "EDA",
+        "name": "E真心重大疾病一年期健康保險甲型",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/EDA-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BDE%E7%9C%9F%E5%BF%83%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E4%B8%80%E5%B9%B4%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "EDB1",
+        "name": "E關懷重大疾病定期健康保險甲型",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/EDB1-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BDE%E9%97%9C%E6%87%B7%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "EHA",
+        "name": "網投日安心定期健康保險",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
         "popularity": 1,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ACCNTR2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%99%E9%9D%B6%E5%AE%88%E8%AD%B7%E9%98%B2%E7%99%8C%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/EHA-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%B6%B2%E6%8A%95%E6%97%A5%E5%AE%89%E5%BF%83%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACCNTR3",
-        "name": "愛要守護防癌健康保險附約",
+        "code": "EHI",
+        "name": "網路投保ILIKE依靠住院日額健康保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/EHI-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%B6%B2%E8%B7%AF%E6%8A%95%E4%BF%9DILIKE%E4%BE%9D%E9%9D%A0%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "FR1DD",
+        "name": "FULL樂無憂一年期重大疾病健康保險甲型",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/FR1DD-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BDFULL%E6%A8%82%E7%84%A1%E6%86%82%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "FRMMR",
+        "name": "FULL樂微型傷害醫療保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 2,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/FRMMR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BDFULL%E6%A8%82%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "FRMPA",
+        "name": "FULL樂微型傷害保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/FRMPA-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BDFULL%E6%A8%82%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "FRPAR",
+        "name": "FULL樂平安小額傷害保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/FRPAR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BDFULL%E6%A8%82%E5%B9%B3%E5%AE%89%E5%B0%8F%E9%A1%8D%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "FRTDD",
+        "name": "FULL樂無憂重大疾病定期健康保險甲型",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/FRTDD-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BDFULL%E6%A8%82%E7%84%A1%E6%86%82%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "HJB",
+        "name": "好加倍終身保險定期給付型",
+        "insurer": "三商美邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2025-01-01",
+        "sourceUrl": "https://finfo.tw/products/HJB-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E5%A5%BD%E5%8A%A0%E5%80%8D%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "HJD",
+        "name": "愛有醫靠醫療定期健康保險",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/HJD-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%84%9B%E6%9C%89%E9%86%AB%E9%9D%A0%E9%86%AB%E7%99%82%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "HLD",
+        "name": "心心相惜生活習慣健康保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 2,
+        "effectiveDate": "2024-09-28",
+        "sourceUrl": "https://finfo.tw/products/HLD-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E5%BF%83%E5%BF%83%E7%9B%B8%E6%83%9C%E7%94%9F%E6%B4%BB%E7%BF%92%E6%85%A3%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-28"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "HMRA",
+        "name": "一年定期住院醫療費用保險附約113",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 13,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/HMRA-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84113-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "ICA",
+        "name": "個人微型傷害保險",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 1,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/ICA-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%80%8B%E4%BA%BA%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "ICG",
+        "name": "益保微型傷害保險",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/ICG-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E7%9B%8A%E4%BF%9D%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "IWPD",
+        "name": "關心豁免保險費附約96",
         "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/IWPD-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%97%9C%E5%BF%83%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%8496-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "JWPC",
+        "name": "安家豁免保險費附約96",
+        "insurer": "保誠人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/JWPC-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%AE%B6%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%8496-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "KHQA",
+        "name": "永保平安傷害保險",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 1,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/KHQA-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E6%B0%B8%E4%BF%9D%E5%B9%B3%E5%AE%89%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "KPA",
+        "name": "童心守護傷害保險僅有意外身故或喪葬費用保險金",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/KPA-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%AB%A5%E5%BF%83%E5%AE%88%E8%AD%B7%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E5%83%85%E6%9C%89%E6%84%8F%E5%A4%96%E8%BA%AB%E6%95%85%E6%88%96%E5%96%AA%E8%91%AC%E8%B2%BB%E7%94%A8%E4%BF%9D%E9%9A%AA%E9%87%91-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "KPAR",
+        "name": "陪童長大意外傷害保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 26,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/KPAR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%99%AA%E7%AB%A5%E9%95%B7%E5%A4%A7%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "LAW5",
+        "name": "老年照護住院醫療保險金附加條款",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 2,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/LAW5-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E8%80%81%E5%B9%B4%E7%85%A7%E8%AD%B7%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%87%91%E9%99%84%E5%8A%A0%E6%A2%9D%E6%AC%BE-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "LCD",
+        "name": "好照85定期健康保險",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 17,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/LCD-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%A5%BD%E7%85%A785%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "MBR",
+        "name": "重大燒燙傷傷害醫療保險附約",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 4,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/MBR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E9%87%8D%E5%A4%A7%E7%87%92%E7%87%99%E5%82%B7%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "MIR",
+        "name": "住院醫療保險附約定額型",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 1687,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/MIR-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E5%AE%9A%E9%A1%8D%E5%9E%8B-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "MPA2",
+        "name": "集體投保型微型傷害保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 0,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/MPA2-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%9B%86%E9%AB%94%E6%8A%95%E4%BF%9D%E5%9E%8B%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NADR",
+        "name": "新意外傷害保險附約",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 10,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/NADR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NAHR",
+        "name": "新意外傷害醫療保險附約住院日額型",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 9,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/NAHR-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E5%9E%8B-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NAI",
+        "name": "新傷害保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 21,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/NAI-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NAMRA",
+        "name": "新意外傷害醫療保險附約限額實支實付型113",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 10,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/NAMRA-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E9%99%90%E9%A1%8D%E5%AF%A6%E6%94%AF%E5%AF%A6%E4%BB%98%E5%9E%8B113-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NCR2",
+        "name": "一年定期癌症照護健康保險附約109",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 4,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/NCR2-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E7%85%A7%E8%AD%B7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84109-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NHRA",
+        "name": "寶滿分重大傷病健康保險附約",
+        "insurer": "安聯人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 8,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/NHRA-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%AF%B6%E6%BB%BF%E5%88%86%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-25"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NIR",
+        "name": "健康保險附約",
+        "insurer": "全球人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 2549,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/NIR-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "NTIW2101",
+        "name": "金多利利率變動型增額終身壽險",
+        "insurer": "台灣人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 0,
+        "effectiveDate": "2024-09-20",
+        "sourceUrl": "https://finfo.tw/products/NTIW2101-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E9%87%91%E5%A4%9A%E5%88%A9%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E5%A2%9E%E9%A1%8D%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA-2024-09-20"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "PAMR",
+        "name": "成意實足意外傷害醫療保險附約",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 26,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/PAMR-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%88%90%E6%84%8F%E5%AF%A6%E8%B6%B3%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "SBB",
+        "name": "意外骨折及特定手術傷害醫療保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 4,
+        "effectiveDate": "2024-09-14",
+        "sourceUrl": "https://finfo.tw/products/SBB-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%A4%96%E9%AA%A8%E6%8A%98%E5%8F%8A%E7%89%B9%E5%AE%9A%E6%89%8B%E8%A1%93%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA-2024-09-14"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "SJR1",
+        "name": "增守護健康保險附約",
+        "insurer": "富邦人壽",
+        "saleStatus": "active",
+        "rateStatus": "ready",
+        "popularity": 83,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/SJR1-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E5%A2%9E%E5%AE%88%E8%AD%B7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "SUPA",
+        "name": "長享平安終身傷害保險",
+        "insurer": "南山人壽",
+        "saleStatus": "active",
+        "rateStatus": "missing",
+        "popularity": 1,
+        "effectiveDate": "2026-10-09",
+        "sourceUrl": "https://finfo.tw/products/SUPA-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E9%95%B7%E4%BA%AB%E5%B9%B3%E5%AE%89%E7%B5%82%E8%BA%AB%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2026-10-09"
+      }
+    },
+    {
+      "type": "new_active_product",
+      "current": {
+        "code": "SWD1",
+        "name": "鍾情一生重大疾病終身健康保險乙型",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
         "popularity": 1,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ACCNTR3-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%84%9B%E8%A6%81%E5%AE%88%E8%AD%B7%E9%98%B2%E7%99%8C%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/SWD1-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%8D%BE%E6%83%85%E4%B8%80%E7%94%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E4%B9%99%E5%9E%8B-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACINLB1",
-        "name": "保心肝重大傷病終身健康保險",
-        "insurer": "保誠人壽",
+        "code": "SWI",
+        "name": "智糖人生定期健康保險",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2026-04-27",
-        "sourceUrl": "https://finfo.tw/products/ACINLB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%BF%83%E8%82%9D%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2026-04-27"
+        "popularity": 3,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/SWI-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%99%BA%E7%B3%96%E4%BA%BA%E7%94%9F%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN25",
-        "name": "富享雙收終身保險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "SWZ",
+        "name": "真心重大疾病暨特定傷病定期健康保險附約",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN25-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E4%BA%AB%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "popularity": 4,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/SWZ-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E7%9C%9F%E5%BF%83%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E6%9A%A8%E7%89%B9%E5%AE%9A%E5%82%B7%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN26",
-        "name": "享利雙收終身保險113定期給付型",
-        "insurer": "保誠人壽",
+        "code": "TJB",
+        "name": "增加倍終身保險定期給付型",
+        "insurer": "三商美邦人壽",
         "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN26-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ACLPEN29",
-        "name": "享利雙收終身保險113定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
+        "rateStatus": "missing",
         "popularity": 0,
         "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN29-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "sourceUrl": "https://finfo.tw/products/TJB-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E5%A2%9E%E5%8A%A0%E5%80%8D%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN30",
-        "name": "超紅運來終身保險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "TSIR3",
+        "name": "真獻情3手術醫療定期健康保險附約",
+        "insurer": "南山人壽",
         "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN30-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%B6%85%E7%B4%85%E9%81%8B%E4%BE%86%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "rateStatus": "missing",
+        "popularity": 25,
+        "effectiveDate": "2024-09-28",
+        "sourceUrl": "https://finfo.tw/products/TSIR3-%E5%8D%97%E5%B1%B1%E4%BA%BA%E5%A3%BD%E7%9C%9F%E7%8D%BB%E6%83%853%E6%89%8B%E8%A1%93%E9%86%AB%E7%99%82%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-28"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN33",
-        "name": "吉利雙收終身保險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "UCR",
+        "name": "醫樣安心重大疾病一年定期健康保險附約",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN33-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%90%89%E5%88%A9%E9%9B%99%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "popularity": 20,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/UCR-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%86%AB%E6%A8%A3%E5%AE%89%E5%BF%83%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN34",
-        "name": "鑫利發終身保險113定期給付型",
-        "insurer": "保誠人壽",
+        "code": "WP",
+        "name": "保險費豁免附約條款",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN34-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E5%88%A9%E7%99%BC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "rateStatus": "missing",
+        "popularity": 56,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/WP-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E4%BF%9D%E9%9A%AA%E8%B2%BB%E8%B1%81%E5%85%8D%E9%99%84%E7%B4%84%E6%A2%9D%E6%AC%BE-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN35",
-        "name": "金利發終身保險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "WPF1",
+        "name": "重大疾病親子型豁免保險費附約",
+        "insurer": "富邦人壽",
         "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN35-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%87%91%E5%88%A9%E7%99%BC%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
+        "rateStatus": "missing",
+        "popularity": 10,
+        "effectiveDate": "2024-09-23",
+        "sourceUrl": "https://finfo.tw/products/WPF1-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E8%A6%AA%E5%AD%90%E5%9E%8B%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84-2024-09-23"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ACLPEN38",
-        "name": "富享年年終身保險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "WPS1",
+        "name": "新安逸豁免保險費健康保險附約",
+        "insurer": "安聯人壽",
         "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-03-03",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN38-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E4%BA%AB%E5%B9%B4%E5%B9%B4%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-03-03"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ACLPEN39",
-        "name": "鑫享豐收終身保險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-11-17",
-        "sourceUrl": "https://finfo.tw/products/ACLPEN39-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E4%BA%AB%E8%B1%90%E6%94%B6%E7%B5%82%E8%BA%AB%E4%BF%9D%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-11-17"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ADDNTB1",
-        "name": "E生必備重大疾病定期健康保險甲型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ADDNTB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E7%94%9F%E5%BF%85%E5%82%99%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ADDNTB2",
-        "name": "E生必備一年期重大疾病健康保險甲型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ADDNTB2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E7%94%9F%E5%BF%85%E5%82%99%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ADDNTR1",
-        "name": "一年定期重大疾病健康保險附約乙型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ADDNTR1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E4%B9%99%E5%9E%8B-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "AHINTB2",
-        "name": "照護有術定期健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AHINTB2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E7%85%A7%E8%AD%B7%E6%9C%89%E8%A1%93%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "AHINTB3",
-        "name": "E保天天一年定期住院日額醫療健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AHINTB3-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E4%BF%9D%E5%A4%A9%E5%A4%A9%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E4%BD%8F%E9%99%A2%E6%97%A5%E9%A1%8D%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "AHINTB4",
-        "name": "E視健康定期健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2026-03-09",
-        "sourceUrl": "https://finfo.tw/products/AHINTB4-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E8%A6%96%E5%81%A5%E5%BA%B7%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2026-03-09"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "AHINTR1",
-        "name": "宜家保醫療健康保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AHINTR1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AE%9C%E5%AE%B6%E4%BF%9D%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ALTRTB1",
-        "name": "E把照一年期長期照顧健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
+        "rateStatus": "missing",
         "popularity": 1,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ALTRTB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E6%8A%8A%E7%85%A7%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%95%B7%E6%9C%9F%E7%85%A7%E9%A1%A7%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "AMRNTB1",
-        "name": "E保庇健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AMRNTB1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E4%BF%9D%E5%BA%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "APANTB10",
-        "name": "阿里叭叭意外傷害保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APANTB10-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%98%BF%E9%87%8C%E5%8F%AD%E5%8F%AD%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "APANTB2",
-        "name": "無微不至集體投保微型傷害保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APANTB2-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E7%84%A1%E5%BE%AE%E4%B8%8D%E8%87%B3%E9%9B%86%E9%AB%94%E6%8A%95%E4%BF%9D%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "APANTB9",
-        "name": "E騎幸福意外傷害保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APANTB9-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E9%A8%8E%E5%B9%B8%E7%A6%8F%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "APANTR1",
-        "name": "金滿意住院醫療傷害保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APANTR1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%87%91%E6%BB%BF%E6%84%8F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "APANTR7",
-        "name": "E生必備小額傷害保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APANTR7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BDE%E7%94%9F%E5%BF%85%E5%82%99%E5%B0%8F%E9%A1%8D%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/WPS1-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E6%96%B0%E5%AE%89%E9%80%B8%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-25"
       }
     },
     {
       "type": "popularity_spike",
       "current": {
-        "code": "APB",
-        "name": "意定罩傷害保險",
+        "code": "XAB",
+        "name": "御守傷害暨兒童傷害失能保險附約",
         "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 21,
-        "effectiveDate": "2026-08-17",
-        "sourceUrl": "https://finfo.tw/products/APB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%AE%9A%E7%BD%A9%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2026-08-17"
+        "popularity": 2192,
+        "effectiveDate": "2026-06-29",
+        "sourceUrl": "https://finfo.tw/products/XAB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%BE%A1%E5%AE%88%E5%82%B7%E5%AE%B3%E6%9A%A8%E5%85%92%E7%AB%A5%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-06-29"
       },
       "previous": {
-        "code": "APB",
-        "name": "意定罩傷害保險",
+        "code": "XAB",
+        "name": "御守傷害暨兒童傷害失能保險附約",
         "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 5,
-        "effectiveDate": "2026-08-17",
-        "sourceUrl": "https://finfo.tw/products/APB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E6%84%8F%E5%AE%9A%E7%BD%A9%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2026-08-17"
+        "popularity": 331,
+        "effectiveDate": "2026-06-29",
+        "sourceUrl": "https://finfo.tw/products/XAB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%BE%A1%E5%AE%88%E5%82%B7%E5%AE%B3%E6%9A%A8%E5%85%92%E7%AB%A5%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-06-29"
       },
-      "increase": 16,
-      "ratio": 4.2
+      "increase": 1861,
+      "ratio": 6.622356495468278
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "APC",
-        "name": "青春無距傷害保險",
+        "code": "XCG",
+        "name": "臻心全意防癌一年期醫療健康保險附約",
         "insurer": "全球人壽",
         "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 14,
+        "rateStatus": "ready",
+        "popularity": 1861,
         "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/APC-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E9%9D%92%E6%98%A5%E7%84%A1%E8%B7%9D%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-09-30"
+        "sourceUrl": "https://finfo.tw/products/XCG-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E8%87%BB%E5%BF%83%E5%85%A8%E6%84%8F%E9%98%B2%E7%99%8C%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "ARDPLN6",
-        "name": "富貴世代終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ARDPLN6-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E8%B2%B4%E4%B8%96%E4%BB%A3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARDPLN7",
-        "name": "超紅運相傳終身壽險定期給付型",
-        "insurer": "保誠人壽",
+        "code": "XHC",
+        "name": "實足滿意醫療費用健康保險附約",
+        "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ARDPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%B6%85%E7%B4%85%E9%81%8B%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN11",
-        "name": "鑫滿傳家終身壽險113定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN11-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E6%BB%BF%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA113%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN12",
-        "name": "臻愛相傳終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN12-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E8%87%BB%E6%84%9B%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN18",
-        "name": "樂享相傳終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-04-15",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN18-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-04-15"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN21",
-        "name": "鑫滿安康終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2025-10-15",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN21-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%91%AB%E6%BB%BF%E5%AE%89%E5%BA%B7%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-10-15"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN22",
-        "name": "鴻裕相傳終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-11-10",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN22-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E9%B4%BB%E8%A3%95%E7%9B%B8%E5%82%B3%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-11-10"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN23",
-        "name": "福康傳富終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-12-08",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN23-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E7%A6%8F%E5%BA%B7%E5%82%B3%E5%AF%8C%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-12-08"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPLN7",
-        "name": "樂享傳家終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2025-01-01",
-        "sourceUrl": "https://finfo.tw/products/ARLPLN7-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E4%BA%AB%E5%82%B3%E5%AE%B6%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2025-01-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ARLPN002",
-        "name": "富貴得利終身壽險定期給付型",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2026-03-09",
-        "sourceUrl": "https://finfo.tw/products/ARLPN002-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AF%8C%E8%B2%B4%E5%BE%97%E5%88%A9%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B-2026-03-09"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ASGNLB3",
-        "name": "樂齡安康手術醫療終身健康保險",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 1,
+        "popularity": 38,
         "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/ASGNLB3-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%A8%82%E9%BD%A1%E5%AE%89%E5%BA%B7%E6%89%8B%E8%A1%93%E9%86%AB%E7%99%82%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-09-30"
+        "sourceUrl": "https://finfo.tw/products/XHC-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%AF%A6%E8%B6%B3%E6%BB%BF%E6%84%8F%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "AUCCR",
-        "name": "一年定期防癌帳戶型健康保險附約",
-        "insurer": "保誠人壽",
+        "code": "XHO",
+        "name": "全心全意自負額醫療費用健康保險附約",
+        "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 1,
+        "popularity": 3491,
         "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AUCCR-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%98%B2%E7%99%8C%E5%B8%B3%E6%88%B6%E5%9E%8B%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
+        "sourceUrl": "https://finfo.tw/products/XHO-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E5%85%A8%E5%BF%83%E5%85%A8%E6%84%8F%E8%87%AA%E8%B2%A0%E9%A1%8D%E9%86%AB%E7%99%82%E8%B2%BB%E7%94%A8%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
       }
     },
     {
-      "type": "new_active_product",
+      "type": "popularity_spike",
       "current": {
-        "code": "AUNHI",
-        "name": "新一年定期住院醫療帳戶型健康保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/AUNHI-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%B8%B3%E6%88%B6%E5%9E%8B%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "BHINLR1",
-        "name": "安康保住院醫療日額健康保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/BHINLR1-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%BA%B7%E4%BF%9D%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E6%97%A5%E9%A1%8D%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "CUCR",
-        "name": "一年定期癌症醫療帳戶型健康保險附約",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/CUCR-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E9%86%AB%E7%99%82%E5%B8%B3%E6%88%B6%E5%9E%8B%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "CWR4",
-        "name": "愛鑫安防癌終身健康保險附約",
-        "insurer": "富邦人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2026-10-12",
-        "sourceUrl": "https://finfo.tw/products/CWR4-%E5%AF%8C%E9%82%A6%E4%BA%BA%E5%A3%BD%E6%84%9B%E9%91%AB%E5%AE%89%E9%98%B2%E7%99%8C%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2026-10-12"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "DIPA",
-        "name": "人身意外傷害保險111",
-        "insurer": "保誠人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 7,
-        "effectiveDate": "2024-09-30",
-        "sourceUrl": "https://finfo.tw/products/DIPA-%E4%BF%9D%E8%AA%A0%E4%BA%BA%E5%A3%BD%E4%BA%BA%E8%BA%AB%E6%84%8F%E5%A4%96%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA111-2024-09-30"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "RN1",
-        "name": "保安康重大傷病一年定期健康保險附約",
+        "code": "XM1",
+        "name": "意佰分終身傷害保險",
         "insurer": "遠雄人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 217,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/RN1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%AE%89%E5%BA%B7%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "RQ1",
-        "name": "愛吉時一年定期癌症健康保險附約",
+        "popularity": 823,
+        "effectiveDate": "2026-06-29",
+        "sourceUrl": "https://finfo.tw/products/XM1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%8F%E4%BD%B0%E5%88%86%E7%B5%82%E8%BA%AB%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2026-06-29"
+      },
+      "previous": {
+        "code": "XM1",
+        "name": "意佰分終身傷害保險",
         "insurer": "遠雄人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 1813,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/RQ1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%9B%E5%90%89%E6%99%82%E4%B8%80%E5%B9%B4%E5%AE%9A%E6%9C%9F%E7%99%8C%E7%97%87%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
+        "popularity": 512,
+        "effectiveDate": "2026-06-29",
+        "sourceUrl": "https://finfo.tw/products/XM1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%8F%E4%BD%B0%E5%88%86%E7%B5%82%E8%BA%AB%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2026-06-29"
+      },
+      "increase": 311,
+      "ratio": 1.607421875
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "RSN",
-        "name": "永安康醫療健康保險附約",
-        "insurer": "遠雄人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 57,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/RSN-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%B0%B8%E5%AE%89%E5%BA%B7%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "RTMA",
-        "name": "保倍心安傷害保險附約",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/RTMA-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%80%8D%E5%BF%83%E5%AE%89%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "S2",
-        "name": "住院醫療日額甲型保險附約",
-        "insurer": "新光人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 118,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/S2-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E6%97%A5%E9%A1%8D%E7%94%B2%E5%9E%8B%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "SADDR",
-        "name": "特定意外事故傷害保險附約",
-        "insurer": "台灣人壽",
+        "code": "XRTL",
+        "name": "享安心五年定期壽險",
+        "insurer": "三商美邦人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
         "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/SADDR-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E7%89%B9%E5%AE%9A%E6%84%8F%E5%A4%96%E4%BA%8B%E6%95%85%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
+        "effectiveDate": "2025-01-01",
+        "sourceUrl": "https://finfo.tw/products/XRTL-%E4%B8%89%E5%95%86%E7%BE%8E%E9%82%A6%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%AE%89%E5%BF%83%E4%BA%94%E5%B9%B4%E5%AE%9A%E6%9C%9F%E5%A3%BD%E9%9A%AA-2025-01-01"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "SDDR",
-        "name": "歲歲平安傷害保險附約",
-        "insurer": "台灣人壽",
+        "code": "XSA",
+        "name": "醫鑫手護一年期手術健康保險附約",
+        "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/SDDR-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%AD%B2%E6%AD%B2%E5%B9%B3%E5%AE%89%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "SMRA",
-        "name": "歲歲平安傷害醫療保險附約甲型",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 3,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/SMRA-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%AD%B2%E6%AD%B2%E5%B9%B3%E5%AE%89%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E7%94%B2%E5%9E%8B-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "SUB",
-        "name": "超健康手術醫療終身健康保險",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/SUB-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E8%B6%85%E5%81%A5%E5%BA%B7%E6%89%8B%E8%A1%93%E9%86%AB%E7%99%82%E7%B5%82%E8%BA%AB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "T07P1",
-        "name": "新保富通二十年定期重大疾病健康保險甲型",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/T07P1-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E6%96%B0%E4%BF%9D%E5%AF%8C%E9%80%9A%E4%BA%8C%E5%8D%81%E5%B9%B4%E5%AE%9A%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E7%94%B2%E5%9E%8B-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "TADR7",
-        "name": "FUN心保傷害保險附約",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/TADR7-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BDFUN%E5%BF%83%E4%BF%9D%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "TCL",
-        "name": "醫起守護防癌定期健康保險",
-        "insurer": "安達人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/TCL-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E9%86%AB%E8%B5%B7%E5%AE%88%E8%AD%B7%E9%98%B2%E7%99%8C%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "THP",
-        "name": "安心樂高住院醫療定期健康保險",
-        "insurer": "安達人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/THP-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%BF%83%E6%A8%82%E9%AB%98%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "TMADD",
-        "name": "保倍心安傷害保險",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/TMADD-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E4%BF%9D%E5%80%8D%E5%BF%83%E5%AE%89%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "TSN",
-        "name": "得醫助手定期保險",
-        "insurer": "安達人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/TSN-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E5%BE%97%E9%86%AB%E5%8A%A9%E6%89%8B%E5%AE%9A%E6%9C%9F%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "TVA",
-        "name": "安心護眼定期健康保險",
-        "insurer": "安達人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 3,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/TVA-%E5%AE%89%E9%81%94%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%BF%83%E8%AD%B7%E7%9C%BC%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WADD",
-        "name": "唯E守護傷害保險",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WADD-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E5%94%AFE%E5%AE%88%E8%AD%B7%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WBBR",
-        "name": "FUN心生活骨折傷害保險附約",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WBBR-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BDFUN%E5%BF%83%E7%94%9F%E6%B4%BB%E9%AA%A8%E6%8A%98%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WHA",
-        "name": "享好康終身醫療健康保險",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WHA-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E4%BA%AB%E5%A5%BD%E5%BA%B7%E7%B5%82%E8%BA%AB%E9%86%AB%E7%99%82%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WHG",
-        "name": "醫定安心定期健康保險108",
-        "insurer": "第一金人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WHG-%E7%AC%AC%E4%B8%80%E9%87%91%E4%BA%BA%E5%A3%BD%E9%86%AB%E5%AE%9A%E5%AE%89%E5%BF%83%E5%AE%9A%E6%9C%9F%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA108-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WMBR",
-        "name": "FUN心生活燒燙傷傷害保險附約",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WMBR-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BDFUN%E5%BF%83%E7%94%9F%E6%B4%BB%E7%87%92%E7%87%99%E5%82%B7%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WO",
-        "name": "新真意豁免保險費附約",
-        "insurer": "元大人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 3,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WO-%E5%85%83%E5%A4%A7%E4%BA%BA%E5%A3%BD%E6%96%B0%E7%9C%9F%E6%84%8F%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WRA",
-        "name": "豁免保險費附約甲型",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 1,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WRA-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84%E7%94%B2%E5%9E%8B-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WRD",
-        "name": "滿天星豁免保險費附約甲型",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WRD-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%BB%BF%E5%A4%A9%E6%98%9F%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84%E7%94%B2%E5%9E%8B-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WRE",
-        "name": "滿天星豁免保險費附約乙型",
-        "insurer": "宏泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WRE-%E5%AE%8F%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%BB%BF%E5%A4%A9%E6%98%9F%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E9%99%84%E7%B4%84%E4%B9%99%E5%9E%8B-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WSADR",
-        "name": "FUN心生活特定意外身故傷害保險附約",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WSADR-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BDFUN%E5%BF%83%E7%94%9F%E6%B4%BB%E7%89%B9%E5%AE%9A%E6%84%8F%E5%A4%96%E8%BA%AB%E6%95%85%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "WV",
-        "name": "豁免多多豁免保險費健康保險附約",
-        "insurer": "新光人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/WV-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E8%B1%81%E5%85%8D%E5%A4%9A%E5%A4%9A%E8%B1%81%E5%85%8D%E4%BF%9D%E9%9A%AA%E8%B2%BB%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "X93",
-        "name": "安護一年期保險費豁免附約",
-        "insurer": "國泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
         "popularity": 15,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/X93-%E5%9C%8B%E6%B3%B0%E4%BA%BA%E5%A3%BD%E5%AE%89%E8%AD%B7%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BF%9D%E9%9A%AA%E8%B2%BB%E8%B1%81%E5%85%8D%E9%99%84%E7%B4%84-2024-10-01"
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/XSA-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD%E9%86%AB%E9%91%AB%E6%89%8B%E8%AD%B7%E4%B8%80%E5%B9%B4%E6%9C%9F%E6%89%8B%E8%A1%93%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "X94",
-        "name": "安家一年期保險費豁免附約",
-        "insurer": "國泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 3,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/X94-%E5%9C%8B%E6%B3%B0%E4%BA%BA%E5%A3%BD%E5%AE%89%E5%AE%B6%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BF%9D%E9%9A%AA%E8%B2%BB%E8%B1%81%E5%85%8D%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "XB1",
-        "name": "E富通小額傷害保險附約",
-        "insurer": "遠雄人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/XB1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BDE%E5%AF%8C%E9%80%9A%E5%B0%8F%E9%A1%8D%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "XHQ",
-        "name": "寶貝金人生傷害失能保險附約",
-        "insurer": "遠雄人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 781,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/XHQ-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E5%AF%B6%E8%B2%9D%E9%87%91%E4%BA%BA%E7%94%9F%E5%82%B7%E5%AE%B3%E5%A4%B1%E8%83%BD%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "XJ1",
-        "name": "新意大力終身傷害保險",
-        "insurer": "遠雄人壽",
+        "code": "XSB",
+        "name": "5GO術喜一年期手術健康保險附約",
+        "insurer": "全球人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 91,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/XJ1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%96%B0%E6%84%8F%E5%A4%A7%E5%8A%9B%E7%B5%82%E8%BA%AB%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-10-01"
+        "popularity": 341,
+        "effectiveDate": "2024-09-30",
+        "sourceUrl": "https://finfo.tw/products/XSB-%E5%85%A8%E7%90%83%E4%BA%BA%E5%A3%BD5GO%E8%A1%93%E5%96%9C%E4%B8%80%E5%B9%B4%E6%9C%9F%E6%89%8B%E8%A1%93%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-09-30"
       }
     },
     {
       "type": "new_active_product",
       "current": {
-        "code": "XJ2",
-        "name": "新金骨力傷害暨兒童意外骨折保險附約",
-        "insurer": "國泰人壽",
+        "code": "YSS2",
+        "name": "寶術安健康保險附約110",
+        "insurer": "安聯人壽",
         "saleStatus": "active",
         "rateStatus": "ready",
-        "popularity": 87,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/XJ2-%E5%9C%8B%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%96%B0%E9%87%91%E9%AA%A8%E5%8A%9B%E5%82%B7%E5%AE%B3%E6%9A%A8%E5%85%92%E7%AB%A5%E6%84%8F%E5%A4%96%E9%AA%A8%E6%8A%98%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "XK1",
-        "name": "意醫非凡傷害醫療定期保險附約",
-        "insurer": "遠雄人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 12,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/XK1-%E9%81%A0%E9%9B%84%E4%BA%BA%E5%A3%BD%E6%84%8F%E9%86%AB%E9%9D%9E%E5%87%A1%E5%82%B7%E5%AE%B3%E9%86%AB%E7%99%82%E5%AE%9A%E6%9C%9F%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "Y2A01",
-        "name": "MYLOVE微型傷害保險",
-        "insurer": "新光人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/Y2A01-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BDMYLOVE%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "Y8A01",
-        "name": "集體投保型微型傷害保險",
-        "insurer": "新光人壽",
-        "saleStatus": "active",
-        "rateStatus": "missing",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/Y8A01-%E6%96%B0%E5%85%89%E4%BA%BA%E5%A3%BD%E9%9B%86%E9%AB%94%E6%8A%95%E4%BF%9D%E5%9E%8B%E5%BE%AE%E5%9E%8B%E5%82%B7%E5%AE%B3%E4%BF%9D%E9%9A%AA-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "YHB",
-        "name": "一年期住院醫療日額健康保險附約新",
-        "insurer": "台灣人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 3,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/YHB-%E5%8F%B0%E7%81%A3%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E6%97%A5%E9%A1%8D%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%96%B0-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "YHR",
-        "name": "一年期住院醫療日額保險附約",
-        "insurer": "第一金人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/YHR-%E7%AC%AC%E4%B8%80%E9%87%91%E4%BA%BA%E5%A3%BD%E4%B8%80%E5%B9%B4%E6%9C%9F%E4%BD%8F%E9%99%A2%E9%86%AB%E7%99%82%E6%97%A5%E9%A1%8D%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84-2024-10-01"
-      }
-    },
-    {
-      "type": "new_active_product",
-      "current": {
-        "code": "ZCN",
-        "name": "新鍾心滿福重大傷病定期保險外溢型",
-        "insurer": "國泰人壽",
-        "saleStatus": "active",
-        "rateStatus": "ready",
-        "popularity": 0,
-        "effectiveDate": "2024-10-01",
-        "sourceUrl": "https://finfo.tw/products/ZCN-%E5%9C%8B%E6%B3%B0%E4%BA%BA%E5%A3%BD%E6%96%B0%E9%8D%BE%E5%BF%83%E6%BB%BF%E7%A6%8F%E9%87%8D%E5%A4%A7%E5%82%B7%E7%97%85%E5%AE%9A%E6%9C%9F%E4%BF%9D%E9%9A%AA%E5%A4%96%E6%BA%A2%E5%9E%8B-2024-10-01"
+        "popularity": 2,
+        "effectiveDate": "2024-09-25",
+        "sourceUrl": "https://finfo.tw/products/YSS2-%E5%AE%89%E8%81%AF%E4%BA%BA%E5%A3%BD%E5%AF%B6%E8%A1%93%E5%AE%89%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84110-2024-09-25"
       }
     }
   ]
