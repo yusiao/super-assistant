@@ -168,7 +168,7 @@ const NationalMarket = (() => {
   }
   function districtPanel({city="",district="",place="",title="",geometry,onLocate,onProject},open){
     const box=text("div","");
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry,onLocate,onProject}));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({city,district,geometry,onLocate,onProject,showNearby:!!geometry}));
     if(!data){box.append(status());return box;}
     if(place){
       const area=data.areas["official:"+place];
@@ -183,7 +183,8 @@ const NationalMarket = (() => {
       }
       box.append(prices);
       if(area?.filings.length){
-        const registry=text("details","");registry.append(text("summary","官方備查紀錄"),listing(area.filings,"圖框內對應建案"));box.append(registry);
+        const registry=text("details","");registry.open=!hasLiveProjects({city,district,geometry});
+        registry.append(text("summary","官方備查紀錄（不是銷售清單）"),listing(area.filings,"圖框內對應建案"));box.append(registry);
       }
       box.append(button("改看 "+district+" 的建案與均價",()=>open({city,district})),note());
       return box;
@@ -196,13 +197,15 @@ const NationalMarket = (() => {
     }
     const byId=new Map(districts.flatMap(([key,d])=>d.filings.map(id=>[id,key.replace("/"," ")])));
     const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());box.append(registry);
+    registry.open=byId.size>0&&!hasLiveProjects({city,district});
     if(byId.size)registry.append(listing(ordered(byId.keys()),title||"近一年備查與首次登記紀錄",byId));
     else box.append(text("p",districts.some(([,d])=>d.registry)?"此區在本次官方檔案沒有符合期間的建案。":"本次官方備查檔未提供此區資料。"));
     box.append(note());return box;
   }
+  const hasLiveProjects=query=>typeof LiveProjects!=="undefined"&&LiveProjects.count(query)>0;
   function areaPanel(id, district, open, geometry,onLocate,onProject){
     const box=text("div","");
-    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry,onLocate,onProject}));
+    if(typeof LiveProjects!=="undefined")box.append(LiveProjects.panel({...district,geometry,onLocate,onProject,showNearby:true}));
     if(!data){box.append(status());return box;}
     const area=data.areas[id];
     const prices=marketDetails();prices.append(priceBoard(area,"圖框內｜已定位成交"));
@@ -216,6 +219,7 @@ const NationalMarket = (() => {
     }
     box.append(button("看 "+district.district+" 全部新建案",()=>open(district)),prices);
     const registry=text("details","");registry.append(text("summary","官方備查／首次登記（不是銷售清單）"),headerNote());
+    registry.open=!!(area?.filings.length||area?.nearby?.length)&&!hasLiveProjects({...district,geometry});
     if(area?.filings.length)registry.append(listing(ordered(area.filings),"圖框內對應建案"));
     if(area?.nearby?.length)registry.append(listing(ordered(area.nearby),"圖框外 500 公尺內的周邊建案"));
     if(area?.filings.length||area?.nearby?.length)registry.append(text("small","按備查門牌或附近門牌比對，不是基地界址。"));

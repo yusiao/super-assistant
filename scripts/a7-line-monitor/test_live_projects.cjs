@@ -73,6 +73,17 @@ const live=vm.runInContext("LiveProjects",context);
   pins.refresh();
   assert.deepEqual(markers[0].icon.html.children.map(e=>e.textContent),["低","預售↓","優"]);
   assert.match(markers[0].icon.html["aria-label"],/成屋價差 1 案、預售價差 1 案/);
+  const emptyFrame={type:"MultiPolygon",coordinates:[[[[121.496,25.098],[121.498,25.098],[121.498,25.102],[121.496,25.102],[121.496,25.098]]]]};
+  data.projects.push({...base,id:"estimated",name:"未核對座標",category:"listed_presale",verified_on:"",
+    url:"https://newhouse.591.com.tw/129",coordinates:[121.499,25.1]});
+  const nearby=live.panel({geometry:emptyFrame,showNearby:true,onProject:p=>selected=p});
+  assert.equal(live.count({geometry:emptyFrame}),0);
+  assert.match(text(nearby),/不計入框內.*框外約 500 公尺/);
+  assert.match(text(nearby),/測試案/);
+  assert.doesNotMatch(text(nearby),/第二個標記|無座標的案|未核對座標/);
+  descendants(nearby).find(e=>e["aria-label"]==="查看建案資料：測試案").events.click();
+  assert.equal(selected.id,"a");
+  assert.doesNotMatch(text(live.panel({geometry:polygon,showNearby:true})),/框外約 500 公尺/);
   data.observed_at=homes.observed_at="2020-01-01";assert.equal(live.count(),0);assert.match(text(live.panel()),/超過 8 天/);
   events.moveend();assert.equal(markers.length,0);
   console.log("PASS: map pins, clustering, direct selection, no fake coordinates, live links, filters and no stale fallback.");

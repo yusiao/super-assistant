@@ -43,6 +43,25 @@ const LiveProjects = (() => {
     const [lng,lat]=Array.isArray(p.coordinates)?p.coordinates:[];
     return p.verified_on&&lng>=118&&lng<=124&&lat>=21&&lat<=27&&Number.isFinite(lng)&&Number.isFinite(lat)?[lat,lng]:null;
   }
+  function boundaryDistance([lng,lat],geometry){
+    if(geometry.type==="GeometryCollection"){
+      return geometry.geometries.reduce((min,g)=>Math.min(min,boundaryDistance([lng,lat],g)),Infinity);
+    }
+    const polygons=geometry.type==="Polygon"?[geometry.coordinates]:geometry.type==="MultiPolygon"?geometry.coordinates:[];
+    const xScale=111320*Math.cos(lat*Math.PI/180),yScale=110574;
+    let min=Infinity;
+    // Approximate the shortest distance to a boundary segment in local metres.
+    for(const polygon of polygons)for(const ring of polygon)for(let i=1;i<ring.length;i++){
+      const ax=(ring[i-1][0]-lng)*xScale,ay=(ring[i-1][1]-lat)*yScale;
+      const dx=(ring[i][0]-ring[i-1][0])*xScale,dy=(ring[i][1]-ring[i-1][1])*yScale;
+      const length=dx*dx+dy*dy,t=length?Math.max(0,Math.min(1,-(ax*dx+ay*dy)/length)):0;
+      min=Math.min(min,Math.hypot(ax+t*dx,ay+t*dy));
+    }
+    return min;
+  }
+  function nearbyProjects(geometry){
+    return matching().filter(p=>location(p)&&!inside(p.coordinates,geometry)&&boundaryDistance(p.coordinates,geometry)<=500);
+  }
   const asking=p=>p.price&&p.price!=="價格待定"?`${p.price}${p.price_unit||""}`:"待定／未提供";
   const areaLabel=p=>`${p.city} ${p.district}${p.circle?` · ${p.circle}`:""}`;
   const watchTypes={completed:{flag:"低",title:"成屋價差",badge:"開價低"},presale:{flag:"預售↓",title:"預售價差",badge:"預售↓"}};
@@ -179,13 +198,18 @@ const LiveProjects = (() => {
     box.append(node("h3",query.geometry?"圖框內｜預售、預推與新成屋":`${query.district||query.city||"全台"}｜預售、預推與新成屋`));
     if(!data&&!newHomes){box.append(node("p",failed?"公開建案資料讀取失敗，不顯示成 0 案。":"正在讀取公開建案…"));return box;}
     if(!fresh(data?.observed_at,8)&&!fresh(newHomes?.observed_at,8)){box.append(node("p","建案索引超過 8 天未更新，暫不列出，避免把舊案當作在售。"));return box;}
-    const date=(data||newHomes).observed_at.slice(0,10),rows=matching(query);
+    const date=(data||newHomes).observed_at.slice(0,10),insideRows=matching(query);
+    const nearbyRows=!insideRows.length&&query.geometry&&query.showNearby?nearbyProjects(query.geometry):[];
+    const rows=nearbyRows.length?nearbyRows:insideRows;
     const reports=Object.values(data?.regions||{}).filter(r=>!query.city||r.city.replaceAll("台","臺")===query.city.replaceAll("台","臺"));
     const checked=reports.filter(r=>r.status==="indexed").length;
+    if(nearbyRows.length){
+      box.append(node("p","本次未取得可定位到框內的建案，下列不計入框內。"),node("h3","框外約 500 公尺｜附近建案"));
+    }
     box.append(node("p",`${date} 讀取 · ${rows.length} 案 · 預售索引 ${checked}/${reports.length} 縣市完整分頁`),
       node("small","新成屋僅列分批核對的在售案，未核實預售另標示。開價不是成交價，未標低價不代表不便宜。"));
     if(homesFailed||!fresh(newHomes?.observed_at,8))box.append(node("small","新成屋索引未載入或已過期，不代表沒有在售案。"));
-    if(!rows.length){box.append(node("p",reports.some(r=>r.status!=="indexed")?"本次來源受限或尚未完成蒐集，不代表零供給。":query.geometry?"本次未取得可定位到此圖框的合格預售案。可改看整個行政區，不代表區內無案。":"本次沒有符合條件的可展示紀錄，不代表沒有預售屋。"));return box;}
+    if(!rows.length){box.append(node("p",reports.some(r=>r.status!=="indexed")?"本次來源受限或尚未完成蒐集，不代表零供給。":query.geometry?"本次未取得可定位到此圖框的建案，可改看官方備查或整個行政區，不代表區內無案。":"本次沒有符合條件的可展示紀錄，不代表沒有建案。"));return box;}
     const controls=node("div");controls.className="live-filters";
     const phase=node("select"),search=node("input"),circle=node("select");
     const option=(label,value)=>{const e=node("option",label);e.value=value;return e;};

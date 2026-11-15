@@ -8,10 +8,11 @@ class Element{
  addEventListener(k,fn){this.events[k]=fn;}
  click(){this.events.click?.({preventDefault(){},stopPropagation(){}});}
  focus(){this.focused=true;}
+ scrollIntoView(){this.reveals=(this.reveals||0)+1;}
 }
 const elements=new Map(),get=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
 const calls=[],overlays=[],panes={},events={},layers=[];
-let zoom=13;
+let zoom=13,mobile=true;
 const map={createPane:n=>(panes[n]=new Element()),getPane:n=>panes[n],getZoom:()=>zoom,
  on:(name,fn)=>events[name]=fn,fitBounds:b=>calls.push(b)};
 function geoJSON(features=[],opts={}){
@@ -44,7 +45,7 @@ const L={geoJSON,layerGroup:()=>({addTo(){return this;},clearLayers(){markers.le
  imageOverlay:(url,bounds,o)=>{overlays.push({url,bounds,...o});return {addTo(){}};}};
 const context=vm.createContext({document:{getElementById:get,createElement:tag=>new Element(tag)},fetch:async url=>{
  assert.equal(url,'station-atlas.geojson');return {ok:true,json:async()=>data};
-},URL,AbortSignal,L,Date,projectLinkUrl:url=>/^https:\/\/(nbm|ttt)\.jsl\.com\.tw\/$/.test(url)?url:''});
+},URL,AbortSignal,L,Date,matchMedia:()=>({matches:mobile}),projectLinkUrl:url=>/^https:\/\/(nbm|ttt)\.jsl\.com\.tw\/$/.test(url)?url:''});
 vm.runInContext(fs.readFileSync(path.join(__dirname,'site/station-atlas.js'),'utf8'),context);
 const atlas=vm.runInContext('StationAtlas',context);
 async function main(){
@@ -54,6 +55,7 @@ async function main(){
  const invalid=structuredClone(data);invalid.features[0].geometry.coordinates[0].pop();assert.equal(atlas.valid(invalid),false);
  const unsafe=structuredClone(data);unsafe.features[0].properties.source_url='javascript:alert(1)';assert.equal(atlas.valid(unsafe),false);
  assert.equal(await atlas.init(map),true);assert.equal(atlas.isActive(),true);
+ assert.equal(get('atlas-results').reveals,undefined,'Loading does not scroll the visitor away from the map');
  assert.deepEqual(Array.from(calls.at(-1)),['a7','a8','a9']);
  assert.equal(markers.length,3);assert.equal(overlays[0].url,'station-terrain.webp');
  assert.ok(+panes.atlasAreas.style.zIndex>400,'Polygon pane must intercept clicks ahead of districts');
@@ -66,6 +68,7 @@ async function main(){
  assert.equal(get('atlas-result-title').textContent,'A7–A9 地圖建案');
  assert.equal(shapes.opts.bubblingMouseEvents,false);
  shapes.paths[0].events.click();
+ assert.equal(get('atlas-results').reveals,1,'Mobile polygon clicks reveal the result panel');
  assert.equal(calls.at(-1)[0],'a7','A geographic polygon click opens its extent, not a point buffer');
  assert.equal(markers.length,5);
  assert.equal(get('atlas-result-title').textContent,'A7 開發區');
@@ -107,6 +110,26 @@ async function main(){
  }
  assert.equal(data.features.length,11);
  assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'site/index.html'),'utf8'),/<dialog\b|返回地圖/);
+ let options,finished;
+ const loaded=new Promise(resolve=>{finished=resolve;});
+ context.LiveProjects={
+  panel:q=>{options=q;return new Element('section');},count:()=>0,
+  selectionPanel:(rows,{benchmark})=>{
+   const inspection=new Element('article'),builder=new Element('details');
+   inspection.append(benchmark,builder);return inspection;
+  }
+ };
+ context.NationalMarket={count:()=>0,load:()=>loaded,projectBenchmark:()=>new Element('section')};
+ mobile=false;
+ const reveals=get('atlas-results').reveals;
+ get('atlas-corridor').click();
+ options.onProject({id:'chosen',name:'點選建案'});
+ assert.equal(get('atlas-results').reveals,reveals,'Desktop details do not scroll the page');
+ const inspection=panel.children[0],builder=inspection.children[1];builder.open=true;
+ finished();await loaded;
+ assert.equal(panel.children[0],inspection);
+ assert.equal(inspection.children[1],builder);
+ assert.equal(builder.open,true,'Loading the benchmark must not reset an opened builder disclosure');
  console.log('PASS: continuous map drilldown and region switches, non-modal panel, source links, refresh and privacy.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
