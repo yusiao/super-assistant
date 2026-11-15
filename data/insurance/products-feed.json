@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-08T21:40:55.957Z",
+  "generatedAt": "2026-11-15T22:31:03.613Z",
   "source": "public-discovery",
   "sourceNote": "自各壽險公司公開頁面自動發現；只匯入可信度較高的商品候選，費率表仍需後續解析。",
   "products": [
@@ -19,7 +19,7 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
@@ -40,7 +40,7 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
@@ -61,11 +61,11 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
-      "note": "主約；繳費便利！利變年金險可使用信用卡或LINE Pay一次繳費。 輕鬆規劃！保費最低1萬元起投保新豪開鑫利變年金險，累積未來所需資金。 承保年齡 18足歲~64歲 繳費年期 躉繳 保障年期 終身 保障特色 年金 +-2 網路投保 查看商品內容"
+      "note": "主約；繳費便利！利變年金險可使用信用卡或LINE Pay一次繳費。 輕鬆規劃！保費最低1萬元起投保新豪開鑫利變年金險，累積未來所需資金。 承保年齡 18足歲~64歲 繳費年期 躉繳 保障年期 終身 保障特色 年金 +-2 網路投保 查看商品內容 顯示更多 注意事項 實際各項保險商品之給付內容及條件限制，悉依各保險商品保單條款內容為準。 不知道哪些保險最合適嗎？"
     },
     {
       "code": "ESC1",
@@ -82,11 +82,11 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
-      "note": "主約；輕鬆入門！保費最低3,000元起即可投保利變型年金險，小資族也能輕鬆入手。 彈性投入！可分期或彈性投入，依需求逐步累積資金。 承保年齡 18足歲~64歲 繳費年期 分期繳、彈性繳 保障年期 終身 保障特色 年金 +-2 網路投保 查看商品內容 顯示更多 注意事項 實際各項保險商品之給付內容及條件限制，悉依各保險商品保單條款內容為準。 不知道哪些保險最合適嗎？"
+      "note": "主約；輕鬆入門！保費最低3,000元起即可投保利變型年金險，小資族也能輕鬆入手。 彈性投入！可分期或彈性投入，依需求逐步累積資金。 承保年齡 18足歲~64歲 繳費年期 分期繳、彈性繳 保障年期 終身 保障特色 年金 +-2 網路投保 查看商品內容"
     },
     {
       "code": "ESD",
@@ -103,7 +103,7 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
@@ -124,7 +124,7 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-      "discoveredAt": "2026-11-08T21:35:48.259Z",
+      "discoveredAt": "2026-11-15T22:25:47.542Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
@@ -145,7 +145,7 @@
       "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
       "source": "public-product-list",
       "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-      "discoveredAt": "2026-11-08T21:35:37.090Z",
+      "discoveredAt": "2026-11-15T22:25:34.004Z",
       "confidence": 0.95,
       "rejected": false,
       "rejectionReason": "",
