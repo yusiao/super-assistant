@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-15T22:31:03.613Z",
+  "generatedAt": "2026-11-22T23:12:00.807Z",
   "sourceCount": 23,
-  "productsDiscovered": 10,
+  "productsDiscovered": 9,
   "feedProducts": 7,
   "unresolvedInsurers": [
     {
@@ -30,8 +30,13 @@
       "tiiCode": "204",
       "name": "國泰人壽",
       "homepage": "https://www.cathaylife.com.tw/",
-      "pagesChecked": 18,
-      "errors": []
+      "pagesChecked": 17,
+      "errors": [
+        {
+          "url": "https://www.cathaylife.com.tw/sitemap_index.xml",
+          "message": "fetch failed"
+        }
+      ]
     },
     {
       "tiiCode": "205",
@@ -78,7 +83,7 @@
       "pagesChecked": 17,
       "errors": [
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/popularity",
+          "url": "https://www.mli.com.tw/sites/mliportal/insurance/accidental",
           "message": "This operation was aborted"
         }
       ]
@@ -184,17 +189,8 @@
       "tiiCode": "267",
       "name": "法國巴黎人壽",
       "homepage": "https://life.cardif.com.tw/",
-      "pagesChecked": 16,
-      "errors": [
-        {
-          "url": "https://life.cardif.com.tw/a211",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://life.cardif.com.tw/documents/418719/2833419/DM_VP_Pro.pdf",
-          "message": "This operation was aborted"
-        }
-      ]
+      "pagesChecked": 18,
+      "errors": []
     },
     {
       "tiiCode": "270",
@@ -560,7 +556,7 @@
       "insurer": "國泰人壽",
       "tiiCode": "204",
       "homepage": "https://www.cathaylife.com.tw/",
-      "pagesChecked": 18,
+      "pagesChecked": 17,
       "productsFound": 0,
       "pages": [
         {
@@ -587,11 +583,6 @@
           "url": "https://www.cathaylife.com.tw/sitemap.xml",
           "status": 200,
           "contentType": "text/plain"
-        },
-        {
-          "url": "https://www.cathaylife.com.tw/sitemap_index.xml",
-          "status": 200,
-          "contentType": ""
         },
         {
           "url": "https://www.cathaylife.com.tw/cathaylifeins/customize",
@@ -654,7 +645,12 @@
           "contentType": "text/html;charset=utf-8"
         }
       ],
-      "errors": [],
+      "errors": [
+        {
+          "url": "https://www.cathaylife.com.tw/sitemap_index.xml",
+          "message": "fetch failed"
+        }
+      ],
       "products": []
     },
     {
@@ -997,7 +993,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1018,7 +1014,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1039,7 +1035,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1060,7 +1056,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1081,7 +1077,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1102,7 +1098,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance",
-          "discoveredAt": "2026-11-15T22:25:34.004Z",
+          "discoveredAt": "2026-11-22T23:07:16.934Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1123,7 +1119,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/oiu/OIB",
           "source": "public-discovery",
           "sourceUrl": "https://www.fubon.com/life/product/personal/oiu/OIB",
-          "discoveredAt": "2026-11-15T22:25:45.852Z",
+          "discoveredAt": "2026-11-22T23:07:28.456Z",
           "confidence": 0.6,
           "rejected": false,
           "rejectionReason": "",
@@ -1144,7 +1140,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
-          "discoveredAt": "2026-11-15T22:25:46.966Z",
+          "discoveredAt": "2026-11-22T23:07:29.590Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1165,7 +1161,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
-          "discoveredAt": "2026-11-15T22:25:46.966Z",
+          "discoveredAt": "2026-11-22T23:07:29.590Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1186,7 +1182,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
-          "discoveredAt": "2026-11-15T22:25:46.966Z",
+          "discoveredAt": "2026-11-22T23:07:29.590Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1207,7 +1203,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
-          "discoveredAt": "2026-11-15T22:25:46.966Z",
+          "discoveredAt": "2026-11-22T23:07:29.590Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1228,7 +1224,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
           "source": "public-discovery",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/EBA",
-          "discoveredAt": "2026-11-15T22:25:46.966Z",
+          "discoveredAt": "2026-11-22T23:07:29.591Z",
           "confidence": 0.6,
           "rejected": false,
           "rejectionReason": "",
@@ -1249,7 +1245,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-          "discoveredAt": "2026-11-15T22:25:47.541Z",
+          "discoveredAt": "2026-11-22T23:07:30.406Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1270,7 +1266,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-          "discoveredAt": "2026-11-15T22:25:47.541Z",
+          "discoveredAt": "2026-11-22T23:07:30.406Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1291,7 +1287,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-          "discoveredAt": "2026-11-15T22:25:47.542Z",
+          "discoveredAt": "2026-11-22T23:07:30.406Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1312,7 +1308,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-          "discoveredAt": "2026-11-15T22:25:47.542Z",
+          "discoveredAt": "2026-11-22T23:07:30.406Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1333,7 +1329,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
           "source": "public-discovery",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/ESD",
-          "discoveredAt": "2026-11-15T22:25:47.542Z",
+          "discoveredAt": "2026-11-22T23:07:30.407Z",
           "confidence": 0.6,
           "rejected": false,
           "rejectionReason": "",
@@ -1354,7 +1350,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
-          "discoveredAt": "2026-11-15T22:25:48.104Z",
+          "discoveredAt": "2026-11-22T23:07:30.996Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1375,7 +1371,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
-          "discoveredAt": "2026-11-15T22:25:48.104Z",
+          "discoveredAt": "2026-11-22T23:07:30.996Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1396,7 +1392,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
-          "discoveredAt": "2026-11-15T22:25:48.104Z",
+          "discoveredAt": "2026-11-22T23:07:30.996Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1417,7 +1413,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
           "source": "public-product-list",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
-          "discoveredAt": "2026-11-15T22:25:48.104Z",
+          "discoveredAt": "2026-11-22T23:07:30.996Z",
           "confidence": 0.95,
           "rejected": false,
           "rejectionReason": "",
@@ -1438,7 +1434,7 @@
           "rateSource": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
           "source": "public-discovery",
           "sourceUrl": "https://www.fubon.com/life/product/personal/annuity-assurance/SBA",
-          "discoveredAt": "2026-11-15T22:25:48.104Z",
+          "discoveredAt": "2026-11-22T23:07:30.996Z",
           "confidence": 0.6,
           "rejected": false,
           "rejectionReason": "",
@@ -1475,6 +1471,11 @@
         },
         {
           "url": "https://www.mli.com.tw/sites/mliportal/home#",
+          "status": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        {
+          "url": "https://www.mli.com.tw/sites/mliportal/insurance/popularity",
           "status": 200,
           "contentType": "text/html; charset=UTF-8"
         },
@@ -1529,11 +1530,6 @@
           "contentType": "text/html; charset=UTF-8"
         },
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/accidental",
-          "status": 200,
-          "contentType": "text/html; charset=UTF-8"
-        },
-        {
           "url": "https://www.mli.com.tw/sites/mliportal/insurance/travel",
           "status": 200,
           "contentType": "text/html; charset=UTF-8"
@@ -1541,7 +1537,7 @@
       ],
       "errors": [
         {
-          "url": "https://www.mli.com.tw/sites/mliportal/insurance/popularity",
+          "url": "https://www.mli.com.tw/sites/mliportal/insurance/accidental",
           "message": "This operation was aborted"
         }
       ],
@@ -1812,7 +1808,7 @@
       "tiiCode": "222",
       "homepage": "https://www.tcb-life.com.tw/",
       "pagesChecked": 18,
-      "productsFound": 2,
+      "productsFound": 1,
       "pages": [
         {
           "url": "https://www.tcb-life.com.tw/",
@@ -1865,7 +1861,7 @@
           "contentType": "application/pdf"
         },
         {
-          "url": "https://my.tcb-life.com.tw/api/assets/3c516dd9-18a2-4970-80d7-2ef12d68530f/一年期重大疾病健康保險附約暨附約保險成本批註條款申請11501.pdf",
+          "url": "https://my.tcb-life.com.tw/api/assets/fbbe6bd4-558f-40a8-a20c-353576f164d9/保險費自動轉帳暨信用卡代扣授權書.pdf",
           "status": 200,
           "contentType": "application/pdf"
         },
@@ -1924,31 +1920,8 @@
           "rateSource": "https://my.tcb-life.com.tw/api/assets/cf510c49-fc76-4eef-986f-9aa9a39a91ca/%E5%95%86%E5%93%81%E6%A2%9D%E6%AC%BE_%E5%90%88%E4%BD%9C%E9%87%91%E5%BA%AB%E4%BA%BA%E5%A3%BD%E7%9C%9F%E7%BE%8E%E5%82%B3%E5%AE%B6%E7%BE%8E%E5%85%83%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%EF%BC%8D%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B_UISL8.pdf",
           "source": "public-discovery",
           "sourceUrl": "https://my.tcb-life.com.tw/api/assets/cf510c49-fc76-4eef-986f-9aa9a39a91ca/%E5%95%86%E5%93%81%E6%A2%9D%E6%AC%BE_%E5%90%88%E4%BD%9C%E9%87%91%E5%BA%AB%E4%BA%BA%E5%A3%BD%E7%9C%9F%E7%BE%8E%E5%82%B3%E5%AE%B6%E7%BE%8E%E5%85%83%E5%88%A9%E7%8E%87%E8%AE%8A%E5%8B%95%E5%9E%8B%E7%B5%82%E8%BA%AB%E5%A3%BD%E9%9A%AA%EF%BC%8D%E5%AE%9A%E6%9C%9F%E7%B5%A6%E4%BB%98%E5%9E%8B_UISL8.pdf",
-          "discoveredAt": "2026-11-15T22:28:26.128Z",
+          "discoveredAt": "2026-11-22T23:09:52.961Z",
           "confidence": 0.55,
-          "rejected": false,
-          "rejectionReason": "",
-          "note": "由公開網站自動發現；尚未完成正式費率表結構化解析，使用前需人工或後續解析器確認。"
-        },
-        {
-          "code": "DISC-222-I7S5AA",
-          "aliases": [
-            "DISCOVERED-222"
-          ],
-          "name": "一年期重大疾病健康保險附約暨附約保險成本批註條款申請11501",
-          "insurer": "合作金庫人壽",
-          "category": "critical",
-          "coverageWan": 0,
-          "endAge": 100,
-          "premiumMode": "ageBand",
-          "premiumChange": "公開來源提到定期、費率或年齡級距；保費應依年齡或續保年齡調整，仍需正式費率表解析後才能精算。",
-          "rateStatus": "missing",
-          "rateUnitCoverage": 1000000,
-          "rateSource": "https://my.tcb-life.com.tw/api/assets/3c516dd9-18a2-4970-80d7-2ef12d68530f/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%9A%A8%E9%99%84%E7%B4%84%E4%BF%9D%E9%9A%AA%E6%88%90%E6%9C%AC%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BE%E7%94%B3%E8%AB%8B11501.pdf",
-          "source": "public-discovery",
-          "sourceUrl": "https://my.tcb-life.com.tw/api/assets/3c516dd9-18a2-4970-80d7-2ef12d68530f/%E4%B8%80%E5%B9%B4%E6%9C%9F%E9%87%8D%E5%A4%A7%E7%96%BE%E7%97%85%E5%81%A5%E5%BA%B7%E4%BF%9D%E9%9A%AA%E9%99%84%E7%B4%84%E6%9A%A8%E9%99%84%E7%B4%84%E4%BF%9D%E9%9A%AA%E6%88%90%E6%9C%AC%E6%89%B9%E8%A8%BB%E6%A2%9D%E6%AC%BE%E7%94%B3%E8%AB%8B11501.pdf",
-          "discoveredAt": "2026-11-15T22:28:36.432Z",
-          "confidence": 0.5,
           "rejected": false,
           "rejectionReason": "",
           "note": "由公開網站自動發現；尚未完成正式費率表結構化解析，使用前需人工或後續解析器確認。"
@@ -2320,7 +2293,7 @@
       "insurer": "法國巴黎人壽",
       "tiiCode": "267",
       "homepage": "https://life.cardif.com.tw/",
-      "pagesChecked": 16,
+      "pagesChecked": 18,
       "productsFound": 0,
       "pages": [
         {
@@ -2341,6 +2314,11 @@
         {
           "url": "https://life.cardif.com.tw/sitemap_index.xml",
           "status": 404,
+          "contentType": "text/html;charset=UTF-8"
+        },
+        {
+          "url": "https://life.cardif.com.tw/a211",
+          "status": 200,
           "contentType": "text/html;charset=UTF-8"
         },
         {
@@ -2379,6 +2357,11 @@
           "contentType": "text/html;charset=UTF-8"
         },
         {
+          "url": "https://life.cardif.com.tw/documents/418719/2833419/DM_VP_Pro.pdf",
+          "status": 200,
+          "contentType": "application/pdf"
+        },
+        {
           "url": "https://life.cardif.com.tw/a251",
           "status": 200,
           "contentType": "text/html;charset=UTF-8"
@@ -2404,16 +2387,7 @@
           "contentType": "text/html;charset=UTF-8"
         }
       ],
-      "errors": [
-        {
-          "url": "https://life.cardif.com.tw/a211",
-          "message": "This operation was aborted"
-        },
-        {
-          "url": "https://life.cardif.com.tw/documents/418719/2833419/DM_VP_Pro.pdf",
-          "message": "This operation was aborted"
-        }
-      ],
+      "errors": [],
       "products": []
     },
     {
